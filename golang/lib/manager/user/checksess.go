@@ -2,13 +2,13 @@ package user
 
 import (
 	context "context"
-	checkSess "znk/protos/generated"
+	checkSess "znk/golang/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	userdb "znk/lib/utils/database/user"
-	security "znk/lib/utils/security/server"
+	userdb "znk/golang/lib/utils/database/user"
+	security "znk/golang/lib/utils/security/server"
 )
 
 // CheckSessService 校验会话id
