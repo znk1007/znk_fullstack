@@ -1,0 +1,2 @@
+修改文件夹读写权限
+sudo chown -R $(whoami):admin /usr/local/*

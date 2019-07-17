@@ -1,0 +1,456 @@
+https://www.cockroachlabs.com/
+http://doc.cockroachchina.baidu.com
+
+杀掉端口进程
+lsof -i: 端口
+kill -9 进程ID
+
+-.安全篇
+1.创建安全证书
+使用cockroach cert命令
+# Create a certs directory and safe directory for the CA key.
+# If using the default certificate directory (`${HOME}/.cockroach-certs`), make sure it is empty.
+mkdir certs
+
+mkdir my-safe-directory
+
+# Create the CA key pair:
+cockroach cert create-ca --certs-dir=certs --ca-key=my-safe-directory/ca.key
+
+# Create a client key pair for the root user:
+cockroach cert create-client root --certs-dir=certs --ca-key=my-safe-directory/ca.key
+
+# Create a key pair for the nodes:
+cockroach cert create-node localhost $(hostname) --certs-dir=certs --ca-key=my-safe-directory/ca.key
+命令注释：
+第一条命令：创建CA证书、客户端和节点证书密钥文件所在的目录；
+第二条命令：创建CA密钥文件所在的目录；
+第三条命令：在指定的目录里生成CA证书ca.crt和密钥文件ca.key；
+第四条命令：为用户创建证书和密钥文件，此处为root用户，生成client.root.crt和client.root.key文件，用于该用户登陆交互式shell或访问集群；
+第五条命令：为节点创建证书和密钥文件，生成node.crt和node.key文件，用于加密集群节点之间的通信。如果每个节点的IP地址不一样，则需要对所有IP地址执行该命令；
+Step 2: 启动节点1
+# 非安全模式
+cockroach start --insecure --host=localhost
+
+# 安全模式：
+cockroach start --certs-dir=certs --host=localhost --http-host=localhost
+CockroachDB node starting at 2018-08-13 15:10:52.34274101 +0000 UTC
+build:      CCL v2.0.5 @ 2018/08/13 14:48:26 (go1.10)
+admin:      http://localhost:8080
+sql:        postgresql://root@localhost:26257?sslmode=disable
+logs:       cockroach-data/logs
+store[0]:   path=cockroach-data
+status:     initialized new cluster
+clusterID:  {dab8130a-d20b-4753-85ba-14d8956a294c}
+nodeID:     1
+参数注释：
+--certs-dir：指定证书的目录；
+--host=localhost：指定启动CockroachDB的节点IP地址为localhost，默认开启数据库连接端口为26257；
+--http-host=localhost：指定网页版Admin界面的IP地址为localhost，默认开启网页的HTTP端口为8080；
+默认当前目录下创建cockroach-data文件夹，CockroachDB在该节点的数据将存放在该文件夹下；
+
+Step 3: 添加节点
+现在集群已经运行起来，但是集群只有一个节点，此时用户可以开始连接数据库并进行操作。在实际业务部署中，用户需要部署大于3个节点才能充分利用CockroachDB的自动冗余副本、数据均衡和集群容错的特性。
+
+开启新终端，添加节点2
+非安全模式：
+
+cockroach start --insecure --store=node2 --host=localhost --port=26258 --http-port=8081 --join=localhost:26257
+安全模式：
+
+cockroach start --certs-dir=certs --store=node2 --host=localhost --port=26258 --http-port=8081 --http-host=localhost --join=localhost:26257
+TIPS: --join 代表当前启动节点要加入的节点（地址为localhost:26257）所在的集群。由于所有的节点在同一物理机器上，需要手动地将--port、--store、--http-port指定为不同端口和地址以避免冲突。
+
+开启另一个新终端，添加节点3
+非安全模式：
+
+cockroach start --insecure --store=node3 --host=localhost --port=26259 --http-port=8082 --join=localhost:26257
+安全模式：
+
+cockroach start --certs-dir=certs --store=node3 --host=localhost --port=26259 --http-port=8082 --http-host=localhost --join=localhost:26257
+Step 4: 验证集群可用性
+连接节点1，启动交互式shell
+非安全模式：
+
+cockroach sql --insecure
+安全模式：
+
+cockroach sql --certs-dir=certs
+执行SQL语句：
+
+CREATE DATABASE bank;
+CREATE TABLE bank.accounts (id INT PRIMARY KEY, balance DECIMAL);
+INSERT INTO bank.accounts VALUES (1, 1000.50);
+SELECT * FROM bank.accounts;
++----+---------+
+| id | balance |
++----+---------+
+|  1 |  1000.5 |
++----+---------+
+(1 row)
+连接节点2，启动交互式shell
+非安全模式：
+
+cockroach sql --insecure --port=26258
+安全模式：
+
+cockroach sql --certs-dir=certs --port=26258
+执行SQL语句：
+
+SELECT * FROM bank.accounts;
++----+---------+
+| id | balance |
++----+---------+
+|  1 |  1000.5 |
++----+---------+
+(1 row)
+可见节点1和节点2同样SQL查询输出的内容一致。
+
+Step 5: 监控集群
+通过Admin界面
+网页URL：http://localhost:8080
+
+图片
+
+默认情况下，CockroachDB对一份数据自动冗余3份副本到集群当中，均衡分布到各个节点，可在Replicas per Node页查看各节点数据冗余情况。
+
+图片
+
+NOTE: 对于单一物理机部署多个节点，容量指标（Capacity metrics）数值可能不准确，详见：limitation 
+TIPS: 关于数据冗余、均衡分布、集群容错的更多介绍，可以查看：数据复制、自动负载均衡、容错及恢复
+
+Step 6: 停止集群
+停止节点1
+在对应终端使用Ctrl+C
+
+查看集群情况
+此时另外两个节点仍然存活。为了验证集群数据的容错性，可以开启交互式shell查看数据情况。 非安全模式：
+
+cockroach sql --insecure --port=26258
+安全模式：
+
+cockroach sql --certs-dir=certs --port=26258
+执行SQL语句：
+
+SELECT * FROM bank.accounts;
++----+---------+
+| id | balance |
++----+---------+
+|  1 |  1000.5 |
++----+---------+
+(1 row)
+停止节点2和节点3
+在对应终端使用Ctrl+C
+
+NOTE: 对于节点3，可能需要花大约1min左右的时间去终止程序。原因是最后只剩下一个节点在集群当中的时候，由于已经丧失了集群当中冗余副本的绝大多数（此情况下是2/3），集群不再允许操作。如需加速终止程序的进程，可以尝试多次Ctrl+C操作。
+
+如不进行Step 7 重启集群的操作，不再需要节点数据，可以删除对应的数据库文件夹。
+
+rm -rf cockroach-data node2 node3
+Step 7: 重启集群
+为了重启集群，需要确保拥有集群2/3节点的数据库文件夹。
+
+重启节点1
+非安全模式：
+
+cockroach start --insecure --host=localhost
+安全模式：
+
+cockroach start --certs-dir=certs --host=localhost --http-host=localhost
+TIPS: 当前集群只有一个节点，集群不可操作直至第二个节点加入集群
+
+重启节点2
+非安全模式：
+
+cockroach start --insecure --store=node2 --host=localhost --port=26258 --http-port=8081 --join=localhost:26257
+安全模式：
+
+cockroach start --certs-dir=certs --store=node2 --host=localhost --port=26258 --http-port=8081 --http-host=localhost --join=localhost:26257
+重启节点3
+非安全模式：
+
+cockroach start --insecure --store=node3 --host=localhost --port=26259 --http-port=8082 --join=localhost:26257
+安全模式：
+
+cockroach start --certs-dir=certs --store=node3 --host=localhost --port=26259 --http-port=8082 --http-host=localhost --join=localhost:26257
+
+*********mac系统文件限制*********
+https://www.cockroachlabs.com/docs/v19.1/recommended-production-settings.html
+查看文件限制
+launchctl limit maxfiles
+cd /Library/LaunchDaemons/
+touch limit.maxfiles.plist
+
+添加一下内容
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+      <string>limit.maxfiles</string>
+    <key>ProgramArguments</key>
+      <array>
+        <string>launchctl</string>
+        <string>limit</string>
+        <string>maxfiles</string>
+        <string>35000</string>
+        <string>35000</string>
+      </array>
+    <key>RunAtLoad</key>
+      <true/>
+    <key>ServiceIPC</key>
+      <false/>
+  </dict>
+</plist>
+
+确保root:wheel都有-rw-r--r--权限
+查看权限
+ls -l limit.maxfiles.plist
+修改权限
+sudo chmod o+w limit.maxfiles.plist
+
+二.创建APP
+使用pg驱动
+Step 1: 安装pg驱动
+go get -u github.com/lib/pq
+Step 2: 启动节点
+以非安全模式：
+
+cockroach start --insecure --store=hello-1 --host=localhost
+Step 3: 创建用户
+执行cockroach user命令创建maxroach用户：
+
+cockroach user set maxroach --insecure
+Step 4: 创建数据库并授权
+以root用户启动内置的SQL客户端，创建bank数据库并授权maxroach用户。
+
+cockroach sql --insecure -e 'CREATE DATABASE bank'
+cockroach sql --insecure -e 'GRANT ALL ON DATABASE bank TO maxroach'
+Step 5: 编写执行Go代码
+基本操作
+建表、插值、查询，Go代码：
+
+package main
+
+import (
+    "database/sql"
+    "fmt"
+    "log"
+
+    _ "github.com/lib/pq"
+)
+
+func main() {
+    // Connect to the "bank" database.
+    //非安全模式
+    db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/bank?sslmode=disable")
+    //安全模式
+    //db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/bank?ssl=true&sslmode=require&sslrootcert=certs/ca.crt&sslkey=certs/client.maxroach.key&sslcert=certs/client.maxroach.crt")
+
+
+    if err != nil {
+        log.Fatal("error connecting to the database: ", err)
+    }
+
+    // Create the "accounts" table.
+    if _, err := db.Exec(
+        "CREATE TABLE IF NOT EXISTS accounts (id INT PRIMARY KEY, balance INT)"); err != nil {
+        log.Fatal(err)
+    }
+
+    // Insert two rows into the "accounts" table.
+    if _, err := db.Exec(
+        "INSERT INTO accounts (id, balance) VALUES (1, 1000), (2, 250)"); err != nil {
+        log.Fatal(err)
+    }
+
+    // Print out the balances.
+    rows, err := db.Query("SELECT id, balance FROM accounts")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer rows.Close()
+    fmt.Println("Initial balances:")
+    for rows.Next() {
+        var id, balance int
+        if err := rows.Scan(&id, &balance); err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("%d %d\n", id, balance)
+    }
+}
+执行：
+
+go run basic-sample.go
+输出：
+
+Initial balances:
+1 1000
+2 250
+创建事务（带重试逻辑）
+Go代码：
+
+package main
+
+import (
+    "context"
+    "database/sql"
+    "fmt"
+    "log"
+
+    "github.com/cockroachdb/cockroach-go/crdb"
+)
+
+func transferFunds(tx *sql.Tx, from int, to int, amount int) error {
+    // Read the balance.
+    var fromBalance int
+    if err := tx.QueryRow(
+        "SELECT balance FROM accounts WHERE id = $1", from).Scan(&fromBalance); err != nil {
+        return err
+    }
+
+    if fromBalance < amount {
+        return fmt.Errorf("insufficient funds")
+    }
+
+    // Perform the transfer.
+    if _, err := tx.Exec(
+        "UPDATE accounts SET balance = balance - $1 WHERE id = $2", amount, from); err != nil {
+        return err
+    }
+    if _, err := tx.Exec(
+        "UPDATE accounts SET balance = balance + $1 WHERE id = $2", amount, to); err != nil {
+        return err
+    }
+    return nil
+}
+
+func main() {
+    //非安全模式
+    db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/bank?sslmode=disable")
+    //安全模式
+    //db, err := sql.Open("postgres", "postgresql://maxroach@localhost:26257/bank?ssl=true&sslmode=require&sslrootcert=certs/ca.crt&sslkey=certs/client.maxroach.key&sslcert=certs/client.maxroach.crt")
+
+    if err != nil {
+        log.Fatal("error connecting to the database: ", err)
+    }
+
+    // Run a transfer in a transaction.
+    err = crdb.ExecuteTx(context.Background(), db, nil, func(tx *sql.Tx) error {
+        return transferFunds(tx, 1 /* from acct# */, 2 /* to acct# */, 100 /* amount */)
+    })
+    if err == nil {
+        fmt.Println("Success")
+    } else {
+        log.Fatal("error: ", err)
+    }
+}
+在默认的隔离级别SERIALIZABLE下，因读写冲突导致事务执行失败，需要用户主动地重新提交事务。用户也实现通用的retry函数在事务内部重新执行事务。
+
+在Golang环境下，CockroachDB的retry函数位于CockroachDB Go客户端的crdb包中，用户需要将相关库克隆到$GOPATH当中：
+
+mkdir -p $GOPATH/src/github.com/cockroachdb
+cd $GOPATH/src/github.com/cockroachdb
+git clone git@github.com:cockroachdb/cockroach-go.git
+执行：
+
+go run txn-sample.go
+输出：
+
+Success
+执行查询：
+
+cockroach sql --insecure -e 'SELECT id, balance FROM accounts' --database=bank
++----+---------+
+| id | balance |
++----+---------+
+|  1 |     900 |
+|  2 |     350 |
++----+---------+
+(2 rows)
+使用GORM框架
+NOTE: 更多细节可查看examples-orms项目。
+
+Step 1: 安装GORM
+go get -u github.com/lib/pq # dependency
+go get -u github.com/jinzhu/gorm
+Step 2: 启动节点
+以非安全模式启动节点：
+
+cockroach start --insecure --store=hello-1 --host=localhost
+Step 3: 创建用户
+执行cockroach user命令创建maxroach用户：
+
+cockroach user set maxroach --insecure
+Step 4: 创建数据库并授权
+以root用户启动内置的SQL客户端，创建bank数据库并授权maxroach用户。
+
+cockroach sql --insecure -e 'CREATE DATABASE bank'
+cockroach sql --insecure -e 'GRANT ALL ON DATABASE bank TO maxroach'
+Step 5: 编写执行Go代码
+下述Go代码中，代码db.AutoMigrate(&Account{}将根据Account模型创建accounts表：
+
+package main
+
+import (
+    "fmt"
+    "log"
+
+    // Import GORM-related packages.
+    "github.com/jinzhu/gorm"
+    _ "github.com/jinzhu/gorm/dialects/postgres"
+)
+
+// Account is our model, which corresponds to the "accounts" database table.
+type Account struct {
+    ID      int `gorm:"primary_key"`
+    Balance int
+}
+
+func main() {
+    // Connect to the "bank" database as the "maxroach" user.
+    //非安全模式
+    const addr = "postgresql://maxroach@localhost:26257/bank?sslmode=disable"
+    //安全模式
+    //const addr = "postgresql://maxroach@localhost:26257/bank?ssl=true&sslmode=require&sslrootcert=certs/ca.crt&sslkey=certs/client.maxroach.key&sslcert=certs/client.maxroach.crt"
+
+    db, err := gorm.Open("postgres", addr)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    // Automatically create the "accounts" table based on the Account model.
+    db.AutoMigrate(&Account{})
+
+    // Insert two rows into the "accounts" table.
+    db.Create(&Account{ID: 1, Balance: 1000})
+    db.Create(&Account{ID: 2, Balance: 250})
+
+    // Print out the balances.
+    var accounts []Account
+    db.Find(&accounts)
+    fmt.Println("Initial balances:")
+    for _, account := range accounts {
+        fmt.Printf("%d %d\n", account.ID, account.Balance)
+    }
+}
+执行：
+
+go run gorm-basic-sample.go
+输出：
+
+Initial balances:
+1 1000
+2 250
+执行查询：
+
+cockroach sql --insecure -e 'SELECT id, balance FROM accounts' --database=bank
++----+---------+
+| id | balance |
++----+---------+
+|  1 |    1000 |
+|  2 |     250 |
++----+---------+
+(2 rows)

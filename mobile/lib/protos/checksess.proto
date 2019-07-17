@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package proto.checksess;
+option go_package = "protos";
+
+
+service CheckSession {
+    rpc checkSession (CheckSessionRequest) returns (CheckSessionResponse);
+}
+
+message CheckSessionRequest {
+    string userId = 1;
+    string sessionId = 2;
+    string device = 3;//设备
+}
+
+message CheckSessionResponse {
+    string message = 1;//状态消息
+    int32 code = 2;//状态码
+    bool isValid = 3;// 是否可用
+    int32 status = 4;// 请求状态 0失败，1成功
+}

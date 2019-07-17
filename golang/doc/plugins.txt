@@ -1,0 +1,113 @@
+
+http://www.fastgolang.com
+Vscode+golang+插件管理
+
+一、go下载
+
+Win: golang中文网
+
+Mac: brew install go
+
+二、go环境变量
+
+$GOROOT=/usr/local/go                        GO安装目录
+
+$GOPATH=/usr/local/var/www/go          GO工作目录
+
+$GOBIN=$GOPATH/bin                          GO可执行文件目录
+
+$PATH=$PATH:$GOBIN:$GOROOT/bin  将GO可执行文件加入PATH中，使GO指令与我们编写的GO应用可以全局调用
+
+三、目录结构
+
+src ——存放源代码文件
+
+pkg——存放编译后的文件
+
+bin ——存放编译后的可执行文件
+
+四、命令
+
+go build 在当前目录下编译生成可执行文件
+
+go install 编译源代码，如果为可执行文件（package "main"且包含main方法），则会编译生成可执行文件到【$GOPATH/bin】目录下
+
+go get可以暂时理解为git clone到【$GOPATH/src】 + go install
+
+五、vscode上安装go开发环境及其插件
+
+1、下载vscode
+
+2、下载git
+
+3、在vscode中下载安装go扩展
+
+4、在gopath目录下创建bin、pkg、src三个目录
+
+5、进入$gopath/bin
+
+go get -u -v github.com/josharian/impl
+
+go get -u -v github.com/mdempsky/gocode
+
+go get -u -v github.com/rogpeppe/godef
+
+go get -u -v github.com/golang/lint/golint
+
+go get -u -v github.com/lukehoban/go-find-references
+
+go get -u -v github.com/lukehoban/go-outline
+
+go get -u -v github.com/sqs/goreturns
+
+go get -u -v golang.org/x/tools/cmd/gorename
+
+go get -u -v github.com/tpng/gopkgs
+
+go get -u -v github.com/newhook/go-symbols
+
+go get -u -v github.com/peterh/liner github.com/derekparker/delve/cmd/dlv
+
+go get -u -v golang.org/x/tools/cmd/guru
+
+由于被墙很多软件被墙，借助github镜像仓库来安装git clone https://github.com/golang/tools.git
+
+tools包含各种库的源代码
+
+6、切换到$GOPATH目录下，安装那些你上一步没有成功的插件
+
+go install github.com/mdempsky/gocode
+
+go install github.com/rogpeppe/godef
+
+go install github.com/lukehoban/go-find-references
+
+go install github.com/lukehoban/go-outline
+
+go install github.com/sqs/goreturns
+
+go install golang.org/x/tools/cmd/gorename
+
+go install github.com/tpng/gopkgs
+
+go install github.com/josharian/impl
+
+go install github.com/newhook/go-symbols
+
+go install golang.org/x/tools/cmd/guru
+
+---------------------
+
+golint比较特殊通过上面的方式还是无法安装，所以我们在x目录下打开终端执行：
+
+git clone https://github.com/golang/lint.git
+
+go install golang.org/x/lint/golint
+
+7、第三方库依赖，切换到x目录
+
+git clone git@github.com:golang/net.git --depth 1
+
+git clone git@github.com:golang/text.git --depth 1
+
+8、重启vscode即可

@@ -1,0 +1,21 @@
+https://www.arangodb.com/documentation/
+https://www.arangodb.com/why-arangodb/cn/
+https://www.cnblogs.com/minglex/p/9399866.html
+
+修改读写权限
+sudo chown -R $(whoami):admin /usr/local
+sudo chown -R `whoami`:admin /usr/local/bin
+
+数据相关项目
+https://studygolang.com/articles/7708
+开源框架
+https://studygolang.com/articles/17916
+arangodb管理页面使用步骤
+1.arangodb官网下载对应系统版本的arangodb-cli客户端
+2.安装下载好的客户端并打开
+3.双击打开后，终端会自动打开数据库管理页面
+4.默认用户名root，密码为空
+5.进入管理页面后，可在USERS模块增加用户和修改权限信息等
+6.在DATABASE模块可新建database,默认是_system
+7.在COLLECTIONS可新建一个集合
+ cockroach influx

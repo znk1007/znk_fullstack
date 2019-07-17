@@ -1,0 +1,8 @@
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Flutter.framework
+
+第一种方法 不修改build system
+分析build error 日志，错误发生在Copy Pods Resources，而且与output有关，应该是使用了cocoapods导致的，尝试删除该项目target-Copy Pods Resources-Output Files，成功解决问题。
+选中项目target -> Build phase -> Copy Pods Resources -> Output Files -> 移除${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH} -> Build
+
+第二种方法 修改build system
+在Xcode菜单栏 -> File -> Workspace Setting，将build system修改为legacy build system，然后clean后编译。

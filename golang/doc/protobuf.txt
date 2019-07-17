@@ -1,0 +1,714 @@
+
+/**
+ * https://developers.google.cn/protocol-buffers/docs/proto3
+ * https://developers.google.cn/protocol-buffers/
+ *
+ * 	message Phone {
+ * 		mobile string = 1;
+ * 		home string = 2;
+ * 	}
+ * 	message Address {
+ *  	home string = 1;
+ *  	company string = 2;
+ * 	}
+ * 	message Person {
+ *		required string name = 1;
+ *		required int32 id = 2;
+ *		optional string email = 3;
+ *  	repeated Phone phone = 4; //可重复，多个值
+ *  	singular Address addr = 5;//零个或一个，不多于一个
+ * }
+ *
+ * 	message Foo {
+ * 		reserved 2, 15, 9 to 11;//保留字段，标识改修饰变量不可用
+ * 		reserved "foo", "bar"
+ * 	}
+ *
+ * 	message SearchRequest {
+ * 		string query = 1;
+ * 		int32 page_number = 2;
+ * 		int32 result_per_page = 3;
+ * 		enum Corpus {
+ * 			UNIVERSAL = 0; //default value
+ * 			WEB = 1;
+ * 			IMAGE = 2;
+ * 			LOCAL = 3;
+ * 			NEWS = 4;
+ * 			PRODUCTS = 5;
+ * 			VIDEO = 6;
+ * 		}
+ * 		optional Corpus copus = 4 [default = UNIVERSAL];
+ * 	}
+ *
+ * 	message SearchResponse {
+ * 		repeated Result result = 1;
+ * 	}
+ *
+ * 	message Result {
+ * 		string url = 1;
+ * 		string title = 2;
+ * 		repeated string snippets = 3;
+ * 	}
+ *
+ * 两个不同的proto文件，可通过import other.proto引入
+ * 栗子
+ * new.proto
+ * All deinitions are moved here
+ *
+ * old.proto
+ * import public "new.proto"
+ * import "other.proto"
+ *
+ * client.proto
+ * import "old.proto"
+ *
+ * 此时，client只能使用除other.proto外的定义
+ *
+ * Nested Types 嵌套类型
+ *
+ * message SearchResponse {
+ * 	message Result {
+ * 		string url = 1;
+ * 		string title = 2;
+ * 		repeated string snippets = 3;
+ * 	}
+ * 	repeated Result results = 1;
+ * }
+ * 使用
+ * message OtherMessage {
+ * 	SearchResponse.Result result = 1;
+ * }
+ *
+ * 支持多重嵌套
+ *
+ * 更新消息类型
+ * 1.不改变原有消息
+ * 2.添加新的字段，需有optional或required修饰
+ * 3.非required字段可以被移除，但是对应的数字标签不能重用，可以通过追加前缀OBSOLETE_或reserved标记
+ *
+ *
+ *定义一个消息
+首先来看一个简单的例子，定义一个搜索请求的消息格式，每个消息包含一个请求字符串，你感兴趣的页数和每页的结果数。下面是在.proto 文件中定义的消息。
+
+message SearchRequest {
+  required string query = 1;
+  optional int32 page_number = 2;
+  optional int32 result_per_page = 3;
+}
+
+SearchRequest消息定义了3个特殊的字段（名字/值 对）对应着我需要的的消息内容。每个字段有一个名字和类型。
+
+特定字段类型
+在上面的例子中，所有的字段都是标量类型 ： 两个整形（page_number result_per_page）和一个字符串query。 当然你也可以使用其他组合类型，比如枚举或者其他 消息类型。
+
+分配标签
+如你所见，消息中的每一个字段都被定义了一个独一无二的数字标签。这个标签是用来在二进制的消息格式中区分字段的，一旦你的消息开始被使用，这些标签就不应该在被修改了。注意 1 到 15 标签在编码的时候仅占用1 byte ，16 - 2047 占用 2 byte 。因此你应该将 1 - 15 标签保留给最经常被使用的消息元素。另外为未来可能添加的常用元素预留位子。
+你能定义的最小的标签是1， 最大是 2的29次方 -1 ， 另外 19000 到 19999 （FieldDescriptor::kFirstReservedNumber through FieldDescriptor::kLastReservedNumber） 也不能用。他们是protobuf 的编译预留标签。另外你也不能使用被 reserved的标签。
+
+特定字段规则
+消息是字段必须是下面的一种
+
+required 格式正确的消息必须有一个这个字段。
+optional 格式正确的消息可以有一个或者零个这样的消息。
+repeated 这个字段可以有任意多个。字段值的顺序被保留。
+由于历史原因， repeated字段的标量编码效率没有应有的效率高，新的代码可以使用[packet=true]来获得更高效的编码， 比如 ：
+
+repeated int32 samples = 4 [packet=true]
+
+Required 字段意味着永久，当你要标记一个字段为required 的时候你必须非常小心 —– 如果某个时刻你想要不再使用这个字段，当你把它改成optional的时候就会出问题 ： 使用旧的协议的人会因为认为这个字段缺失而认为消息不完整，进而拒收或者丢弃这个消息。谷歌的一些工程师得出这样的结论：使用required造成的伤害比他们的好处多，他们更倾向于使用optional的和repeated的。然而，这种观点不是绝对的。
+
+添加更多的消息
+多个消息类型可以在一个.proto文件中定义。当你定义多个相关联的消息的时候就用的上了 —— 比如我要定义一个返回消息格式来回应SearchRequest消息，那么我在同一个文件中 ：
+
+message SearchRequest {
+  required string query = 1;
+  optional int32 page_number = 2;
+  optional int32 result_per_page = 3;
+}
+message SearchResponse {
+//。。。
+}
+
+添加注释
+在.proto文件中添加注释，使用C/C++风格的 //语法
+
+message SearchRequest {
+  required string query = 1;
+  optional int32 page_number = 2;// Which page number do we want?
+  optional int32 result_per_page = 3;// Number of results to return per page.
+}
+
+保留字段
+当你在某次更新消息中屏蔽或者删除了一个字段的话，未来的使用着可能在他们的更新中重用这个标签数字来标记他们自己的字段。然后当他们加载旧的消息的时候就会出现很多问题，包括数据冲突，隐藏的bug等等。指定这个字段的标签数字（或者名字，名字可能在序列化为JSON的时候可能冲突）标记为reserved来保证他们不会再次被使用。如果以后的人试用的话protobuf编译器会提示出错。
+
+message Foo {
+  reserved 2, 15, 9 to 11;
+  reserved "foo", "bar";
+}
+
+注意一个reserved字段不能既有标签数字又有名字。
+
+.proto文件最终生成什么
+当你使用protoc 来编译一个.proto文件的时候，编译器将利用你在文件中定义的类型生成你打算使用的语言的代码文件。生成的代码包括getting setting 接口和序列化，反序列化接口。
+
+对于C++，编译器对每个.proto文件生成一个.h和一个.cc文件。 每个消息生成一个class。
+对于Java ， 编译器为每个消息生成一个.java文件，外加一个特殊的Builder类来生成消息实例。
+对于Python ， 一点点不同 —– Python编译器生成有一个静态的对每个消息的描述器的模块。然后，用一个元类在运行时创建必要的Python数据访问类。
+对于Go ， 编译器对文件中的每个消息生成一个.pb.go文件。
+标量
+proto	Note	C++	Java	Python	Go
+float		float	float	float	*float32
+double		double	double	float	*float64
+int32	变长编码. 编码负数效率底下– 打算使用负数的话请使用 sint32.	int32	int	int	*int32
+int64	变长编码. 编码负数效率底下– 打算使用负数的话请使用 sint64.	int64	long	int/long	*int64
+uint32	变长编码.	uint32	int	int/long	*uint32
+uint64	变长编码.	uint64	long	int/long	*uint64
+sint32	U变长编码. 数值有符号，负数编码效率高于int32	int32	int	int	*int32
+sint64	U变长编码. 数值有符号，负数编码效率高于int64	int64	long	int/long	*int64
+fixed32	固定4byte， 如果数值经常大于2的28次方的话效率高于uint32.	uint32	int	int	*uint32
+fixed64	固定8byte， 如果数值经常大于2的56次方的话效率高于uint64.	uint64	long	int/long	*uint64
+sfixed32	固定4byte.	int32	int	int	*int32
+sfixed64	固定8byte.	int64	long	int/long	*int64
+bool		bool	boolean	bool	*bool
+string	字符串内容应该是 UTF-8 编码或者7-bit ASCII 文本.	string	String	str/unicode	*string
+bytes	任意二进制数据.	string	ByteString	str	[]byte
+optional字段和默认初始值
+按照上面提到的，元素可以被标记为optional的。一个正确格式的消息可以有也可以没有包含这个可选的字段。再解析消息的时候，如果个可选的字段没有被设置，那么他的值就会被设置成默认值。默认值可以作为消息描述的一不部分 ：
+
+optional int32 result_per_page = 3 [default = 10];
+1
+如果没有明确指明默认值，那么这个字段的值就是这个字段的类型默认值。比如 ： 字符串的默认值就是空串。数字类型的默认值就是0。枚举类型的默认值是枚举定义表的第一个值，这意味着枚举的第一个值需要被格外注意。
+
+枚举
+当你定义一个消息的时候，你可能希望它其中的某个字段一定是预先定义好的一组值中的一个。你如说我要在SearchRequest中添加corpus字段。它只能是 UNIVERSAL, WEB , IMAGES , LOCAL, NEWS ,PRODUCTS, 或者 VIDEO 。你可以很简单的在你的消息中定义一个枚举并且定义corpus字段为枚举类型，如果这个字段给出了一个不再枚举中的值，那么解析器就会把它当作一个未知的字段。
+
+message SearchRequest {
+  required string query = 1;
+  optional int32 page_number = 2;
+  optional int32 result_per_page = 3 [default = 10];
+  enum Corpus {
+    UNIVERSAL = 0;
+    WEB = 1;
+    IMAGES = 2;
+    LOCAL = 3;
+    NEWS = 4;
+    PRODUCTS = 5;
+    VIDEO = 6;
+  }
+  optional Corpus corpus = 4 [default = UNIVERSAL];
+}
+
+只需要将相同的值赋值给不同的枚举项名字，你就在枚举中你可以定义别名 。当然你得先将allow_alias选项设置为true, 否则编译器遇到别名的时候就报错。
+
+enum EnumAllowingAlias {
+  option allow_alias = true;
+  UNKNOWN = 0;
+  STARTED = 1;
+  RUNNING = 1;
+}
+enum EnumNotAllowingAlias {
+  UNKNOWN = 0;
+  STARTED = 1;
+  // RUNNING = 1;  //取消这一行的屏蔽的话，编译器报错。
+}
+
+枚举常数必须是一个32为的整数。由于枚举值在通讯的时候使用变长编码，所以负数的效率很低，不推荐使用。你可以在（像上面这样）在一个消息内定义枚举，也可以在消息外定义 —– 这样枚举就在全文件可见了。如果你想要使用在消息内定义的枚举的话，使用语法 MessageType.EnumType。
+在你编译带有枚举的.proto文件的时候，如果生成的是C++或者Java代码， 那么生成的代码中会有对应的枚举。
+
+使用其他的消息类型
+你可以使用其他的消息类型作为字段的类型。比如我们打算在SearchResponse消息中包含一个Result类型的消息 ：
+
+message SearchResponse {
+  repeated Result result = 1;
+}
+
+message Result {
+  required string url = 1;
+  optional string title = 2;
+  repeated string snippets = 3;
+}
+
+导入定义
+在上面的例子中， Result消息类型是和SearchResponse定义在同一个文件中，如果你想使用的消息类型已经在另一个.proto文件中定义的话怎么办 ？
+只要你导入一个文件就可以使用这个文件内定义的消息。在你的文件头部加上这样的语句来导入其他文件：
+import "myproject/other_protos.proto";
+默认情况下你只能使用直接导入的文件中的定义。然而有的时候你需要将一个文件从一个路径移动到另一个路径的时候，与其将所有的引用这个文件的地方都更新到新的路径，不如在原来的路径上留下一个假的文件，使用import public来指向新的路径。import public语句可以将它导入的文件简介传递给导入本文减的文件。比如 ：
+
+// new.proto
+// 新的定义都在这里
+
+// old.proto
+// 其他的文件其实导入的都是这个文件
+import public "new.proto";
+import "other.proto";
+
+// client.proto
+import "old.proto";
+// 你可以使用 old.proto 和 new.proto 的定义， 但是不能使用other.proto的定义
+
+在命令行中试用-I/--proto_path来指定一系列的编译器搜索路径，如果这个参数没有被设置，那么默认在命令执行的路径查找。通常情况下使用-I/--proto_path来指定到你项目的根目录，然后使用完整的路径来导入所需的文件。
+
+导入proto 3 的消息类型
+你可以将proto3的消息类型导入并在proto2的消息中使用，反之亦然。不过proto2的枚举不能在proto3中使用。
+
+内嵌类型
+你可以在一个消息中定义并使用其他消息类型，比如下面的例子 —— Result消息是在SearchResponse中定义的 ：
+
+message SearchResponse {
+  message Result {
+    required string url = 1;
+    optional string title = 2;
+    repeated string snippets = 3;
+  }
+  repeated Result result = 1;
+}
+
+如果你打算在这个消息的父消息之外重用这个消息的话，你可以这样引用它 ： Parent.Type
+
+message SomeOtherMessage {
+  optional SearchResponse.Result result = 1;
+}
+
+你想嵌套多深就嵌套多深，没有限制 ：
+
+message Outer {                  // Level 0
+  message MiddleAA {  // Level 1
+    message Inner {   // Level 2
+      required int64 ival = 1;
+      optional bool  booly = 2;
+    }
+  }
+  message MiddleBB {  // Level 1
+    message Inner {   // Level 2
+      required int32 ival = 1;
+      optional bool  booly = 2;
+    }
+  }
+}
+
+
+Group其实将内嵌消息的定义和字段声明合并在一起了。在你的生成代码中，你会发现这个消息有一个Result类型的result字段（字段名字自动小写来防止冲突）。 因此这个例子和上面的第一个内嵌的例子是等价的。除了这个消息的通讯格式不大一样外。
+
+更新一个消息
+如果一个现有的消息类型不再满足你的需求，比如你需要额外的字段，但是你仍然希望兼容旧代码生成的消息的话，不要担心！ 在不破坏现有代码的前提下更新消息是很简单的。请铭记下面的规则 ：
+
+不要改变任何已有的数字标签
+你新添加的字段需要是optional或者repeated。由于任何required字段都没有丢失，这意味着你的旧代码序列化的消息能够被新代码解析通过。你应该给新的字段设置合理的默认值，这样新的代码可以合适解析使用旧的消息。同样的，新的代码产生的消息包也可以被旧的代码解析通过，旧的代码在解析的时候会忽略新的字段。不过新的字段并没有被丢弃,如果这个消息在旧的代码中再次被序列化，这些未知的字段还会在里面 —— 这样这些消息被传递回新的代码的时候，解析仍然有效。
+非required字段可以被移除，但是对应的数字标签不能被重用。或许你可以通过重命名这个字段，加上前缀OBSOLETE_来表示废弃。或者你可以标记reserverd。这样你未来就不会不小心重用这些字段了。
+只要保证标签数字一致，一个非required字段可以被转化扩展字段，反之亦然。
+int32, uint32, int64, uint64, 和 bool这些类型是兼容的 —— 这意味着你可以将一个字段的类型从其中的一种转化为另一种，不会打破向前向后兼容！ 如果通信的时候传输的数字不符合对应类型的那么你会得到和C++中强制类型转化一样的效果（64bit数字会被截断）。
+sint32 sint64相互兼容，但是不和其他的数字类型兼容。
+string bytes相互兼容 ，前提是二进制内容是有效的UTF-8 。
+optional repeated是兼容的。当给定的输入字段是repeated的时候，如果接收方期待的是一个optional的字段的话，对与原始类型的字段，他会取最后一个值，对于消息类型的字段，他会将所有的输入合并起来。
+你可以改变一个默认初始值，反正这个初始值从来不再通讯中传递。因此， 如果一个字段没有被设置，那么解析程序就将它赋值为解析程序所使用的版本的默认初始值，而不是发送方的默认初始值。
+枚举类型和int32, uint32, int64, and uint64在传输格式中相互兼容（注意如果不合适会被 截断），但是接收方在发序列化的时候处理他们可不大一样。请注意： 反序列化的时候不正确的枚举数字会被丢弃，这样这个字段的has_xxx接口就返回false并且get_xxx接口返回枚举的第一个值。不过如果是一个整形字段的话，这个数值会一致保留。所以当你打算把一个整形更新为枚举的时候，请务必注意整数的值不要超出接收方枚举的值。
+扩展 extemsions
+extensions 让你定义一段可用的数字标签来供第三方扩展你的消息。其他人可以在他们自己的文件里面使用这些标签数字来扩展你的下消息（无需修改你的消息文件）。 举个例子：
+
+message Foo {
+  //，，，
+  extensions 100 to 199;
+}
+
+这意味着Foo 消息在[ 100 , 199 ]区间的标签数字被保留做扩展使用。其他的使用者可以在他们自己的文件中导入你的文件，然后在他们自己的文件中给你的消息添加新的字段 ：
+
+extend Foo {
+  optional int32 bar = 126;
+}
+
+这样就意味着Foo消息现在有一个叫做bar的int32字段了。在编码的时候，通讯格式和使用者定义的新的消息一样。不过你的程序访问扩展字段的方式和访问常规字段的方式不太一样， 这里以C++代码为例 ：
+
+Foo foo;
+foo.SetExtension(bar, 15);
+
+类似的，Foo类有以下接口HasExtension(), ClearExtension(), GetExtension(), MutableExtension(), and AddExtension() 。
+注意扩展字段可以是除了oneof或者map外的其他任何类型，包括消息类型。
+
+内嵌扩展
+你可以在其他类型的作用域内定义扩展字段 ：
+
+message Baz {
+  extend Foo {
+    optional int32 bar = 126;
+  }
+  //。。。
+}
+
+在这种情况下，扩展的字段如下访问 （ C++ )
+
+Foo foo;
+foo.SetExtension(Baz::bar, 15);
+
+这里有一个很常见的疑惑 ： 在一个消息类型内定义另一个类型的扩展并不会导致被扩展消息类型和包含类型的任何关系。实际上，在上面的例子中，Baz类不是Foo类的子类。上面仅仅意味着bar这个变量实际上是Baz的一个static变量，仅此而已。
+
+一个常规的使用方法是当我们要扩展一个类型的字段的时候，将它写在这个类型里面， 比如我要扩展一个Baz类型的Foo字段的时候 ：
+
+message Baz {
+  extend Foo {
+    optional Baz foo_ext = 127;
+  }
+  ...
+}
+
+然而，这并不是必要的。你完全可以这样做 ：
+
+message Baz {
+  ...
+}
+
+// This can even be in a different file.
+extend Foo {
+  optional Baz foo_baz_ext = 127;
+}
+
+事实上这个语法是用来避免疑惑的。正如上面提到的，嵌套语法经常会不熟悉扩展的人被误以为是子类。
+
+选择扩展标签数字
+重要的是，要确保两个使用者不会向同一个消息内扩展同一个数字的字段。否则如果类型恰好不兼容的话数据就混乱了。你需要为你的项目定义合适的扩展数字来避免这种事。
+如果你打算使用一些非常大的数字来作为你的扩展的话，你可以让你的扩展字段区间一直到最大值，你可以max关键字 ：
+
+message Foo {
+  extensions 1000 to max;
+}
+
+max 是 2的29次方 - 1, 536,870,911.
+同样的你不能使用19000-19999 。 你可以定义扩展空间包含他们，不过当你定义扩展字段的时候不能真的使用这些数字。
+
+Oneof 类似union
+如果你的消息中有很多可选字段，而同一个时刻最多仅有其中的一个字段被设置的话，你可以使用oneof来强化这个特性并且节约存储空间。
+oneof字段类似optional字段只不过oneof里面所有的字段共享内存，而且统一时刻只有一个字段可以被设着。设置其中任意一个字段都自动清理其他字段。在你的代码中，你可以使用case（）或者 WhichOneOf（）接口来查看到底是哪个字段被设置了。
+
+使用 Oneof
+使用Oneof特性你只需要在oneof关键字后面加上它的名字就行 ：
+
+message SampleMessage {
+  oneof test_oneof {
+     string name = 4;
+     SubMessage sub_message = 9;
+  }
+}
+
+你可以在oneof中使用oneof， 你可以使用任何类型的字段，但是你不能使用required, optional, 或者 repeated关键字。
+在你的代码中，oneof内的字段和其他常规字段有一样的getter setter 接口。你还可以通过接口（取决于你的语言）判断哪个字段被设置。
+
+Oneof特性
+设置一个oneof字段会自动清理其他的oneof字段。如果你设置了多个oneof字段，只有最后一个有效。
+SampleMessage message;
+message.set_name("name");
+CHECK(message.has_name());
+message.mutable_sub_message();   //清理name字段.
+CHECK(!message.has_name());
+
+如果解析器发现多个oneof字段被设置了，最后一个读到的算数。
+扩展字段不能被设置为oneof类型。
+oneof字段不能是repeated。
+反射API对oneof字段有效。
+如果你使用C++的话，下面的代码会崩溃，因为在set_name的时候sub_message字段已经被清理了。
+SampleMessage message;
+SubMessage* sub_message = message.mutable_sub_message();
+message.set_name("name");      // Will delete sub_message
+sub_message->set_...            // Crashes here
+
+对C++而言， 如果你对两个带有oneof的消息的使用Swap（）接口的话，每个消息会带有对方的oneof字段。
+SampleMessage msg1;
+msg1.set_name("name");
+SampleMessage msg2;
+msg2.mutable_sub_message();
+msg1.swap(&msg2);
+CHECK(msg1.has_sub_message());
+CHECK(msg2.has_name());
+
+向后兼容问题
+当你添加或者删除一个oneof中的字段的时候要小心点。如果你检测到oneof的值是None/NOT_SET的话，这意味着oneof字段没有被设置或者它被其他版本的消息设置为了一个未知的oneof字段。通讯中可没有办法告诉你两个版本的oneof到底哪里不一样了。
+重用的注意事项：
+
+将opttional字段移入或者移除oneof的话，在（被旧的版本代码）将消息序列化或者反序列化的时候，有些字段肯能会丢失。
+先删除一个oneof中的字段再加回去：在（被旧的版本代码）将消息序列化或者反序列化的时候，当前设置可能被清理。.
+合并或者拆分oneof ： 同移入移除optional.
+Maps
+如果你打算在你的数据结构中创建一个关联表的话，我们提供了很方便的语法：
+
+map<key_type, value_type> map_field = N;
+
+这里key_type可以是任意整形或者字符串。而value_tpye 可以是任意类型。
+举个例子，如果你打算创建一个Project表，每个Project关联到一个字符串上的话 ：
+
+map<string, Project> projects = 3;
+
+现在生成Map的API对于所有支持proto2的语言都可用了。
+
+Maps 特性
+扩展项不能是map.
+Maps不能使 repeated, optional, 或者 required.
+通讯格式中的顺序或者Map迭代器的顺序是未知的，你不能指望Map保存你的录入顺序。
+在文本模式下，Map由Key排序。
+向后兼容
+在通讯中，map等价与下面的定义， 这样不支持Map的版本也可以解析你的消息：
+
+message MapFieldEntry {
+  key_type key = 1;
+  value_type value = 2;
+}
+
+repeated MapFieldEntry map_field = N;
+
+Packages概念
+为了防止不同消息之间的命名冲突，你可以对特定的.proto文件提指定packet 名字 。
+
+package foo.bar;
+message Open { ... }
+
+在定义你的消息字段类型的时候你可以指定包的名字：
+
+message Foo {
+  ...
+  required foo.bar.Open open = 1;
+  ...
+}
+
+包名字的实现取决于你工作的具体编程语言：
+
+在C++中 ，生成的消息被包被在一个包名字的命名空间中，比如上面的代码中Bar类是 ： foo::bar。
+在 Java中,除非你指定了选项java_package，否则这个包名字就是Java的包名字。
+在 Python中,由于Python的模块是由它的文件系统来管理的，所以包名被忽略。
+包和名字解析
+protobuf的名字解析方式和C++很像。首先是最里面的作用域被搜索，然后是外面的一层。。。 没一个包都从他自己到它的父辈。但是如果前面有.号的话就（比如foo.bar.Baz）意味着从最外面开始。
+
+protobuf 编译器通过所有导入.proto文件来解析所有的名字。代码生成器为每个语言生成对应的合适的类型。
+
+定义服务 （ Services ）
+如果打算将你的消息配合一个RPC(Remote Procedure Call 远程调用）系统联合使用的话，你可以在.proto文件中定义一个RPC 服务接口然后protobuf就会给你生成一个服务接口和其他必要代码。比如你打算定义一个远程调用，接收SearchRequest返回SearchResponse， 那么你在你的文件中这样定义 ：
+
+service SearchService {
+  rpc Search (SearchRequest) returns (SearchResponse);
+}
+
+默认情况下，编译器给你生成一个纯虚接口名叫SearchRequest和一个对应的桩实现。这个桩实现直接调用RpcChannel，这个是你自己实现的具体RPC代码。比如你打算实现一个RpcChannel来序列化消息并且使用HTTP发送。换句话说，生成的代码提供了一个基于你的RPC的类型的安全的协议接口实现，它 不需要知晓你的PRC 的任何实现细节。因此最后你的代码大体是这样的 ：
+
+using google::protobuf;
+
+protobuf::RpcChannel* channel;
+protobuf::RpcController* controller;
+SearchService* service;
+SearchRequest request;
+SearchResponse response;
+
+void DoSearch() {
+  // 你自己提供MyRpcChannel和MyRpcController两个类，这两个类分别实现了纯虚接口
+  // s protobuf::RpcChannel 和protobuf::RpcController.
+  channel = new MyRpcChannel("somehost.example.com:1234");
+  controller = new MyRpcController;
+  service = new SearchService::Stub(channel);
+
+  // Set up the request.
+  request.set_query("protocol buffers");
+
+  // Execute the RPC.
+  service->Search(controller, request, response, protobuf::NewCallback(&Done));
+}
+
+void Done() {
+  delete service;
+  delete channel;
+  delete controller;
+}
+
+所有的服务器类同样实现服务接口。这提供了一种在不知道方法名字和参数的情况下调用方法的途径。在服务器这边，你需要实现一个可以注册服务的PRC服务器。
+
+using google::protobuf;
+
+class ExampleSearchService : public SearchService {
+ public:
+  void Search(protobuf::RpcController* controller,
+              const SearchRequest* request,
+              SearchResponse* response,
+              protobuf::Closure* done) {
+    if (request->query() == "google") {
+      response->add_result()->set_url("http://www.google.com");
+    } else if (request->query() == "protocol buffers") {
+      response->add_result()->set_url("http://protobuf.googlecode.com");
+    }
+    done->Run();
+  }
+};
+
+int main() {
+//你自己提供的MyRpcServer类，它不需要实现任何接口，这里意思意思就行。
+  MyRpcServer server;
+
+  protobuf::Service* service = new ExampleSearchService;
+  server.ExportOnPort(1234, service);
+  server.Run();
+
+  delete service;
+  return 0;
+}
+
+如果你不想嵌入你自己的已经存在的RPC系统，你现在可以使用gRPC ： 这是一种谷歌开发的语言和平台无关的开源RPC系统。gPRC和protobuf配合的格外方便。在添加了特定的插件后，它可以从你的.proto文件直接生成对应的RPC代码。不过由于proto2和proto3之间存在兼容问题，我们推荐你使用proto3来定义你的gPRC服务。如果你打算使用gPRC配合protobuf ， 你需要3.0.0以上的版本。
+
+选项
+每个.proto文件中的独立的定义都可以被一系列的选项说明。选项不改变任何定义的整体意义，但是在特定的上下文下它们能有特定的效果。选项列表在google/protobuf/descriptor.proto中.
+有的选项是文件等级的，意味着它必须在文件最顶端写，不能在任何消息，枚举或者服务的定义中。也有写选项是消息级别的，意味着它们应该写在消息定义内，有些选项是字段级别的，意味着他们应该被写在字段定义中。选项可以被写在枚举，服务中，但是目前还没有对应的有意义的选项。
+
+这是一些常用的选项：
+
+java_package (file option): 生成的Java的包名字。如果没有指定这个选项那么使用packet关键字的参数。不过packet关键字没有办法生成优雅的Java包名字，因为packet关键字不支持.号。非Java语言忽略。
+ option java_package = "com.example.foo";
+
+java_outer_classname (file option): Java最外围的类名字和文件名。如果没有设置，文件名就死协议文件名转化成驼峰式的名字 ： （foo_bar.proto 变成 FooBar.java) ， 非java语言忽略。
+ option java_outer_classname = "Ponycopter";
+
+optimize_for (file option): 可以是SPEED, CODE_SIZE, or LITE_RUNTIME. 对 C++ 、Java （或者其他三方代码生成器）代码生成有如下影响:
+SPEED (default): 生成序列化，解析代码，生成其他常用代码。默认配置，代码经过很好的优化。
+CODE_SIZE: 编译器生成很少的类，依赖共享，反射等实现序列化，解析等其他操作。生成的代码比SPEED小的多，也慢了些。生成的API和SPEED一样。当你有 大量的协议而且不指望他们太快的时候这个就比较合适了。
+LITE_RUNTIME: 生成代码仅仅依赖轻量级运行库 (libprotobuf-lite 而不是 libprotobuf)。 轻量运行库要小的多，而且有必要的描述和反射特性。这个尤其对移动开发有效。API接口和SPEED的一样块但是仅仅提供SPEED模式的一个子集API。
+option optimize_for = CODE_SIZE;
+
+cc_generic_services,java_generic_services, py_generic_services (file options): 是否生成抽象的服务代码 分别对应C++, Java, 和Python。 由于历史遗留原因，这些被默认设置为true。
+ // This file relies on plugins to generate service code.
+option cc_generic_services = false;
+option java_generic_services = false;
+option py_generic_services = false;
+
+cc_enable_arenas (file option): 允许 arena allocation ，C++有效.
+
+packed(field option): 当你对一个repeated的整形字段设置true 的时，会使用一种更有效的编码方式。 没有坏处。不过在2.3.0之前的版本，如果解析器发现期待这个字段不是packed而接收的数据是packed，那么数据会被忽略。之后的版本是安全的。如果你使用很久的版本的话请小心。
+
+ repeated int32 samples = 4 [packed=true];
+
+deprecated (field option): 如果被设置为true，那么这个字段被标记为废弃，新的代码不应该使用它。在大多数语言中这个没有实际的意义，Java会使用@Deprecated.
+optional int32 old_field = 6 [deprecated=true];
+1
+自定义选项
+Protocol Buffers 甚至允许你自定义你自己的选项。注意这是高级用法，大多数人用不到。既然选项是在google/protobuf/descriptor.proto (like FileOptions or FieldOptions)中定义的，你只需要扩展他们定义你自己的选项。比如:
+
+import "google/protobuf/descriptor.proto";
+extend google.protobuf.MessageOptions {
+  optional string my_option = 51234;
+}
+
+message MyMessage {
+  option (my_option) = "Hello world!";
+}
+
+这里我们通过扩展MessageOptions定义了一个消息级别的选项。我们在C++中这样读取这个选项的值：
+
+string value = MyMessage::descriptor()->options().GetExtension(my_option);
+
+这里,MyMessage::descriptor()->options() 返回了MessageOptions消息。读取扩展选项和读取其他的扩展字段没什么区别。
+
+Java代码：
+
+String value = MyProtoFile.MyMessage.getDescriptor().getOptions()
+  .getExtension(MyProtoFile.myOption);
+
+Python代码：
+
+value = my_proto_file_pb2.MyMessage.DESCRIPTOR.GetOptions()
+  .Extensions[my_proto_file_pb2.my_option]
+
+各种类型的选项都能被扩展。
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+  optional string my_file_option = 50000;
+}
+extend google.protobuf.MessageOptions {
+  optional int32 my_message_option = 50001;
+}
+extend google.protobuf.FieldOptions {
+  optional float my_field_option = 50002;
+}
+extend google.protobuf.EnumOptions {
+  optional bool my_enum_option = 50003;
+}
+extend google.protobuf.EnumValueOptions {
+  optional uint32 my_enum_value_option = 50004;
+}
+extend google.protobuf.ServiceOptions {
+  optional MyEnum my_service_option = 50005;
+}
+extend google.protobuf.MethodOptions {
+  optional MyMessage my_method_option = 50006;
+}
+
+option (my_file_option) = "Hello world!";
+
+message MyMessage {
+  option (my_message_option) = 1234;
+
+  optional int32 foo = 1 [(my_field_option) = 4.5];
+  optional string bar = 2;
+}
+
+enum MyEnum {
+  option (my_enum_option) = true;
+
+  FOO = 1 [(my_enum_value_option) = 321];
+  BAR = 2;
+}
+
+message RequestType {}
+message ResponseType {}
+
+service MyService {
+  option (my_service_option) = FOO;
+
+  rpc MyMethod(RequestType) returns(ResponseType) {
+    // Note:  my_method_option has type MyMessage.  We can set each field
+    //   within it using a separate "option" line.
+    option (my_method_option).foo = 567;
+    option (my_method_option).bar = "Some string";
+  }
+}
+
+注意如果你在另一个包中使用这个包定义的选项的话，你必须使用包名字作为前缀：
+
+// foo.proto
+import "google/protobuf/descriptor.proto";
+package foo;
+extend google.protobuf.MessageOptions {
+  optional string my_option = 51234;
+}
+
+// bar.proto
+import "foo.proto";
+package bar;
+message MyMessage {
+  option (foo.my_option) = "Hello world!";
+}
+生成你的代码
+如果你要用.proto文件生成 C++ , Java, Python的代码的话，你需要使用protoc来编译.proto文件。如果你还没安装这个编译器的话，去下载一个吧。
+
+如下执行协议的编译:
+
+protoc –proto_path=IMPORT_PATH –cpp_out=DST_DIR –java_out=DST_DIR –python_out=DST_DIR path/to/file.proto
+
+IMPORT_PATH 指定查找.proto文件的搜索目录，默认是当前的工作目录。可以多次使用这个参数来指定多个目录，他们会按照顺序被检索， -I=IMPORT_PATH 是 --proto_path的简写。
+你可以指定特定的输出路径:
+--cpp_out C++ code in DST_DIR.
+--java_out generates Java code in DST_DIR.
+--python_out generates Python code in DST_DIR.
+作为一个额外的便利，如果DST_DIR以.zip 或者.jar 来结尾的话，编译器会自动给你打包。注意如果指定路径已经存在的话会被覆盖。
+
+你必须提供一个或多个.proto文件。多个文件可以一次全给定。文件名必须是相对当前目录的相对路径名。每个文件都应该在IMPORT_PATHs 指定的某个路径下！
+
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+*/

@@ -1,0 +1,9 @@
+mac 电脑安装Uber的prototool
+brew install prototool
+
+命令行prototool
+prototool lint
+prototool help lint 检验
+prototool config init 无必要
+prototool compile 编译protobuf文件
+prototool generate 根据prototool.yaml或prototool.json文件的规则生成对应文件

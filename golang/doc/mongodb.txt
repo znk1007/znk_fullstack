@@ -1,0 +1,22 @@
+https://docs.mongodb.com/ecosystem/drivers/go/
+https://godoc.org/go.mongodb.org/mongo-driver/mongo
+安装
+1.安装包安装
+官网下载tgz文件，解压，sudo mv <sourcepath> <targetpath>
+a.vi ~/.bash_profile配置环境变量
+export PATH=/usr/local/mongo/bin:${PATH}
+b.source ~/.bash_profile 使环境变量生效
+2.homebrew安装
+a). brew install mongo
+b).vi ~/.bash_profile配置环境变量
+export PATH=/usr/local/mongo<version>/bin:${PATH}
+c).source ~/.bash_profile 使环境变量生效
+
+启动服务
+1.如果系统未启动mongodb服务，执行下面命令
+brew service start mongodb
+2.启动mongodb服务器
+sudo mongod 
+3.命令行操作mongodb
+mongo
+

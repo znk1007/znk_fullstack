@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package protos.updatephoto;
+option go_package = "protos";
+
+
+service UpdatePhoto {
+    rpc update (UpdatePhotoRequest) returns (UpdatePhotoResponse);
+}
+
+
+message UpdatePhotoRequest {
+    string account = 1;
+    string userId = 2;
+    string sessionId = 3;
+    string photo = 4;
+    string device = 5;
+}
+
+message UpdatePhotoResponse {
+    string message = 1;//状态消息
+    int32 code = 2;//状态码
+    int32 status = 3;// 请求状态 0失败，1成功
+}

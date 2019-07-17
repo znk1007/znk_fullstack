@@ -1,0 +1,28 @@
+1.安装protobuf
+brew install protobuf
+
+2.安装dart
+brew tap dart-lang/dart
+brew install dart
+
+3.安装protoc_plugin
+pub global activate protoc_plugin
+
+4.将protoc-gen-dart添加到path
+vi ~/.bash_profile
+export "$PATH:$PWD/.pub-cache/bin"
+此步之后便有 protoc-gen-dart命令
+
+5.将.proto文件编译成dart文件
+protoc --dart_out=. *.proto 
+如是grpc
+protoc --dart_out=plugins=grpc:. *.proto
+如无添加path
+protoc --dart_out=. test.proto --plugin $HOME/.pub-cache/bin/protoc-gen-dart
+
+6.在flutter中引入protobuf
+在pubspec.ymal中添加依赖
+protobuf: ^0.13.4
+
+
+

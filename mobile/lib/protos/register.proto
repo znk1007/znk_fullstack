@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package protos.register;
+option go_package = "protos";
+
+
+// 注册服务端
+service Register {
+    rpc Regist (RegistRequest) returns (RegistResponse);
+}
+// 注册请求字段
+message RegistRequest {
+    string account = 1;//账号，可为手机号，邮箱，昵称
+    string password = 2;//密码
+    string device = 3;//设备
+}
+// 注册响应字段
+message RegistResponse {
+    string account = 1;//账号，可为手机号，邮箱，昵称
+    string userId = 2;//用户ID
+    string message = 3;//状态消息
+    int32 code = 4;//状态码
+    int32 status = 5;// 请求状态 0失败，1成功
+}

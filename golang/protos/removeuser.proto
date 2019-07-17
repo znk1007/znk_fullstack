@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package protos.removeuser;
+option go_package = "protos";
+
+
+service RemoveUser {
+    rpc remove (RemoveUserRequest) returns (RemoveUserResponse);
+}
+
+
+message RemoveUserRequest {
+    repeated string accounts = 1;
+    string adminAccount = 2;
+    string adminUserId = 3;
+    string device = 4;
+}
+
+message RemoveUserResponse {
+    string message = 1;//状态消息
+    int32 code = 2;//状态码
+    int32 status = 3;// 请求状态 0失败，1成功
+}

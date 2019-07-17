@@ -1,0 +1,2 @@
+http://www.nosql-database.org/
+https://db-engines.com/en/ranking

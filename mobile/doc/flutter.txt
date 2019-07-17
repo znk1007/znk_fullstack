@@ -1,0 +1,4 @@
+https://flutterchina.club/setup-macos/
+//wget https://mirrors.sjtug.sjtu.edu.cn/flutter_infra/flutter//dart-sdk-darwin-x64.zip
+//https://storage.flutter-io.cn/flutter_infra/
+https://flutterchina.club/

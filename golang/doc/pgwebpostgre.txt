@@ -1,0 +1,13 @@
+1.官网下载postgres.app
+2.https://www.postgresql.org 下载管理客户端
+2.默认启动5432端口
+账号:znk
+密码:znk1007
+
+pgweb版管理GUI
+1.brew install pgweb
+2.终端输入pgweb --host localhost
+3.浏览器打开后，点击connect
+
+xorm版
+http://gobook.io/read/github.com/go-xorm/manual-zh-CN/
