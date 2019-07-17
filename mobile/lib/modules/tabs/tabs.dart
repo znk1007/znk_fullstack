@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:znk/modules/tabs/chat.dart';
+import 'package:znk/modules/tabs/chat/chat.dart';
 import 'package:znk/modules/tabs/onwer/owner.dart';
-import 'package:znk/modules/tabs/schedule.dart';
+import 'package:znk/modules/tabs/schedule/schedule.dart';
 import 'package:znk/core/user/index.dart';
 class Tabs extends StatefulWidget {
 
@@ -16,18 +16,17 @@ class Tabs extends StatefulWidget {
 }
 
 class _TabsState extends State<Tabs> with WidgetsBindingObserver {
+
   // 当前位置
   int _currentIndex = 1;
-  List<Widget> _tabsList = [
-    Chat(),
-    Schedule(),
-    Owner()
-  ];
-
+  List<Widget> _tabsList = [];
+ 
   @override
   void initState() {
     super.initState();
-    print('tab init state');
+    _tabsList.add(Chat(userRepository: widget._userRepository,));
+    _tabsList.add(Schedule(userRepository: widget._userRepository,));
+    _tabsList.add(Owner(userRepository: widget._userRepository,));
     WidgetsBinding.instance.addObserver(this);
   }
 

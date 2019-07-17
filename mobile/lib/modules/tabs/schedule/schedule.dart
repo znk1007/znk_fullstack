@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:znk/core/user/index.dart';
 
 class Schedule extends StatefulWidget {
-  Schedule({Key key}) : super(key: key);
-
+  UserRepository _userRepository;
+  Schedule({Key key, @required UserRepository userRepository}) : 
+    assert(userRepository != null),
+    _userRepository = userRepository,
+    super(key: key);
   _ScheduleState createState() => _ScheduleState();
 }
 

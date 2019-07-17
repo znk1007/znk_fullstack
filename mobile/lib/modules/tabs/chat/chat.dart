@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:znk/core/user/index.dart';
 
 class Chat extends StatefulWidget {
-  Chat({Key key}) : super(key: key);
-
+  UserRepository _userRepository;
+  Chat({Key key, @required UserRepository userRepository}) : 
+    assert(userRepository != null),
+    _userRepository = userRepository,
+    super(key: key);
   _ChatState createState() => _ChatState();
 }
 

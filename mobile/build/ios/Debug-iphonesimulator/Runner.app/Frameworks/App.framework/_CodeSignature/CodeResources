@@ -10,7 +10,7 @@
 		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		qqrps+AspsPVgh8RNal83dYv7xg=
+		/sHWZL0plhYEaaLCl98WoJLTgkw=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -18,7 +18,7 @@
 		</data>
 		<key>flutter_assets/LICENSE</key>
 		<data>
-		mfHEnp7v+ZjJAhxoshGz5ulIKEQ=
+		YIHrLDX0xbma/+nqqJIU8nsJpJk=
 		</data>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -26,11 +26,23 @@
 		</data>
 		<key>flutter_assets/isolate_snapshot_data</key>
 		<data>
-		E2Ve1v3fp1XemR8OUWFcmReHNrY=
+		2OCmYicE3YAuUVEtVHr65fklIXY=
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		u6GBxnlwgkH3uvM/rtjWyK+Rwxc=
+		iffovSBthT7lIDz9iWz4OGxYQYk=
+		</data>
+		<key>flutter_assets/lib/images/iOS/common/2.0x/right_arrow.png</key>
+		<data>
+		oZUq1Hw2DAYb1d6BIXNnbYzkUMk=
+		</data>
+		<key>flutter_assets/lib/images/iOS/common/3.0x/right_arrow.png</key>
+		<data>
+		ERC+BIKiiLM7Od+aM98HVLF8evk=
+		</data>
+		<key>flutter_assets/lib/images/iOS/common/right_arrow.png</key>
+		<data>
+		UvZBef7PQqCv0tp19GCFpF42B0I=
 		</data>
 		<key>flutter_assets/lib/images/iOS/launch/2.0x/launchImg.png</key>
 		<data>
@@ -55,6 +67,42 @@
 		<key>flutter_assets/lib/images/iOS/launch/launchVersionBg.png</key>
 		<data>
 		mOrCxpYsLgYshP8S31MMMSEuc74=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/2.0x/collection.png</key>
+		<data>
+		Q5Xg8KZwq6mkCNpw712LYgwqgTE=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/2.0x/file_store.png</key>
+		<data>
+		AgmXj7YtD8J8S8cwEVcSPeQILfI=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/2.0x/setting.png</key>
+		<data>
+		G3xa19og8s1JG+MT8cJBtgxfCL0=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/3.0x/collection.png</key>
+		<data>
+		C7G0qmv3WbkHRkc3vUYOgPwUSnk=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/3.0x/file_store.png</key>
+		<data>
+		eERzwfvlHBYyiyrX1gB5r2xrOy4=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/3.0x/setting.png</key>
+		<data>
+		Q/tYvsDASB8Syoey2X1LGzAZ2a4=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/collection.png</key>
+		<data>
+		QiwmtuT3IneBBPsLBG0HtBUNUY4=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/file_store.png</key>
+		<data>
+		uvXP3xcQXTtUgYwCGUEucTwzGDY=
+		</data>
+		<key>flutter_assets/lib/images/iOS/owner/setting.png</key>
+		<data>
+		rXtXVq4vhdS2OT5+8VphYaw/rhA=
 		</data>
 		<key>flutter_assets/lib/images/iOS/tabs/2.0x/tab_msg_n.png</key>
 		<data>
@@ -194,7 +242,7 @@
 		</data>
 		<key>flutter_assets/vm_snapshot_data</key>
 		<data>
-		u0iLG6h3S3zBGs6hv3ooOu7THnU=
+		Md9+yZ//pYXy28l4A3huVqbT5mI=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -203,11 +251,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			qqrps+AspsPVgh8RNal83dYv7xg=
+			/sHWZL0plhYEaaLCl98WoJLTgkw=
 			</data>
 			<key>hash2</key>
 			<data>
-			KiOSf4LZ7AjP6lY9Y04AziucoKCMv309B4jxOZXfMQE=
+			sHYku0mJkzCxdgZw2M8fH8ekwx9qhBA+dpzWnk66L4w=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -225,11 +273,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			mfHEnp7v+ZjJAhxoshGz5ulIKEQ=
+			YIHrLDX0xbma/+nqqJIU8nsJpJk=
 			</data>
 			<key>hash2</key>
 			<data>
-			qxxog1B2RP6FxRb+DM8lCzISwcAv16XHDGdY1A5Swfs=
+			bNtw+bL4jY6kjYV/cuNscNd16FrUqvG3K8gZ5ko6VqI=
 			</data>
 		</dict>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.ttf</key>
@@ -247,22 +295,55 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			E2Ve1v3fp1XemR8OUWFcmReHNrY=
+			2OCmYicE3YAuUVEtVHr65fklIXY=
 			</data>
 			<key>hash2</key>
 			<data>
-			jML4i+fb13w6FTfyle6AwjPqWTOI8wiUyAIJ1PwKBb4=
+			0VbC+mVgNUFyx3jhuadxb3vs6qYsKK8wVmnZxXvf3bk=
 			</data>
 		</dict>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			u6GBxnlwgkH3uvM/rtjWyK+Rwxc=
+			iffovSBthT7lIDz9iWz4OGxYQYk=
 			</data>
 			<key>hash2</key>
 			<data>
-			SwxrH0e5C3Gq5HY/S7TOxX6iJUk1RUyj0WHz8lTvnhk=
+			2jQHoKPfIbDvCavcAxMEKK3ogHPxJNPEmAExFeTA/RM=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/common/2.0x/right_arrow.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			oZUq1Hw2DAYb1d6BIXNnbYzkUMk=
+			</data>
+			<key>hash2</key>
+			<data>
+			GooqKNZmQOtPpHv/KKa9+UIvNmX60fT+1snYRi9+QW8=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/common/3.0x/right_arrow.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			ERC+BIKiiLM7Od+aM98HVLF8evk=
+			</data>
+			<key>hash2</key>
+			<data>
+			q58DWT+8dIuD/RNY/8nh6/4LDkh0oYRW/myBAyoyV1g=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/common/right_arrow.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			UvZBef7PQqCv0tp19GCFpF42B0I=
+			</data>
+			<key>hash2</key>
+			<data>
+			CxyVbmu8h1VIH3+zgR9MuDlNnL7v8R2wSCeoVpWnN8o=
 			</data>
 		</dict>
 		<key>flutter_assets/lib/images/iOS/launch/2.0x/launchImg.png</key>
@@ -329,6 +410,105 @@
 			<key>hash2</key>
 			<data>
 			My2qk+t+/hIT+SUWJ6EMVsOtqNZZ7MeM5tkCBGILWFI=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/2.0x/collection.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			Q5Xg8KZwq6mkCNpw712LYgwqgTE=
+			</data>
+			<key>hash2</key>
+			<data>
+			cybLxJHDOQ1I7a1AfKEV7+KgmgRdvKoYgg9/ZMqESB8=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/2.0x/file_store.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			AgmXj7YtD8J8S8cwEVcSPeQILfI=
+			</data>
+			<key>hash2</key>
+			<data>
+			9DFK/t85Gg0tAA8/EWsvX46tM4E2vRyV9D78u2ODDuc=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/2.0x/setting.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			G3xa19og8s1JG+MT8cJBtgxfCL0=
+			</data>
+			<key>hash2</key>
+			<data>
+			/ps80nJ4Nwsdi+8AskLpPBeP4W/+Q/zpikET0CPhXuc=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/3.0x/collection.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			C7G0qmv3WbkHRkc3vUYOgPwUSnk=
+			</data>
+			<key>hash2</key>
+			<data>
+			b1f42CHpqfA53ogLMbngl+qS+9s8noUIrduMm5mXMDs=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/3.0x/file_store.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			eERzwfvlHBYyiyrX1gB5r2xrOy4=
+			</data>
+			<key>hash2</key>
+			<data>
+			tW3W/6SWsv1Mm6nwZmHXsbkfW/ZBtjIzPCECVf64DrM=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/3.0x/setting.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			Q/tYvsDASB8Syoey2X1LGzAZ2a4=
+			</data>
+			<key>hash2</key>
+			<data>
+			DphzzZ2E7v5h4uQgnpwUP6TxADXbEUcTmqQoi+6q53g=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/collection.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			QiwmtuT3IneBBPsLBG0HtBUNUY4=
+			</data>
+			<key>hash2</key>
+			<data>
+			J5/CshcjBN4WaRotJXGTRkHRY36tI3tZ26JLrsBa3IQ=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/file_store.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			uvXP3xcQXTtUgYwCGUEucTwzGDY=
+			</data>
+			<key>hash2</key>
+			<data>
+			IXGy9b8CCvGMIwIvyEMyYzrrg9OjgOMPtDiGmbaGigU=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/images/iOS/owner/setting.png</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			rXtXVq4vhdS2OT5+8VphYaw/rhA=
+			</data>
+			<key>hash2</key>
+			<data>
+			GXP2F8DGd7c0VozjErOqq1lZ8ZWdxVpyjAiT2LQtBDs=
 			</data>
 		</dict>
 		<key>flutter_assets/lib/images/iOS/tabs/2.0x/tab_msg_n.png</key>
@@ -709,11 +889,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			u0iLG6h3S3zBGs6hv3ooOu7THnU=
+			Md9+yZ//pYXy28l4A3huVqbT5mI=
 			</data>
 			<key>hash2</key>
 			<data>
-			z4PBoadz2SQKMlO6dV39stqIWAoypzVe5C8ljElSBps=
+			j94+RsFUroOcKkeaA2S3bPBUYnLdM+wi04c19kzWx8A=
 			</data>
 		</dict>
 	</dict>

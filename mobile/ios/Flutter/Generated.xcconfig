@@ -1,7 +1,7 @@
 // This is a generated file; do not edit or check into version control.
 FLUTTER_ROOT=/usr/local/Cellar/flutter
-FLUTTER_APPLICATION_PATH=/Users/huangsam/GITHUB/ZNKProject/Mobile/znk
-FLUTTER_TARGET=/Users/huangsam/GITHUB/ZNKProject/Mobile/znk/lib/main.dart
+FLUTTER_APPLICATION_PATH=/Users/huangsam/GITHUB/ZNKProject/go/src/znk/mobile
+FLUTTER_TARGET=/Users/huangsam/GITHUB/ZNKProject/go/src/znk/mobile/lib/main.dart
 FLUTTER_BUILD_DIR=build
 SYMROOT=${SOURCE_ROOT}/../build/ios
 FLUTTER_FRAMEWORK_DIR=/usr/local/Cellar/flutter/bin/cache/artifacts/engine/ios
