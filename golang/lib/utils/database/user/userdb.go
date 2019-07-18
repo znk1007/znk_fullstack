@@ -6,9 +6,9 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"znk/lib/utils/database/cockroachz"
-	"znk/lib/utils/database/redisz"
-	"znk/lib/utils/database/redisz/redigo/redis"
+	"github.com/znk1007/fullstack/lib/utils/database/cockroachz"
+	"github.com/znk1007/fullstack/lib/utils/database/redisz"
+	"github.com/znk1007/fullstack/lib/utils/database/redisz/redigo/redis"
 )
 
 // User 用户管理客户端

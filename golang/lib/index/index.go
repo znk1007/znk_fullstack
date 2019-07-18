@@ -3,15 +3,15 @@ package index
 import (
 	"log"
 	"net"
-	protos "znk/protos/generated"
+	protos "github.com/znk1007/fullstack/protos/generated"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 
-	"znk/lib/manager/user"
-	"znk/lib/utils/middleware"
-	security "znk/lib/utils/security/server"
-	_ "znk/lib/utils/socket"
+	"github.com/znk1007/fullstack/lib/manager/user"
+	"github.com/znk1007/fullstack/lib/utils/middleware"
+	security "github.com/znk1007/fullstack/lib/utils/security/server"
+	_ "github.com/znk1007/fullstack/lib/utils/socket"
 )
 
 const (

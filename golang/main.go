@@ -1,10 +1,10 @@
 package main
 
 import (
-	"znk/lib/index"
-	_ "znk/lib/utils/database/cockroachz"
-	_ "znk/lib/utils/database/mongodbz"
-	_ "znk/lib/utils/database/redisz"
+	"github.com/znk1007/fullstack/lib/index"
+	_ "github.com/znk1007/fullstack/lib/utils/database/cockroachz"
+	_ "github.com/znk1007/fullstack/lib/utils/database/mongodbz"
+	_ "github.com/znk1007/fullstack/lib/utils/database/redisz"
 )
 
 func main() {

@@ -2,14 +2,14 @@ package user
 
 import (
 	context "context"
-	removeuser "znk/protos/generated"
+	removeuser "github.com/znk1007/fullstack/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	utils "znk/lib/utils/common"
-	userdb "znk/lib/utils/database/user"
-	security "znk/lib/utils/security/server"
+	utils "github.com/znk1007/fullstack/lib/utils/common"
+	userdb "github.com/znk1007/fullstack/lib/utils/database/user"
+	security "github.com/znk1007/fullstack/lib/utils/security/server"
 )
 
 // RemoveUserService 物理删除用户
