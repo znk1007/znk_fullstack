@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	socket "github.com/znk1007/fullstack/lib/utils/socket/protos/generated"
+	socket "github.com/znk_fullstack/golang/lib/utils/socket/protos/generated"
 )
 
 func TestConnParams(t *testing.T) {

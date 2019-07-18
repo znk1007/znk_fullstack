@@ -3,14 +3,14 @@ package user
 import (
 	context "context"
 
-	activeuser "github.com/znk1007/fullstack/protos/generated"
+	activeuser "github.com/znk_fullstack/golang/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	utils "github.com/znk1007/fullstack/lib/utils/common"
-	userdb "github.com/znk1007/fullstack/lib/utils/database/user"
-	security "github.com/znk1007/fullstack/lib/utils/security/server"
+	utils "github.com/znk_fullstack/golang/lib/utils/common"
+	userdb "github.com/znk_fullstack/golang/lib/utils/database/user"
+	security "github.com/znk_fullstack/golang/lib/utils/security/server"
 )
 
 // ActiveUserService 禁用用户

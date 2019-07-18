@@ -3,7 +3,7 @@ package packet
 import (
 	"io"
 
-	"github.com/znk1007/fullstack/lib/utils/socket/common"
+	"github.com/znk_fullstack/golang/lib/utils/socket/common"
 )
 
 // FrameReader 数据读取器

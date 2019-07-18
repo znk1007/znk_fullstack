@@ -2,13 +2,13 @@ package user
 
 import (
 	context "context"
-	updatephoto "github.com/znk1007/fullstack/protos/generated"
+	updatephoto "github.com/znk_fullstack/golang/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	userdb "github.com/znk1007/fullstack/lib/utils/database/user"
-	security "github.com/znk1007/fullstack/lib/utils/security/server"
+	userdb "github.com/znk_fullstack/golang/lib/utils/database/user"
+	security "github.com/znk_fullstack/golang/lib/utils/security/server"
 )
 
 // UpdateOnlineService 修改在线状态

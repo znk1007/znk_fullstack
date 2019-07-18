@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/znk1007/fullstack/lib/utils/database/redisz/redigo/redis"
+	"github.com/znk_fullstack/golang/lib/utils/database/redisz/redigo/redis"
 )
 
 // Manager 操作客户端

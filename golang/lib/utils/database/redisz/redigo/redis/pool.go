@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/znk1007/fullstack/lib/utils/database/redisz/redigo/internal"
+	"github.com/znk_fullstack/golang/lib/utils/database/redisz/redigo/internal"
 )
 
 var nowFunc = time.Now // for testing
