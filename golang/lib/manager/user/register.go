@@ -2,16 +2,16 @@ package user
 
 import (
 	context "context"
-	register "znk/golang/protos/generated"
+	register "znk/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	// "znk/golang/lib/utils/common"
-	userdb "znk/golang/lib/utils/database/user"
-	objectid "znk/golang/lib/utils/objectId"
-	regexputils "znk/golang/lib/utils/regexps"
-	security "znk/golang/lib/utils/security/server"
+	// "znk/lib/utils/common"
+	userdb "znk/lib/utils/database/user"
+	objectid "znk/lib/utils/objectId"
+	regexputils "znk/lib/utils/regexps"
+	security "znk/lib/utils/security/server"
 )
 
 // RegisterService 注册服务

@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"znk/golang/lib/utils/database/redisz/redigo/redis"
+	"znk/lib/utils/database/redisz/redigo/redis"
 )
 
 // Manager 操作客户端

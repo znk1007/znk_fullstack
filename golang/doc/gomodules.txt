@@ -1,0 +1,2 @@
+1.把golang项目放到gopath之外
+2.在main.go所在根目录执行go mod init <module_name>

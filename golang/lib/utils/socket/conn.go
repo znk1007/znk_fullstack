@@ -9,7 +9,7 @@ import (
 
 	"github.com/gogo/protobuf/io"
 
-	socket "znk/golang/lib/utils/socket/protos/generated"
+	socket "znk/lib/utils/socket/protos/generated"
 )
 
 // Conn 连接接口

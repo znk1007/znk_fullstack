@@ -3,14 +3,14 @@ package user
 import (
 	context "context"
 	"strconv"
-	login "znk/golang/protos/generated"
+	login "znk/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	userdb "znk/golang/lib/utils/database/user"
-	crypto "znk/golang/lib/utils/security"
-	security "znk/golang/lib/utils/security/server"
+	userdb "znk/lib/utils/database/user"
+	crypto "znk/lib/utils/security"
+	security "znk/lib/utils/security/server"
 )
 
 // LoginService 登录端

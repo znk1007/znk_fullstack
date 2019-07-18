@@ -2,13 +2,13 @@ package user
 
 import (
 	context "context"
-	updatenickname "znk/golang/protos/generated"
+	updatenickname "znk/protos/generated"
 
 	"google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
-	userdb "znk/golang/lib/utils/database/user"
-	security "znk/golang/lib/utils/security/server"
+	userdb "znk/lib/utils/database/user"
+	security "znk/lib/utils/security/server"
 )
 
 // UpdateNicknameService 修改昵称
