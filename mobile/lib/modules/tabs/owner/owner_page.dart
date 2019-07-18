@@ -45,11 +45,8 @@ class _OwnerListState extends State<OwnerList> {
           if (state.models.isEmpty) {
             return Container();
           }
-          return ListView.builder(
-            itemCount: 1,
-            itemBuilder: (BuildContext context, int index) {
-            return ;
-           },
+          return ListView(
+            
           );
         } else {
           return Container();
