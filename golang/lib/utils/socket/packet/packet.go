@@ -40,6 +40,20 @@ func newEncoder(w FrameWriter) *encoder {
 // NextWriter 下一个写入器
 func (e *encoder) NextWriter(ft common.FrameType, pt common.PacketType) (io.WriteCloser, error) {
 	w, err := e.w.NextWriter(ft)
+	if err != nil {
+		return nil, err
+	}
+	var b [1]byte
+	if ft == common.FrameString {
+		b[0] = pt.ToStringByte()
+	} else {
+		b[0] = pt.ToBinaryByte()
+	}
+	if _, err := w.Write(b[:]); err != nil {
+		w.Close()
+		return nil, err
+	}
+	return w, nil
 }
 
 type decoder struct {
@@ -53,5 +67,13 @@ func newDecoder(r FrameReader) *decoder {
 }
 
 func (d *decoder) NextReader() (common.FrameType, common.PacketType, io.ReadCloser, error) {
-
+	ft, r, err := d.r.NextReader()
+	if err != nil {
+		return 0, 0, nil, err
+	}
+	var b [1]byte
+	if _, err := io.ReadFull(r, b[:]); err != nil {
+		return 0, 0, nil, err
+	}
+	return ft, common.ToPacketType(b[0], ft), r, nil
 }
