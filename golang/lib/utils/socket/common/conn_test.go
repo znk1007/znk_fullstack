@@ -1,4 +1,4 @@
-package socket
+package common
 
 import (
 	"bytes"
@@ -13,10 +13,10 @@ import (
 func TestConnParams(t *testing.T) {
 	at := assert.New(t)
 	param := socket.ConnParams{
-		int64(time.Second * 10),
-		int64(time.Second * 5),
-		"vCcJKmYQcIf801WDAAAB",
-		[]string{"websocket", "polling"},
+		PingInterval: int64(time.Second * 10),
+		PingTimeout:  int64(time.Second * 5),
+		SID:          "vCcJKmYQcIf801WDAAAB",
+		Upgrades:     []string{"websocket", "polling"},
 	}
 	out := param.String()
 	tests := []struct {
@@ -38,7 +38,7 @@ func TestConnParams(t *testing.T) {
 	for _, test := range tests {
 		buf := bytes.NewBuffer(nil)
 
-		err := WriteTo(test.para, buf) //test.para.WriteTo(buf)
+		_, err := WriteTo(test.para, buf) //test.para.WriteTo(buf)
 		at.Nil(err)
 		// at.Equal(test.out, buf.String())
 

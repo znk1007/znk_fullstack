@@ -1,4 +1,4 @@
-package socket
+package common
 
 import "io"
 
@@ -90,8 +90,4 @@ type FrameReader interface {
 // FrameWriter 写入数据帧
 type FrameWriter interface {
 	NextWriter(ft FrameType, pt PacketType) (io.WriteCloser, error)
-}
-
-func NewEncoder(w FrameWriter) {
-
 }

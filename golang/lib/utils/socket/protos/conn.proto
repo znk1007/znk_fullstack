@@ -1,7 +1,7 @@
 syntax = "proto3";
 package socketprotos.conn;
 
-option go_package = "socket";
+option go_package = "protos";
 
 message ConnParams {
     int64 PingInterval = 1;
