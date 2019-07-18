@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:znk/modules/tabs/chat/chat.dart';
-import 'package:znk/modules/tabs/onwer/owner.dart';
+import 'package:znk/modules/tabs/owner/owner_page.dart';
 import 'package:znk/modules/tabs/schedule/schedule.dart';
 import 'package:znk/core/user/index.dart';
 class Tabs extends StatefulWidget {
@@ -18,7 +18,7 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> with WidgetsBindingObserver {
 
   // 当前位置
-  int _currentIndex = 1;
+  int _currentIndex = 2;
   List<Widget> _tabsList = [];
  
   @override
