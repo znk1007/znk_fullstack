@@ -2,6 +2,7 @@ package user
 
 import (
 	context "context"
+
 	activeuser "github.com/znk1007/fullstack/protos/generated"
 
 	"google.golang.org/grpc/codes"

@@ -91,3 +91,7 @@ type FrameReader interface {
 type FrameWriter interface {
 	NextWriter(ft FrameType, pt PacketType) (io.WriteCloser, error)
 }
+
+func NewEncoder(w FrameWriter) {
+
+}
