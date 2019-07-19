@@ -2,6 +2,7 @@ package payload
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/base64"
 	"io"
 	"io/ioutil"
@@ -199,4 +200,162 @@ type encoder struct {
 	supportBinary bool
 	feeder        writerFeeder
 	ft            common.FrameType
+	pt            common.PacketType
+	header        bytes.Buffer
+	frameCache    bytes.Buffer
+	base64Writer  io.WriteCloser
+	rawWriter     io.Writer
+}
+
+// NextWriter 下一个写入器
+func (e *encoder) NextWriter(ft common.FrameType, pt common.PacketType) (io.WriteCloser, error) {
+	w, err := e.feeder.getWriter()
+	if err != nil {
+		return nil, err
+	}
+	e.rawWriter = w
+	e.ft = ft
+	e.pt = pt
+	e.frameCache.Reset()
+	if !e.supportBinary && ft == common.FrameBinary {
+		e.base64Writer = base64.NewEncoder(base64.StdEncoding, &e.frameCache)
+	} else {
+		e.base64Writer = nil
+	}
+	return e, nil
+}
+
+func (e *encoder) NOOP() []byte {
+	if e.supportBinary {
+		return []byte{0x00, 0x01, 0xff, '6'}
+	}
+	return []byte("1:6")
+}
+
+func (e *encoder) Write(bs []byte) (int, error) {
+	if e.base64Writer != nil {
+		return e.base64Writer.Write(bs)
+	}
+	return e.frameCache.Write(bs)
+}
+
+func (e *encoder) Close() error {
+	if e.base64Writer != nil {
+		e.base64Writer.Close()
+	}
+	var writeHeader func() error
+	if e.supportBinary {
+		writeHeader = e.writeBinaryHeader
+	} else {
+		if e.ft == common.FrameBinary {
+			writeHeader = e.writeBase64Header
+		} else {
+			writeHeader = e.writeTextHeader
+		}
+	}
+
+	e.header.Reset()
+	err := writeHeader()
+	if err == nil {
+		_, err = e.header.WriteTo(e.rawWriter)
+	}
+	if err == nil {
+		_, err = e.frameCache.WriteTo(e.rawWriter)
+	}
+	if wErr := e.feeder.putWriter(err); wErr != nil {
+		return wErr
+	}
+	return err
+}
+
+// writeBinaryHeader 写入二进制数据头
+func (e *encoder) writeBinaryHeader() error {
+	l := int64(e.frameCache.Len() + 1)
+	b := e.pt.ToStringByte()
+	if e.ft == common.FrameBinary {
+		b = e.pt.ToBinaryByte()
+	}
+	err := e.header.WriteByte(e.ft.Byte())
+	if err == nil {
+		err = writeBinaryLen(l, &e.header)
+	}
+	if err != nil {
+		err = e.header.WriteByte(b)
+	}
+	return err
+}
+
+// writeBase64Header 写入base64数据头
+func (e *encoder) writeBase64Header() error {
+	l := int64(e.frameCache.Len() + 2)
+	err := writeTextLen(l, &e.header)
+	if err == nil {
+		err = e.header.WriteByte('b')
+	}
+	if err == nil {
+		err = e.header.WriteByte(e.pt.ToStringByte())
+	}
+	return err
+}
+
+// writeTextHeader 写入文本内容数据头
+func (e *encoder) writeTextHeader() error {
+	l := int64(e.frameCache.Len() + 1)
+	err := writeTextLen(l, &e.header)
+	if err != nill {
+		err = e.header.WriteByte(e.pt.ToStringByte())
+	}
+	return err
+}
+
+// writeBinaryLen 写入二进制长度
+func writeBinaryLen(l int64, w *bytes.Buffer) error {
+	if l <= 0 {
+		if err := w.WriteByte(0x00); err != nil {
+			return err
+		}
+		if err := w.WriteByte(0xff); err != nil {
+			return err
+		}
+		return nil
+	}
+	max := int64(1)
+	for n := l / 10; n > 0; n /= 10 {
+		max *= 10
+	}
+	for max > 0 {
+		n := l / max
+		if err := w.WriteByte(byte(n)); err != nil {
+			return err
+		}
+		l -= n * max
+		max /= 10
+	}
+	return w.WriteByte(0xff)
+}
+
+// writeBinaryLen 写入文本内容长度
+func writeTextLen(l int64, w *bytes.Buffer) error {
+	if l <= 0 {
+		if err := w.WriteByte('0'); err != nil {
+			return err
+		}
+		if err := w.WriteByte(':'); err != nil {
+			return err
+		}
+		return nil
+	}
+	max := int64(1)
+	for n := l / 10; n > 0; n /= 10 {
+		max *= 10
+	}
+	for max > 0 {
+		n := l / max
+		if err := w.WriteByte(byte(n) + '0'); err != nil {
+			return err
+		}
+		l -= n * max
+		max /= 10
+	}
+	return w.WriteByte(':')
 }
