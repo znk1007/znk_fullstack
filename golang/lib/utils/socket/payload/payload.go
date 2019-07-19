@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"io"
 	"io/ioutil"
+	"sync"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/common"
 )
@@ -358,4 +359,35 @@ func writeTextLen(l int64, w *bytes.Buffer) error {
 		max /= 10
 	}
 	return w.WriteByte(':')
+}
+
+type pauserStatus int
+
+const (
+	statusNormal pauserStatus = iota
+	statusPausing
+	statusPaused
+)
+
+type pauser struct {
+	lock    sync.Mutex
+	c       *sync.Cond
+	worker  int
+	pausing chan struct{}
+	paused  chan struct{}
+	status pauserStatus
+}
+
+func newPauser() *pauser  {
+	ret := &pauser{
+		pausing: make(chan struct),
+		paused: make(chan struct),
+		status: statusNormal,
+	}
+	ret.c = sync.NewCond(&ret.l)
+	return ret
+}
+// Pause 暂停
+func (p *pause)Pause() bool {
+	
 }
