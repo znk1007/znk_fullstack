@@ -162,11 +162,11 @@ func FromString(id string) (ID, error) {
 // UnmarshalText 解析指定字节
 func (id *ID) UnmarshalText(bytes []byte) error {
 	if len(bytes) != encodedLen {
-		return ErrInvalidObjectID
+		return ErrInvalidSocketID
 	}
 	for _, b := range bytes {
 		if dec[b] == 0xFF {
-			return ErrInvalidObjectID
+			return ErrInvalidSocketID
 		}
 	}
 	decode(id, bytes)
@@ -243,7 +243,7 @@ func (id ID) Bytes() []byte {
 func FromBytes(b []byte) (ID, error) {
 	var id ID
 	if len(b) != rawLen {
-		return id, ErrInvalidObjectID
+		return id, ErrInvalidSocketID
 	}
 	copy(id[:], b)
 	return id, nil

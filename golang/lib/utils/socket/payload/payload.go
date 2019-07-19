@@ -375,19 +375,43 @@ type pauser struct {
 	worker  int
 	pausing chan struct{}
 	paused  chan struct{}
-	status pauserStatus
+	status  pauserStatus
 }
 
-func newPauser() *pauser  {
+func newPauser() *pauser {
 	ret := &pauser{
-		pausing: make(chan struct),
-		paused: make(chan struct),
-		status: statusNormal,
+		pausing: make(chan struct{}),
+		paused:  make(chan struct{}),
+		status:  statusNormal,
 	}
-	ret.c = sync.NewCond(&ret.l)
+	ret.c = sync.NewCond(&ret.lock)
 	return ret
 }
+
 // Pause 暂停
-func (p *pause)Pause() bool {
-	
+func (p *pauser) Pause() bool {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	switch p.status {
+	case statusPaused:
+		return false
+	case statusNormal:
+		close(p.pausing)
+		p.status = statusPausing
+	}
+	for p.worker != 0 {
+		p.c.Wait()
+	}
+	if p.status == statusPaused {
+		return false
+	}
+	close(p.paused)
+	p.status = statusPaused
+	p.c.Broadcast()
+	return true
+}
+
+func (p *pauser) Resume() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
 }
