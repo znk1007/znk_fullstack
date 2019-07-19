@@ -120,7 +120,6 @@ class _OwnerItem extends StatelessWidget {
                 Container(
                   width: 150,
                   height: Device.isIOS ? Device.iOSRelativeWidth(79) : 79,
-                  color: Colors.green,
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -129,8 +128,9 @@ class _OwnerItem extends StatelessWidget {
                         child: Text(
                           model.title,
                           style: TextStyle(
+                            color: Colors.black,
                             fontSize: 18,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -138,7 +138,12 @@ class _OwnerItem extends StatelessWidget {
                         margin: EdgeInsets.only(left: 15, top: 10),
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          model.detail
+                          model.detail,
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 15,
+                            fontWeight: FontWeight.w300,
+                          ),
                         ),
                       ),
                     ],
