@@ -10,7 +10,7 @@ enum OwnerType {
 }
 
 class OwnerModel {
-  Image icon;
+  String icon;
   String title;
   String detail;
   OwnerType type;
@@ -18,17 +18,14 @@ class OwnerModel {
   Future<List<OwnerModel>> generate() async {
     List<OwnerModel> models = [];
     UserModel user = await UserDB.dao.current;
-    final photo = user?.user?.photo ?? '';
-    Image header = (photo.startsWith('http') || photo.startsWith('https')) ? 
-      Image.network(photo) : 
-      Image.asset(photo);
+    final photo = user?.user?.photo?.isNotEmpty == true ? user?.user?.photo : 'lib/images/iOS/user/user_header.png';
     var nickname = user?.user?.nickname;
     final account = user.user.account;
     if (nickname == account) {
       nickname = '昵称';
     }
     var model = OwnerModel()
-      ..icon = header
+      ..icon = photo
       ..title = nickname ?? ''
       ..detail = account ?? ''
       ..type = OwnerType.person;

@@ -24,9 +24,9 @@ class _TabsState extends State<Tabs> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _tabsList.add(Chat(userRepository: widget._userRepository,));
-    _tabsList.add(Schedule(userRepository: widget._userRepository,));
-    _tabsList.add(Owner(userRepository: widget._userRepository,));
+    _tabsList.add(Chat(userRepository: widget._userRepository));
+    _tabsList.add(Schedule(userRepository: widget._userRepository));
+    _tabsList.add(Owner(userRepository: widget._userRepository));
     WidgetsBinding.instance.addObserver(this);
   }
 

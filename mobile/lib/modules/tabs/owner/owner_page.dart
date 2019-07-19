@@ -6,7 +6,7 @@ import 'package:znk/modules/tabs/owner/owner_bloc.dart';
 import 'package:znk/utils/base/device.dart';
 
 class Owner extends StatelessWidget {
-  UserRepository _userRepository;
+  final UserRepository _userRepository;
   Owner({Key key, @required UserRepository userRepository}) : 
   assert(userRepository != null),
   _userRepository = userRepository,
@@ -63,7 +63,7 @@ class _OwnerListsState extends State<_OwnerLists> {
               }
               return Container(
                 height: sepHeight,
-                color: Color.fromARGB(1, 249, 249, 249),
+                color: Colors.grey[100],
               );
             },
             itemBuilder: (BuildContext ctx, int idx) {
@@ -95,42 +95,49 @@ class _OwnerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    // TODO: implement build
     switch (model.type) {
       case OwnerType.person:
-        return GestureDetector(
+        final header = (model.icon.startsWith('http') || 
+                        model.icon.startsWith('https')) ?
+                        Image.network(model.icon) : Image.asset(model.icon);
+        return InkWell(
           child: Container(
             height: Device.isIOS ? Device.iOSRelativeHeight(143) : 100,
-            color: Colors.red,
-            
+            child: Row(
+              children: <Widget>[
+                Container(
+                  child: header,
+                  width: Device.isIOS ? Device.iOSRelativeWidth(60) : 60,
+                  height: Device.isIOS ? Device.iOSRelativeWidth(59) : 59,
+                  color: Colors.green,
+                )
+              ],
+            ),
           ),
           onTap: () => onItemPressed(model),
-        );
+            );
         break;
       case OwnerType.fileStore:
-        return GestureDetector(
+        return InkWell(
           child: Container(
             height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
-            color: Colors.red,
           ),
           onTap: () => onItemPressed(model),
         );
         break;
       case OwnerType.collection:
-        return GestureDetector(
+      
+        return InkWell(
           child: Container(
             height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
-            color: Colors.red,
           ),
           onTap: () => onItemPressed(model),
         );
         break;
       case OwnerType.setting:
-        return GestureDetector(
+        return InkWell(
           child: Container(
             height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
-            color: Colors.red,
           ),
           onTap: () => onItemPressed(model),
         );
