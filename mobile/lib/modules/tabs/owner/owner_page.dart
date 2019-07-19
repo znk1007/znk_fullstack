@@ -115,17 +115,31 @@ class _OwnerItem extends StatelessWidget {
                   child: header,
                   width: Device.isIOS ? Device.iOSRelativeWidth(80) : 80,
                   height: Device.isIOS ? Device.iOSRelativeWidth(79) : 79,
-                  margin: EdgeInsets.only(left: Device.isIOS ? Device.iOSRelativeWidth(20) : 20),
+                  margin: EdgeInsets.only(left: 20),
                 ),
                 Container(
+                  width: 150,
+                  height: Device.isIOS ? Device.iOSRelativeWidth(79) : 79,
                   color: Colors.green,
                   child: Column(
                     children: <Widget>[
                       Container(
-                        child: Text(model.title),
+                        margin: EdgeInsets.only(left: 15, top: 10),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          model.title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
                       Container(
-                        child: Text(model.detail),
+                        margin: EdgeInsets.only(left: 15, top: 10),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          model.detail
+                        ),
                       ),
                     ],
                   ),
