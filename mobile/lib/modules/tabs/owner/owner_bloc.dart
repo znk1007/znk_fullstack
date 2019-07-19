@@ -21,7 +21,7 @@ abstract class OwnerState extends Equatable {
 }
 
 class Loaded extends OwnerState {
-  final List<List<OwnerModel>> models;
+  final List<OwnerModel> models;
   Loaded({@required this.models}): super([models]);
 
   @override

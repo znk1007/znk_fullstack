@@ -2,13 +2,21 @@ import 'package:flutter/widgets.dart';
 import 'package:znk/images/manager.dart';
 import 'package:znk/utils/database/user.dart';
 
+enum OwnerType {
+  person,
+  fileStore,
+  collection,
+  setting
+}
+
 class OwnerModel {
   Image icon;
   String title;
   String detail;
+  OwnerType type;
   // 生成数据
-  Future<List<List<OwnerModel>>> generate() async {
-    List<List<OwnerModel>> models = [];
+  Future<List<OwnerModel>> generate() async {
+    List<OwnerModel> models = [];
     UserModel user = await UserDB.dao.current;
     final photo = user?.user?.photo ?? '';
     Image header = (photo.startsWith('http') || photo.startsWith('https')) ? 
@@ -19,34 +27,32 @@ class OwnerModel {
     if (nickname == account) {
       nickname = '昵称';
     }
-    List<OwnerModel> temps = [];
     var model = OwnerModel()
       ..icon = header
       ..title = nickname ?? ''
-      ..detail = account ?? '';
-    temps.add(model);
-    models.add(temps);
+      ..detail = account ?? ''
+      ..type = OwnerType.person;
+    models.add(model);
 
-    temps = [];
     model = OwnerModel()
       ..icon = OwnerAsset.fileStore
       ..title = '我的网盘'
-      ..detail = '';
-    temps.add(model);
+      ..detail = ''
+      ..type = OwnerType.fileStore;
+    models.add(model);
     model = OwnerModel()
       ..icon = OwnerAsset.collection
       ..title = '我的收藏'
-      ..detail = '';
-    temps.add(model);
-    models.add(temps);
+      ..detail = ''
+      ..type = OwnerType.collection;
+    models.add(model);
 
-    temps = [];
     model = OwnerModel()
       ..icon = OwnerAsset.setting
       ..title = '设置'
-      ..detail = '';
-    temps.add(model);
-    models.add(temps);
+      ..detail = ''
+      ..type = OwnerType.setting;
+    models.add(model);
     return models;
   }
 }

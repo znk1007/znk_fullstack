@@ -22,19 +22,19 @@ class Owner extends StatelessWidget {
       body: BlocProvider(
         builder: (ctx) =>
           OwnerBloc(ownerModel: OwnerModel())..dispatch(Generate()),
-          child: OwnerList(),
+          child: _OwnerLists(),
       ),
     );
   }
 }
 
-class OwnerList extends StatefulWidget {
-  OwnerList({Key key}) : super(key: key);
+class _OwnerLists extends StatefulWidget {
+  _OwnerLists({Key key}) : super(key: key);
 
-  _OwnerListState createState() => _OwnerListState();
+  _OwnerListsState createState() => _OwnerListsState();
 }
 
-class _OwnerListState extends State<OwnerList> {
+class _OwnerListsState extends State<_OwnerLists> {
   @override
   Widget build(BuildContext context) {
     final ownerBloc = BlocProvider.of<OwnerBloc>(context);
@@ -45,15 +45,89 @@ class _OwnerListState extends State<OwnerList> {
           if (state.models.isEmpty) {
             return Container();
           }
-          return ListView(
-            
+          return ListView.separated(
+            itemCount: state.models.length,
+            separatorBuilder: (BuildContext ctx, int section) {
+              print('length: ${state.models.length}');
+              print('section: $section');
+              double sepHeight = 0;
+              switch (section) {
+                case 0:
+                  sepHeight = 20;
+                  break;
+                case 1:
+                sepHeight = 1;
+                  break;
+                case 2:
+                sepHeight = 20;
+                  break;
+                default:
+              }
+              return Container(
+                height: sepHeight,
+                color: Color.fromARGB(1, 249, 249, 249),
+              );
+            },
+            itemBuilder: (BuildContext ctx, int idx) {
+              return _OwnerItem(
+                model: state.models[idx],
+                onItemPressed: (OwnerType type) {
+
+                },
+              );
+            },
           );
         } else {
           return Container();
         }
       },
     );
+  }
+}
+
+
+class _OwnerItem extends StatelessWidget {
+  final OwnerModel model;
+  final Function(OwnerType) onItemPressed;
+  const _OwnerItem({
+    Key key, 
+    @required this.model, 
+    @required this.onItemPressed
+  }): super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    switch (model.type) {
+      case OwnerType.person:
+        return Container(
+          height: Device.isIOS ? Device.iOSRelativeHeight(143) : 100,
+          color: Colors.red,
+        );
+        break;
+      case OwnerType.fileStore:
+        return Container(
+          height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
+          color: Colors.red,
+        );
+        break;
+      case OwnerType.collection:
+        return Container(
+          height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
+          color: Colors.red,
+        );
+        break;
+      case OwnerType.setting:
+        return Container(
+          height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
+          color: Colors.red,
+        );
+        break;
+      default:
+        return Container();
+    }
     
   }
+  
 }
 
