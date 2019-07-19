@@ -27,8 +27,8 @@ const (
 )
 
 var (
-	//ErrInvalidObjectID is returned when try to parse an invlid ID
-	ErrInvalidObjectID = errors.New("Invalid ID")
+	//ErrInvalidSocketID is returned when try to parse an invlid ID
+	ErrInvalidSocketID = errors.New("Invalid ID")
 	// IDCounter is rand int64
 	IDCounter = randInt()
 	//机器id
