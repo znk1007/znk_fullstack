@@ -116,7 +116,20 @@ class _OwnerItem extends StatelessWidget {
                   width: Device.isIOS ? Device.iOSRelativeWidth(80) : 80,
                   height: Device.isIOS ? Device.iOSRelativeWidth(79) : 79,
                   margin: EdgeInsets.only(left: Device.isIOS ? Device.iOSRelativeWidth(20) : 20),
-                )
+                ),
+                Container(
+                  color: Colors.green,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        child: Text(model.title),
+                      ),
+                      Container(
+                        child: Text(model.detail),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
