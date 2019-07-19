@@ -48,8 +48,6 @@ class _OwnerListsState extends State<_OwnerLists> {
           return ListView.separated(
             itemCount: state.models.length,
             separatorBuilder: (BuildContext ctx, int section) {
-              print('length: ${state.models.length}');
-              print('section: $section');
               double sepHeight = 0;
               switch (section) {
                 case 0:
@@ -71,8 +69,8 @@ class _OwnerListsState extends State<_OwnerLists> {
             itemBuilder: (BuildContext ctx, int idx) {
               return _OwnerItem(
                 model: state.models[idx],
-                onItemPressed: (OwnerType type) {
-
+                onItemPressed: (OwnerModel model) {
+                  print('current model type: ${model.type}');
                 },
               );
             },
@@ -88,7 +86,7 @@ class _OwnerListsState extends State<_OwnerLists> {
 
 class _OwnerItem extends StatelessWidget {
   final OwnerModel model;
-  final Function(OwnerType) onItemPressed;
+  final Function(OwnerModel) onItemPressed;
   const _OwnerItem({
     Key key, 
     @required this.model, 
@@ -97,30 +95,44 @@ class _OwnerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     // TODO: implement build
     switch (model.type) {
       case OwnerType.person:
-        return Container(
-          height: Device.isIOS ? Device.iOSRelativeHeight(143) : 100,
-          color: Colors.red,
+        return GestureDetector(
+          child: Container(
+            height: Device.isIOS ? Device.iOSRelativeHeight(143) : 100,
+            color: Colors.red,
+            
+          ),
+          onTap: () => onItemPressed(model),
         );
         break;
       case OwnerType.fileStore:
-        return Container(
-          height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
-          color: Colors.red,
+        return GestureDetector(
+          child: Container(
+            height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
+            color: Colors.red,
+          ),
+          onTap: () => onItemPressed(model),
         );
         break;
       case OwnerType.collection:
-        return Container(
-          height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
-          color: Colors.red,
+        return GestureDetector(
+          child: Container(
+            height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
+            color: Colors.red,
+          ),
+          onTap: () => onItemPressed(model),
         );
         break;
       case OwnerType.setting:
-        return Container(
-          height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
-          color: Colors.red,
+        return GestureDetector(
+          child: Container(
+            height: Device.isIOS ? Device.iOSRelativeHeight(53) : 53,
+            color: Colors.red,
+          ),
+          onTap: () => onItemPressed(model),
         );
         break;
       default:
