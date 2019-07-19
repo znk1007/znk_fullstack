@@ -99,17 +99,23 @@ class _OwnerItem extends StatelessWidget {
       case OwnerType.person:
         final header = (model.icon.startsWith('http') || 
                         model.icon.startsWith('https')) ?
-                        Image.network(model.icon) : Image.asset(model.icon);
+                        Image.network(
+                          model.icon,
+                          fit: BoxFit.fill,
+                        ) : Image.asset(
+                          model.icon,
+                          fit: BoxFit.fill,
+                        );
         return InkWell(
           child: Container(
-            height: Device.isIOS ? Device.iOSRelativeHeight(143) : 100,
+            height: Device.isIOS ? Device.iOSRelativeHeight(120) : 100,
             child: Row(
               children: <Widget>[
                 Container(
                   child: header,
-                  width: Device.isIOS ? Device.iOSRelativeWidth(60) : 60,
-                  height: Device.isIOS ? Device.iOSRelativeWidth(59) : 59,
-                  color: Colors.green,
+                  width: Device.isIOS ? Device.iOSRelativeWidth(80) : 80,
+                  height: Device.isIOS ? Device.iOSRelativeWidth(79) : 79,
+                  margin: EdgeInsets.only(left: Device.isIOS ? Device.iOSRelativeWidth(20) : 20),
                 )
               ],
             ),
