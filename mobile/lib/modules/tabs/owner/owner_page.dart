@@ -5,6 +5,7 @@ import 'package:znk/images/manager.dart';
 import 'package:znk/modules/tabs/owner/model.dart';
 import 'package:znk/modules/tabs/owner/owner_bloc.dart';
 import 'package:znk/modules/tabs/owner/setting/setting/setting_page.dart';
+import 'package:znk/utils/base/custom_theme.dart';
 import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/base/random.dart';
 
@@ -55,7 +56,7 @@ class _OwnerListsState extends State<_OwnerLists> {
             return Container();
           }
           return Container(
-            color: Color.fromARGB(255, 249, 249, 249),
+            color: CustomColors.backgroundColor,
             child: ListView.separated(
               itemCount: state.models.length,
               separatorBuilder: (BuildContext ctx, int section) {
@@ -74,7 +75,7 @@ class _OwnerListsState extends State<_OwnerLists> {
                 }
                 return Container(
                   height: sepHeight,
-                  color: Colors.grey[100],
+                  color: CustomColors.separatorColor,
                 );
               },
               itemBuilder: (BuildContext ctx, int idx) {
@@ -115,7 +116,6 @@ class _OwnerItem extends StatelessWidget {
   Widget build(BuildContext context) {
     double marginLeft = Device.relativeWidth(20);
     Size iconSize = Size(Device.relativeWidth(27), Device.relativeWidth(27));
-    Size arrowSize = Size(Device.relativeWidth(15), Device.relativeWidth(15));
     Size headerSize = Size(Device.relativeWidth(80), Device.relativeWidth(79));
     EdgeInsets headerMargin = EdgeInsets.only(left: 15, top: 10);
     Size infoSize = Size(Device.relativeWidth(150), Device.relativeWidth(79));
@@ -176,9 +176,9 @@ class _OwnerItem extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: arrowSize.width,
-                  height: arrowSize.height,
-                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * arrowSize.width - headerSize.width - infoSize.width),
+                  width: CustomMeasure.arrowSize.width,
+                  height: CustomMeasure.arrowSize.height,
+                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * CustomMeasure.arrowSize.width - headerSize.width - infoSize.width),
                   child: Image.asset(CommonAsset.rightArrow),
                 ),
               ],
@@ -212,9 +212,9 @@ class _OwnerItem extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: arrowSize.width,
-                  height: arrowSize.height,
-                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * arrowSize.width - iconSize.width - infoSize.width - iconTxtSpace),
+                  width: CustomMeasure.arrowSize.width,
+                  height: CustomMeasure.arrowSize.height,
+                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * CustomMeasure.arrowSize.width - iconSize.width - infoSize.width - iconTxtSpace),
                   child: Image.asset(CommonAsset.rightArrow),
                 ),
               ],
@@ -248,9 +248,9 @@ class _OwnerItem extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: arrowSize.width,
-                  height: arrowSize.height,
-                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * arrowSize.width - iconSize.width - infoSize.width - iconTxtSpace),
+                  width: CustomMeasure.arrowSize.width,
+                  height: CustomMeasure.arrowSize.height,
+                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * CustomMeasure.arrowSize.width - iconSize.width - infoSize.width - iconTxtSpace),
                   child: Image.asset(CommonAsset.rightArrow),
                 ),
               ],
@@ -284,9 +284,9 @@ class _OwnerItem extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: arrowSize.width,
-                  height: arrowSize.height,
-                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * arrowSize.width - iconSize.width - infoSize.width - iconTxtSpace),
+                  width: CustomMeasure.arrowSize.width,
+                  height: CustomMeasure.arrowSize.height,
+                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * CustomMeasure.arrowSize.width - iconSize.width - infoSize.width - iconTxtSpace),
                   child: Image.asset(CommonAsset.rightArrow),
                 ),
               ],

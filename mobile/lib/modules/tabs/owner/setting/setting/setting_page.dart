@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:znk/images/manager.dart';
 import 'package:znk/modules/tabs/owner/setting/setting/model.dart';
 import 'package:znk/utils/base/custom_theme.dart';
+import 'package:znk/utils/base/device.dart';
 
 class SettingPage extends StatelessWidget {
   static const String routeName = "/setting";
@@ -52,7 +54,7 @@ class SettingPage extends StatelessWidget {
           }
           return Container(
             height: sepHeight,
-            color: Colors.grey[100],
+            color: CustomColors.separatorColor,
           );
         },
       ),
@@ -67,8 +69,53 @@ class _SettimgItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Container(),
+    Alignment align = Alignment.centerLeft;
+    double titleWidth = Device.relativeWidth(100);
+    double marginLeft = Device.relativeWidth(20);
+    bool hasArrow = (model.type == SettingType.security || model.type == SettingType.privacy);
+    if (model.type == SettingType.logout) {
+      align = Alignment.center;
+      titleWidth = Device.width;
+      marginLeft = 0;
+    }
+    return InkWell(
+      child: Container(
+        height: Device.relativeHeight(53),
+        color: Colors.white,
+        child: Row(
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(left: marginLeft),
+              alignment: align,
+              width: titleWidth,
+              height: Device.relativeHeight(53),
+              child: Text(
+                model.title,
+              ),
+            ),
+            !hasArrow ? 
+            model.type == SettingType.version ?
+            Container(
+              width: Device.width - Device.relativeWidth(100) - 2 * marginLeft,
+              height: Device.relativeHeight(53),
+              alignment: Alignment.centerRight,
+              child: Text(
+                'v${Device.version}',
+                style: TextStyle(
+                  color: Colors.grey[400],
+                ),
+              ),
+            ) :
+            Container() :
+            Container(
+              width: CustomMeasure.arrowSize.width,
+                  height: CustomMeasure.arrowSize.height,
+                  margin: EdgeInsets.only(left: Device.width - marginLeft - 2 * CustomMeasure.arrowSize.width - titleWidth),
+                  child: Image.asset(CommonAsset.rightArrow),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
