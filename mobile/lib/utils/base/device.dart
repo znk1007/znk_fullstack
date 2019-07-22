@@ -57,13 +57,30 @@ class Device {
   static double get iOSHeightScale {
     return height / 736.0;
   }
-  // 相对宽度
+  // 相对宽度 iOS
   static double iOSRelativeWidth(double other) {
     return other * iOSWidthScale;
   }
-  // 相对高度
+  // 相对高度 iOS
   static double iOSRelativeHeight(double other) {
     return other * iOSHeightScale;
+  }
+  // 相对宽度 Android
+  static double androidRelativeWidth(double other) {
+    return other;
+  }
+  // 相对高度 Android
+  static double androidRelativeHeight(double other) {
+    return other;
+  }
+
+  // 相对宽度 通用
+  static double relativeWidth(double other) {
+    return isIOS ? iOSRelativeWidth(other) : androidRelativeWidth(other);
+  }
+  // 相对高度 通用
+  static double relativeHeight(double other) {
+    return isIOS ? iOSRelativeHeight(other) : androidRelativeHeight(other);
   }
 
 }

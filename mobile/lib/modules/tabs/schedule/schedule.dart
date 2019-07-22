@@ -15,8 +15,14 @@ class _ScheduleState extends State<Schedule> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('日程'),
+        title: Text(
+          '日程',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.white,
       ),
     );
   }

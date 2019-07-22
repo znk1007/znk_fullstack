@@ -207,10 +207,10 @@ func (t FrameType) Byte() byte {
 
 // FrameReader 读取数据帧
 type FrameReader interface {
-	NextReader() (FrameType, PacketType, io.ReadCloser, error)
+	NextReader() (FrameType, PacketType, sysIO.ReadCloser, error)
 }
 
 // FrameWriter 写入数据帧
 type FrameWriter interface {
-	NextWriter(ft FrameType, pt PacketType) (io.WriteCloser, error)
+	NextWriter(ft FrameType, pt PacketType) (sysIO.WriteCloser, error)
 }
