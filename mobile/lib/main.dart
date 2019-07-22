@@ -49,7 +49,7 @@ class ZnkProject extends StatelessWidget {
     loadContactsFromDB(context);
     Device.getPackageInfo();
     return new MaterialApp(
-      routes: Routes.generate(),
+      routes: Routes.generate(_userRepository),
       debugShowCheckedModeBanner: false,
       home: BlocBuilder(
         bloc: BlocProvider.of<AuthBloc>(context),

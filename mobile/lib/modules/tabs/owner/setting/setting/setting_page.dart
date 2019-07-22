@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:znk/core/user/index.dart';
 import 'package:znk/images/manager.dart';
 import 'package:znk/modules/tabs/owner/setting/setting/model.dart';
 import 'package:znk/utils/base/custom_theme.dart';
@@ -9,7 +10,10 @@ class SettingPage extends StatelessWidget {
 
   List<SettingModel> _models;
 
-  SettingPage() {
+  UserRepository _userRepository;
+
+  SettingPage({@required UserRepository userRepository}) {
+    _userRepository = userRepository;
     _models = SettingModel.generate();
   }
 
@@ -37,6 +41,12 @@ class SettingPage extends StatelessWidget {
             model: _models[idx],
             onItemPressed: (SettingModel m) {
               print('model type: ${m.type}');
+              switch (m.type) {
+                case SettingType.logout:
+                  
+                  break;
+                default:
+              }
             },
           );
         },
@@ -116,6 +126,7 @@ class _SettimgItem extends StatelessWidget {
           ],
         ),
       ),
+      onTap: () => onItemPressed(model),
     );
   }
 }
