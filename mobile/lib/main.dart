@@ -9,6 +9,7 @@ import 'package:znk/core/user/auth_state.dart';
 import 'package:znk/core/user/index.dart';
 import 'package:znk/core/user/user_repository.dart';
 import 'package:znk/utils/base/device.dart';
+import 'package:znk/utils/base/routes.dart';
 import 'package:znk/utils/database/user.dart';
 
 import 'modules/launch/launch_screen.dart';
@@ -48,6 +49,7 @@ class ZnkProject extends StatelessWidget {
     loadContactsFromDB(context);
     Device.getPackageInfo();
     return new MaterialApp(
+      routes: Routes.generate(),
       debugShowCheckedModeBanner: false,
       home: BlocBuilder(
         bloc: BlocProvider.of<AuthBloc>(context),

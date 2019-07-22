@@ -4,6 +4,7 @@ import 'package:znk/core/user/index.dart';
 import 'package:znk/images/manager.dart';
 import 'package:znk/modules/tabs/owner/model.dart';
 import 'package:znk/modules/tabs/owner/owner_bloc.dart';
+import 'package:znk/modules/tabs/owner/setting/setting/setting_page.dart';
 import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/base/random.dart';
 
@@ -81,6 +82,12 @@ class _OwnerListsState extends State<_OwnerLists> {
                   model: state.models[idx],
                   onItemPressed: (OwnerModel model) {
                     print('current model type: ${model.type}');
+                    switch (model.type) {
+                      case OwnerType.setting:
+                        Navigator.of(ctx).pushNamed(SettingPage.routeName);
+                        break;
+                      default:
+                    }
                   },
                 );
               },
