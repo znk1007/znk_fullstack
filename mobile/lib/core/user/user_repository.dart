@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:znk/core/requests/login_request.dart';
+import 'package:znk/core/requests/register_request.dart';
+import 'package:znk/core/requests/update_online.dart';
 import 'package:znk/core/user/check_userId.dart';
-import 'package:znk/core/user/register/index.dart';
-import 'package:znk/core/user/update_online.dart';
 import 'package:znk/protos/generated/project/user.pb.dart';
 import 'package:znk/utils/database/user.dart';
 
-import 'login/login_request.dart';
 
 enum UserErrorType {
   none,

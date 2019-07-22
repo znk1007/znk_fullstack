@@ -43,7 +43,11 @@ class SettingPage extends StatelessWidget {
               print('model type: ${m.type}');
               switch (m.type) {
                 case SettingType.logout:
-                  
+                  {
+                    _userRepository.signOut().then((val) {
+
+                    });
+                  }
                   break;
                 default:
               }
