@@ -6,9 +6,12 @@ import (
 	"encoding/base64"
 	"io"
 	"io/ioutil"
+	"math"
 	"sync"
+	"sync/atomic"
+	"time"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/common"
+	"github.com/znk_fullstack/golang/lib/utils/socket/primary"
 )
 
 type byteReader interface {
@@ -24,15 +27,15 @@ type readerFeeder interface {
 type decoder struct {
 	feeder readerFeeder
 
-	ft            common.FrameType
-	pt            common.PacketType
+	ft            primary.FrameType
+	pt            primary.PacketType
 	supportBinary bool
 	rawReader     byteReader
 	limitReader   io.LimitedReader
 	base64Reader  io.Reader
 }
 
-func (d *decoder) NextReader() (common.FrameType, common.PacketType, io.Reader, error) {
+func (d *decoder) NextReader() (primary.FrameType, primary.PacketType, io.ReadCloser, error) {
 	if d.rawReader == nil {
 		r, supportBinary, err := d.feeder.getReader()
 		if err != nil {
@@ -83,7 +86,7 @@ func (d *decoder) sendError(e error) error {
 
 // setNextReader 下一个读取器
 func (d *decoder) setNextReader(r byteReader, supportBinary bool) error {
-	var read func(byteReader) (common.FrameType, common.PacketType, int64, error)
+	var read func(byteReader) (primary.FrameType, primary.PacketType, int64, error)
 	if supportBinary {
 		read = d.binaryRead
 	} else {
@@ -99,7 +102,7 @@ func (d *decoder) setNextReader(r byteReader, supportBinary bool) error {
 	d.limitReader.R = r
 	d.limitReader.N = l
 	d.supportBinary = supportBinary
-	if !supportBinary && ft == common.FrameBinary {
+	if !supportBinary && ft == primary.FrameBinary {
 		d.base64Reader = base64.NewDecoder(base64.StdEncoding, &d.limitReader)
 	} else {
 		d.base64Reader = nil
@@ -108,15 +111,15 @@ func (d *decoder) setNextReader(r byteReader, supportBinary bool) error {
 }
 
 // binaryRead 读取二进制数据
-func (d *decoder) binaryRead(r byteReader) (common.FrameType, common.PacketType, int64, error) {
+func (d *decoder) binaryRead(r byteReader) (primary.FrameType, primary.PacketType, int64, error) {
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, 0, 0, err
 	}
 	if b > 1 {
-		return 0, 0, 0, common.ErrInvalidPayload
+		return 0, 0, 0, primary.ErrInvalidPayload
 	}
-	ft := common.ToFrameType(b)
+	ft := primary.ToFrameType(b)
 	l, err := readBinaryLen(r)
 	if err != nil {
 		return 0, 0, 0, err
@@ -125,32 +128,32 @@ func (d *decoder) binaryRead(r byteReader) (common.FrameType, common.PacketType,
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	pt := common.ToPacketType(b, ft)
+	pt := primary.ToPacketType(b, ft)
 	l--
 	return ft, pt, l, nil
 }
 
 // textRead 读取文本内容
-func (d *decoder) textRead(r byteReader) (common.FrameType, common.PacketType, int64, error) {
+func (d *decoder) textRead(r byteReader) (primary.FrameType, primary.PacketType, int64, error) {
 	l, err := readTextLen(r)
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	ft := common.FrameString
+	ft := primary.FrameString
 	b, err := r.ReadByte()
 	if err != nil {
 		return 0, 0, 0, err
 	}
 	l--
 	if b == 'b' {
-		ft = common.FrameBinary
+		ft = primary.FrameBinary
 		b, err = r.ReadByte()
 		if err != nil {
 			return 0, 0, 0, err
 		}
 		l--
 	}
-	pt := common.ToPacketType(b, common.FrameString)
+	pt := primary.ToPacketType(b, primary.FrameString)
 	return ft, pt, l, nil
 }
 
@@ -166,7 +169,7 @@ func readTextLen(r byteReader) (int64, error) {
 			break
 		}
 		if b < '0' || b > '9' {
-			return 0, common.ErrInvalidPayload
+			return 0, primary.ErrInvalidPayload
 		}
 		ret = ret*10 + int64(b-'0')
 	}
@@ -185,7 +188,7 @@ func readBinaryLen(r byteReader) (int64, error) {
 			break
 		}
 		if b > 9 {
-			return 0, common.ErrInvalidPayload
+			return 0, primary.ErrInvalidPayload
 		}
 		ret = ret*10 + int64(b)
 	}
@@ -200,8 +203,8 @@ type writerFeeder interface {
 type encoder struct {
 	supportBinary bool
 	feeder        writerFeeder
-	ft            common.FrameType
-	pt            common.PacketType
+	ft            primary.FrameType
+	pt            primary.PacketType
 	header        bytes.Buffer
 	frameCache    bytes.Buffer
 	base64Writer  io.WriteCloser
@@ -209,7 +212,7 @@ type encoder struct {
 }
 
 // NextWriter 下一个写入器
-func (e *encoder) NextWriter(ft common.FrameType, pt common.PacketType) (io.WriteCloser, error) {
+func (e *encoder) NextWriter(ft primary.FrameType, pt primary.PacketType) (io.WriteCloser, error) {
 	w, err := e.feeder.getWriter()
 	if err != nil {
 		return nil, err
@@ -218,7 +221,7 @@ func (e *encoder) NextWriter(ft common.FrameType, pt common.PacketType) (io.Writ
 	e.ft = ft
 	e.pt = pt
 	e.frameCache.Reset()
-	if !e.supportBinary && ft == common.FrameBinary {
+	if !e.supportBinary && ft == primary.FrameBinary {
 		e.base64Writer = base64.NewEncoder(base64.StdEncoding, &e.frameCache)
 	} else {
 		e.base64Writer = nil
@@ -248,7 +251,7 @@ func (e *encoder) Close() error {
 	if e.supportBinary {
 		writeHeader = e.writeBinaryHeader
 	} else {
-		if e.ft == common.FrameBinary {
+		if e.ft == primary.FrameBinary {
 			writeHeader = e.writeBase64Header
 		} else {
 			writeHeader = e.writeTextHeader
@@ -273,7 +276,7 @@ func (e *encoder) Close() error {
 func (e *encoder) writeBinaryHeader() error {
 	l := int64(e.frameCache.Len() + 1)
 	b := e.pt.ToStringByte()
-	if e.ft == common.FrameBinary {
+	if e.ft == primary.FrameBinary {
 		b = e.pt.ToBinaryByte()
 	}
 	err := e.header.WriteByte(e.ft.Byte())
@@ -303,7 +306,7 @@ func (e *encoder) writeBase64Header() error {
 func (e *encoder) writeTextHeader() error {
 	l := int64(e.frameCache.Len() + 1)
 	err := writeTextLen(l, &e.header)
-	if err != nill {
+	if err != nil {
 		err = e.header.WriteByte(e.pt.ToStringByte())
 	}
 	return err
@@ -411,7 +414,379 @@ func (p *pauser) Pause() bool {
 	return true
 }
 
+// Resume 复位
 func (p *pauser) Resume() {
 	p.lock.Lock()
 	defer p.lock.Unlock()
+	p.paused = make(chan struct{})
+	p.pausing = make(chan struct{})
+}
+
+// Working 正在工作
+func (p *pauser) Working() bool {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if p.status == statusPaused {
+		return false
+	}
+	p.worker++
+	return true
+}
+
+// Done 完成
+func (p *pauser) Done() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if p.status == statusPaused || p.worker == 0 {
+		return
+	}
+	p.worker--
+	p.c.Broadcast()
+}
+
+// PausingTrigger 即将暂停操作的管道
+func (p *pauser) PausingTrigger() <-chan struct{} {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	return p.pausing
+}
+
+// PausedTrigger 已暂停操作的管道
+func (p *pauser) PausedTrigger() <-chan struct{} {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	return p.paused
+}
+
+type readArg struct {
+	r             io.Reader
+	supportBinary bool
+}
+
+// Payload 有效载荷
+type Payload struct {
+	close     chan struct{}
+	closeOnce sync.Once
+	err       atomic.Value
+
+	pauser *pauser
+
+	readerChan   chan readArg
+	feeding      int64
+	readError    chan error
+	readDeadline atomic.Value
+	decoder      decoder
+
+	writerChan    chan io.Writer
+	flushing      int64
+	writeError    chan error
+	writeDeadline atomic.Value
+	encoder       encoder
+}
+
+// New 新建有效载荷
+func New(supportBinary bool) *Payload {
+	ret := &Payload{
+		close:      make(chan struct{}),
+		pauser:     newPauser(),
+		readerChan: make(chan readArg),
+		readError:  make(chan error),
+		writerChan: make(chan io.Writer),
+		writeError: make(chan error),
+	}
+	ret.readDeadline.Store(time.Time{})
+	ret.decoder.feeder = ret
+	ret.writeDeadline.Store(time.Time{})
+	ret.encoder.supportBinary = supportBinary
+	ret.encoder.feeder = ret
+	return ret
+}
+
+// FeedIn 数据流入
+func (p *Payload) FeedIn(r io.Reader, supportBinary bool) error {
+	select {
+	case <-p.close:
+		return p.load()
+	default:
+	}
+	if !atomic.CompareAndSwapInt64(&p.feeding, 0, 1) {
+		return primary.NewErr("", "read", false, primary.ErrOverlap)
+	}
+	defer atomic.StoreInt64(&p.feeding, 0)
+	if ok := p.pauser.Working(); !ok {
+		return primary.NewErr("", "payload", false, primary.ErrPaused)
+	}
+	defer p.pauser.Done()
+	for {
+		after, ok := p.readTimeout()
+		if !ok {
+			return p.Store("read", primary.ErrTimeout)
+		}
+		select {
+		case <-p.close:
+			return p.load()
+		case <-after:
+			continue
+		case p.readerChan <- readArg{
+			r:             r,
+			supportBinary: supportBinary,
+		}:
+		}
+		break
+	}
+	for {
+		after, ok := p.readTimeout()
+		if !ok {
+			return p.Store("read", primary.ErrTimeout)
+		}
+		select {
+		case <-after:
+			continue
+		case err := <-p.readError:
+			return p.Store("read", err)
+		}
+	}
+}
+
+// FlushOut 刷新缓存
+func (p *Payload) FlushOut(w io.Writer) error {
+	select {
+	case <-p.close:
+		return p.load()
+	default:
+	}
+	if !atomic.CompareAndSwapInt64(&p.flushing, 0, 1) {
+		return primary.NewErr("", "write", false, primary.ErrOverlap)
+	}
+	defer atomic.StoreInt64(&p.flushing, 0)
+	if ok := p.pauser.Working(); !ok {
+		_, err := w.Write(p.encoder.NOOP())
+		return err
+	}
+	defer p.pauser.Done()
+	for {
+		after, ok := p.writeTimeout()
+		if !ok {
+			return p.Store("write", primary.ErrTimeout)
+		}
+		select {
+		case <-p.close:
+			return p.load()
+		case <-after:
+			continue
+		case <-p.pauser.PausingTrigger():
+			_, err := w.Write(p.encoder.NOOP())
+			return err
+		case p.writerChan <- w:
+
+		}
+		break
+	}
+	for {
+		after, ok := p.writeTimeout()
+		if !ok {
+			return p.Store("write", primary.ErrTimeout)
+		}
+		select {
+		case <-after:
+		case err := <-p.writeError:
+			return p.Store("write", err)
+		}
+	}
+}
+
+// NextReader 下一个读取器
+func (p *Payload) NextReader() (primary.FrameType, primary.PacketType, io.ReadCloser, error) {
+	ft, pt, r, err := p.decoder.NextReader()
+	return ft, pt, r, err
+}
+
+// SetReadDeadline 设置读取截止
+func (p *Payload) SetReadDeadline(t time.Time) error {
+	p.readDeadline.Store(t)
+	return nil
+}
+
+// NextWriter 下一个写入器
+func (p *Payload) NextWriter(ft primary.FrameType, pt primary.PacketType) (io.WriteCloser, error) {
+	return p.encoder.NextWriter(ft, pt)
+}
+
+// SetWriteDeadline 设置写入截止
+func (p *Payload) SetWriteDeadline(t time.Time) error {
+	p.writeDeadline.Store(t)
+	return nil
+}
+
+// Pause 暂停
+func (p *Payload) Pause() {
+	p.pauser.Pause()
+}
+
+// Resume 复位
+func (p *Payload) Resume() {
+	p.pauser.Resume()
+}
+
+// Close 关闭有效载荷
+func (p *Payload) Close() error {
+	p.closeOnce.Do(func() {
+		close(p.close)
+	})
+	return nil
+}
+
+// Store 存储相关错误信息
+func (p *Payload) Store(op string, err error) error {
+	old := p.err.Load()
+	if old == nil {
+		if err == io.EOF || err == nil {
+			return err
+		}
+		op := primary.NewErr("", op, false, err)
+		p.err.Store(op)
+		return op
+	}
+	return old.(error)
+}
+
+// getReader 获取读取器
+func (p *Payload) getReader() (io.Reader, bool, error) {
+	select {
+	case <-p.close:
+		return nil, false, p.load()
+	default:
+	}
+	if ok := p.pauser.Working(); !ok {
+		return nil, false, primary.NewErr("", "payload", false, primary.ErrPaused)
+	}
+	p.pauser.Done()
+	for {
+		after, ok := p.readTimeout()
+		if !ok {
+			return nil, false, p.Store("read", primary.ErrTimeout)
+		}
+		select {
+		case <-p.close:
+			return nil, false, p.load()
+		case <-p.pauser.PausedTrigger():
+			return nil, false, primary.NewErr("", "payload", false, primary.ErrPaused)
+		case <-after:
+			continue
+		case arg := <-p.readerChan:
+			return arg.r, arg.supportBinary, nil
+		}
+	}
+}
+
+// putReader 添加写入器
+func (p *Payload) putReader(err error) error {
+	select {
+	case <-p.close:
+		return p.load()
+	default:
+	}
+	for {
+		after, ok := p.readTimeout()
+		if !ok {
+			return p.Store("read", primary.ErrTimeout)
+		}
+		select {
+		case <-p.close:
+			return p.load()
+		case <-after:
+			continue
+		case p.readError <- err:
+
+		}
+		return nil
+	}
+}
+
+// readTimeout 读取超时
+func (p *Payload) readTimeout() (<-chan time.Time, bool) {
+	deadline := p.readDeadline.Load().(time.Time)
+	wait := deadline.Sub(time.Now())
+	if deadline.IsZero() {
+		wait = math.MaxInt64
+	}
+	if wait <= 0 {
+		return nil, false
+	}
+	return time.After(wait), true
+}
+
+func (p *Payload) getWriter() (io.Writer, error) {
+	select {
+	case <-p.close:
+		return nil, p.load()
+	default:
+	}
+	if ok := p.pauser.Working(); !ok {
+		return nil, primary.NewErr("", "payload", false, primary.ErrPaused)
+	}
+	p.pauser.Done()
+	for {
+		after, ok := p.writeTimeout()
+		if !ok {
+			return nil, p.Store("write", primary.ErrTimeout)
+		}
+		select {
+		case <-p.close:
+			return nil, p.load()
+		case <-p.pauser.PausedTrigger():
+			return nil, primary.NewErr("", "payload", false, primary.ErrPaused)
+		case <-after:
+			continue
+		case w := <-p.writerChan:
+			return w, nil
+		}
+	}
+}
+
+// putWriter 添加写入器
+func (p *Payload) putWriter(err error) error {
+	select {
+	case <-p.close:
+		return p.load()
+	default:
+	}
+
+	for {
+		after, ok := p.writeTimeout()
+		if !ok {
+			return p.Store("write", primary.ErrTimeout)
+		}
+		ret := p.Store("write", err)
+		select {
+		case <-p.close:
+			return p.load()
+		case <-after:
+			continue
+		case p.writeError <- err:
+			return ret
+		}
+	}
+}
+
+// writeTimeout 写入超时
+func (p *Payload) writeTimeout() (<-chan time.Time, bool) {
+	deadline := p.writeDeadline.Load().(time.Time)
+	wait := deadline.Sub(time.Now())
+	if deadline.IsZero() {
+		wait = math.MaxInt64
+	}
+	if wait <= 0 {
+		return nil, false
+	}
+	return time.After(wait), true
+}
+
+// load 加载
+func (p *Payload) load() error {
+	ret := p.err.Load()
+	if ret == nil {
+		return io.EOF
+	}
+	return ret.(error)
 }

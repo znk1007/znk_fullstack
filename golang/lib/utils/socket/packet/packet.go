@@ -3,26 +3,26 @@ package packet
 import (
 	"io"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/common"
+	"github.com/znk_fullstack/golang/lib/utils/socket/primary"
 )
 
 // FrameReader 数据读取器
 type FrameReader interface {
-	NextReader() (common.FrameType, io.ReadCloser, error)
+	NextReader() (primary.FrameType, io.ReadCloser, error)
 }
 
 // FrameWriter 数据写入器
 type FrameWriter interface {
-	NextWriter(ft common.FrameType) (io.WriteCloser, error)
+	NextWriter(ft primary.FrameType) (io.WriteCloser, error)
 }
 
 // NewEncoder 创建编码器
-func NewEncoder(fw FrameWriter) common.FrameWriter {
+func NewEncoder(fw FrameWriter) primary.FrameWriter {
 	return newEncoder(fw)
 }
 
 // NewDecoder 创建解码器
-func NewDecoder(fr FrameReader) common.FrameReader {
+func NewDecoder(fr FrameReader) primary.FrameReader {
 	return newDecoder(fr)
 }
 
@@ -38,13 +38,13 @@ func newEncoder(w FrameWriter) *encoder {
 }
 
 // NextWriter 下一个写入器
-func (e *encoder) NextWriter(ft common.FrameType, pt common.PacketType) (io.WriteCloser, error) {
+func (e *encoder) NextWriter(ft primary.FrameType, pt primary.PacketType) (io.WriteCloser, error) {
 	w, err := e.w.NextWriter(ft)
 	if err != nil {
 		return nil, err
 	}
 	var b [1]byte
-	if ft == common.FrameString {
+	if ft == primary.FrameString {
 		b[0] = pt.ToStringByte()
 	} else {
 		b[0] = pt.ToBinaryByte()
@@ -66,7 +66,7 @@ func newDecoder(r FrameReader) *decoder {
 	}
 }
 
-func (d *decoder) NextReader() (common.FrameType, common.PacketType, io.ReadCloser, error) {
+func (d *decoder) NextReader() (primary.FrameType, primary.PacketType, io.ReadCloser, error) {
 	ft, r, err := d.r.NextReader()
 	if err != nil {
 		return 0, 0, nil, err
@@ -75,5 +75,5 @@ func (d *decoder) NextReader() (common.FrameType, common.PacketType, io.ReadClos
 	if _, err := io.ReadFull(r, b[:]); err != nil {
 		return 0, 0, nil, err
 	}
-	return ft, common.ToPacketType(b[0], ft), r, nil
+	return ft, primary.ToPacketType(b[0], ft), r, nil
 }
