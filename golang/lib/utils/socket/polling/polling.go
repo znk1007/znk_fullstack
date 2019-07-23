@@ -2,12 +2,17 @@ package polling
 
 import (
 	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/znk_fullstack/golang/lib/utils/socket/primary"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/payload"
 )
@@ -73,6 +78,7 @@ type clientConn struct {
 	remoteHeader atomic.Value
 }
 
+// dial 连接
 func dial(client *http.Client, url *url.URL, requestHeader http.Header) (*clientConn, error) {
 	if client == nil {
 		client = &http.Client{}
@@ -94,5 +100,44 @@ func dial(client *http.Client, url *url.URL, requestHeader http.Header) (*client
 		Payload:    payload.New(supportBinary),
 		httpClient: client,
 		request:    *req,
+	}
+	return ret, nil
+}
+
+// getOpen 打开
+func (c *clientConn) getOpen() {
+	req := c.request
+	query := req.URL.Query()
+	url := *req.URL
+	req.URL = &url
+	req.Method = "GET"
+	query.Set("id", primary.NewSocketID().String())
+	req.URL.RawQuery = query.Encode()
+	resp, err := c.httpClient.Do(&req)
+	if err != nil {
+		c.Payload.Store("get", err)
+		c.Close()
+		return
+	}
+	defer func() {
+		io.Copy(ioutil.Discard, resp.Body)
+		resp.Body.Close()
+	}()
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("invalid request: %s(%d)", resp.Status, resp.StatusCode)
+	}
+	var supportBinary bool
+	if err == nil {
+		m := resp.Header.Get("Content-Type")
+		supportBinary, err = mimeSupportBinary(m)
+	}
+	if err != nil {
+		c.Payload.Store("get", err)
+		c.Close()
+		return
+	}
+	c.remoteHeader.Store(resp.Header)
+	if err = c.Payload.FeedIn(resp.Body, supportBinary); err != nil {
+		return
 	}
 }
