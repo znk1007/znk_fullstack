@@ -1,11 +1,13 @@
 package polling
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"mime"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -104,6 +106,34 @@ func dial(client *http.Client, url *url.URL, requestHeader http.Header) (*client
 	return ret, nil
 }
 
+func (c *clientConn) URL() url.URL {
+	return *c.request.URL
+}
+
+func (c *clientConn) LocalAddr() net.Addr {
+	return Addr{""}
+}
+
+func (c *clientConn) RemoteAddr() net.Addr {
+	return Addr{
+		c.request.Host,
+	}
+}
+
+func (c *clientConn) RemoteHeader() http.Header {
+	ret := c.remoteHeader.Load()
+	if ret == nil {
+		return nil
+	}
+	return ret.(http.Header)
+}
+
+func (c *clientConn) Resume() {
+	c.Payload.Resume()
+	go c.serverGet()
+	go c.serverPost()
+}
+
 // getOpen 打开
 func (c *clientConn) getOpen() {
 	req := c.request
@@ -111,7 +141,7 @@ func (c *clientConn) getOpen() {
 	url := *req.URL
 	req.URL = &url
 	req.Method = "GET"
-	query.Set("id", primary.NewSocketID().String())
+	query.Set("t", primary.NewSocketID().String())
 	req.URL.RawQuery = query.Encode()
 	resp, err := c.httpClient.Do(&req)
 	if err != nil {
@@ -139,5 +169,78 @@ func (c *clientConn) getOpen() {
 	c.remoteHeader.Store(resp.Header)
 	if err = c.Payload.FeedIn(resp.Body, supportBinary); err != nil {
 		return
+	}
+}
+
+// serverGet GET请求
+func (c *clientConn) serverGet() {
+	req := c.request
+	query := req.URL.Query()
+	url := *req.URL
+	req.URL = &url
+	req.Method = "GET"
+	for {
+		query.Set("t", primary.NewSocketID().String())
+		req.URL.RawQuery = query.Encode()
+		resp, err := c.httpClient.Do(&req)
+		if err != nil {
+			c.Payload.Store("get", err)
+			c.Close()
+			return
+		}
+		if resp.StatusCode != http.StatusOK {
+			err = fmt.Errorf("invalid request: %s(%d)", resp.Status, resp.StatusCode)
+		}
+		var supportBinary bool
+		if err == nil {
+			m := resp.Header.Get("Content-Type")
+			supportBinary, err = mimeSupportBinary(m)
+		}
+		if err != nil {
+			io.Copy(ioutil.Discard, resp.Body)
+			resp.Body.Close()
+			c.Payload.Store("get", err)
+			c.Close()
+			return
+		}
+		if err = c.Payload.FeedIn(resp.Body, supportBinary); err != nil {
+			io.Copy(ioutil.Discard, resp.Body)
+			resp.Body.Close()
+			return
+		}
+		c.remoteHeader.Store(resp.Header)
+	}
+}
+
+// serverPost POST请求
+func (c *clientConn) serverPost() {
+	var buf bytes.Buffer
+	req := c.request
+	url := *req.URL
+	req.URL = &url
+	query := url.Query()
+	req.Method = "POST"
+	req.Body = ioutil.NopCloser(&buf)
+	for {
+		buf.Reset()
+		if err := c.Payload.FlushOut(&buf); err != nil {
+			return
+		}
+		query.Set("t", primary.NewSocketID().String())
+		req.URL.RawQuery = query.Encode()
+		resp, err := c.httpClient.Do(&req)
+		if err != nil {
+			c.Payload.Store("post", err)
+			c.Close()
+			return
+		}
+		io.Copy(ioutil.Discard, resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			c.Payload.Store("post", fmt.Errorf("invalid response %s(%d)", resp.Status, resp.StatusCode))
+			c.Close()
+			return
+		}
+		c.remoteHeader.Store(resp.Header)
 	}
 }
