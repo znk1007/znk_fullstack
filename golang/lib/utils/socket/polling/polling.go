@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -69,9 +70,19 @@ func (t *Transport) Name() string {
 	return "polling"
 }
 
-// func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (primary.Conn, error) {
-// 	conn :=
-// }
+// Accept 接收传输数据
+func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (primary.Conn, error) {
+	conn := newServerConn(r)
+	return conn, nil
+}
+
+// Dial 拨号连接
+func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (primary.Conn, error) {
+	query := u.Query()
+	query.Set("transport", t.Name())
+	u.RawQuery = query.Encode()
+	return dial(t.Client, u, requestHeader)
+}
 
 type clientConn struct {
 	*payload.Payload
@@ -242,5 +253,93 @@ func (c *clientConn) serverPost() {
 			return
 		}
 		c.remoteHeader.Store(resp.Header)
+	}
+}
+
+type serverConn struct {
+	*payload.Payload
+	supportBinary bool
+	remoteHeader  http.Header
+	localAddr     Addr
+	remoteAddr    Addr
+	url           url.URL
+	jsonp         string
+}
+
+func newServerConn(r *http.Request) primary.Conn {
+	query := r.URL.Query()
+	supportBinary := query.Get("base64") == ""
+	jsonp := query.Get("j")
+	if jsonp != "" {
+		supportBinary = false
+	}
+	return &serverConn{
+		Payload:       payload.New(supportBinary),
+		supportBinary: supportBinary,
+		remoteHeader:  r.Header,
+		localAddr:     Addr{r.Host},
+		remoteAddr:    Addr{r.RemoteAddr},
+		url:           *r.URL,
+		jsonp:         jsonp,
+	}
+}
+
+func (s *serverConn) URL() url.URL {
+	return s.url
+}
+
+func (s *serverConn) LocalAddr() net.Addr {
+	return s.localAddr
+}
+
+func (s *serverConn) RemoteAddr() net.Addr {
+	return s.remoteAddr
+}
+
+func (s *serverConn) RemoteHeader() http.Header {
+	return s.remoteHeader
+}
+
+func (s *serverConn) ServerHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		if jsonp := r.URL.Query().Get("j"); jsonp != "" {
+			buf := bytes.NewBuffer(nil)
+			if err := s.Payload.FlushOut(buf); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "text/javascript; charset=UTF-8")
+			pl := template.JSEscapeString(buf.String())
+			w.Write([]byte("__eio[" + jsonp + "](\""))
+			w.Write([]byte(pl))
+			w.Write([]byte("\");"))
+			return
+		}
+		if s.supportBinary {
+			w.Header().Set("Content-Type", "application/octet-stream")
+		} else {
+			w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+		}
+		if err := s.Payload.FlushOut(w); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		return
+	case "POST":
+		m := r.Header.Get("Content-Type")
+		supportBinary, err := mimeSupportBinary(m)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if err := s.Payload.FeedIn(r.Body, supportBinary); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Write([]byte("ok"))
+		return
+	default:
+		http.Error(w, "invalid method", http.StatusBadRequest)
 	}
 }
