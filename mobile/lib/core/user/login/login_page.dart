@@ -23,7 +23,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      
+      // resizeToAvoidBottomInset: false,// 抵住键盘，防止遮挡
       body: BlocProvider<LoginBloc>(
         builder: (context) => LoginBloc(userRepository: _userRepository),
         child: LoginForm(userRepository: _userRepository),

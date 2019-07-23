@@ -21,6 +21,7 @@ class SettingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
+        elevation: 0,
         iconTheme: IconThemeData(
           color: CustomColors.navigatorBackColor,
           size: 0.5,
