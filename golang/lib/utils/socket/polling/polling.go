@@ -18,6 +18,8 @@ import (
 	"github.com/znk_fullstack/golang/lib/utils/socket/primary"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/payload"
+
+	socket "github.com/znk_fullstack/golang/lib/utils/socket/protos/generated"
 )
 
 func mimeSupportBinary(m string) (bool, error) {
@@ -89,6 +91,31 @@ type clientConn struct {
 	httpClient   *http.Client
 	request      http.Request
 	remoteHeader atomic.Value
+}
+
+func (c *clientConn) Open() (socket.ConnParams, error) {
+	go c.getOpen()
+	_, pt, r, err := c.NextReader()
+	if err != nil {
+		return socket.ConnParams{}, err
+	}
+	if pt != primary.Open {
+		return socket.ConnParams{}, errors.New("invalid open")
+	}
+	conn, err := primary.ReadConnParams(r)
+	if err != nil {
+		return socket.ConnParams{}, err
+	}
+	err = r.Close()
+	if err != nil {
+		return socket.ConnParams{}, err
+	}
+	query := c.request.URL.Query()
+	query.Set("sid", conn.SID)
+	c.request.URL.RawQuery = query.Encode()
+	go c.serverGet()
+	go c.serverPost()
+	return conn, nil
 }
 
 // dial 连接
