@@ -4,13 +4,11 @@ import 'package:znk/core/user/auth_bloc.dart';
 import 'package:znk/core/user/auth_event.dart';
 import 'package:znk/core/user/login/index.dart';
 import 'package:znk/core/user/user_repository.dart';
-import 'package:znk/protos/generated/project/login.pb.dart';
+import 'package:znk/images/manager.dart';
 import 'package:znk/utils/base/device.dart';
-import 'package:znk/utils/base/random.dart';
 import 'package:znk/utils/database/settings.dart';
 import 'package:znk/utils/database/user.dart';
 import 'package:znk/utils/hud/hud.dart';
-import 'package:znk/core/user/register/index.dart';
 
 class LoginPage extends StatelessWidget {
   static const String routeName = "/login";
@@ -53,6 +51,9 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
 
   LoginBloc _loginBloc;
 
+  final _bgImageHeight = Device.relativeHeight(400);
+  final _fieldHeight = Device.relativeWidth(55);
+  final _fieldBtnSpace = 20;
   bool get isOk => 
     _accountController.text.isNotEmpty && _passwordControler.text.isNotEmpty;
 
@@ -118,7 +119,7 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
           return Stack(
             children: <Widget>[
               _placeholderBackgroundView(),
-              _BackgrounView(),
+              _BackgrounView(bgImageHeight: _bgImageHeight),
               _logoView(),
               _textField(),
               _loginButton(state),
@@ -159,27 +160,27 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
   // 占位背景视图
   Widget _placeholderBackgroundView() {
     return Container(
-      child: Image(
-        image: AssetImage('lib/images/iOS/user/background.png'),
+      child: Image.asset(
+        LoginAsset.userBackground,
         width: Device.width,
+        height: _bgImageHeight,
+        fit: BoxFit.fill,
       ),
     );
   }
   // logo
   Widget _logoView() {
     return Container(
-      margin: EdgeInsets.fromLTRB(Device.iOSRelativeWidth(104), Device.iOSRelativeWidth(105), 0, 0),
-      child: Image(
-        image: AssetImage('lib/images/iOS/user/daxingzheng.png'),
-      ),
+      margin: EdgeInsets.fromLTRB(Device.relativeWidth(104), Device.relativeWidth(105), 0, 0),
+      child: Image.asset(LoginAsset.daxingzheng)
     );
   }
 
   // 输入框
   Widget _textField() {
-    final fieldHeight = Device.iOSRelativeWidth(55);
+    
     return Container(
-      height: fieldHeight * 2,
+      height: _fieldHeight * 2,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -195,15 +196,13 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
           ),
         ],
       ),
-      margin: EdgeInsets.only(left: Device.iOSRelativeWidth(29), top: Device.iOSRelativeHeight(345), right: Device.iOSRelativeWidth(29)),
+      margin: EdgeInsets.only(left: Device.relativeWidth(29), top: _bgImageHeight - _fieldHeight, right: Device.relativeWidth(29)),
       child: Column(
         children: <Widget>[
           TextFormField(
             controller: _accountController,
             decoration: InputDecoration(
-              prefixIcon: Image(
-                image: AssetImage('lib/images/iOS/user/account.png'),
-              ),
+              prefixIcon: Image.asset(LoginAsset.account),
               hintText: '请输入用户',
               border: InputBorder.none,
             ),            
@@ -215,9 +214,7 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
           TextFormField(
             controller: _passwordControler,
             decoration: InputDecoration(
-              prefixIcon: Image(
-                image: AssetImage('lib/images/iOS/user/password.png'),
-              ),
+              prefixIcon: Image.asset(LoginAsset.password),
               hintText: '请输入密码',
               border: InputBorder.none,
             ),
@@ -231,12 +228,12 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
   // 登录按钮
   Widget _loginButton(LoginState state) {
     // print('current state: $state');
-    var startX = Device.iOSRelativeWidth(29);
+    var startX = Device.relativeWidth(29);
     return Container(
       color: Colors.blue[600],
       width: Device.width - startX * 2,
-      height: Device.iOSRelativeWidth(55),
-      margin: EdgeInsets.only(left: Device.iOSRelativeWidth(29), top: Device.iOSRelativeHeight(480)),
+      height: _fieldHeight,
+      margin: EdgeInsets.only(left: Device.relativeWidth(29), top: _bgImageHeight +  _fieldHeight + _fieldBtnSpace),
       child: FlatButton(
         onPressed: isLoginButtonEnabled(state) == true ? _onFormSubmitted : null,
         textColor: Colors.white,
@@ -270,7 +267,7 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
             ),
         ],
       ),
-      margin: EdgeInsets.only(left: Device.iOSRelativeWidth(16), top: Device.iOSRelativeHeight(550)),
+      margin: EdgeInsets.only(left: Device.relativeWidth(16), top: Device.relativeHeight(550)),
       width: 120,
       height: 20,
       alignment: Alignment.centerLeft,
@@ -296,7 +293,7 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
       ),
       width: 100,
       height: 20,
-      margin: EdgeInsets.only(top: Device.iOSRelativeHeight(550), left: Device.width - 100 - Device.iOSRelativeWidth(16)),
+      margin: EdgeInsets.only(top: Device.relativeHeight(550), left: Device.width - 100 - Device.relativeWidth(16)),
     );
   }
   // 没有账号
@@ -322,7 +319,7 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
       ),
       width: btnWidth,
       height: 20,
-      margin: EdgeInsets.only(top: Device.iOSRelativeHeight(650), left: (Device.width - btnWidth) / 2),
+      margin: EdgeInsets.only(top: Device.relativeHeight(650), left: (Device.width - btnWidth) / 2),
     );
   }
 
@@ -337,7 +334,10 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
 }
 
 class _BackgrounView extends StatefulWidget {
-  _BackgrounView({Key key}) : super(key: key);
+  double _bgImageHeight;
+  _BackgrounView({Key key, @required double bgImageHeight}) : 
+  _bgImageHeight = bgImageHeight,
+  super(key: key);
 
   __BackgrounViewState createState() => __BackgrounViewState();
 }
@@ -363,16 +363,16 @@ class __BackgrounViewState extends State<_BackgrounView> with TickerProviderStat
     List<TweenSequenceItem> items = [];
     TweenSequenceItem item = TweenSequenceItem(
       tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 2, top: 0, right: 0, bottom: 0),
-        end: EdgeInsets.only(left: 0, top: 2, right: 0, bottom: 0)
+        begin: EdgeInsets.only(left: 1, top: 0, right: 0, bottom: 0),
+        end: EdgeInsets.only(left: 0, top: 1, right: 0, bottom: 0)
       ),
       weight: 1,
     );
     items.add(item);
     item = TweenSequenceItem(
       tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0, top: 0, right: 2, bottom: 0),
-        end: EdgeInsets.only(left: 0, top: 0, right: 0, bottom: 2)
+        begin: EdgeInsets.only(left: 0, top: 0, right: 1, bottom: 0),
+        end: EdgeInsets.only(left: 0, top: 0, right: 0, bottom: 1)
       ),
       weight: 2,
     );
@@ -421,10 +421,12 @@ class __BackgrounViewState extends State<_BackgrounView> with TickerProviderStat
   Widget build(BuildContext context) {
     return Container(
        alignment: Alignment.topCenter,
-          //  height: 500,
         padding: _movement.value,
         child: Image(
           image: AssetImage('lib/images/iOS/user/background.png'),
+          height: widget._bgImageHeight,
+          width: Device.width,
+          fit: BoxFit.fill,
         ),
     );
   }
