@@ -6,6 +6,7 @@ import 'package:znk/core/user/login/index.dart';
 import 'package:znk/core/user/user_repository.dart';
 import 'package:znk/images/manager.dart';
 import 'package:znk/utils/base/device.dart';
+import 'package:znk/utils/base/keyboard_helper.dart';
 import 'package:znk/utils/database/settings.dart';
 import 'package:znk/utils/database/user.dart';
 import 'package:znk/utils/hud/hud.dart';
@@ -30,6 +31,10 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class LoginScroll extends KeyboardHelpWidget {
+  
 }
 
 class LoginForm extends StatefulWidget {
