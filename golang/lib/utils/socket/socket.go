@@ -32,12 +32,13 @@ func newWriter(w io.WriteCloser, locker *sync.RWMutex) *writer {
 	}
 }
 
-func (w *writer) Close(err error) {
+func (w *writer) Close() (err error) {
 	w.closeOnce.Do(func() {
 		w.locker.Lock()
 		defer w.locker.Unlock()
 		err = w.WriteCloser.Close()
 	})
+	return
 }
 
 func (w *writer) Write(bs []byte) (int, error) {
@@ -280,7 +281,7 @@ func newSession(m *manager, t string, conn primary.Conn, params protos.ConnParam
 		mamanger:  m,
 	}
 	m.Add(ret)
-	ret.SetDeadline()
+	ret.setDeadline()
 	return ret, nil
 }
 
