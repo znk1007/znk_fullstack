@@ -12,17 +12,26 @@ class DefaultHead implements CustomHead {
 
   @override
   Widget get leftView => Container(
-    child: Text('<'),
+    margin: leftViewPosition,
+    child: FlatButton(
+      child: Icon(
+        Icons.arrow_left,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        print('left view press');
+      },
+    ),
   );
 
   @override
   // TODO: implement leftViewPosition
-  EdgeInsets get leftViewPosition => null;
+  EdgeInsets get leftViewPosition => EdgeInsets.only(left: 20);
 
   @override
   // TODO: implement rightView
   Widget get rightView => Container(
-    child: Text('<'),
+    child: Text('>'),
   );
 
   @override
@@ -40,7 +49,7 @@ class DefaultHead implements CustomHead {
   @override
   // TODO: implement titleView
   Widget get titleView => Container(
-    child: Text('<'),
+    child: Text('date'),
   );
 
   @override
