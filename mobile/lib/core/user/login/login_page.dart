@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/transformers.dart';
 import 'package:znk/core/user/auth_bloc.dart';
 import 'package:znk/core/user/auth_event.dart';
 import 'package:znk/core/user/login/index.dart';
 import 'package:znk/core/user/user_repository.dart';
 import 'package:znk/images/manager.dart';
 import 'package:znk/utils/base/device.dart';
-import 'package:znk/utils/base/keyboard_helper.dart';
 import 'package:znk/utils/database/settings.dart';
 import 'package:znk/utils/database/user.dart';
 import 'package:znk/utils/hud/hud.dart';
@@ -33,10 +33,6 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class LoginScroll extends KeyboardHelpWidget {
-  
-}
-
 class LoginForm extends StatefulWidget {
   final UserRepository _userRepository;
   LoginForm({Key key, @required UserRepository userRepository}) : 
@@ -47,12 +43,18 @@ class LoginForm extends StatefulWidget {
   _LoginFormState createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMixin{
+class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMixin, WidgetsBindingObserver{
   var _isActive = false;
 
   final TextEditingController _accountController = TextEditingController();
   final TextEditingController _passwordControler = TextEditingController();
+  final FocusNode _accountNode = FocusNode();
+  final FocusNode _passwordNode = FocusNode();
   final HUD _hud = HUD();
+
+  double _inputOffset = 0.0;
+
+  double _originOffset = 0.0;
 
   LoginBloc _loginBloc;
 
@@ -68,8 +70,8 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
 
   @override
   void initState() {
-    super.initState();
     
+    _inputOffset = _originOffset = _bgImageHeight - _fieldHeight;
     Settings.dao.recordPsw.then((val){
       setState(() {
         _isActive = val;
@@ -78,7 +80,24 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
     _loginBloc = BlocProvider.of<LoginBloc>(context);
     _accountController.addListener(_onAccountChanged);
     _passwordControler.addListener(_onPasswordChanged);
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
   }
+
+  @override
+  void dispose() {
+    print('login page dispose');
+    super.dispose();
+    _accountController.dispose();
+    _passwordControler.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    print('didChangeMetrics');
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener(
@@ -124,7 +143,17 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
           return Stack(
             children: <Widget>[
               _placeholderBackgroundView(),
-              _BackgrounView(bgImageHeight: _bgImageHeight),
+              _BackgrounView(bgImageHeight: _bgImageHeight, onTapAction:() {
+                if (_accountNode.hasFocus) {
+                  _accountNode.unfocus();
+                }
+                if (_passwordNode.hasFocus) {
+                  _passwordNode.unfocus();
+                }
+                setState(() {
+                  _inputOffset = _originOffset;
+                });
+              }),
               _logoView(),
               _textField(),
               _loginButton(state),
@@ -201,22 +230,29 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
           ),
         ],
       ),
-      margin: EdgeInsets.only(left: Device.relativeWidth(29), top: _bgImageHeight - _fieldHeight, right: Device.relativeWidth(29)),
+      margin: EdgeInsets.only(left: Device.relativeWidth(29), top: _inputOffset, right: Device.relativeWidth(29)),
       child: Column(
         children: <Widget>[
-          TextFormField(
+          TextField(
+            focusNode: _accountNode,
             controller: _accountController,
             decoration: InputDecoration(
               prefixIcon: Image.asset(LoginAsset.account),
               hintText: '请输入用户',
               border: InputBorder.none,
-            ),            
+            ),
+            onTap: () {
+              setState(() {
+                _inputOffset = _originOffset - 20;
+              });
+            },
           ),
           Divider(
             color: Colors.grey[100],
             height: 1,
           ),
-          TextFormField(
+          TextField(
+            focusNode: _passwordNode,
             controller: _passwordControler,
             decoration: InputDecoration(
               prefixIcon: Image.asset(LoginAsset.password),
@@ -224,7 +260,11 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
               border: InputBorder.none,
             ),
             obscureText: true,
-            
+            onTap: () {
+              setState(() {
+                _inputOffset = _originOffset - 40;
+              });
+            },
           ),
         ],
       ),
@@ -328,20 +368,15 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
     );
   }
 
-  @override
-  void dispose() {
-    _accountController.dispose();
-    _passwordControler.dispose();
-    super.dispose();
-  }
+  
 
 
 }
 
 class _BackgrounView extends StatefulWidget {
-  double _bgImageHeight;
-  _BackgrounView({Key key, @required double bgImageHeight}) : 
-  _bgImageHeight = bgImageHeight,
+  double bgImageHeight;
+  VoidFunc onTapAction;
+  _BackgrounView({Key key, @required this.bgImageHeight, @required this.onTapAction}) : 
   super(key: key);
 
   __BackgrounViewState createState() => __BackgrounViewState();
@@ -393,9 +428,9 @@ class __BackgrounViewState extends State<_BackgrounView> with TickerProviderStat
       ),
     )
     ..addListener((){
-      setState(() {
+      // setState(() {
         
-      });
+      // });
     })
     ..addStatusListener((status) {
       // if (status == AnimationStatus.completed) {
@@ -427,11 +462,14 @@ class __BackgrounViewState extends State<_BackgrounView> with TickerProviderStat
     return Container(
        alignment: Alignment.topCenter,
         padding: _movement.value,
-        child: Image(
-          image: AssetImage('lib/images/iOS/user/background.png'),
-          height: widget._bgImageHeight,
-          width: Device.width,
-          fit: BoxFit.fill,
+        child: GestureDetector(
+          child: Image.asset(
+            LoginAsset.userBackground,
+            width: Device.width,
+            height: widget.bgImageHeight,
+            fit: BoxFit.fill,
+          ),
+          onTap: widget.onTapAction,
         ),
     );
   }

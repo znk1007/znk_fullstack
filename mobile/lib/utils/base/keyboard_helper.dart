@@ -28,6 +28,10 @@ abstract class KeyboardHelpWidget extends State<StatefulWidget> with WidgetsBind
   // 当前位置
   double _currentPosition = 0.0;
 
+  bool showScaffold;
+
+  Widget child;
+
   @override
   void initState() { 
     super.initState();
@@ -43,12 +47,18 @@ abstract class KeyboardHelpWidget extends State<StatefulWidget> with WidgetsBind
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return showScaffold == true ? Scaffold(
       body: SingleChildScrollView(
         controller: _controller,
         child: Column(
           children: children()..add(SizedBox(height: 400.0)),
         ),
+      ),
+    ) : 
+    SingleChildScrollView(
+      controller: _controller,
+      child: Column(
+        
       ),
     );
   }
