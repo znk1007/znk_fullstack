@@ -7,7 +7,9 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	protos "github.com/znk_fullstack/golang/lib/utils/socket/protos/generated"
@@ -243,4 +245,189 @@ func (c *client) server() {
 		}
 		c.conn.SetWriteDeadline(time.Now().Add(time.Duration(c.params.PingTimeout)))
 	}
+}
+
+// SessionIDGenerator 会话ID生成接口
+type SessionIDGenerator interface {
+	NewID() string
+}
+
+type defaultIDGenerator struct {
+	nextID uint64
+}
+
+func (g *defaultIDGenerator) NewID() string {
+	id := atomic.AddUint64(&g.nextID, 1)
+	return strconv.FormatUint(id, 36)
+}
+
+type session struct {
+	params        protos.ConnParams
+	mamanger      *manager
+	closeOnce     sync.Once
+	context       interface{}
+	upgradeLocker sync.RWMutex
+	transport     string
+	conn          primary.Conn
+}
+
+func newSession(m *manager, t string, conn primary.Conn, params protos.ConnParams) (*session, error) {
+	params.SID = m.NewID()
+	ret := &session{
+		transport: t,
+		conn:      conn,
+		params:    params,
+		mamanger:  m,
+	}
+	m.Add(ret)
+	ret.SetDeadline()
+	return ret, nil
+}
+
+func (s *session) SetContext(v interface{}) {
+	s.context = v
+}
+
+func (s *session) Context() interface{} {
+	return s.context
+}
+
+func (s *session) ID() string {
+	return s.params.SID
+}
+
+func (s *session) Transport() string {
+	s.upgradeLocker.RLock()
+	defer s.upgradeLocker.RUnlock()
+	return s.transport
+}
+
+func (s *session) Close() error {
+	s.upgradeLocker.RLock()
+	defer s.upgradeLocker.RUnlock()
+	s.closeOnce.Do(func() {
+		s.mamanger.Remove(s.params.SID)
+	})
+	return s.conn.Close()
+}
+
+func (s *session) NextReader() (FrameType, io.ReadCloser, error) {
+	for {
+		ft, pt, r, e := s.nextReader()
+		if e != nil {
+			return 0, nil, e
+		}
+		switch pt {
+		case primary.Ping:
+			e := func() error {
+				w, err := s.nextWriter(ft, primary.Pong)
+				if err != nil {
+					return err
+				}
+				io.Copy(w, r)
+				return w.Close()
+			}()
+			r.Close()
+			if e != nil {
+				s.Close()
+				return 0, nil, e
+			}
+			s.setDeadline()
+		case primary.Message:
+			return FrameType(ft), r, nil
+		}
+		r.Close()
+	}
+}
+
+func (s *session) nextReader() (primary.FrameType, primary.PacketType, io.ReadCloser, error) {
+	var ft primary.FrameType
+	var pt primary.PacketType
+	var r io.ReadCloser
+	var err error
+	for {
+		s.upgradeLocker.RLock()
+		ft, pt, r, err = s.conn.NextReader()
+		if err != nil {
+			s.upgradeLocker.RUnlock()
+			if op, ok := err.(primary.Error); ok {
+				if op.Temporary() {
+					continue
+				}
+			}
+			return 0, 0, nil, err
+		}
+		s.upgradeLocker.RUnlock()
+		return ft, pt, newReader(r, &s.upgradeLocker), nil
+	}
+}
+
+func (s *session) nextWriter(ft primary.FrameType, pt primary.PacketType) (io.WriteCloser, error) {
+	for {
+		s.upgradeLocker.RLock()
+		w, err := s.conn.NextWriter(ft, pt)
+		if err != nil {
+			s.upgradeLocker.RUnlock()
+			if op, ok := err.(primary.Error); ok {
+				if op.Temporary() {
+					continue
+				}
+			}
+			return nil, err
+		}
+		s.upgradeLocker.RUnlock()
+		return newWriter(w, &s.upgradeLocker), nil
+	}
+}
+
+func (s *session) setDeadline() {
+	deadline := time.Now().Add(time.Duration(s.params.PingTimeout))
+	var conn primary.Conn
+	for {
+		s.upgradeLocker.RLock()
+		same := conn == s.conn
+		s.upgradeLocker.RUnlock()
+		if same {
+			return
+		}
+		s.conn.SetReadDeadline(deadline)
+		s.conn.SetWriteDeadline(deadline)
+	}
+}
+
+type manager struct {
+	SessionIDGenerator
+	s      map[string]*session
+	locker sync.RWMutex
+}
+
+func newManager(g SessionIDGenerator) *manager {
+	if g == nil {
+		g = &defaultIDGenerator{}
+	}
+	return &manager{
+		SessionIDGenerator: g,
+		s:                  make(map[string]*session),
+	}
+}
+
+func (m *manager) Add(s *session) {
+	m.locker.Lock()
+	defer m.locker.Unlock()
+	m.s[s.ID()] = s
+}
+
+func (m *manager) Get(sid string) *session {
+	m.locker.Lock()
+	defer m.locker.Unlock()
+	return m.s[sid]
+}
+
+func (m *manager) Remove(sid string) {
+	m.locker.Lock()
+	defer m.locker.Unlock()
+	if _, ok := m.s[sid]; !ok {
+		return
+	}
+	delete(m.s, sid)
 }
