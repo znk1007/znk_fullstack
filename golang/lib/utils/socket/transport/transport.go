@@ -60,3 +60,18 @@ func NewManager(transports []Transport) *Manager {
 		transport: tranMap,
 	}
 }
+
+// UpgradeFrom 更新传输
+func (m *Manager) UpgradeFrom(name string) []string {
+	for i, n := range m.order {
+		if n == name {
+			return m.order[i+1:]
+		}
+	}
+	return nil
+}
+
+// Get 获取传输对象
+func (m *Manager) Get(name string) Transport {
+	return m.transport[name]
+}
