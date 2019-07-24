@@ -19,7 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else if (event is LoggedIn){
       yield * _mapLoggedInToState();
     } else if (event is LoggedOut) {
-      yield * _mapLoggedOutToState();
+      yield * _mapLoggedOutToState(event.ctx);
     }
   }
 
@@ -43,9 +43,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     yield Authenticated(userId);
   }
   // 退出登录状态
-  Stream<AuthState> _mapLoggedOutToState() async* {
+  Stream<AuthState> _mapLoggedOutToState(BuildContext context) async* {
     yield UnAuthenticated();
-    _userRepository.signOut();
+    _userRepository.signOut(context);
   }
   
 }

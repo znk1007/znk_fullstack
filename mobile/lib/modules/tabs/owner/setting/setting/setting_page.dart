@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:znk/core/user/index.dart';
 import 'package:znk/images/manager.dart';
 import 'package:znk/modules/tabs/owner/setting/setting/model.dart';
@@ -45,9 +46,8 @@ class SettingPage extends StatelessWidget {
               switch (m.type) {
                 case SettingType.logout:
                   {
-                    _userRepository.signOut().then((val) {
-
-                    });
+                    BlocProvider.of<AuthBloc>(ctx).dispatch(LoggedOut(ctx: context));
+                    Navigator.of(ctx).pop();
                   }
                   break;
                 default:

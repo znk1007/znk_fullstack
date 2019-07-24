@@ -43,7 +43,7 @@ class LoginForm extends StatefulWidget {
   _LoginFormState createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMixin, WidgetsBindingObserver{
+class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMixin {
   var _isActive = false;
 
   final TextEditingController _accountController = TextEditingController();
@@ -73,6 +73,11 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
     
     _inputOffset = _originOffset = _bgImageHeight - _fieldHeight;
     Settings.dao.recordPsw.then((val){
+      if (val) {
+        UserDB.dao.current.then((user) {
+          _accountController.text = user.user.account;
+        });
+      }
       setState(() {
         _isActive = val;
       });
@@ -80,7 +85,6 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
     _loginBloc = BlocProvider.of<LoginBloc>(context);
     _accountController.addListener(_onAccountChanged);
     _passwordControler.addListener(_onPasswordChanged);
-    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
@@ -90,13 +94,8 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
     super.dispose();
     _accountController.dispose();
     _passwordControler.dispose();
-    WidgetsBinding.instance.removeObserver(this);
   }
 
-  @override
-  void didChangeMetrics() {
-    print('didChangeMetrics');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +240,7 @@ class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMix
               hintText: '请输入用户',
               border: InputBorder.none,
             ),
+            
             onTap: () {
               setState(() {
                 _inputOffset = _originOffset - 20;

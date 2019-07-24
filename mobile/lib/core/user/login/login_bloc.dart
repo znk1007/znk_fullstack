@@ -58,9 +58,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     String account, 
     String password
   ) async* {
-    UserError userError = await _userRepository.signIn(ctx, account: account, password: password);
+    UserRepositoryResult userError = await _userRepository.signIn(ctx, account: account, password: password);
     print('is login succ: ${userError.type}, description: ${userError.description}');
-    if (userError.type == UserErrorType.none) {
+    if (userError.type == UserRepositoryState.none) {
       yield LoginState.success();
     } else {
       yield LoginState.failure();

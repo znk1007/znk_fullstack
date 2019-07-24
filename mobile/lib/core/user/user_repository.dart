@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:znk/core/requests/login_request.dart';
+import 'package:znk/core/requests/logout_request.dart';
 import 'package:znk/core/requests/register_request.dart';
 import 'package:znk/core/requests/update_online.dart';
 import 'package:znk/core/user/check_userId.dart';
@@ -10,7 +11,7 @@ import 'package:znk/protos/generated/project/user.pb.dart';
 import 'package:znk/utils/database/user.dart';
 
 
-enum UserErrorType {
+enum UserRepositoryState {
   none,
   checkUserIdFailed,
   unregisted,
@@ -18,13 +19,14 @@ enum UserErrorType {
   unlogined,
   loginFailed,
   unkown,
-  paramsEmpty
+  paramsEmpty,
+  logoutFailed,
 }
 
-class UserError extends Error {
-  final UserErrorType type;
+class UserRepositoryResult extends Error {
+  final UserRepositoryState type;
   final String description;
-  UserError({this.type = UserErrorType.none, this.description = ''});
+  UserRepositoryResult({this.type = UserRepositoryState.none, this.description = ''});
 
   @override
   String toString() {
@@ -53,39 +55,50 @@ class UserRepository {
     }
     return succ;
   }
-  Future<UserError>signIn(BuildContext ctx, {@required String account, @required String password}) async {
+  Future<UserRepositoryResult>signIn(BuildContext ctx, {@required String account, @required String password}) async {
     final user = await UserDB.dao.findByAccount(account);
     String userId = '';
     if (user == null) {
       CheckUserId c = CheckUserId(account: account);
       final cRes = await c.check(ctx);
       if (cRes == null) {
-        return UserError(type: UserErrorType.unkown, description: 'error occur when check userId');
+        return UserRepositoryResult(type: UserRepositoryState.unkown, description: 'error occur when check userId');
       }
       if (cRes.status != 1) {
-        return UserError(type: UserErrorType.checkUserIdFailed, description: 'error occur when check userId: ${cRes.message}');
+        return UserRepositoryResult(type: UserRepositoryState.checkUserIdFailed, description: 'error occur when check userId: ${cRes.message}');
       }
       userId = cRes.userId;
     } else {
       userId = user.user.userId;
     }
     if (userId.isEmpty) {
-      return UserError(type: UserErrorType.paramsEmpty, description: 'userId cannot be empty');
+      return UserRepositoryResult(type: UserRepositoryState.paramsEmpty, description: 'userId cannot be empty');
     }
     Login login = Login(account: account, userId: userId, password: password);
     final res = await login.login(ctx);
     if (res.status != 1) {
-      return UserError(type: UserErrorType.loginFailed, description: 'login failed: ${res.message}');
+      return UserRepositoryResult(type: UserRepositoryState.loginFailed, description: 'login failed: ${res.message}');
     }
     await UserDB.dao.upsert(res.user, true);
-    return  UserError();
+    return  UserRepositoryResult();
   }
 
-  // Future<UserError> _login_request()
-
   // 退出登录
-  Future<void>signOut() async {
-
+  Future<UserRepositoryResult>signOut(BuildContext ctx) async {
+    final curUser = await UserDB.dao.current;
+    print('cur user: $curUser');
+    if (curUser == null || curUser.user == null) {
+      return UserRepositoryResult(type: UserRepositoryState.unlogined, description: 'user unlogined');
+    }
+    final userId = curUser.user.userId;
+    final sessionId = curUser.user.sessionId;
+    if (userId.isEmpty || sessionId.isEmpty) {
+      return UserRepositoryResult(type: UserRepositoryState.paramsEmpty, description: 'params cannot be empty');
+    }
+    Logout l = Logout(userId: userId, sessionId: sessionId);
+    await l.logout(ctx);
+    UserDB.dao.updateLoginState(false, userId);
+    return UserRepositoryResult(type: UserRepositoryState.none, description: 'logout success');
   }
   // 获取用户id
   Future<String>getUserId() async {

@@ -24,6 +24,8 @@ class LoggedIn extends AuthEvent {
 }
 
 class LoggedOut extends AuthEvent {
+  final BuildContext ctx;
+  LoggedOut({@required this.ctx});
   @override
   String toString() {
     return 'LoggedOut';
