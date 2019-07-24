@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:znk/core/user/index.dart';
+import 'package:znk/utils/calendar/head.dart';
 
 class Schedule extends StatefulWidget {
   UserRepository _userRepository;
@@ -23,6 +24,13 @@ class _ScheduleState extends State<Schedule> {
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            CalendarHead(),
+          ],
+        ),
       ),
     );
   }
