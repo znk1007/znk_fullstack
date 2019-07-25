@@ -18,7 +18,7 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> with WidgetsBindingObserver {
 
   // 当前位置
-  int _currentIndex = 2;
+  int _currentIndex = 1;
   List<Widget> _tabsList = [];
  
   @override

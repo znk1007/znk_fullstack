@@ -7,7 +7,7 @@ class DefaultHead implements CustomHead {
 
   @override
   Widget get backgroundView => Container(
-    color: Colors.blue,
+    color: Colors.grey[100],
   );
 
   @override
@@ -16,7 +16,7 @@ class DefaultHead implements CustomHead {
     child: FlatButton(
       child: Icon(
         Icons.arrow_left,
-        color: Colors.white,
+        color: Colors.black,
       ),
       onPressed: () {
         print('left view press');
@@ -25,36 +25,56 @@ class DefaultHead implements CustomHead {
   );
 
   @override
-  // TODO: implement leftViewPosition
   EdgeInsets get leftViewPosition => EdgeInsets.only(left: 20);
 
   @override
-  // TODO: implement rightView
   Widget get rightView => Container(
-    child: Text('>'),
+    child: FlatButton(
+      child: Icon(
+        Icons.arrow_right,
+        color: Colors.black
+      ),
+      onPressed: () {
+        print('right view press');
+      },
+    ),
   );
 
   @override
-  // TODO: implement rightViewPosition
   EdgeInsets get rightViewPosition => null;
 
   @override
-  // TODO: implement statusView
   Widget get statusView => Container();
 
+
   @override
-  // TODO: implement statusViewPostion
   EdgeInsets get statusViewPostion => null;
 
   @override
-  // TODO: implement titleView
   Widget get titleView => Container(
-    child: Text('date'),
+    child: Text(
+      title
+    ),
   );
 
   @override
-  // TODO: implement titleViewPosition
+  String get title => 'date';
+
+  @override
   EdgeInsets get titleViewPosition => null;
+
+  @override
+  String statusText;
+
+  @override
+  void set statuText(String txt) {
+    // TODO: implement statuText
+  }
+
+  @override
+  void set title(String txt) {
+    // TODO: implement title
+  }
   
   
 }
