@@ -126,7 +126,6 @@ class DateUtil {
   static int firstWeekdayOfMonth(DateTime time) {
     DateTime theTime = DateTime(time.year, time.month, 1);
     int weekday = theTime.weekday;
-    print('weekday: $weekday');
     return weekday;
   }
 

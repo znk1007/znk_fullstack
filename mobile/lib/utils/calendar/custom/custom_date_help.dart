@@ -14,5 +14,6 @@ abstract class CustomDateHelper {
   WeekType weekType;
   // 月份显示格式
   MonthType monthType;
-
+  // 日期最大行数 6或7
+  int get maxCalendarRows;
 }

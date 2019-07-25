@@ -17,6 +17,7 @@ class DefaultDateHelper implements CustomDateHelper {
     monthType = _monthType;
   }
 
-  
+  @override
+  int get maxCalendarRows => 7;  
   
 }
