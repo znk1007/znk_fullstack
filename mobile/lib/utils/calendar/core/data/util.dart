@@ -78,6 +78,42 @@ class DateUtil {
     }
     return '';
   }
-
+  // 是否闰年
+  static bool isLeapYear(int year) {
+    return ((year % 4 == 0) && (year % 100) != 0) || (year % 400 == 0); 
+  }
+  
+  // 每月天数
+  static int daysOfMonth(int year, int month) {
+    int count = 30;
+    switch (month) {
+      case 2:
+      {
+        bool isLeap = isLeapYear(year);
+        count = isLeap ? 29 : 28;
+      }
+        break;
+      case 4:
+      case 6:
+      case 9:
+      case 11:
+      {
+        count = 30;
+      }
+        break;
+      case 1:
+      case 3:
+      case 5:
+      case 7:
+      case 8:
+      case 10:
+      {
+        count = 31;
+      }
+        break;
+      default:
+    }
+    return count;
+  }
 
 }
