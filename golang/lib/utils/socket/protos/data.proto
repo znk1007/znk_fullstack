@@ -1,0 +1,27 @@
+syntax = "proto3";
+package socketprotos.data;
+
+option go_package = "protos";
+
+message Header {
+    Type type = 1;
+    string namespace = 2;
+    uint64 ID = 3;
+    bool needAck = 4;
+    enum Type {
+        connect = 0;
+        disconect = 1;
+        event = 2;
+        ack = 4;
+        error = 5;
+        binaryEvent = 6;
+        binaryAck = 7;
+        typeMax = 8;
+    }
+}
+
+message Buffer {
+    bytes data = 1;
+    bool isBinary = 2;
+    uint64 num = 3;
+}
