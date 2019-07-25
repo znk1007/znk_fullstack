@@ -1,10 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/calendar/custom/custom_head.dart';
 
 class DefaultHead implements CustomHead {
-
+  String _statusText = '';
+  String _title = '';
   @override
   Widget get backgroundView => Container(
     color: Colors.grey[100],
@@ -12,7 +14,7 @@ class DefaultHead implements CustomHead {
 
   @override
   Widget get leftView => Container(
-    margin: leftViewPosition,
+    margin: EdgeInsets.only(left: 20),
     child: FlatButton(
       child: Icon(
         Icons.arrow_left,
@@ -23,9 +25,6 @@ class DefaultHead implements CustomHead {
       },
     ),
   );
-
-  @override
-  EdgeInsets get leftViewPosition => EdgeInsets.only(left: 20);
 
   @override
   Widget get rightView => Container(
@@ -40,40 +39,30 @@ class DefaultHead implements CustomHead {
     ),
   );
 
-  @override
-  EdgeInsets get rightViewPosition => null;
 
   @override
   Widget get statusView => Container();
 
 
   @override
-  EdgeInsets get statusViewPostion => null;
-
-  @override
   Widget get titleView => Container(
+    width: Device.relativeWidth(150),
     child: Text(
-      title
+      _title
     ),
   );
 
-  @override
-  String get title => 'date';
+
+  
 
   @override
-  EdgeInsets get titleViewPosition => null;
-
-  @override
-  String statusText;
-
-  @override
-  void set statuText(String txt) {
-    // TODO: implement statuText
+  set statuText(String txt) {
+    _statusText = txt ?? '';
   }
 
   @override
-  void set title(String txt) {
-    // TODO: implement title
+  set title(String txt) {
+    _title = txt ?? '';
   }
   
   
