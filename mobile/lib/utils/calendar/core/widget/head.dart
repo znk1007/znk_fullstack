@@ -18,7 +18,10 @@ class CalendarHead extends StatefulWidget {
 class _CalendarHeadState extends State<CalendarHead> {
   @override
   Widget build(BuildContext context) {
-    DateUtil.chineseWeek(DateTime.now());
+    DateUtil.firstWeekdayOfMonth(DateTime.now().add(Duration(days: 69)));
+    if (widget.headTool == null) {
+      widget.headTool = DefaultHead();
+    }
     List<Widget> children = [
       Expanded(
         child: widget.headTool.leftView,

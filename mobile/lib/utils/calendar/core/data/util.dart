@@ -82,7 +82,7 @@ class DateUtil {
   static bool isLeapYear(int year) {
     return ((year % 4 == 0) && (year % 100) != 0) || (year % 400 == 0); 
   }
-  
+
   // 每月天数
   static int daysOfMonth(int year, int month) {
     int count = 30;
@@ -114,6 +114,20 @@ class DateUtil {
       default:
     }
     return count;
+  }
+  // 指定日期是一周的第几天
+  static int dayOfWeek(DateTime time) {
+    DateTime theTime = DateTime(time.year, time.month);
+    Duration duration = time.difference(theTime);
+    int diff = (duration.inDays ~/ 7).toInt();
+    return diff + 1;
+  }
+  // 指定日期月份1号星期
+  static int firstWeekdayOfMonth(DateTime time) {
+    DateTime theTime = DateTime(time.year, time.month, 1);
+    int weekday = theTime.weekday;
+    print('weekday: $weekday');
+    return weekday;
   }
 
 }

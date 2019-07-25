@@ -11,7 +11,7 @@ class CalendarModel {
   }
 
   bool get isToday {
-    return dateTime.difference(DateTime.now()).inDays == 0; 
+    return dateTime.difference(DateTime.now().add(Duration(days: 56))).inDays == 0; 
   }
   bool isSelected;
   bool isSchedule;// 是否有事项
