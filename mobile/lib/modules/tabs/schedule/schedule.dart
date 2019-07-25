@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:znk/core/user/index.dart';
-import 'package:znk/utils/calendar/head.dart';
+import 'package:znk/utils/calendar/core/widget/head.dart';
 
 class Schedule extends StatefulWidget {
   UserRepository _userRepository;
