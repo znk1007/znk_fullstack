@@ -105,7 +105,7 @@ func (c *conn) SetWriteDeadline(t time.Time) error {
 	return c.wp.SetWriteDeadline(t)
 }
 
-func (c *conn) ServerHTTP(w http.ResponseWriter, r *http.Request) {
+func (c *conn) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	<-c.closed
 }
 

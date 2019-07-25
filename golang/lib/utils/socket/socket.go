@@ -12,6 +12,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/znk_fullstack/golang/lib/utils/socket/polling"
+	"github.com/znk_fullstack/golang/lib/utils/socket/websocket"
+
 	protos "github.com/znk_fullstack/golang/lib/utils/socket/protos/generated"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/transport"
@@ -334,11 +337,43 @@ func (s *session) NextReader() (FrameType, io.ReadCloser, error) {
 				return 0, nil, e
 			}
 			s.setDeadline()
+		case primary.Close:
+			r.Close()
+			s.Close()
+			return 0, nil, io.EOF
 		case primary.Message:
 			return FrameType(ft), r, nil
 		}
 		r.Close()
 	}
+}
+
+func (s *session) NextWriter(ft FrameType) (io.WriteCloser, error) {
+	return s.nextWriter(primary.FrameType(ft), primary.Message)
+}
+
+func (s *session) URL() url.URL {
+	s.upgradeLocker.RLock()
+	defer s.upgradeLocker.RUnlock()
+	return s.conn.URL()
+}
+
+func (s *session) LocalAddr() net.Addr {
+	s.upgradeLocker.RLock()
+	defer s.upgradeLocker.RUnlock()
+	return s.conn.LocalAddr()
+}
+
+func (s *session) RemoteAddr() net.Addr {
+	s.upgradeLocker.RLock()
+	defer s.upgradeLocker.RUnlock()
+	return s.conn.RemoteAddr()
+}
+
+func (s *session) RemoteHeader() http.Header {
+	s.upgradeLocker.RLock()
+	defer s.upgradeLocker.RUnlock()
+	return s.conn.RemoteHeader()
 }
 
 func (s *session) nextReader() (primary.FrameType, primary.PacketType, io.ReadCloser, error) {
@@ -396,6 +431,85 @@ func (s *session) setDeadline() {
 	}
 }
 
+func (s *session) serverHTTP(w http.ResponseWriter, r *http.Request) {
+	s.upgradeLocker.RLock()
+	conn := s.conn
+	s.upgradeLocker.RUnlock()
+	if h, ok := conn.(http.Handler); ok {
+		h.ServeHTTP(w, r)
+	}
+}
+
+func (s *session) upgrade(transport string, conn primary.Conn) {
+	go s.upgrading(transport, conn)
+}
+
+func (s *session) upgrading(t string, conn primary.Conn) {
+	deadline := time.Now().Add(time.Duration(s.params.PingTimeout))
+	conn.SetReadDeadline(deadline)
+	conn.SetWriteDeadline(deadline)
+
+	ft, pt, r, err := conn.NextReader()
+	if err != nil {
+		conn.Close()
+		return
+	}
+	if pt != primary.Ping {
+		conn.Close()
+		return
+	}
+	if err := r.Close(); err != nil {
+		conn.Close()
+		return
+	}
+	w, err := conn.NextWriter(ft, pt)
+	if err != nil {
+		conn.Close()
+		return
+	}
+	if _, err := io.Copy(w, r); err != nil {
+		conn.Close()
+		return
+	}
+	if err := w.Close(); err != nil {
+		conn.Close()
+		return
+	}
+	s.upgradeLocker.RLock()
+	old := s.conn
+	s.upgradeLocker.RUnlock()
+	p, ok := old.(transport.Pauser)
+	if !ok {
+		conn.Close()
+		return
+	}
+	p.Pasue()
+	defer func() {
+		if p != nil {
+			p.Resume()
+		}
+	}()
+	_, pt, r, err = conn.NextReader()
+	if err != nil {
+		conn.Close()
+		return
+	}
+	if pt != primary.Upgrade {
+		conn.Close()
+		return
+	}
+	if err := r.Close(); err != nil {
+		conn.Close()
+		return
+	}
+	s.upgradeLocker.Lock()
+	s.conn = conn
+	s.transport = t
+	s.upgradeLocker.Unlock()
+	p = nil
+	old.Close()
+}
+
 type manager struct {
 	SessionIDGenerator
 	s      map[string]*session
@@ -431,4 +545,176 @@ func (m *manager) Remove(sid string) {
 		return
 	}
 	delete(m.s, sid)
+}
+
+func defaultChecker(*http.Request) (http.Header, error) {
+	return nil, nil
+}
+
+func defaultInitor(*http.Request, Conn) {}
+
+// Options 连接选项
+type Options struct {
+	RequestChecker     func(*http.Request) (http.Header, error)
+	ConnInitor         func(*http.Request, Conn)
+	PingTimeout        time.Duration
+	PingInterval       time.Duration
+	Transports         []transport.Transport
+	SessionIDGenerator SessionIDGenerator
+}
+
+// getRquestChecker 获取请求校验器
+func (op *Options) getRquestChecker() func(*http.Request) (http.Header, error) {
+	if op != nil && op.RequestChecker != nil {
+		return op.RequestChecker
+	}
+	return defaultChecker
+}
+
+func (op *Options) getConnInitor() func(*http.Request, Conn) {
+	if op != nil && op.ConnInitor != nil {
+		return op.ConnInitor
+	}
+	return defaultInitor
+}
+
+func (op *Options) getPintTimeout() time.Duration {
+	if op != nil && op.PingTimeout != 0 {
+		return op.PingTimeout
+	}
+	return time.Minute
+}
+
+func (op *Options) getPingInterval() time.Duration {
+	if op != nil && op.PingInterval != 0 {
+		return op.PingInterval
+	}
+	return time.Second * 20
+}
+
+func (op *Options) getTransports() []transport.Transport {
+	if op != nil && len(op.Transports) != 0 {
+		return op.Transports
+	}
+	return []transport.Transport{
+		polling.Default,
+		websocket.Default,
+	}
+}
+
+func (op *Options) getSessionIDGenerator() SessionIDGenerator {
+	if op != nil && op.SessionIDGenerator != nil {
+		return op.SessionIDGenerator
+	}
+	return &defaultIDGenerator{}
+}
+
+// Server 服务端对象
+type Server struct {
+	transports     *transport.Manager
+	pingInterval   time.Duration
+	pingTimeout    time.Duration
+	sessions       *manager
+	requestChecker func(*http.Request) (http.Header, error)
+	connInitor     func(*http.Request, Conn)
+	locker         sync.RWMutex
+	connChan       chan Conn
+	closeOnce      sync.Once
+}
+
+// NewServer 实例化服务端对象
+func NewServer(ops *Options) (*Server, error) {
+	tm := transport.NewManager(ops.getTransports())
+	return &Server{
+		transports:     tm,
+		pingInterval:   ops.getPingInterval(),
+		pingTimeout:    ops.getPintTimeout(),
+		requestChecker: ops.getRquestChecker(),
+		connInitor:     ops.getConnInitor(),
+		sessions:       newManager(ops.getSessionIDGenerator()),
+		connChan:       make(chan Conn, 1),
+	}, nil
+}
+
+// Accept 接收连接
+func (s *Server) Accept() (Conn, error) {
+	cc := <-s.connChan
+	if cc == nil {
+		return nil, io.EOF
+	}
+	return cc, nil
+}
+
+// ServeHTTP 连接服务端请求
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	sid := query.Get("sid")
+	session := s.sessions.Get(sid)
+	tpStr := query.Get("transport")
+	tp := s.transports.Get(tpStr)
+	if tp == nil {
+		http.Error(w, "invalid transport", http.StatusBadRequest)
+		return
+	}
+	header, err := s.requestChecker(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+
+	for k, v := range header {
+		w.Header()[k] = v
+	}
+	if session == nil {
+		if sid != "" {
+			http.Error(w, "invalid sid", http.StatusBadRequest)
+			return
+		}
+		conn, err := tp.Accept(w, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		params := protos.ConnParams{
+			PingInterval: int64(s.pingInterval),
+			PingTimeout:  int64(s.pingTimeout),
+			Upgrades:     s.transports.UpgradeFrom(tpStr),
+		}
+		session, err = newSession(s.sessions, tpStr, conn, params)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		s.connInitor(r, session)
+		go func() {
+			w, err := session.nextWriter(primary.FrameString, primary.Open)
+			if err != nil {
+				session.Close()
+				return
+			}
+			if _, err := primary.WriteTo(session.params, w); err != nil {
+				w.Close()
+				session.Close()
+				return
+			}
+			if err := w.Close(); err != nil {
+				session.Close()
+				return
+			}
+			s.connChan <- session
+		}()
+	}
+	if session.Transport() != tpStr {
+		conn, err := tp.Accept(w, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		session.upgrade(tpStr, conn)
+		if handler, ok := conn.(http.Handler); ok {
+			handler.ServeHTTP(w, r)
+		}
+		return
+	}
+	session.serverHTTP(w, r)
 }

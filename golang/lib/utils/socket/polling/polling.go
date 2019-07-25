@@ -327,7 +327,7 @@ func (s *serverConn) RemoteHeader() http.Header {
 	return s.remoteHeader
 }
 
-func (s *serverConn) ServerHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *serverConn) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		if jsonp := r.URL.Query().Get("j"); jsonp != "" {
