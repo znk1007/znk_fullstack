@@ -15,6 +15,35 @@ class CalendarHead extends StatefulWidget {
 class _CalendarHeadState extends State<CalendarHead> {
   @override
   Widget build(BuildContext context) {
+    List<Widget> children = [
+      Expanded(
+        child: widget.headTool.leftView,
+      ),
+      Expanded(
+        flex: 2,
+        child: widget.headTool.titleView,
+      ),
+      Expanded(
+        child: widget.headTool.rightView,
+      ),
+    ];
+    if (widget.headTool.statusView != null) {
+      children = [
+        Expanded(
+          child: widget.headTool.leftView,
+        ),
+        Expanded(
+          flex: 2,
+          child: widget.headTool.titleView,
+        ),
+        Expanded(
+          child: widget.headTool.statusView,
+        ),
+        Expanded(
+          child: widget.headTool.rightView,
+        )
+    ];
+    }
     return Container(
       width: Device.width,
       height: Device.relativeHeight(50),
@@ -23,13 +52,8 @@ class _CalendarHeadState extends State<CalendarHead> {
            widget.headTool.backgroundView,
            Container(
              child: Row(
-               children: <Widget>[
-                 widget.headTool.leftView,
-                 widget.headTool.titleView,
-                 widget.headTool.statusView,
-                 widget.headTool.rightView,
-               ],
-             ),
+                children: children,
+             )             
            ),
          ],
        ),

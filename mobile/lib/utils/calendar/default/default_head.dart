@@ -6,7 +6,8 @@ import 'package:znk/utils/calendar/custom/custom_head.dart';
 
 class DefaultHead implements CustomHead {
   String _statusText = '';
-  String _title = '';
+  String _title = 'data';
+  final _titleWidth = Device.relativeWidth(150);
   @override
   Widget get backgroundView => Container(
     color: Colors.grey[100],
@@ -14,7 +15,6 @@ class DefaultHead implements CustomHead {
 
   @override
   Widget get leftView => Container(
-    margin: EdgeInsets.only(left: 20),
     child: FlatButton(
       child: Icon(
         Icons.arrow_left,
@@ -41,12 +41,12 @@ class DefaultHead implements CustomHead {
 
 
   @override
-  Widget get statusView => Container();
+  Widget get statusView => null;
 
 
   @override
   Widget get titleView => Container(
-    width: Device.relativeWidth(150),
+    alignment: Alignment.center,
     child: Text(
       _title
     ),
