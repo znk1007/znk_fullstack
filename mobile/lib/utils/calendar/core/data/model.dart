@@ -14,7 +14,7 @@ class CalendarModel {
     return dateTime.difference(DateTime.now().add(Duration(days: 56))).inDays == 0; 
   }
   bool isSelected;
-  bool isSchedule;// 是否有事项
+  bool hasSchedule;// 是否有事项
 }
 
 class ModelManager {
@@ -27,7 +27,23 @@ class ModelManager {
   }
   static ModelManager _inner;
   ModelManager._();
-  
-  
+  // 模型
+  List<CalendarModel> models;
+  // 当前页码
+  int currentPage;
+
+  int _firstYear = 1930;
+
+  int _lastYear = 2100;
+  // 预加载数据
+  Future preLoad({int startYear = 1900, int endYear = 2100}) async {
+    int s = startYear < _firstYear ? startYear : _firstYear;
+    _firstYear = s;
+    int e = endYear > _lastYear ? endYear : _lastYear;
+    _lastYear = e;
+    for (var i = _firstYear; i < _lastYear; i++) {
+      
+    }
+  }
 
 }
