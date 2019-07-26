@@ -214,10 +214,51 @@ func NewDecoder(r FrameReader) *Decoder {
 	}
 }
 
+// Close 关闭
 func (d *Decoder) Close() error {
 	if d.lastFrame != nil {
 		d.lastFrame.Close()
 		d.lastFrame = nil
 	}
 	return nil
+}
+
+// DiscardLast 禁用最后一个
+func (d *Decoder) DiscardLast() (err error) {
+	if d.lastFrame != nil {
+		err = d.lastFrame.Close()
+		d.lastFrame = nil
+	}
+	return
+}
+
+func (d *Decoder) DecodeHeader(header *protos.Header, event *string) error {
+	ft, r, err := d.r.NextReader()
+	if err != nil {
+		return err
+	}
+	if ft != Text {
+		return errors.New("first packet should be text frame")
+	}
+	d.lastFrame = r
+	br, ok := r.(byteReader)
+	if !ok {
+		br = bufio.NewReader(r)
+	}
+	d.packetReader = br
+	bufCount, err := d.readHeader(header)
+}
+
+func (d *Decoder) readHeader(header *protos.Header) (uint64, error) {
+	var bt byte
+	bt, err := d.packetReader.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+	header.Type = protos.Header_Type(bt - '0')
+	if header.Type >= protos.Header_typeMax {
+		return 0, errors.New("invalid packet type")
+	}
+	// num, hasNum, err :=
+	return 0, err
 }

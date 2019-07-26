@@ -122,7 +122,7 @@ class UserRepository {
       online: online,
     );
     final res = await updateOnline.update(ctx);
-    return res.status == 1;
+    return res != null && res.status == 1;
   }
 
 }
