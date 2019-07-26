@@ -34,11 +34,11 @@ class ModelManager {
   // 当前页码
   int currentPage;
 
-  int _firstYear = 1930;
+  int _firstYear = 1960;
 
-  int _lastYear = 2100;
+  int _lastYear = 2060;
   // 预加载数据
-  Future preLoad({int startYear = 1900, int endYear = 2100, int currentYear = -1, int currentMonth = -1}) async {
+  Future preLoad({int startYear = 1960, int endYear = 2060, int currentYear = -1, int currentMonth = -1}) async {
     int s = startYear < _firstYear ? startYear : _firstYear;
     _firstYear = s;
     int currentMonthIdx = 0;
@@ -56,6 +56,9 @@ class ModelManager {
         }
         currentMonthIdx++;
         int days = DateUtil.daysOfMonth(i, j);
+        for (var k = 0; k < days; k++) {
+          
+        }
       }
     }
   }
