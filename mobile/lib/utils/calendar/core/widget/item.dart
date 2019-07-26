@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:znk/utils/calendar/core/data/model.dart';
+import 'package:znk/utils/calendar/custom/custom_date_help.dart';
 
 class CalendarItem extends StatefulWidget {
-  
-  CalendarItem({Key key}) : super(key: key);
+  CustomDateHelper dateHelper;
+  CalendarModel model;
+  CalendarItem({Key key, @required this.dateHelper, @required this.model}) : super(key: key);
 
   _CalendarItemState createState() => _CalendarItemState();
 }

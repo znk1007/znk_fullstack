@@ -16,3 +16,18 @@ class CalendarModel {
   bool isSelected;
   bool isSchedule;// 是否有事项
 }
+
+class ModelManager {
+  // 单例
+  static ModelManager get instance {
+    if (_inner == null) {
+      _inner = ModelManager._();
+    } 
+    return _inner;
+  }
+  static ModelManager _inner;
+  ModelManager._();
+  
+  
+
+}
