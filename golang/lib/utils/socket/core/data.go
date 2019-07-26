@@ -1,12 +1,24 @@
 package core
 
 import (
+	"bufio"
+	"encoding/json"
 	"errors"
 	"io"
 	"reflect"
 
+	_ "github.com/gogo/protobuf/io"
 	protos "github.com/znk_fullstack/golang/lib/utils/socket/protos/generated"
 )
+
+type byteWriter interface {
+	io.Writer
+	WriteByte(byte) error
+}
+
+type flusher interface {
+	Flush() error
+}
 
 // FrameWriter 数据写入器
 type FrameWriter interface {
@@ -40,6 +52,77 @@ func (e *Encoder) writeBuffer(w io.WriteCloser, buffer []byte) error {
 	defer w.Close()
 	_, err := w.Write(buffer)
 	return err
+}
+
+func (e *Encoder) writeUint64(w byteWriter, i uint64) error {
+	base := uint64(1)
+	for i/base > 10 {
+		base *= 10
+	}
+	for base > 0 {
+		p := i / base
+		if err := w.WriteByte(byte(p) + '0'); err != nil {
+			return err
+		}
+		i -= p * base
+		base /= 10
+	}
+	return nil
+}
+
+func (e *Encoder) writePacket(w io.WriteCloser, h protos.Header, args []interface{}) ([][]byte, error) {
+	defer w.Close()
+	bw, ok := w.(byteWriter)
+	if !ok {
+		bw = bufio.NewWriter(w)
+	}
+	max := uint64(0)
+	bufs, err := e.attachBuffer(reflect.ValueOf(args), &max)
+	if err != nil {
+		return nil, err
+	}
+	if len(bufs) > 0 && (h.Type == protos.Header_event || h.Type == protos.Header_ack) {
+		h.Type += 3
+	}
+	if err := bw.WriteByte(byte(h.Type + '0')); err != nil {
+		return nil, err
+	}
+	if h.Type == protos.Header_binaryAck || h.Type == protos.Header_binaryEvent {
+		if err := e.writeUint64(bw, max); err != nil {
+			return nil, err
+		}
+		if err := bw.WriteByte('-'); err != nil {
+			return nil, err
+		}
+	}
+	if h.Namespace != "" {
+		if _, err := bw.Write([]byte(h.Namespace)); err != nil {
+			return nil, err
+		}
+		if h.ID != 0 || args != nil {
+			if err := bw.WriteByte(','); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if h.NeedAck {
+		if err := e.writeUint64(bw, h.ID); err != nil {
+			return nil, err
+		}
+	}
+	if args != nil {
+		// fullWriter := gogoio.NewFullWriter(bw).WriteMsg(args)
+		if err := json.NewEncoder(bw).Encode(args); err != nil {
+			return nil, err
+		}
+	}
+	if f, ok := bw.(flusher); ok {
+		if err := f.Flush(); err != nil {
+			return nil, err
+		}
+	}
+	return bufs, nil
 }
 
 func (e *Encoder) attachBuffer(v reflect.Value, idx *uint64) ([][]byte, error) {
