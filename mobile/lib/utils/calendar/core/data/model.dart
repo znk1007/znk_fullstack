@@ -1,3 +1,5 @@
+import 'package:znk/utils/calendar/core/data/util.dart';
+
 class CalendarModel {
   DateTime dateTime;
   int get year {
@@ -36,13 +38,25 @@ class ModelManager {
 
   int _lastYear = 2100;
   // 预加载数据
-  Future preLoad({int startYear = 1900, int endYear = 2100}) async {
+  Future preLoad({int startYear = 1900, int endYear = 2100, int currentYear = -1, int currentMonth = -1}) async {
     int s = startYear < _firstYear ? startYear : _firstYear;
     _firstYear = s;
+    int currentMonthIdx = 0;
     int e = endYear > _lastYear ? endYear : _lastYear;
     _lastYear = e;
     for (var i = _firstYear; i < _lastYear; i++) {
-      
+      for (var j = 1; j <= 12; j++) {
+        if (currentYear == -1 || currentMonth == -1) {
+          DateTime now = DateTime.now();
+          currentYear = now.year;
+          currentMonth = now.month;
+        }
+        if (i == currentYear && j == currentMonth) {
+          currentPage = currentMonthIdx;
+        }
+        currentMonthIdx++;
+        int days = DateUtil.daysOfMonth(i, j);
+      }
     }
   }
 
