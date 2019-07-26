@@ -44,7 +44,22 @@ func (e *Encoder) Encode(h protos.Header, args []interface{}) (err error) {
 	if err != nil {
 		return
 	}
-
+	var bufs [][]byte
+	bufs, err = e.writePacket(w, h, args)
+	if err != nil {
+		return
+	}
+	for _, b := range bufs {
+		w, err = e.w.NextWriter(Binary)
+		if err != nil {
+			return
+		}
+		err = e.writeBuffer(w, b)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 // 写入二进制数据
@@ -170,4 +185,39 @@ func (e *Encoder) attachBuffer(v reflect.Value, idx *uint64) ([][]byte, error) {
 		}
 	}
 	return ret, nil
+}
+
+// FrameReader 数据读取接口
+type FrameReader interface {
+	NextReader() (FrameType, io.ReadCloser, error)
+}
+
+// Decoder 解码器
+type Decoder struct {
+	r            FrameReader
+	lastFrame    io.ReadCloser
+	packetReader byteReader
+	bufferCount  uint64
+	isEvent      bool
+}
+
+type byteReader interface {
+	io.Reader
+	ReadByte() (byte, error)
+	UnreadByte() error
+}
+
+// NewDecoder 创建解码器
+func NewDecoder(r FrameReader) *Decoder {
+	return &Decoder{
+		r: r,
+	}
+}
+
+func (d *Decoder) Close() error {
+	if d.lastFrame != nil {
+		d.lastFrame.Close()
+		d.lastFrame = nil
+	}
+	return nil
 }
