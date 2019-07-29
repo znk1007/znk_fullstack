@@ -36,7 +36,9 @@ class ZnkProject extends StatelessWidget {
   UserRepository userRepository;
   ZnkProject({Key key, @required this.userRepository}) {
     assert(userRepository != null);
-    CalendarManager.instance.preLoad(loadDay: true);
+    print('1: ${DateTime.now()}');
+    CalendarManager.instance.preLoad();
+    print('2: ${DateTime.now()}');
   }
     
 

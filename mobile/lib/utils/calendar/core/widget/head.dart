@@ -18,7 +18,6 @@ class CalendarHead extends StatefulWidget {
 class _CalendarHeadState extends State<CalendarHead> {
   @override
   Widget build(BuildContext context) {
-    DateUtil.firstWeekdayOfMonth(DateTime.now().add(Duration(days: 69)));
     if (widget.headTool == null) {
       widget.headTool = DefaultHead();
     }

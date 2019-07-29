@@ -40,22 +40,22 @@ class CalendarManager {
   }
   static CalendarManager _inner;
   CalendarManager._() {
-    _models = [];
-    _selectedModels = [];
+    _modelsMap = Map();
+    _selectedModels = Map();
   }
 
-  List<CalendarModel> get calendarModels {
-    return _models;
+  Map<String, CalendarModel> get calendarModelsMap {
+    return _modelsMap;
   }
 
-  List<CalendarModel> get calendarSelectedModels {
+  Map<String, CalendarModel> get calendarSelectedModelsMap {
     return _selectedModels;
   }
 
-  List<CalendarModel> _selectedModels;
+  Map<String, CalendarModel> _selectedModels;
 
   // 模型
-  List<CalendarModel> _models;
+  Map<String, CalendarModel> _modelsMap;
   // 当前页码
   int currentPage;
 
@@ -63,18 +63,18 @@ class CalendarManager {
 
   int _lastYear = 2060;
 
-  bool _loadDay = false;
+  String _key(int year, int month, int day) {
+    return '$year' + '$month' + '$day';
+  }
 
   // 预加载数据
-  List<CalendarModel> preLoad({
+  void preLoad({
     int startYear = 1960, 
     int endYear = 2060, 
     int currentYear = -1, 
     int currentMonth = -1,
-    bool loadDay = false,
   }) {
-    _loadDay = loadDay;
-    _models = [];
+    _modelsMap = Map();
     int s = startYear < _firstYear ? startYear : _firstYear;
     _firstYear = s;
     int currentMonthIdx = 0;
@@ -90,26 +90,78 @@ class CalendarManager {
         if (i == currentYear && j == currentMonth) {
           currentPage = currentMonthIdx;
         }
-        currentMonthIdx++;
-        if (_loadDay) {
-          int days = DateUtil.daysOfMonth(i, j);
-          for (var k = 1; k <= days; k++) {
-            CalendarModel model = CalendarModel()
-              ..dateTime = DateTime(i, j, k);
-              _models.add(model);
-          }
-        } else {
+        
+        int days = DateUtil.daysOfMonth(i, j);
+        for (var k = 1; k <= days; k++) {
           CalendarModel model = CalendarModel()
-            ..dateTime = DateTime(i, j);
-          _models.add(model);
+            ..dateTime = DateTime(i, j, k);
+            _modelsMap[_key(i, j, k)] = model;
+        }
+        currentMonthIdx++;
+      }
+    }
+  }
+
+  CalendarModel getModel(int year, int month, int day) {
+    CalendarModel model = _modelsMap[_key(year, month, day)];
+    return model;
+  }
+
+  List<CalendarModel> getModels(int year, int month, int startDay, int offset) {
+    CalendarModel temp = getModel(year, month, startDay);
+    if (temp == null) {
+      return null;
+    }
+    List<CalendarModel> temps = [];
+    if (offset == 0) {
+      return [temp];
+    } else if (offset > 0) {
+      int curMonthDays = DateUtil.daysOfMonth(year, month);
+      for (var i = 1; i <= offset; i++) {
+        int tempDay = startDay + i;
+        if (tempDay > curMonthDays) {
+          tempDay -= curMonthDays;
+          month += 1;
+        }
+        print('> 0 temp day: $tempDay');
+        CalendarModel model = _modelsMap[_key(year, month, tempDay)];
+        if (model != null) {
+          temps.add(model);
+        }
+      }
+    } else {
+      int curMonthDays = DateUtil.daysOfMonth(year, month-1);
+      offset = -offset;
+      for (var i = offset; i > 0; i--) {
+        int tempDay = startDay - i;
+        if (tempDay <= 0) {
+          tempDay = curMonthDays + tempDay;
+          month -= 1;
+        }
+        CalendarModel model = _modelsMap[_key(year, month, tempDay)];
+        if (model != null) {
+          temps.add(model);
         }
       }
     }
-    return _models;
+    return temps;
+  }
+
+  // 切割模型
+  List<CalendarModel> subModels(int year, int month) {
+    List<CalendarModel> models = [];
+    
+    for (var v in _modelsMap.values) {
+      if (v.year == year && v.month == month) {
+        models.add(v);
+      }
+    }
+    return models;
   }
 
   void mapToView(int year, int month) {
     final numberOflines = DateUtil.numberOfLinesOfMonth(year, month);
+    int firstWeekday = DateUtil.firstWeekdayOfMonth_1(year, month);
     final totalNums = numberOflines * 7;
     for (var i = 0; i < totalNums; i++) {
       
