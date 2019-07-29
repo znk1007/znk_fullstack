@@ -17,14 +17,6 @@ class _ScheduleState extends State<Schedule> {
   
   @override
   Widget build(BuildContext context) {
-    final models = CalendarManager.instance.getModels(2019, 7, 29, 7);
-    if (models != null) {
-      for (var m in models) {
-        print('year ${m.year}');
-        print('month ${m.month}');
-        print('day ${m.day}');
-      }
-    }
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

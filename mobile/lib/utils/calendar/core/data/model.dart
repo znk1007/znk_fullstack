@@ -107,7 +107,7 @@ class CalendarManager {
     return model;
   }
 
-  List<CalendarModel> getModels(int year, int month, int startDay, int offset) {
+  List<CalendarModel> _getModels(int year, int month, int startDay, int offset) {
     CalendarModel temp = getModel(year, month, startDay);
     if (temp == null) {
       return null;
@@ -150,7 +150,6 @@ class CalendarManager {
   // 切割模型
   List<CalendarModel> subModels(int year, int month) {
     List<CalendarModel> models = [];
-    
     for (var v in _modelsMap.values) {
       if (v.year == year && v.month == month) {
         models.add(v);
@@ -162,9 +161,18 @@ class CalendarManager {
   void mapToView(int year, int month) {
     final numberOflines = DateUtil.numberOfLinesOfMonth(year, month);
     int firstWeekday = DateUtil.firstWeekdayOfMonth_1(year, month);
+    // 1 -1
+    // 2 -2
+    // 3 -3
+    // 4 -4
+    // 5 -5
+    // 6 -6
+    // 7 -0
+    
     final totalNums = numberOflines * 7;
     for (var i = 0; i < totalNums; i++) {
-      
+      //上个月最后几天 >= 0
+
     }
   }
 
