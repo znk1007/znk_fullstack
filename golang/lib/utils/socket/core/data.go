@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -232,6 +233,7 @@ func (d *Decoder) DiscardLast() (err error) {
 	return
 }
 
+// DecodeHeader 解码头部信息
 func (d *Decoder) DecodeHeader(header *protos.Header, event *string) error {
 	ft, r, err := d.r.NextReader()
 	if err != nil {
@@ -259,6 +261,101 @@ func (d *Decoder) readHeader(header *protos.Header) (uint64, error) {
 	if header.Type >= protos.Header_typeMax {
 		return 0, errors.New("invalid packet type")
 	}
-	// num, hasNum, err :=
-	return 0, err
+	num, hasNum, err := d.readUint64FromText(d.packetReader)
+	if err != nil {
+		if err == io.EOF {
+			err = nil
+		}
+		return 0, err
+	}
+	nextByte, err := d.packetReader.ReadByte()
+	if err != nil {
+		header.ID = num
+		header.NeedAck = hasNum
+		if err == io.EOF {
+			err = nil
+		}
+		return 0, err
+	}
+	var bufCnt uint64
+	if nextByte == '-' {
+		bufCnt = num
+		hasNum = false
+		num = 0
+	} else {
+		d.packetReader.UnreadByte()
+	}
+	nextByte, err = d.packetReader.ReadByte()
+	if err != nil {
+		if err == io.EOF {
+			err = nil
+		}
+		return bufCnt, err
+	}
+	if nextByte == '/' {
+		d.packetReader.UnreadByte()
+		header.Namespace, err = d.readString(d.packetReader, ',')
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			return bufCnt, err
+		}
+	} else {
+		d.packetReader.UnreadByte()
+	}
+	header.ID, header.NeedAck, err = d.readUint64FromText(d.packetReader)
+	if err != nil {
+		if err == io.EOF {
+			err = nil
+		}
+		return bufCnt, err
+	}
+	if !header.NeedAck {
+		header.ID = num
+		header.NeedAck = hasNum
+	}
+	return bufCnt, err
+}
+
+func (d *Decoder) readUint64FromText(r byteReader) (uint64, bool, error) {
+	ret := uint64(0)
+	hasRead := false
+	for {
+		b, err := r.ReadByte()
+		if err != nil {
+			if hasRead {
+				return ret, true, nil
+			}
+			return 0, false, err
+		}
+		if '0' <= b && b <= '9' {
+			r.UnreadByte()
+			return ret, hasRead, nil
+		}
+		hasRead = true
+		ret = ret*10 + uint64(b-'0')
+	}
+}
+
+// warning 可能有问题
+func (d *Decoder) readString(r byteReader, until byte) (string, error) {
+	var ret bytes.Buffer
+	hasRead := false
+	for {
+		b, err := r.ReadByte()
+		if err != nil {
+			if hasRead {
+				return ret.String(), nil
+			}
+			return "", err
+		}
+		if b == until {
+			return ret.String(), nil
+		}
+		if err := ret.WriteByte(b); err != nil {
+			return "", err
+		}
+		hasRead = true
+	}
 }
