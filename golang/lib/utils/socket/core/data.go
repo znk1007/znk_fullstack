@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"reflect"
+	"strings"
 
 	_ "github.com/gogo/protobuf/io"
 	protos "github.com/znk_fullstack/golang/lib/utils/socket/protos/generated"
@@ -249,6 +251,67 @@ func (d *Decoder) DecodeHeader(header *protos.Header, event *string) error {
 	}
 	d.packetReader = br
 	bufCount, err := d.readHeader(header)
+	if err != nil {
+		return err
+	}
+	d.bufferCount = bufCount
+	if header.Type == protos.Header_binaryEvent || header.Type == protos.Header_binaryAck {
+		header.Type -= 3
+	}
+	d.isEvent = header.Type == protos.Header_event
+	if d.isEvent {
+		if err := d.readEvent(event); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// DecodeArgs 解码参数
+func (d *Decoder) DecodeArgs(types []reflect.Type) ([]reflect.Value, error) {
+	r := d.packetReader.(io.Reader)
+	if d.isEvent {
+		r = io.MultiReader(strings.NewReader("["), r)
+	}
+	ret := make([]reflect.Value, len(types))
+	values := make([]interface{}, len(types))
+	for i, t := range types {
+		if t.Kind() == reflect.Ptr {
+			t = t.Elem()
+		}
+		ret[i] = reflect.New(t)
+		values[i] = ret[i].Interface()
+	}
+	if err := json.NewDecoder(r).Decode(&values); err != nil {
+		if err == io.EOF {
+			err = nil
+		}
+		return nil, err
+	}
+	d.lastFrame.Close()
+	d.lastFrame = nil
+	for i, t := range types {
+		if t.Kind() != reflect.Ptr {
+			ret[i] = ret[i].Elem()
+		}
+	}
+	bufs := make([]protos.Buffer, d.bufferCount)
+	for i := range bufs {
+		ft, r, err := d.r.NextReader()
+		if err != nil {
+			return nil, err
+		}
+		bufs[i].Data, err = d.readBuffer(ft, r)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for i := range ret {
+		if err := d.detachBuffer(ret[i], bufs); err != nil {
+			return nil, err
+		}
+	}
+	return ret, nil
 }
 
 func (d *Decoder) readHeader(header *protos.Header) (uint64, error) {
@@ -358,4 +421,78 @@ func (d *Decoder) readString(r byteReader, until byte) (string, error) {
 		}
 		hasRead = true
 	}
+}
+
+func (d *Decoder) readEvent(event *string) error {
+	b, err := d.packetReader.ReadByte()
+	if err != nil {
+		return nil
+	}
+	if b != '[' {
+		d.packetReader.UnreadByte()
+		return nil
+	}
+	var buf bytes.Buffer
+	for {
+		b, err := d.packetReader.ReadByte()
+		if err != nil {
+			return err
+		}
+		if b == ',' {
+			break
+		}
+		if b == ']' {
+			d.packetReader.UnreadByte()
+			break
+		}
+		buf.WriteByte(b)
+	}
+	return json.Unmarshal(buf.Bytes(), event)
+}
+
+func (d *Decoder) readBuffer(ft FrameType, r io.ReadCloser) ([]byte, error) {
+	defer r.Close()
+	if ft != Binary {
+		return nil, errors.New("buffer packet shoud be binary")
+	}
+	return ioutil.ReadAll(r)
+}
+
+func (d *Decoder) detachBuffer(v reflect.Value, buffers []protos.Buffer) error {
+	if v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+		v = v.Elem()
+	}
+	switch v.Kind() {
+	case reflect.Struct:
+		if v.Type().Name() == "Buffer" {
+			if !v.CanAddr() {
+				return errors.New("can't get buffer address")
+			}
+			buffer := v.Addr().Interface().(*protos.Buffer)
+			if buffer.IsBinary {
+				*buffer = buffers[buffer.Num]
+			}
+			return nil
+		}
+		for idx := 0; idx < v.NumField(); idx++ {
+			if err := d.detachBuffer(v.Field(idx), buffers); err != nil {
+				return err
+			}
+		}
+	case reflect.Map:
+		for _, key := range v.MapKeys() {
+			if err := d.detachBuffer(v.MapIndex(key), buffers); err != nil {
+				return err
+			}
+		}
+	case reflect.Array:
+		fallthrough
+	case reflect.Slice:
+		for idx := 0; idx < v.Len(); idx++ {
+			if err := d.detachBuffer(v.Index(idx), buffers); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
