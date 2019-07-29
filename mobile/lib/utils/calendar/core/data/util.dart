@@ -125,8 +125,13 @@ class DateUtil {
   // 指定日期月份1号星期
   static int firstWeekdayOfMonth(DateTime time) {
     DateTime theTime = DateTime(time.year, time.month, 1);
-    int weekday = theTime.weekday;
-    return weekday;
+    return theTime.weekday;
+  }
+  // 每个月行数
+  static int numberOfLinesOfMonth(int year, int month) {
+    int days = daysOfMonth(year, month);
+    int lines = (days ~/ 7).toInt() + 1;
+    return lines;
   }
 
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:znk/core/user/index.dart';
+import 'package:znk/utils/calendar/core/data/model.dart';
+import 'package:znk/utils/calendar/core/data/util.dart';
 import 'package:znk/utils/calendar/core/widget/head.dart';
 
 class Schedule extends StatefulWidget {
@@ -14,6 +16,7 @@ class Schedule extends StatefulWidget {
 class _ScheduleState extends State<Schedule> {
   @override
   Widget build(BuildContext context) {
+    DateUtil.numberOfLinesOfMonth(2019, 7);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

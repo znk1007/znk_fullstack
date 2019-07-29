@@ -10,6 +10,7 @@ import 'package:znk/core/user/index.dart';
 import 'package:znk/core/user/user_repository.dart';
 import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/base/routes.dart';
+import 'package:znk/utils/calendar/core/data/model.dart';
 import 'package:znk/utils/database/user.dart';
 
 import 'modules/launch/launch_screen.dart';
@@ -32,12 +33,12 @@ void main() {
 }
 
 class ZnkProject extends StatelessWidget {
-
-  final UserRepository _userRepository;
-  ZnkProject({Key key, @required UserRepository userRepository}):
-    assert(userRepository != null),
-    _userRepository = userRepository,
-    super(key: key);
+  UserRepository userRepository;
+  ZnkProject({Key key, @required this.userRepository}) {
+    assert(userRepository != null);
+    CalendarManager.instance.preLoad(loadDay: true);
+  }
+    
 
   void loadContactsFromDB(BuildContext ctx) async {
     final docPath = await path.getApplicationDocumentsDirectory();
@@ -49,7 +50,7 @@ class ZnkProject extends StatelessWidget {
     loadContactsFromDB(context);
     Device.getPackageInfo();
     return new MaterialApp(
-      routes: Routes.generate(_userRepository),
+      routes: Routes.generate(userRepository),
       debugShowCheckedModeBanner: false,
       home: BlocBuilder(
         bloc: BlocProvider.of<AuthBloc>(context),
@@ -57,9 +58,9 @@ class ZnkProject extends StatelessWidget {
           if (state is Uninitialized) {
             return LaunchScreen();
           } else if (state is UnAuthenticated) {
-            return LoginPage(userRepository: this._userRepository);
+            return LoginPage(userRepository: this.userRepository);
           } else if (state is Authenticated) {
-            return Tabs(userRepository: this._userRepository);
+            return Tabs(userRepository: this.userRepository);
           } else {
             return LaunchScreen();
           }
