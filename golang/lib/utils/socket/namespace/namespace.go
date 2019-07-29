@@ -72,6 +72,50 @@ func (fh *funcHandler) Call(args []reflect.Value) (ret []reflect.Value, err erro
 	return
 }
 
+type namespaceHandler struct {
+	onConnect    func(c Conn) error
+	onDisconnect func(c Conn, msg string)
+	onError      func(err error)
+	events       map[string]*funcHandler
+}
+
+func newHandler() *namespaceHandler {
+	return &namespaceHandler{
+		events: make(map[string]*funcHandler),
+	}
+}
+
+func (nh *namespaceHandler) OnConnect(f func(Conn) error) {
+	nh.onConnect = f
+}
+
+func (nh *namespaceHandler) OnDisconnect(f func(Conn, string)) {
+	nh.onDisconnect = f
+}
+
+func (nh *namespaceHandler) OnError(f func(error)) {
+	nh.onError = f
+}
+
+func (nh *namespaceHandler) OnEvent(event string, f interface{}) {
+	nh.events[event] = newEventFunc(f)
+}
+
+func (nh *namespaceHandler) getTypes(header protos.Header, event string) []reflect.Type {
+	switch header.Type {
+	case protos.Header_error:
+		fallthrough
+	case protos.Header_event:
+		namespaceHandler := nh.events[event]
+		if namespaceHandler == nil {
+			return nil
+		}
+		return namespaceHandler.argTypes
+	}
+	return nil
+}
+
+// Conn 接口
 type Conn interface {
 	ID() string
 	Close() error
@@ -97,4 +141,10 @@ type writePacket struct {
 
 type conn struct {
 	core.Conn
+	encoder   *core.Encoder
+	decoder   *core.Decoder
+	errorChan chan errorMessage
+	writeChan chan writePacket
+	quitChan  chan struct{}
+	handlers  map[string]*namespaceHandler
 }
