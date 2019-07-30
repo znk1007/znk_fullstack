@@ -16,5 +16,9 @@ class DefaultDateHelper implements CustomDateHelper {
   set monthType(MonthType _monthType) {
     monthType = _monthType;
   }
+
+  @override
+  bool get sundayFirst => true;
+
   
 }

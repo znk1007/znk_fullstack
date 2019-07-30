@@ -158,21 +158,64 @@ class CalendarManager {
     return models;
   }
 
-  void mapToView(int year, int month) {
-    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month);
-    int firstWeekday = DateUtil.firstWeekdayOfMonth_1(year, month);
-    // 1 -1
-    // 2 -2
-    // 3 -3
-    // 4 -4
-    // 5 -5
-    // 6 -6
-    // 7 -0
-    
+  void mapToView(int year, int month, {bool sundayFirst = false}) {
+    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, true);
+    int firstWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
+    int curMonthDays = DateUtil.daysOfMonth(year, month);
+    // last month
+    // 1 sundayFirst == true ? -1 : -0
+    // 2 sundayFirst == true ? -2 : -1
+    // 3 sundayFirst == true ? -3 : -2
+    // 4 sundayFirst == true ? -4 : -3
+    // 5 sundayFirst == true ? -5 : -4
+    // 6 sundayFirst == true ? -6 : -5
+    // 7 sundayFirst == true ? -0 : -6
+    // next month
+    // total-current-last=next *
+    // 1 sundayFirst == true ? +5 : +6
+    // 2 sundayFirst == true ? +4 : +5
+    // 3 sundayFirst == true ? +3 : +4
+    // 4 sundayFirst == true ? +2 : +3
+    // 5 sundayFirst == true ? +1 : +2
+    // 6 sundayFirst == true ? +0 : +1
+    // 7 sundayFirst == true ? +6 : +0
+    int lastMonth = month - 1;
+    int lastMonthDays = 0;
+    int lastMonthDiff = -1;
+    int fixLastMontDays = sundayFirst ? firstWeekday == 7 ? 0 : firstWeekday : firstWeekday - 1;
+    int nextMonth = month+1;
+    int tempCurMonthDays = curMonthDays + fixLastMontDays;
+    int currentMonthIdx = 1;
+
     final totalNums = numberOflines * 7;
     for (var i = 0; i < totalNums; i++) {
-      //上个月最后几天 >= 0
-
+      //last month      
+      if (i < fixLastMontDays) {
+        int lastYear = year;
+        if (lastMonth <= 0) {
+          lastMonth = 12;
+          lastYear--;
+        }
+        if (lastMonthDiff == -1) {
+          lastMonthDays = DateUtil.daysOfMonth(lastYear, lastMonth);
+          lastMonthDiff = firstWeekday;
+        }
+        String key = _key(lastYear, lastMonth, lastMonthDays);
+        lastMonthDays--;
+      } else if (i >= tempCurMonthDays) {
+        // next month
+        int nextYear = year;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear++;
+        }
+        String key = _key(nextYear, nextMonth, i-tempCurMonthDays+1);
+        // print('\nnext: $key');
+        
+      } else {
+        String key = _key(year, month, currentMonthIdx++);
+        print('\ncurrent key: $key');
+      }
     }
   }
 

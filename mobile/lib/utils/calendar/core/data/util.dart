@@ -123,20 +123,32 @@ class DateUtil {
     return diff + 1;
   }
   // 指定日期月份1号星期
-  static int firstWeekdayOfMonth(DateTime time) {
+  static int firstWeekdayOfMonthForDateTime(DateTime time) {
     DateTime theTime = DateTime(time.year, time.month, 1);
+    return theTime.weekday;
+  }
+  // 指定年月最后一天的星期
+  static int lastWeekdayOfMonthForYearMonth(int year, int month) {
+    int days = daysOfMonth(year, month);
+    DateTime theTime = DateTime(year, month, days);
     return theTime.weekday;
   }
 
   // 指定日期月份1号星期
-  static int firstWeekdayOfMonth_1(int year, int month) {
+  static int firstWeekdayOfMonthForYearMonth(int year, int month) {
     DateTime theTime = DateTime(year, month, 1);
     return theTime.weekday;
   }
   // 每个月行数
-  static int numberOfLinesOfMonth(int year, int month) {
+  static int numberOfLinesOfMonth(int year, int month, bool fixed) {
+    if (fixed) {
+      return 6;
+    }
     int days = daysOfMonth(year, month);
-    int lines = (days ~/ 7).toInt() + 1;
+    int firstWeekday = firstWeekdayOfMonthForYearMonth(year, month);
+    print('pre idx: ${firstWeekday ~/ 5}');
+    int addtionLine = firstWeekday ~/ 5;
+    int lines = (days ~/ 7).toInt() + addtionLine + 1;
     return lines;
   }
 
