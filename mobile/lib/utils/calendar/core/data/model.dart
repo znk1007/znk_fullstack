@@ -158,7 +158,7 @@ class CalendarManager {
     return models;
   }
 
-  void mapToView(int year, int month, {bool sundayFirst = false}) {
+  List<CalendarModel> mapToView(int year, int month, {bool sundayFirst = true}) {
     final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, true);
     int firstWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
     int curMonthDays = DateUtil.daysOfMonth(year, month);
@@ -188,6 +188,8 @@ class CalendarManager {
     int currentMonthIdx = 1;
 
     final totalNums = numberOflines * 7;
+    String key = '';
+    List<CalendarModel> models = [];
     for (var i = 0; i < totalNums; i++) {
       //last month      
       if (i < fixLastMontDays) {
@@ -200,7 +202,7 @@ class CalendarManager {
           lastMonthDays = DateUtil.daysOfMonth(lastYear, lastMonth);
           lastMonthDiff = firstWeekday;
         }
-        String key = _key(lastYear, lastMonth, lastMonthDays);
+        key = _key(lastYear, lastMonth, lastMonthDays);
         lastMonthDays--;
       } else if (i >= tempCurMonthDays) {
         // next month
@@ -209,14 +211,17 @@ class CalendarManager {
           nextMonth = 1;
           nextYear++;
         }
-        String key = _key(nextYear, nextMonth, i-tempCurMonthDays+1);
+        key = _key(nextYear, nextMonth, i-tempCurMonthDays+1);
         // print('\nnext: $key');
         
       } else {
-        String key = _key(year, month, currentMonthIdx++);
-        print('\ncurrent key: $key');
+        key = _key(year, month, currentMonthIdx++);
+      }
+      if (key.isNotEmpty) {
+        models.add(_modelsMap[key]);
       }
     }
+    return models;
   }
 
 }
