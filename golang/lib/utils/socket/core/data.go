@@ -130,7 +130,6 @@ func (e *Encoder) writePacket(w io.WriteCloser, h protos.Header, args []interfac
 		}
 	}
 	if args != nil {
-		// fullWriter := gogoio.NewFullWriter(bw).WriteMsg(args)
 		if err := json.NewEncoder(bw).Encode(args); err != nil {
 			return nil, err
 		}

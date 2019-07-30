@@ -636,6 +636,14 @@ func NewServer(ops *Options) (*Server, error) {
 	}, nil
 }
 
+// Close 关闭服务
+func (s *Server) Close() error {
+	s.closeOnce.Do(func() {
+		close(s.connChan)
+	})
+	return nil
+}
+
 // Accept 接收连接
 func (s *Server) Accept() (Conn, error) {
 	cc := <-s.connChan
