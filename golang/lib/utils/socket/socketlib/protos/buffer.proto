@@ -1,0 +1,10 @@
+
+syntax = "proto3";
+package socket.go;
+option go_package = "socketproto";
+// buffer: binary buffer for emit args, used for transport 
+message Buffer {
+    bytes data = 1;
+    bool isBinary = 2;
+    uint64 num = 3;
+}

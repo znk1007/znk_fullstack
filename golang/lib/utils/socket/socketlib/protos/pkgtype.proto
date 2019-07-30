@@ -1,0 +1,19 @@
+syntax = "proto3";
+package socket.go;
+option go_package = "socketproto";
+// generate command-line: protoc -I=protos --gogofaster_out=plugins=grpc:protos protos/*.proto
+// PacketType type for packet in transport
+enum PacketType {
+    open = 0;
+    close = 1;
+    ping = 2;
+    pong = 3;
+    message = 4;
+    upgrade = 5;
+    noop = 6;
+}
+// DataType type for data
+enum DataType {
+    string = 0;
+    binary = 1;
+}

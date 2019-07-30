@@ -1,0 +1,21 @@
+syntax = "proto3";
+package socket.go;
+option go_package = "socketproto";
+// packet type for connect to server
+enum Type {
+    connect = 0;
+    disconnect = 1;
+    event = 2;
+    ack = 3;
+    error = 4;
+    binaryEvent = 6;
+    binaryAck = 7;
+    typeMax = 8;
+}
+// header for packet
+message Header {
+    Type t = 1;
+    string namespace = 2;
+    uint64 ID = 3;
+    bool needAck = 4;
+}

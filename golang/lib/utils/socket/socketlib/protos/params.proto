@@ -1,0 +1,11 @@
+syntax = "proto3";
+package socket.go;
+option go_package = "socketproto";
+// generate command-line: protoc -I=protos --gogofaster_out=plugins=grpc:protos protos/*.proto
+// connection parameters for server
+message ConnParameters {
+    int64 pingInterval = 1;
+    int64 pingTimeout = 2;
+    string sID = 3;
+    repeated string upgrades = 4;
+}
