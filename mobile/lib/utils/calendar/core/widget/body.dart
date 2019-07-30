@@ -8,20 +8,24 @@ class CalendarBody extends StatefulWidget {
 }
 
 class _CalendarBodyState extends State<CalendarBody> {
-  List <CalendarModel> models;
+  PageController _controller;
+  int _totalPage = 0;
   @override
   void initState() {
     super.initState();
-    models = [];
+    _controller = PageController(initialPage: CalendarManager.instance.currentPage);
+    _totalPage = CalendarManager.instance.totalPage;
   }
   @override
   Widget build(BuildContext context) {
     return Container(
        child: PageView.builder(
+         itemCount: _totalPage,
+         controller: _controller,
          itemBuilder: (BuildContext ctx, int idx) {
-
+           print('idx: $idx');
          },
-         itemCount: 1,
+         
        ),
     );
   }

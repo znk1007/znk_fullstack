@@ -1,7 +1,5 @@
 import 'package:znk/utils/calendar/core/data/util.dart';
 
-
-
 class CalendarModel {
   DateTime dateTime;
   int get year {
@@ -52,12 +50,18 @@ class CalendarManager {
     return _selectedModels;
   }
 
+  int get totalPage {
+    return _pages;
+  }
+
   Map<String, CalendarModel> _selectedModels;
 
   // 模型
   Map<String, CalendarModel> _modelsMap;
   // 当前页码
-  int currentPage;
+  int currentPage = 0;
+  // 总页数
+  int _pages = 0;
 
   int _firstYear = 1960;
 
@@ -74,6 +78,7 @@ class CalendarManager {
     int currentYear = -1, 
     int currentMonth = -1,
   }) {
+    _pages = (endYear - startYear) * 12;
     _modelsMap = Map();
     int s = startYear < _firstYear ? startYear : _firstYear;
     _firstYear = s;
@@ -158,6 +163,11 @@ class CalendarManager {
     return models;
   }
 
+  List<CalendarModel> load(int startYear, int endYear) {
+
+  }
+
+  // 日期转视图
   List<CalendarModel> mapToView(int year, int month, {bool sundayFirst = true}) {
     final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, true);
     int firstWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
