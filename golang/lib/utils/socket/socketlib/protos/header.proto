@@ -1,6 +1,7 @@
 syntax = "proto3";
 package socket.go;
-option go_package = "socketproto";
+option go_package = "pbs";
+// generate command-line: protoc -I=protos --gogofaster_out=plugins=grpc:protos/pbs protos/*.proto
 // packet type for connect to server
 enum Type {
     connect = 0;
