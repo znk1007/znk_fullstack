@@ -1,11 +1,14 @@
 package socket
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
 )
+
+const isJSON = false
 
 type writer struct {
 	i int64
@@ -21,20 +24,28 @@ func (w *writer) Write(p []byte) (int, error) {
 // writeTo 写入数据
 func writeTo(params pbs.ConnParameters, w io.Writer) (int64, error) {
 
-	bs := []byte(params.String())
-	var err error
-	// bs, err := params.Marshal()
-	if err != nil {
-		return 0, err
+	if isJSON {
+		wr := writer{
+			w: w,
+		}
+		err := json.NewEncoder(&wr).Encode(params)
+		return wr.i, err
+	} else {
+		// bs := []byte(params.String())
+		// var err error
+		bs, err := params.Marshal()
+		if err != nil {
+			return 0, err
+		}
+		wr := &writer{
+			w: w,
+		}
+		_, err = wr.Write(bs)
+		if err != nil {
+			return 0, err
+		}
+		return wr.i, nil
 	}
-	wr := &writer{
-		w: w,
-	}
-	_, err = wr.Write(bs)
-	if err != nil {
-		return 0, err
-	}
-	return wr.i, nil
 }
 
 type reader struct {
@@ -46,28 +57,43 @@ type reader struct {
 func (r *reader) Read(p []byte) (n int, err error) {
 	len, e := r.r.Read(p)
 	r.i += int64(len)
-	return n, e
+	return len, e
 }
 
-func readConnParams(r io.Reader) (*pbs.ConnParameters, error) {
-	defer func() {
-		if closer, ok := r.(io.Closer); ok {
-			closer.Close()
+func readConnParams(r io.Reader) (pbs.ConnParameters, error) {
+	if isJSON {
+		var params pbs.ConnParameters
+		if err := json.NewDecoder(r).Decode(&params); err != nil {
+			return pbs.ConnParameters{}, err
 		}
-	}()
-	rr := &reader{
-		r:   r,
-		buf: make([]byte, 1024*1024),
+		return pbs.ConnParameters{
+			PingInterval: params.PingInterval,
+			PingTimeout:  params.PingTimeout,
+			SID:          params.SID,
+			Upgrades:     params.Upgrades,
+		}, nil
+	} else {
+		defer func() {
+			if closer, ok := r.(io.Closer); ok {
+				closer.Close()
+			}
+		}()
+		rr := &reader{
+			r:   r,
+			buf: make([]byte, 1024*1024),
+		}
+		len, e := rr.Read(rr.buf)
+		if e != nil {
+			return pbs.ConnParameters{}, e
+		}
+		param := pbs.ConnParameters{}
+		buf := rr.buf[:len]
+		fmt.Println("read len: ", len)
+		e = param.Unmarshal(buf)
+		fmt.Println("read param: ", param)
+		if e != nil {
+			return pbs.ConnParameters{}, e
+		}
+		return param, nil
 	}
-	_, e := rr.Read(rr.buf)
-	if e != nil {
-		return nil, e
-	}
-	param := &pbs.ConnParameters{}
-	e = param.XXX_Unmarshal(rr.buf)
-	fmt.Println("unmarshal param: ", param)
-	if e != nil {
-		return nil, e
-	}
-	return param, nil
 }

@@ -11,7 +11,6 @@ import (
 func TestConnParameters(t *testing.T) {
 	tests := []struct {
 		param pbs.ConnParameters
-		ret   string
 	}{
 		{
 			pbs.ConnParameters{
@@ -20,10 +19,18 @@ func TestConnParameters(t *testing.T) {
 				SID:          "abcdefjHiJKLmnopq09f",
 				Upgrades:     []string{"websocket", "polling"},
 			},
-			"pingInterval:10000000000 pingTimeout:5000000000 sID:\"abcdefjHiJKLmnopq09f\" upgrades:\"websocket\" upgrades:\"polling\"",
 		},
 	}
 	for _, test := range tests {
+
+		// marshalByte, e := test.param.Marshal()
+		// t.Log("marshal e: ", e)
+		// t.Log("marshal byte: ", marshalByte)
+		// var p pbs.ConnParameters
+		// e = p.Unmarshal(marshalByte)
+		// t.Log("unmarshal p: ", p)
+		// t.Log("unmarshal e: ", e)
+
 		buf := bytes.NewBuffer(nil)
 		n, err := writeTo(test.param, buf)
 		t.Log("len: ", n)
@@ -31,11 +38,10 @@ func TestConnParameters(t *testing.T) {
 			t.Log("write err: ", err)
 		}
 		t.Log("write result: ", buf)
-		t.Log("buf string: ", buf.String())
 		params, err := readConnParams(buf)
 		if err != nil {
 			t.Error("read err: ", err)
 		}
-		t.Log("read result: ", params)
+		t.Error("read result: ", params)
 	}
 }
