@@ -37,20 +37,20 @@ func TestPkgType(t *testing.T) {
 		dtb := dataTypeToByte(test.dt)
 		// dt := byteToDataType(test.b)
 		fmt.Println("test dtb: ", dtb)
-		fmt.Println("dtb == test dtb: ", dtb == test.dtb)
+		// fmt.Println("dtb == test dtb: ", dtb == test.dtb)
 	}
 
 	fmt.Println("------------------------")
 	for _, test := range tests {
 		bpt := byteToPacketType(test.ptb, test.dt)
 		fmt.Println("test bpt: ", bpt)
-		bb := packetTypeToBinaryByte(bpt)
-		ab := packetTypeToASCIIByte(bpt)
-		pts := bpt.String()
-		fmt.Println("binary byte: ", bb)
-		fmt.Println("string byte: ", ab)
-		fmt.Println("bb == test bin: ", bb == test.bin)
-		fmt.Println("ab == test str: ", ab == test.str)
-		fmt.Println("pts == test desc: ", pts == test.desc)
+		// bb := packetTypeToBinaryByte(bpt)
+		// ab := packetTypeToASCIIByte(bpt)
+		// pts := bpt.String()
+		// fmt.Println("binary byte: ", bb)
+		// fmt.Println("string byte: ", ab)
+		// fmt.Println("bb == test bin: ", bb == test.bin)
+		// fmt.Println("ab == test str: ", ab == test.str)
+		// fmt.Println("pts == test desc: ", pts == test.desc)
 	}
 }
