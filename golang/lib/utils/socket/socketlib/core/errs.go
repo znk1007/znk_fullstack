@@ -1,13 +1,22 @@
-package core
+package socket
 
 import (
+	"errors"
 	"fmt"
 	"net"
 )
 
 var (
-	// ErrPaused paused err
+	// errPaused 暂停错误
 	errPaused = retryError{"paused"}
+	// errTimeout 超时
+	errTimeout = retryError{"timeout"}
+	// ErrInvalidPayload 无效负载
+	errInvalidPayload = errors.New("invalid payload")
+	// errDrain 无效输出
+	errDrain = errors.New("drain")
+	// errOverlap 重叠错误
+	errOverlap = errors.New("overlap")
 )
 
 // Error payload error interface
