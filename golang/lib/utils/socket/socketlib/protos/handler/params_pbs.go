@@ -64,7 +64,7 @@ func readConnParams(r io.Reader) (*pbs.ConnParameters, error) {
 		return nil, e
 	}
 	param := &pbs.ConnParameters{}
-	e = param.Unmarshal(rr.buf)
+	e = param.XXX_Unmarshal(rr.buf)
 	fmt.Println("unmarshal param: ", param)
 	if e != nil {
 		return nil, e
