@@ -74,7 +74,7 @@ class CalendarManager {
     _firstYear = s;
     int e = endYear > _lastYear ? endYear : _lastYear;
     _lastYear = e;
-    for (var i = _firstYear; i < _lastYear; i++) {
+    for (var i = _firstYear; i <= _lastYear; i++) {
       for (var j = 1; j <= 12; j++) {
         int days = DateUtil.daysOfMonth(i, j);
         for (var k = 1; k <= days; k++) {
@@ -91,58 +91,59 @@ class CalendarManager {
     return model;
   }
 
-  List<CalendarModel> getModels(int year, int month, int startDay, int offset) {
-    CalendarModel temp = getModel(year, month, startDay);
-    if (temp == null) {
-      return null;
+  List<String> _manageKeys(int year, int month) {
+    int days = DateUtil.daysOfMonth(year, month);
+    List<String> keys = [];
+    for (var i = 0; i < days; i++) {
+      keys.add(_key(year, month, i));
     }
-    List<CalendarModel> temps = [];
-    if (offset == 0) {
-      return [temp];
-    } else if (offset > 0) {
-      int curMonthDays = DateUtil.daysOfMonth(year, month);
-      for (var i = 1; i <= offset; i++) {
-        int tempDay = startDay + i;
-        if (tempDay > curMonthDays) {
-          tempDay -= curMonthDays;
-          month += 1;
-        }
-        print('> 0 temp day: $tempDay');
-        CalendarModel model = _modelsMap[_key(year, month, tempDay)];
-        if (model != null) {
-          temps.add(model);
-        }
-      }
-    } else {
-      int curMonthDays = DateUtil.daysOfMonth(year, month-1);
-      offset = -offset;
-      for (var i = offset; i > 0; i--) {
-        int tempDay = startDay - i;
-        if (tempDay <= 0) {
-          tempDay = curMonthDays + tempDay;
-          month -= 1;
-        }
-        CalendarModel model = _modelsMap[_key(year, month, tempDay)];
-        if (model != null) {
-          temps.add(model);
-        }
-      }
-    }
-    return temps;
+    return keys;
   }
 
   // 切割模型
   List<CalendarModel> subModels(int year, int month) {
     List<CalendarModel> models = [];
-    for (var v in _modelsMap.values) {
-      if (v.year == year && v.month == month) {
-        models.add(v);
+    final keys = _manageKeys(year, month);
+    for (var key in keys) {
+      final model = _modelsMap[key];
+      if (model != null) {
+        models.add(_modelsMap[key]);
       }
     }
     return models;
   }
 
   List<CalendarModel> load(DateTime startTime, DateTime endTime) {
+    int startYear = startTime.year;
+    int startMonth = startTime.month;
+    int endYear = endTime.year;
+    int endMonth = endTime.month;
+    List<String>keys = [];
+    for (var i = startYear; i < endYear; i++) {
+      if (startMonth <= 12 && i == startYear) {
+        for (var sm = startMonth; sm <= 12; sm++) {
+          int days = DateUtil.daysOfMonth(i, sm);
+          for (var sd = 0; sd < days; sd++) {
+            keys.add(_key(i, sm, sd));
+          }
+        }
+      } else if (endMonth <= 12 && i == endYear) {
+        for (var em = endMonth; em <= 12; em++) {
+          int days = DateUtil.daysOfMonth(i, em);
+          for (var ed = 0; ed < days; ed++) {
+            keys.add(_key(i, em, ed));
+          }
+        }
+      } else if (startYear == endYear) {
+
+      } else {
+        for (var mm = 1; mm <= 12; mm++) {
+          
+        }
+      }
+      
+    }
+
     if (_firstDate == null) {
       _firstDate = startTime;
     } else {
@@ -151,7 +152,7 @@ class CalendarManager {
     if (_lastDate == null) {
       _lastDate = endTime;
     } else {
-      
+
     }
   }
 
