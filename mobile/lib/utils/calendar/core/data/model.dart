@@ -39,22 +39,11 @@ class CalendarManager {
   static CalendarManager _inner;
   CalendarManager._() {
     _modelsMap = Map();
-    _selectedModels = Map();
-  }
-
-  Map<String, CalendarModel> get calendarModelsMap {
-    return _modelsMap;
-  }
-
-  Map<String, CalendarModel> get calendarSelectedModelsMap {
-    return _selectedModels;
   }
 
   int get totalPage {
     return _pages;
   }
-
-  Map<String, CalendarModel> _selectedModels;
 
   // 模型
   Map<String, CalendarModel> _modelsMap;
@@ -67,6 +56,10 @@ class CalendarManager {
 
   int _lastYear = 2060;
 
+  DateTime _firstDate;
+
+  DateTime _lastDate;
+
   String _key(int year, int month, int day) {
     return '$year' + '$month' + '$day';
   }
@@ -75,34 +68,20 @@ class CalendarManager {
   void preLoad({
     int startYear = 1960, 
     int endYear = 2060, 
-    int currentYear = -1, 
-    int currentMonth = -1,
   }) {
-    _pages = (endYear - startYear) * 12;
     _modelsMap = Map();
     int s = startYear < _firstYear ? startYear : _firstYear;
     _firstYear = s;
-    int currentMonthIdx = 0;
     int e = endYear > _lastYear ? endYear : _lastYear;
     _lastYear = e;
     for (var i = _firstYear; i < _lastYear; i++) {
       for (var j = 1; j <= 12; j++) {
-        if (currentYear == -1 || currentMonth == -1) {
-          DateTime now = DateTime.now();
-          currentYear = now.year;
-          currentMonth = now.month;
-        }
-        if (i == currentYear && j == currentMonth) {
-          currentPage = currentMonthIdx;
-        }
-        
         int days = DateUtil.daysOfMonth(i, j);
         for (var k = 1; k <= days; k++) {
           CalendarModel model = CalendarModel()
             ..dateTime = DateTime(i, j, k);
             _modelsMap[_key(i, j, k)] = model;
         }
-        currentMonthIdx++;
       }
     }
   }
@@ -112,7 +91,7 @@ class CalendarManager {
     return model;
   }
 
-  List<CalendarModel> _getModels(int year, int month, int startDay, int offset) {
+  List<CalendarModel> getModels(int year, int month, int startDay, int offset) {
     CalendarModel temp = getModel(year, month, startDay);
     if (temp == null) {
       return null;
@@ -163,8 +142,17 @@ class CalendarManager {
     return models;
   }
 
-  List<CalendarModel> load(int startYear, int endYear) {
-  
+  List<CalendarModel> load(DateTime startTime, DateTime endTime) {
+    if (_firstDate == null) {
+      _firstDate = startTime;
+    } else {
+
+    }
+    if (_lastDate == null) {
+      _lastDate = endTime;
+    } else {
+      
+    }
   }
 
   // 日期转视图

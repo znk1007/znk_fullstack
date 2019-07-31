@@ -16,5 +16,7 @@ abstract class CustomDateHelper {
   MonthType monthType;
   // 第一天是否星期天
   bool get sundayFirst;
+  // 页数，3，5，7，。。。
+  int get numberOfPage;
 
 }
