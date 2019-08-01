@@ -1,4 +1,4 @@
-package socket
+package core
 
 import (
 	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"

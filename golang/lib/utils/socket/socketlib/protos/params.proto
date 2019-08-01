@@ -1,5 +1,5 @@
 syntax = "proto3";
-package socket.go;
+package core.go;
 option go_package = "pbs";
 // generate command-line: protoc -I=protos --gogofaster_out=plugins=grpc:protos/pbs protos/*.proto
 // connection parameters for server
