@@ -2,7 +2,6 @@ package socket
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
@@ -24,7 +23,7 @@ func (w *writer) Write(p []byte) (int, error) {
 // writeTo 写入数据
 func writeTo(params pbs.ConnParameters, w io.Writer) (int64, error) {
 
-	if isJSON {
+	if isJSON == true {
 		wr := writer{
 			w: w,
 		}
@@ -61,7 +60,7 @@ func (r *reader) Read(p []byte) (n int, err error) {
 }
 
 func readConnParams(r io.Reader) (pbs.ConnParameters, error) {
-	if isJSON {
+	if isJSON == true {
 		var params pbs.ConnParameters
 		if err := json.NewDecoder(r).Decode(&params); err != nil {
 			return pbs.ConnParameters{}, err
@@ -88,9 +87,7 @@ func readConnParams(r io.Reader) (pbs.ConnParameters, error) {
 		}
 		param := pbs.ConnParameters{}
 		buf := rr.buf[:len]
-		fmt.Println("read len: ", len)
 		e = param.Unmarshal(buf)
-		fmt.Println("read param: ", param)
 		if e != nil {
 			return pbs.ConnParameters{}, e
 		}
