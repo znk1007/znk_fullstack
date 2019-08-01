@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"testing"
@@ -31,6 +32,7 @@ func newTestConnReader(data []testData) *testConnReader {
 }
 
 func (tcr *testConnReader) NextReader() (pbs.DataType, pbs.PacketType, io.ReadCloser, error) {
+	fmt.Println("trc data: ", tcr.data)
 	if len(tcr.data) == 0 {
 		return pbs.DataType_string, 0, nil, io.EOF
 	}
@@ -287,5 +289,31 @@ func TestPacketEncoder(t *testing.T) {
 			}
 		}
 		t.Errorf("idx: %d\n test data: %v\n enco data: %v", idx, test.data, tcw.data)
+	}
+}
+
+func TestPacketDecoder(t *testing.T) {
+	for idx, test := range tests {
+		tcr := newTestConnReader(test.data)
+		decoder := NewPacketDecoder(tcr)
+		var out []testPacket
+		for {
+			dt, pt, rc, err := decoder.NextReader()
+			if err != nil {
+				// t.Error("decoder err: ", err)
+				t.Log("decoder err: ", err)
+				break
+			}
+			b, err := ioutil.ReadAll(rc)
+			if err != nil {
+				t.Error("read all err: ", err)
+			}
+			out = append(out, testPacket{
+				dt: dt,
+				pt: pt,
+				bs: b,
+			})
+		}
+		t.Errorf("idx: %d\n test data: %v\n deco data: %v", idx, test.packets, out)
 	}
 }
