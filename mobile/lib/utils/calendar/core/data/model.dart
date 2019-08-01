@@ -112,48 +112,97 @@ class CalendarManager {
     }
     return models;
   }
-
+  // 加载数据
   List<CalendarModel> load(DateTime startTime, DateTime endTime) {
     int startYear = startTime.year;
     int startMonth = startTime.month;
+    int startDay = startTime.day;
     int endYear = endTime.year;
     int endMonth = endTime.month;
-    List<String>keys = [];
-    for (var i = startYear; i < endYear; i++) {
-      if (startMonth <= 12 && i == startYear) {
+    int endDay = endTime.day;
+    List<CalendarModel> models = [];
+    for (var i = startYear; i <= endYear; i++) {
+      if (i == startYear && startYear != endYear) {
         for (var sm = startMonth; sm <= 12; sm++) {
           int days = DateUtil.daysOfMonth(i, sm);
-          for (var sd = 0; sd < days; sd++) {
-            keys.add(_key(i, sm, sd));
+          if (sm == startMonth) {
+            for (var sd = startDay; sd <= days; sd++) {
+              final model = _modelsMap[_key(i, sm, sd)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
+          } else {
+            for (var sd = 1; sd <= days; sd++) {
+              final model = _modelsMap[_key(i, sm, sd)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
           }
         }
-      } else if (endMonth <= 12 && i == endYear) {
-        for (var em = endMonth; em <= 12; em++) {
+      } else if (i == endYear && startYear != endYear) {
+        for (var em = 1; em <= endMonth; em++) {
           int days = DateUtil.daysOfMonth(i, em);
-          for (var ed = 0; ed < days; ed++) {
-            keys.add(_key(i, em, ed));
+          if (em == endMonth) {
+            for (var ed = 1; ed <= days; ed++) {
+              final model = _modelsMap[_key(i, em, ed)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
+          } else {
+            for (var ed = 1; ed <= days; ed++) {
+              final model = _modelsMap[_key(i, em, ed)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
           }
         }
-      } else if (startYear == endYear) {
-
+      } else if (startYear == endYear && i == startYear && i == endYear) {
+        for (var em = startMonth; em <= endMonth; em++) {
+          int days = DateUtil.daysOfMonth(i, em);
+          if (em == startMonth) {
+            for (var ed = startDay; ed <= days; ed++) {
+              final model = _modelsMap[_key(i, em, ed)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
+          } else if (em == endMonth) {
+            for (var ed = 1; ed <= endDay; ed++) {
+              final model = _modelsMap[_key(i, em, ed)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
+          } else {
+            for (var ed = 1; ed <= days; ed++) {
+              final model = _modelsMap[_key(i, em, ed)];
+              if (model != null) {
+                models.add(model);
+              }
+            }
+          }
+        }
       } else {
         for (var mm = 1; mm <= 12; mm++) {
-          
+          int days = DateUtil.daysOfMonth(i, mm);
+          for (var md = 1; md <= days; md++) {
+            final model = _modelsMap[_key(i, mm, md)];
+            if (model != null) {
+              models.add(model);
+            }
+          }
         }
       }
-      
     }
-
-    if (_firstDate == null) {
-      _firstDate = startTime;
-    } else {
-
+    print('number of model: ${models.length}');
+    for (var model in models) {
+      print('time: ${model.dateTime}');
     }
-    if (_lastDate == null) {
-      _lastDate = endTime;
-    } else {
-
-    }
+    return models;
   }
 
   // 日期转视图

@@ -24,9 +24,11 @@ class _CalendarBodyState extends State<CalendarBody> {
     _helper = widget.helper ?? DefaultDateHelper();
     _totalPage = _helper.numberOfPage / 2 == 0 ? 3 : _helper.numberOfPage;
     _controller = PageController(initialPage: (_totalPage-1) ~/ 2);
+    
   }
   @override
   Widget build(BuildContext context) {
+    CalendarManager.instance.load(DateTime(2018,10,31), DateTime(2019, 9, 30));
     return Container(
       width: Device.width,
       height: 300,
