@@ -12,7 +12,7 @@ import (
 
 // dataReader 数据读取器
 type dataReader interface {
-	NextReader() (pbs.DataType, io.ReadCloser, error)
+	NextReader() (pbs.DataType, pbs.PacketType, io.ReadCloser, error)
 }
 
 // dataWriter 数据写入器
