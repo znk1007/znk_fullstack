@@ -17,7 +17,7 @@ func TestHeader(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		t.Error("test bin byte: ", byte(test.header.T))
+		t.Error("test bin byte == header type byte: ", test.bin == byte(test.header.T))
 		t.Error("test type: ", test.header.T)
 	}
 }
