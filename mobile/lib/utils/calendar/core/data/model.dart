@@ -198,11 +198,80 @@ class CalendarManager {
         }
       }
     }
-    print('number of model: ${models.length}');
-    for (var model in models) {
-      print('time: ${model.dateTime}');
-    }
+    // print('number of model: ${models.length}');
+    // for (var model in models) {
+    //   print('time: ${model.dateTime}');
+    // }
     return models;
+  }
+  // 年差
+  int diffYear(int month, int diffMonth) {
+    int tempYear = 0;
+    if (diffMonth > 0) {
+      int divideYear = diffMonth ~/ 12;
+      int modeYear = diffMonth % 12;
+      bool more = (modeYear + month >= 12);
+      tempYear += divideYear;
+      if (more) {
+        tempYear += 1;
+      }
+    } else {
+      diffMonth = -diffMonth;
+      int divideYear = diffMonth ~/ 12;
+      int modeYear = diffMonth % 12;
+      bool more = (modeYear - month >= 0);
+      tempYear -= divideYear;
+      if (more) {
+        tempYear -= 1;
+      }
+    }
+    return tempYear;
+  }
+  // 月差
+  int diffMonth(int month, int diffMonth) {
+    int tempMonth = month;
+    if (diffMonth > 0) {
+      int modeYear = diffMonth % 12;
+      bool more = (modeYear + month >= 12);
+      if (more) {
+        tempMonth = modeYear - month + 1;
+      }
+    } else {
+      diffMonth = -diffMonth;
+      int modeYear = diffMonth % 12;
+      bool more = (modeYear - month >= 0);
+      if (more) {
+        tempMonth = 12 - (modeYear - month);
+      }
+    }
+    return tempMonth;
+  }
+
+  void diffLoad(int year, int month, int diffMonth) {
+    int tempYear = year;
+    int tempMonth = month;
+    if (diffMonth > 0) {
+      int divideYear = diffMonth ~/ 12;
+      int modeYear = diffMonth % 12;
+      bool more = (modeYear + month >= 12);
+      tempYear += divideYear;
+      if (more) {
+        tempMonth = modeYear - month + 1;
+        tempYear += 1;
+      }
+    } else {
+      diffMonth = -diffMonth;
+      int divideYear = diffMonth ~/ 12;
+      int modeYear = diffMonth % 12;
+      bool more = (modeYear - month >= 0);
+      tempYear -= divideYear;
+      if (more) {
+        tempMonth = 12 - (modeYear - month);
+        tempYear -= 1;
+      }
+    }
+    
+    print('current year: $year, temp year: $tempYear, current month: $month, temp month: $tempMonth');
   }
 
   // 日期转视图
