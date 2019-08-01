@@ -43,7 +43,7 @@ type testConnWriter struct {
 	data []testData
 }
 
-func newConnWriter() *testConnWriter {
+func newTestConnWriter() *testConnWriter {
 	return &testConnWriter{}
 }
 
@@ -247,8 +247,8 @@ var tests = []struct {
 			},
 			{
 				pbs.DataType_string,
-				pbs.PacketType_message,
-				[]byte("1"),
+				pbs.PacketType_close,
+				[]byte{},
 			},
 		},
 		[]testData{
@@ -268,6 +268,24 @@ var tests = []struct {
 	},
 }
 
-func TestPacketCoder(t *testing.T) {
-
+func TestPacketEncoder(t *testing.T) {
+	for idx, test := range tests {
+		tcw := newTestConnWriter()
+		encoder := NewPacketEncoder(tcw)
+		for _, p := range test.packets {
+			nw, err := encoder.NextWriter(p.dt, p.pt)
+			if err != nil {
+				t.Error("encoder next writer err: ", err)
+			}
+			_, err = nw.Write(p.bs)
+			if err != nil {
+				t.Error("encoder write err: ", err)
+			}
+			err = nw.Close()
+			if err != nil {
+				t.Error("encoder close err: ", err)
+			}
+		}
+		t.Errorf("idx: %d\n test data: %v\n enco data: %v", idx, test.data, tcw.data)
+	}
 }

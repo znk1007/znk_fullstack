@@ -10,7 +10,8 @@ type packetEncoder struct {
 	dw dataWriter
 }
 
-func newPacketEncoder(dw dataWriter) *packetEncoder {
+// NewPacketEncoder 包编码器
+func NewPacketEncoder(dw dataWriter) *packetEncoder {
 	return &packetEncoder{
 		dw: dw,
 	}
@@ -38,7 +39,8 @@ type packetDecoder struct {
 	dr dataReader
 }
 
-func newPacketDecoder(dr dataReader) *packetDecoder {
+// NewPacketDecoder 包解码器
+func NewPacketDecoder(dr dataReader) *packetDecoder {
 	return &packetDecoder{
 		dr: dr,
 	}
