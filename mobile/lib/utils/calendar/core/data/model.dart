@@ -37,16 +37,13 @@ class CalendarManager {
     return _inner;
   }
   static CalendarManager _inner;
-  CalendarManager._() {
-    _modelsMap = Map();
-  }
+  CalendarManager._();
 
   int get totalPage {
     return _pages;
   }
-
   // 模型
-  Map<String, CalendarModel> _modelsMap;
+  Map<String, CalendarModel> _modelsMap = Map();
   // 当前页码
   int currentPage = 0;
   // 总页数
@@ -56,9 +53,7 @@ class CalendarManager {
 
   int _lastYear = 2060;
 
-  DateTime _firstDate;
-
-  DateTime _lastDate;
+  List<CalendarModel> _loadedModels = [];
 
   String _key(int year, int month, int day) {
     return '$year' + '$month' + '$day';
@@ -116,10 +111,10 @@ class CalendarManager {
   List<CalendarModel> load(DateTime startTime, DateTime endTime) {
     int startYear = startTime.year;
     int startMonth = startTime.month;
-    int startDay = startTime.day;
+    int startDay = startTime.day == 0 ? 1 : startTime.day;
     int endYear = endTime.year;
     int endMonth = endTime.month;
-    int endDay = endTime.day;
+    int endDay = endTime.day == 0 ? DateUtil.daysOfMonth(endYear, endMonth) : endTime.day;
     List<CalendarModel> models = [];
     for (var i = startYear; i <= endYear; i++) {
       if (i == startYear && startYear != endYear) {
@@ -246,10 +241,12 @@ class CalendarManager {
     }
     return tempMonth;
   }
-
-  void diffLoad(int year, int month, int diffMonth) {
+  // 差加载
+  List<CalendarModel> diffLoad(int year, int month, int diffMonth) {
     int tempYear = year;
     int tempMonth = month;
+    DateTime startTime;
+    DateTime endTime;
     if (diffMonth > 0) {
       int divideYear = diffMonth ~/ 12;
       int modeYear = diffMonth % 12;
@@ -259,6 +256,8 @@ class CalendarManager {
         tempMonth = modeYear - month + 1;
         tempYear += 1;
       }
+      startTime = DateTime(year, month, 0);
+      endTime = DateTime(tempYear, tempMonth, 0);
     } else {
       diffMonth = -diffMonth;
       int divideYear = diffMonth ~/ 12;
@@ -269,9 +268,10 @@ class CalendarManager {
         tempMonth = 12 - (modeYear - month);
         tempYear -= 1;
       }
+      startTime = DateTime.utc(tempYear, tempMonth, 1);
+      endTime = DateTime.utc(year, month, DateUtil.daysOfMonth(year, month));
     }
-    
-    print('current year: $year, temp year: $tempYear, current month: $month, temp month: $tempMonth');
+    return load(startTime, endTime);
   }
 
   // 日期转视图
