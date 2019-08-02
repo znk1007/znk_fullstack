@@ -8,7 +8,9 @@ class CalendarBody extends StatefulWidget {
   final CustomDateHelper helper;
   CalendarBody({Key key, this.helper}) : super(key: key);
 
-  _CalendarBodyState createState() => _CalendarBodyState();
+  final state = _CalendarBodyState();
+
+  _CalendarBodyState createState() => state;
 }
 
 class _CalendarBodyState extends State<CalendarBody> {
@@ -16,6 +18,11 @@ class _CalendarBodyState extends State<CalendarBody> {
   PageController _controller;
   int _totalPage = 0;
   CustomDateHelper _helper;
+  int _diffPages = 0;
+
+  DateTime _now = DateTime.now();
+  int _currentYear = 0;
+  int _currentMonth = 0;
   
   @override
   void initState() {
@@ -23,19 +30,20 @@ class _CalendarBodyState extends State<CalendarBody> {
     _totalPage = CalendarManager.instance.totalPage;
     _helper = widget.helper ?? DefaultDateHelper();
     _totalPage = _helper.numberOfPage / 2 == 0 ? 3 : _helper.numberOfPage;
+    int initPage = (_totalPage-1) ~/ 2;
+    _diffPages = initPage;
     _controller = PageController(initialPage: (_totalPage-1) ~/ 2);
-    
+    _currentYear = _now.year;
+    _currentMonth = _now.month;
   }
   @override
   Widget build(BuildContext context) {
-    // CalendarManager.instance.load(DateTime(2018,10,31), DateTime(2019, 9, 30));
-    // List<CalendarModel> models = CalendarManager.instance.diffLoad(2019, 8, -9-13);
-    // CalendarManager.instance.testDiffWeekday(backward: false);
-    final models = CalendarManager.instance.mapToGridView(2019, 8, firstWeekday: 2);
-    for (var model in models) {
-      print(' ');
-      print('grid view: ${model.dateTime} weekday: ${model.dateTime.weekday} == column: ${model.column}, row: ${model.row}');
-    }
+
+    // final models = CalendarManager.instance.mapToGridView(2019, 8);
+    // for (var model in models) {
+    //   print(' ');
+    //   print('grid view: ${model.dateTime} weekday: ${model.dateTime.weekday} == column: ${model.column}, row: ${model.row}');
+    // }
     // final models = CalendarManager.instance.mapToCustomView(2019, 7);
     // for (var model in models) {
     //   print('custom view: ${model.dateTime}');
@@ -55,9 +63,14 @@ class _CalendarBodyState extends State<CalendarBody> {
           );
         },
         onPageChanged: (int current) {
-          print('current page: $current');
+          print('diff page: ${current-_diffPages}');
         },
       ),
     );
+  }
+  @override
+  void dispose() { 
+    _controller.dispose();
+    super.dispose();
   }
 }

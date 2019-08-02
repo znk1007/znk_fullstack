@@ -5,48 +5,44 @@ import 'package:znk/utils/calendar/core/default/default_head.dart';
 import 'package:znk/utils/calendar/custom/custom_head.dart';
 
 class CalendarHead extends StatefulWidget {
-  CustomHead headTool;
+  final CustomHead headTool;
   CalendarHead({Key key, this.headTool}) : super(key: key);
 
-  _CalendarHeadState createState() {
-    this.headTool = this.headTool ?? DefaultHead();
-    
-    return _CalendarHeadState();
-  }
+  _CalendarHeadState createState() => _CalendarHeadState();
 }
 
 class _CalendarHeadState extends State<CalendarHead> {
+  CustomHead _headTool;
   @override
   Widget build(BuildContext context) {
-    if (widget.headTool == null) {
-      widget.headTool = DefaultHead();
-    }
+    _headTool = widget.headTool ?? DefaultHead();
+
     List<Widget> children = [
       Expanded(
-        child: widget.headTool.leftView,
+        child: _headTool.leftView,
       ),
       Expanded(
         flex: 2,
-        child: widget.headTool.titleView,
+        child: _headTool.titleView,
       ),
       Expanded(
-        child: widget.headTool.rightView,
+        child: _headTool.rightView,
       ),
     ];
-    if (widget.headTool.statusView != null) {
+    if (_headTool.statusView != null) {
       children = [
           Expanded(
-            child: widget.headTool.leftView,
+            child: _headTool.leftView,
           ),
           Expanded(
             flex: 2,
-            child: widget.headTool.titleView,
+            child: _headTool.titleView,
           ),
           Expanded(
-            child: widget.headTool.statusView,
+            child: _headTool.statusView,
           ),
           Expanded(
-            child: widget.headTool.rightView,
+            child: _headTool.rightView,
           )
       ];
     }
@@ -55,7 +51,7 @@ class _CalendarHeadState extends State<CalendarHead> {
       height: Device.relativeHeight(50),
        child: Stack(
          children: <Widget>[
-           widget.headTool.backgroundView,
+           _headTool.backgroundView,
            Container(
              child: Row(
                 children: children,
