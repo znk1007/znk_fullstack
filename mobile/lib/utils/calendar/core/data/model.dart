@@ -65,9 +65,13 @@ class CalendarManager {
   int _firstYear = 1960;
 
   int _lastYear = 2060;
-
-  List<CalendarModel> _loadedModels = [];
-
+  // 自定义视图已加载模型
+  List<CalendarModel> _customLoadedModels = [];
+  // 网格已加载模型
+  List<CalendarModel> _gridLoadedModels = [];
+  // 分页网格已加载模型
+  List<List<CalendarModel>> _gridsLoadedModels = [];
+  // 键值
   String _key(int year, int month, int day) {
     return '$year' + '$month' + '$day';
   }
@@ -94,7 +98,11 @@ class CalendarManager {
     }
   }
 
-  CalendarModel getModel(int year, int month, int day) {
+  CalendarModel getModel(
+    int year, 
+    int month, 
+    int day
+  ) {
     CalendarModel model = _modelsMap[_key(year, month, day)];
     return model;
   }
@@ -121,7 +129,10 @@ class CalendarManager {
     return models;
   }
   // 加载数据
-  List<CalendarModel> load(DateTime startTime, DateTime endTime) {
+  List<CalendarModel> load(
+    DateTime startTime, 
+    DateTime endTime
+  ) {
     int startYear = startTime.year;
     int startMonth = startTime.month;
     int startDay = startTime.day == 0 ? 1 : startTime.day;
@@ -213,7 +224,10 @@ class CalendarManager {
     return models;
   }
   // 年差
-  int diffYear(int month, int diffMonth) {
+  int diffYear(
+    int month, 
+    int diffMonth
+  ) {
     int tempYear = 0;
     if (diffMonth > 0) {
       int divideYear = diffMonth ~/ 12;
@@ -236,7 +250,10 @@ class CalendarManager {
     return tempYear;
   }
   // 月差
-  int diffMonth(int month, int diffMonth) {
+  int diffMonth(
+    int month, 
+    int diffMonth
+  ) {
     int tempMonth = month;
     if (diffMonth > 0) {
       int modeYear = diffMonth % 12;
@@ -255,7 +272,11 @@ class CalendarManager {
     return tempMonth;
   }
   // 差加载
-  List<CalendarModel> diffLoad(int year, int month, int diffMonth) {
+  List<CalendarModel> diffLoad(
+    int year, 
+    int month, 
+    int diffMonth
+  ) {
     int tempYear = year;
     int tempMonth = month;
     DateTime startTime;
@@ -287,7 +308,13 @@ class CalendarManager {
     return load(startTime, endTime);
   }
   // 星期差
-  int diffWeekday(int firstWeekday, int currentWeekday, {bool backward = true}) {
+  int diffWeekday(
+    int firstWeekday, 
+    int currentWeekday, 
+    {
+      bool backward = true
+    }
+  ) {
     int diff = currentWeekday - firstWeekday;
     if (backward) {
       if (diff < 0) {
@@ -303,7 +330,11 @@ class CalendarManager {
     return diff;
   }
   // 测试星期差
-  void testDiffWeekday({bool backward = true}) {
+  void testDiffWeekday(
+    {
+      bool backward = true
+    }
+  ) {
     for (var i = 1; i <= 7; i++) {
       print(' ');
       for (var j = 1; j <= 7; j++) {
@@ -450,8 +481,54 @@ class CalendarManager {
     return models;
   }
 
+  List<List<CalendarModel>> mapToGridViews(
+    int year, 
+    int month, 
+    {
+      int pages = 5, 
+      int firstWeekday = 7, 
+      bool fixedLines = true
+    }
+  ) {
+    List<List<CalendarModel>> models = [];
+    int middlePage = pages ~/ 2;
+    int tempMonth = month;
+    int tempYear = year;
+    for (var i = 0; i < pages; i++) {
+      print(' ');
+      tempMonth = month - (middlePage - i);
+      if (tempMonth <= 0) {
+        tempYear = year - 1;
+        tempMonth = 12;
+        List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+        models.add(ms);
+      } else if (tempMonth > 12) {
+        tempMonth = 1;
+        tempYear = year + 1;
+        List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+        models.add(ms);
+      } else {
+        List<CalendarModel> ms = mapToGridView(year, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+        models.add(ms);
+      }
+      for (var ms in models) {
+        for (var m in ms) {
+          print('m date time: ${m.dateTime}, row: ${m.row}, column: ${m.column}');
+        }
+      }
+    }
+    return models;
+  }
+
   // 日期转视图，可设置首日是否为星期日，适用非二维图如GridView
-  List<CalendarModel> mapToCustomView(int year, int month, {int firstWeekday = 7, bool fixedLines = true}) {
+  List<CalendarModel> mapToCustomView(
+    int year, 
+    int month, 
+    {
+      int firstWeekday = 7, 
+      bool fixedLines = true
+    }
+  ) {
     final numberOfLines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
     int firstDayWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
     int curMonthDays = DateUtil.daysOfMonth(year, month);
@@ -468,12 +545,12 @@ class CalendarManager {
       nextMonth = 12;
       nextYear++;
     }
-    
+    final totalNums = numberOfLines * 7;
     int preDays = diffWeekday(firstWeekday, firstDayWeekday);
     int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth) - preDays;
     int tempCurMonthDays = curMonthDays + preDays;
     int currentMonthDayIdx = 1;
-    final totalNums = numberOfLines * 7;
+    
     String key = '';
     List<CalendarModel> models = [];
     for (var i = 0; i < totalNums; i++) {
@@ -490,6 +567,8 @@ class CalendarManager {
         models.add(_modelsMap[key]);
       }
     }
+    
+    _customLoadedModels = models;
     return models;
   }
 
