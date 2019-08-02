@@ -391,56 +391,75 @@ class CalendarManager {
       bool fixedLines = true
     }
   ) {
-    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
+    final numberOfLines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
     int firstDayWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
     int curMonthDays = DateUtil.daysOfMonth(year, month);
-    
+    int preDays = diffWeekday(firstWeekday, firstDayWeekday);
+    int tempCurMonthDays = curMonthDays + preDays;
+    int preYear = year;
+    int preMonth = month - 1;
+    if (preMonth <= 0) {
+      preMonth = 12;
+      preYear--;
+    }
+    int nextYear = year;
+    int nextMonth = month + 1;
+    if (nextMonth > 12) {
+      nextMonth = 12;
+      nextYear++;
+    }
+    int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth);
+    int currentMonthDayIdx = 1;
+    for (var i = 0; i < numberOfLines; i++) {
+      for (var j = 0; j < 7; j++) {
+        int idx = (i * 7) + j;
+        if (idx < preMonthDays) {
+          
+        } else if (idx >= tempCurMonthDays) {
+          
+        } else {
+
+        }
+        print('num: ${(i * 7) + (j - 1)}');
+      }
+    }
   }
 
   // 日期转视图，可设置首日是否为星期日，适用非二维图如GridView
-  List<CalendarModel> mapToCustomView(int year, int month, {bool sundayFirst = true, bool fixedLines = true}) {
-    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
+  List<CalendarModel> mapToCustomView(int year, int month, {int firstWeekday = 7, bool fixedLines = true}) {
+    final numberOfLines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
     int firstDayWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
     int curMonthDays = DateUtil.daysOfMonth(year, month);
 
-    int lastMonth = month - 1;
-    int lastMonthDays = 0;
-    int lastMonthDiff = -1;
-    int firstWeekday = sundayFirst ? 7 : 1;
-    int fixPreMonthDays = diffWeekday(firstWeekday, firstDayWeekday);
-    int nextMonth = month+1;
-    int tempCurMonthDays = curMonthDays + fixPreMonthDays;
-    int currentMonthIdx = 1;
-
-    final totalNums = numberOflines * 7;
+    int preYear = year;
+    int preMonth = month - 1;
+    if (preMonth <= 0) {
+      preMonth = 12;
+      preYear--;
+    }
+    int nextYear = year;
+    int nextMonth = month + 1;
+    if (nextMonth > 12) {
+      nextMonth = 12;
+      nextYear++;
+    }
+    int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth);
+    int preDays = diffWeekday(firstWeekday, firstDayWeekday);
+    int tempCurMonthDays = curMonthDays + preDays;
+    int currentMonthDayIdx = 1;
+    final totalNums = numberOfLines * 7;
     String key = '';
     List<CalendarModel> models = [];
     for (var i = 0; i < totalNums; i++) {
       //pre month      
-      if (i < fixPreMonthDays) {
-        int lastYear = year;
-        if (lastMonth <= 0) {
-          lastMonth = 12;
-          lastYear--;
-        }
-        if (lastMonthDiff == -1) {
-          lastMonthDays = DateUtil.daysOfMonth(lastYear, lastMonth);
-          lastMonthDiff = firstDayWeekday;
-        }
-        key = _key(lastYear, lastMonth, lastMonthDays);
-        lastMonthDays--;
+      if (i < preDays) {
+        key = _key(preYear, preMonth, preMonthDays);
+        preMonthDays--;
       } else if (i >= tempCurMonthDays) {
         // next month
-        int nextYear = year;
-        if (nextMonth > 12) {
-          nextMonth = 1;
-          nextYear++;
-        }
         key = _key(nextYear, nextMonth, i-tempCurMonthDays+1);
-        // print('\nnext: $key');
-        
       } else {
-        key = _key(year, month, currentMonthIdx++);
+        key = _key(year, month, currentMonthDayIdx++);
       }
       if (key.isNotEmpty) {
         models.add(_modelsMap[key]);

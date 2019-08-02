@@ -16,7 +16,6 @@ class Schedule extends StatefulWidget {
 class _ScheduleState extends State<Schedule> {
   @override
   Widget build(BuildContext context) {
-    CalendarManager.instance.mapToView(2019, 7);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

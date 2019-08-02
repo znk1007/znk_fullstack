@@ -18,7 +18,7 @@ class DefaultDateHelper implements CustomDateHelper {
   }
 
   @override
-  bool get sundayFirst => true;
+  int get firstWeekday => 7;
 
   @override
   int get numberOfPage => 3;
