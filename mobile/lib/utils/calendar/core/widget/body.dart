@@ -31,7 +31,15 @@ class _CalendarBodyState extends State<CalendarBody> {
     // CalendarManager.instance.load(DateTime(2018,10,31), DateTime(2019, 9, 30));
     // List<CalendarModel> models = CalendarManager.instance.diffLoad(2019, 8, -9-13);
     // CalendarManager.instance.testDiffWeekday(backward: false);
-    CalendarManager.instance.mapToGridView(2019, 8);
+    final models = CalendarManager.instance.mapToGridView(2019, 8, firstWeekday: 2);
+    for (var model in models) {
+      print(' ');
+      print('grid view: ${model.dateTime} weekday: ${model.dateTime.weekday} == column: ${model.column}, row: ${model.row}');
+    }
+    // final models = CalendarManager.instance.mapToCustomView(2019, 7);
+    // for (var model in models) {
+    //   print('custom view: ${model.dateTime}');
+    // }
     return Container(
       width: Device.width,
       height: 300,

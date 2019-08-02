@@ -408,21 +408,46 @@ class CalendarManager {
       nextMonth = 12;
       nextYear++;
     }
-    int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth);
+    int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth) - preDays;
     int currentMonthDayIdx = 1;
+    List<CalendarModel> models = [];
     for (var i = 0; i < numberOfLines; i++) {
       for (var j = 0; j < 7; j++) {
         int idx = (i * 7) + j;
-        if (idx < preMonthDays) {
-          
+        if (idx < preDays) {
+          String key = _key(preYear, preMonth, ++preMonthDays);
+          final model = _modelsMap[key];
+          if (model != null) {
+            model.column = j;
+            model.row = i;
+            models.add(model);
+          } else {
+            print('pre month day null');
+          }
         } else if (idx >= tempCurMonthDays) {
-          
+          String key = _key(nextYear, nextMonth, (idx-tempCurMonthDays+1));
+          final model = _modelsMap[key];
+          if (model != null) {
+            model.column = j;
+            model.row = i;
+            models.add(model);
+          } else {
+            print('next month day null');
+          }
         } else {
-
+          String key = _key(year, month, currentMonthDayIdx++);
+          final model = _modelsMap[key];
+          if (model != null) {
+            model.column = j;
+            model.row = i;
+            models.add(model);
+          } else {
+            print('current month day null');
+          }
         }
-        print('num: ${(i * 7) + (j - 1)}');
       }
     }
+    return models;
   }
 
   // 日期转视图，可设置首日是否为星期日，适用非二维图如GridView
@@ -443,8 +468,9 @@ class CalendarManager {
       nextMonth = 12;
       nextYear++;
     }
-    int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth);
+    
     int preDays = diffWeekday(firstWeekday, firstDayWeekday);
+    int preMonthDays = DateUtil.daysOfMonth(preYear, preMonth) - preDays;
     int tempCurMonthDays = curMonthDays + preDays;
     int currentMonthDayIdx = 1;
     final totalNums = numberOfLines * 7;
@@ -453,8 +479,7 @@ class CalendarManager {
     for (var i = 0; i < totalNums; i++) {
       //pre month      
       if (i < preDays) {
-        key = _key(preYear, preMonth, preMonthDays);
-        preMonthDays--;
+        key = _key(preYear, preMonth, ++preMonthDays);
       } else if (i >= tempCurMonthDays) {
         // next month
         key = _key(nextYear, nextMonth, i-tempCurMonthDays+1);
