@@ -450,33 +450,48 @@ class CalendarManager {
       for (var j = 0; j < 7; j++) {
         int idx = (i * 7) + j;
         if (idx < preDays) {
-          String key = _key(preYear, preMonth, ++preMonthDays);
-          final model = _modelsMap[key];
+          int day = ++preMonthDays;
+          String key = _key(preYear, preMonth, day);
+          CalendarModel model = _modelsMap[key];
           if (model != null) {
             model.column = j;
             model.row = i;
             models.add(model);
           } else {
+            model = CalendarModel()
+              ..dateTime = DateTime(preYear, preMonth, day);
+            _modelsMap[key] = model;
+            models.add(model);
             // print('pre month day null');
           }
         } else if (idx >= tempCurMonthDays) {
-          String key = _key(nextYear, nextMonth, (idx-tempCurMonthDays+1));
-          final model = _modelsMap[key];
+          int day = idx-tempCurMonthDays+1;
+          String key = _key(nextYear, nextMonth, day);
+          CalendarModel model = _modelsMap[key];
           if (model != null) {
             model.column = j;
             model.row = i;
             models.add(model);
           } else {
+            model = CalendarModel()
+              ..dateTime = DateTime(preYear, preMonth, preMonthDays);
+            _modelsMap[key] = model;
+            models.add(model);
             // print('next month day null');
           }
         } else {
-          String key = _key(year, month, currentMonthDayIdx++);
-          final model = _modelsMap[key];
+          int day = currentMonthDayIdx++;
+          String key = _key(year, month, day);
+          CalendarModel model = _modelsMap[key];
           if (model != null) {
             model.column = j;
             model.row = i;
             models.add(model);
           } else {
+            model = CalendarModel()
+              ..dateTime = DateTime(year, month, day);
+            _modelsMap[key] = model;
+            models.add(model);
             // print('current month day null');
           }
         }
@@ -491,17 +506,29 @@ class CalendarManager {
     {
       int pages = 5, 
       int firstWeekday = 7, 
-      bool fixedLines = true
+      bool fixedLines = true,
+      bool keep = true,
     }
   ) {
     pages = pages < 3 ? 3 : pages;
     int middlePage = pages ~/ 2;
     int tempMonth = month;
     int tempYear = year;
-    _pageModels = [];
-    print('  ');
+    int len = _pageModels.length;
+    if (keep == false && len > pages) {
+      int idx = _pageModels.indexWhere((page) => page.year == year && page.month == month);
+      if (idx != -1) {
+        int removeIdx = len - 1 - idx;
+        if (removeIdx < idx) {
+          _pageModels.removeRange(0, removeIdx);
+        } else if (removeIdx > idx) {
+          _pageModels.removeRange(removeIdx + 1, len - 1);
+        }
+      }
+    }
+    // print('  ');
     for (var i = 0; i < pages; i++) {
-      tempMonth = month + (middlePage - i);
+      tempMonth = month - (middlePage - i);
       if (tempMonth <= 0) {
         int diffYear = -tempMonth ~/ 12 + 1;
         tempYear = year - diffYear;
@@ -513,12 +540,12 @@ class CalendarManager {
           CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: tempMonth, models: ms);
           _pageModels.insert(0, pageModel);
         }
-        print('<=0: year = $tempYear, month = $tempMonth');
+        // print('<=0: year = $tempYear, month = $tempMonth');
       } else if (tempMonth > 12) {
         int diffYear = tempMonth ~/ 12;
         tempMonth -= 12 * diffYear - 1;
         tempYear = year + diffYear;
-        print('>12: year = $tempYear, month = $tempMonth');
+        // print('>12: year = $tempYear, month = $tempMonth');
         int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
         if (idx == -1) {
           List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
@@ -526,7 +553,7 @@ class CalendarManager {
           _pageModels.add(pageModel);
         }
       } else {
-        print('same: year = $year, month = $tempMonth');
+        // print('same: year = $year, month = $tempMonth');
         int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == year);
         if (idx == -1) {
           List<CalendarModel> ms = mapToGridView(year, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
@@ -609,7 +636,6 @@ class CalendarManager {
         models.add(_modelsMap[key]);
       }
     }
-    
     return models;
   }
 

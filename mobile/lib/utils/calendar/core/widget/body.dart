@@ -38,8 +38,15 @@ class _CalendarBodyState extends State<CalendarBody> {
   }
   @override
   Widget build(BuildContext context) {
-    int n = 100;
-    final models = CalendarManager.instance.mapToGridViews(2019, 1, pages: 2 * n + 1);
+    // final tests = [1,2,3,4,5,6];
+    // tests.removeRange(4, tests.length-1);
+    // print('');
+    // for (var t in tests) {
+    //   print('remove: $t');
+    // }
+    
+    // int n = 100;
+    // final models = CalendarManager.instance.mapToGridViews(2019, 1, pages: 2 * n + 1);
     // for (var m in models) {
     //   print('year: ${m.year}');
     //   print('month: ${m.month}');
