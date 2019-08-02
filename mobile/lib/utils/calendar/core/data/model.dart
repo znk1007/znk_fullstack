@@ -1,22 +1,35 @@
 import 'package:znk/utils/calendar/core/data/util.dart';
 
 class CalendarModel {
+  // 日期
   DateTime dateTime;
+  // 行
+  int row;
+  // 列
+  int column;
+  // 是否已选中
+  bool isSelected = false;
+  // 是否有日程
+  bool hasSchedule = false;// 是否有事项
+  // 日程id
+  String scheduleId;
+  // 年份
   int get year {
     return dateTime.year;
   }
+  // 月份
   int get month {
     return dateTime.month;
   }
+  // 天
   int get day {
     return dateTime.day;
   }
-
+  // 是否今天
   bool get isToday {
     return dateTime.difference(DateTime.now().add(Duration(days: 56))).inDays == 0; 
   }
-  bool isSelected = false;
-  bool hasSchedule = false;// 是否有事项
+
   // 是否同一天
   bool isSameDay(CalendarModel other) {
     return this.year == other.year && this.month == other.month && this.day == other.day;
@@ -273,43 +286,138 @@ class CalendarManager {
     }
     return load(startTime, endTime);
   }
+  // 星期差
+  int diffWeekday(int firstWeekday, int currentWeekday, {bool backward = true}) {
+    int diff = currentWeekday - firstWeekday;
+    if (backward) {
+      if (diff < 0) {
+        diff += 7;
+      }
+    } else {
+      if (diff < 0) {
+        diff = -diff - 1 ;
+      } else {
+        diff = 6 - diff;
+      }
+    }
+    return diff;
+  }
+  // 测试星期差
+  void testDiffWeekday({bool backward = true}) {
+    for (var i = 1; i <= 7; i++) {
+      print(' ');
+      for (var j = 1; j <= 7; j++) {
+        int diff = diffWeekday(i, j, backward: backward);
+        print('first weekday = $i : the weekday = $j : diffWeekday = $diff');
+      }
+    print('-------------------------');
+    }
+  }
 
-  // 日期转视图
-  List<CalendarModel> mapToView(int year, int month, {bool sundayFirst = true}) {
-    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, true);
-    int firstWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
+  // pre month
+  // * firstWeekday = 7
+  // * 1 -1
+  // * 2 -2
+  // * 3 -3
+  // * 4 -4
+  // * 5 -5
+  // * 6 -6
+  // * 7 -0
+  // * firstWeekday = 1
+  // * 1 -0
+  // * 2 -1
+  // * 3 -2
+  // * 4 -3
+  // * 5 -4
+  // * 6 -5
+  // * 7 -6
+  // * firstWeekday = 2
+  // * 1 -6
+  // * 2 -0
+  // * 3 -1
+  // * 4 -2
+  // * 5 -3
+  // * 6 -4
+  // * 7 -5
+  // * firstWeekday = 3
+  // * 1 -0
+  // * 2 -1
+  // * 3 -2
+  // * 4 -3
+  // * 5 -4
+  // * 6 -5
+  // * 7 -6
+  // * firstWeekday = 4
+  // * 1 -0
+  // * 2 -1
+  // * 3 -2
+  // * 4 -3
+  // * 5 -4
+  // * 6 -5
+  // * 7 -6
+  // * firstWeekday = 5
+  // * 1 -0
+  // * 2 -1
+  // * 3 -2
+  // * 4 -3
+  // * 5 -4
+  // * 6 -5
+  // * 7 -6
+  // * firstWeekday = 6
+  // * 1 -0
+  // * 2 -1
+  // * 3 -2
+  // * 4 -3
+  // * 5 -4
+  // * 6 -5
+  // * 7 -6
+  // int diff = currentWeekday - firstWeekday;
+  // if (diff < 0) {
+  //   diff += 7;
+  // }
+  // diff;
+  // next month
+  // if (diff < 0) {
+  //   diff = -diff - 1 ;
+  // } else {
+  //   diff = 6 - diff;
+  // }
+  // 日期和日历对应，可设置首日星期，适用二维图如GridView
+  List<CalendarModel> mapToGridView(
+    int year, 
+    int month, 
+    {
+      int firstWeekday = 7, 
+      bool fixedLines = true
+    }
+  ) {
+    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
+    int firstDayWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
     int curMonthDays = DateUtil.daysOfMonth(year, month);
-    // last month
-    // 1 sundayFirst == true ? -1 : -0
-    // 2 sundayFirst == true ? -2 : -1
-    // 3 sundayFirst == true ? -3 : -2
-    // 4 sundayFirst == true ? -4 : -3
-    // 5 sundayFirst == true ? -5 : -4
-    // 6 sundayFirst == true ? -6 : -5
-    // 7 sundayFirst == true ? -0 : -6
-    // next month
-    // total-current-last=next *
-    // 1 sundayFirst == true ? +5 : +6
-    // 2 sundayFirst == true ? +4 : +5
-    // 3 sundayFirst == true ? +3 : +4
-    // 4 sundayFirst == true ? +2 : +3
-    // 5 sundayFirst == true ? +1 : +2
-    // 6 sundayFirst == true ? +0 : +1
-    // 7 sundayFirst == true ? +6 : +0
+    
+  }
+
+  // 日期转视图，可设置首日是否为星期日，适用非二维图如GridView
+  List<CalendarModel> mapToCustomView(int year, int month, {bool sundayFirst = true, bool fixedLines = true}) {
+    final numberOflines = DateUtil.numberOfLinesOfMonth(year, month, fixedLines);
+    int firstDayWeekday = DateUtil.firstWeekdayOfMonthForYearMonth(year, month);
+    int curMonthDays = DateUtil.daysOfMonth(year, month);
+
     int lastMonth = month - 1;
     int lastMonthDays = 0;
     int lastMonthDiff = -1;
-    int fixLastMontDays = sundayFirst ? firstWeekday == 7 ? 0 : firstWeekday : firstWeekday - 1;
+    int firstWeekday = sundayFirst ? 7 : 1;
+    int fixPreMonthDays = diffWeekday(firstWeekday, firstDayWeekday);
     int nextMonth = month+1;
-    int tempCurMonthDays = curMonthDays + fixLastMontDays;
+    int tempCurMonthDays = curMonthDays + fixPreMonthDays;
     int currentMonthIdx = 1;
 
     final totalNums = numberOflines * 7;
     String key = '';
     List<CalendarModel> models = [];
     for (var i = 0; i < totalNums; i++) {
-      //last month      
-      if (i < fixLastMontDays) {
+      //pre month      
+      if (i < fixPreMonthDays) {
         int lastYear = year;
         if (lastMonth <= 0) {
           lastMonth = 12;
@@ -317,7 +425,7 @@ class CalendarManager {
         }
         if (lastMonthDiff == -1) {
           lastMonthDays = DateUtil.daysOfMonth(lastYear, lastMonth);
-          lastMonthDiff = firstWeekday;
+          lastMonthDiff = firstDayWeekday;
         }
         key = _key(lastYear, lastMonth, lastMonthDays);
         lastMonthDays--;

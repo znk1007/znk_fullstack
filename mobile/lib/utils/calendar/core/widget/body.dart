@@ -29,7 +29,8 @@ class _CalendarBodyState extends State<CalendarBody> {
   @override
   Widget build(BuildContext context) {
     // CalendarManager.instance.load(DateTime(2018,10,31), DateTime(2019, 9, 30));
-    List<CalendarModel> models = CalendarManager.instance.diffLoad(2019, 8, -9-13);
+    // List<CalendarModel> models = CalendarManager.instance.diffLoad(2019, 8, -9-13);
+    CalendarManager.instance.testDiffWeekday(backward: false);
 
     return Container(
       width: Device.width,
