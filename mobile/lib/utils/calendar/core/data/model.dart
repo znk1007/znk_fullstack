@@ -1,5 +1,12 @@
 import 'package:znk/utils/calendar/core/data/util.dart';
 
+class CalendarPageModel {
+  final int year;
+  final int month;
+  final List<CalendarModel> models;
+  CalendarPageModel({this.year, this.month, this.models});
+}
+
 class CalendarModel {
   // 日期
   DateTime dateTime;
@@ -65,12 +72,9 @@ class CalendarManager {
   int _firstYear = 1960;
 
   int _lastYear = 2060;
-  // 自定义视图已加载模型
-  List<CalendarModel> _customLoadedModels = [];
-  // 网格已加载模型
-  List<CalendarModel> _gridLoadedModels = [];
+
   // 分页网格已加载模型
-  List<List<CalendarModel>> _gridsLoadedModels = [];
+  List<CalendarPageModel> _pageModels = [];
   // 键值
   String _key(int year, int month, int day) {
     return '$year' + '$month' + '$day';
@@ -453,7 +457,7 @@ class CalendarManager {
             model.row = i;
             models.add(model);
           } else {
-            print('pre month day null');
+            // print('pre month day null');
           }
         } else if (idx >= tempCurMonthDays) {
           String key = _key(nextYear, nextMonth, (idx-tempCurMonthDays+1));
@@ -463,7 +467,7 @@ class CalendarManager {
             model.row = i;
             models.add(model);
           } else {
-            print('next month day null');
+            // print('next month day null');
           }
         } else {
           String key = _key(year, month, currentMonthDayIdx++);
@@ -473,7 +477,7 @@ class CalendarManager {
             model.row = i;
             models.add(model);
           } else {
-            print('current month day null');
+            // print('current month day null');
           }
         }
       }
@@ -481,7 +485,7 @@ class CalendarManager {
     return models;
   }
 
-  List<List<CalendarModel>> mapToGridViews(
+  List<CalendarPageModel> mapToGridViews(
     int year, 
     int month, 
     {
@@ -490,34 +494,72 @@ class CalendarManager {
       bool fixedLines = true
     }
   ) {
-    List<List<CalendarModel>> models = [];
+    pages = pages < 3 ? 3 : pages;
     int middlePage = pages ~/ 2;
     int tempMonth = month;
     int tempYear = year;
+    _pageModels = [];
+    print('  ');
     for (var i = 0; i < pages; i++) {
-      print(' ');
-      tempMonth = month - (middlePage - i);
+      tempMonth = month + (middlePage - i);
       if (tempMonth <= 0) {
-        tempYear = year - 1;
-        tempMonth = 12;
-        List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
-        models.add(ms);
+        int diffYear = -tempMonth ~/ 12 + 1;
+        tempYear = year - diffYear;
+        // print('<0: diff year = $tempYear');
+        tempMonth += 12 * diffYear;
+        int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
+        if (idx == -1) {
+          List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+          CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: tempMonth, models: ms);
+          _pageModels.insert(0, pageModel);
+        }
+        print('<=0: year = $tempYear, month = $tempMonth');
       } else if (tempMonth > 12) {
-        tempMonth = 1;
-        tempYear = year + 1;
-        List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
-        models.add(ms);
+        int diffYear = tempMonth ~/ 12;
+        tempMonth -= 12 * diffYear - 1;
+        tempYear = year + diffYear;
+        print('>12: year = $tempYear, month = $tempMonth');
+        int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
+        if (idx == -1) {
+          List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+          CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: tempMonth, models: ms);
+          _pageModels.add(pageModel);
+        }
       } else {
-        List<CalendarModel> ms = mapToGridView(year, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
-        models.add(ms);
-      }
-      for (var ms in models) {
-        for (var m in ms) {
-          print('m date time: ${m.dateTime}, row: ${m.row}, column: ${m.column}');
+        print('same: year = $year, month = $tempMonth');
+        int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == year);
+        if (idx == -1) {
+          List<CalendarModel> ms = mapToGridView(year, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+          CalendarPageModel pageModel = CalendarPageModel(year: year, month: tempMonth, models: ms);
+          if (_pageModels.isEmpty) {
+            _pageModels.add(pageModel);
+          } else {
+            final firstPage = _pageModels.first;
+            final lastPage = _pageModels.last;
+            if (firstPage.year == lastPage.year) {
+              if (year < firstPage.year) {
+                _pageModels.insert(0, pageModel);
+              } else if (lastPage.year > year) {
+                _pageModels.add(pageModel);
+              } else if (firstPage.year == year) {
+                if (firstPage.month > tempMonth) {
+                  _pageModels.insert(0, pageModel);
+                } else if (lastPage.month > tempMonth) {
+                  _pageModels.add(pageModel);
+                }
+              }
+            } else {
+              if (firstPage.year == year && firstPage.month > tempMonth) {
+                _pageModels.insert(0, pageModel);
+              } else if (lastPage.year == year && lastPage.month < tempMonth) {
+                _pageModels.add(pageModel);
+              }
+            }
+          }
         }
       }
     }
-    return models;
+    return _pageModels;
   }
 
   // 日期转视图，可设置首日是否为星期日，适用非二维图如GridView
@@ -568,7 +610,6 @@ class CalendarManager {
       }
     }
     
-    _customLoadedModels = models;
     return models;
   }
 
