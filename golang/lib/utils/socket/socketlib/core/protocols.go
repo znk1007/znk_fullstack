@@ -10,6 +10,24 @@ import (
 	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
 )
 
+// writeManager 写入管理
+type writeManager interface {
+	getWriter() (io.Writer, error)
+	addWriter(error) error
+}
+
+// readManager 读取管理
+type readManager interface {
+	getReader() (io.Reader, bool, error)
+	addReader(error) error
+}
+
+// byteReader 字节读取器
+type byteReader interface {
+	ReadByte() (byte, error)
+	io.Reader
+}
+
 // dataReader 数据读取器
 type dataReader interface {
 	NextReader() (pbs.DataType, pbs.PacketType, io.ReadCloser, error)
