@@ -26,10 +26,10 @@ var payloadTests = []struct {
 		[]byte{0x00, 0x01, 0xff, '0'},
 		[]packet{
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_open, 
-				[]byte{}
-			}
+				pbs.DataType_string,
+				pbs.PacketType_open,
+				[]byte{},
+			},
 		},
 	},
 	{
@@ -37,10 +37,10 @@ var payloadTests = []struct {
 		[]byte{0x00, 0x01, 0x03, 0xff, '4', 'h', 'e', 'l', 'l', 'o', ' ', 0xe4, 0xbd, 0xa0, 0xe5, 0xa5, 0xbd},
 		[]packet{
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_message, 
-				[]byte("hello 你好")
-			}
+				pbs.DataType_string,
+				pbs.PacketType_message,
+				[]byte("hello 你好"),
+			},
 		},
 	},
 	{
@@ -63,18 +63,18 @@ var payloadTests = []struct {
 		},
 		[]packet{
 			packet{
-				pbs.DataType_binary, 
-				pbs.PacketType_message, 
-				[]byte("hello\n")
+				pbs.DataType_binary,
+				pbs.PacketType_message,
+				[]byte("hello\n"),
 			},
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_message, 
-				[]byte("你好\n")
+				pbs.DataType_string,
+				pbs.PacketType_message,
+				[]byte("你好\n"),
 			},
-			packet{pbs.DataType_string, 
-				pbs.PacketType_ping, 
-				[]byte("probe")
+			packet{pbs.DataType_string,
+				pbs.PacketType_ping,
+				[]byte("probe"),
 			},
 		},
 	},
@@ -83,9 +83,9 @@ var payloadTests = []struct {
 		[]byte("1:0"),
 		[]packet{
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_open, 
-				[]byte{}
+				pbs.DataType_string,
+				pbs.PacketType_open,
+				[]byte{},
 			},
 		},
 	},
@@ -94,9 +94,9 @@ var payloadTests = []struct {
 		[]byte("13:4hello 你好"),
 		[]packet{
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_message, 
-				[]byte("hello 你好")
+				pbs.DataType_string,
+				pbs.PacketType_message,
+				[]byte("hello 你好"),
 			},
 		},
 	},
@@ -105,9 +105,9 @@ var payloadTests = []struct {
 		[]byte("18:b4aGVsbG8g5L2g5aW9"),
 		[]packet{
 			packet{
-				pbs.DataType_binary, 
-				pbs.PacketType_message, 
-				[]byte("hello 你好")
+				pbs.DataType_binary,
+				pbs.PacketType_message,
+				[]byte("hello 你好"),
 			},
 		},
 	},
@@ -116,19 +116,19 @@ var payloadTests = []struct {
 		[]byte("10:b4aGVsbG8K8:4你好\n6:2probe"),
 		[]packet{
 			packet{
-				pbs.DataType_binary, 
-				pbs.PacketType_message, 
-				[]byte("hello\n")
+				pbs.DataType_binary,
+				pbs.PacketType_message,
+				[]byte("hello\n"),
 			},
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_message, 
-				[]byte("你好\n")
+				pbs.DataType_string,
+				pbs.PacketType_message,
+				[]byte("你好\n"),
 			},
 			packet{
-				pbs.DataType_string, 
-				pbs.PacketType_ping, 
-				[]byte("probe")
+				pbs.DataType_string,
+				pbs.PacketType_ping,
+				[]byte("probe"),
 			},
 		},
 	},
@@ -249,17 +249,19 @@ func TestPayloadEncoder(t *testing.T) {
 			if err != nil {
 				t.Error("payload encoder next writer err: ", err)
 			}
-			t.Log("fw data: ", pkt.data)
+			t.Error("fw 1: ", fw)
 			_, err = fw.Write(pkt.data)
+			t.Error("fw 2: ", fw)
 			if err != nil {
 				t.Error("payload encoder write err: ", err)
 			}
 			err = fw.Close()
+			t.Error("fw 3: ", fw)
 			if err != nil {
 				t.Error("payload encoder close err: ", err)
 			}
 		}
-		t.Errorf("\ntest data :%v\nbufs bytes:%v", test.data, buf.Bytes())
+		// t.Errorf("\ntest data :%v\nbufs bytes:%v", test.data, buf.Bytes())
 	}
 
 }
