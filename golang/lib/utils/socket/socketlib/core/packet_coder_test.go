@@ -140,7 +140,7 @@ func (tdw *testDiscardWriter) NextWriter(dt pbs.DataType, pt pbs.PacketType) (io
 	return testOneDataDiscarder{}, nil
 }
 
-var tests = []struct {
+var packetTests = []struct {
 	packets []testPacket
 	data    []testData
 }{
@@ -271,7 +271,7 @@ var tests = []struct {
 }
 
 func TestPacketEncoder(t *testing.T) {
-	for idx, test := range tests {
+	for idx, test := range packetTests {
 		tcw := newTestConnWriter()
 		encoder := NewPacketEncoder(tcw)
 		for _, p := range test.packets {
@@ -293,7 +293,7 @@ func TestPacketEncoder(t *testing.T) {
 }
 
 func TestPacketDecoder(t *testing.T) {
-	for idx, test := range tests {
+	for idx, test := range packetTests {
 		tcr := newTestConnReader(test.data)
 		decoder := NewPacketDecoder(tcr)
 		var out []testPacket
