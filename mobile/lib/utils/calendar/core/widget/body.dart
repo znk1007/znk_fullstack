@@ -26,12 +26,15 @@ class _CalendarBodyState extends State<CalendarBody> {
   double _calendarHeight = 268;
   double _totalHeight = 300;
   DateTime _currentTime = DateTime.now();
+
+  List<int> _weekdays;
   
   @override
   void initState() {
     super.initState();
     _helper = widget.helper ?? DefaultDateHelper();
     _loadBase(_helper);
+    _loadPageModels();
   }
   
 
@@ -43,7 +46,16 @@ class _CalendarBodyState extends State<CalendarBody> {
         children: <Widget>[
           Container(
             width: Device.width,
-            height: (_totalHeight - _calendarHeight).toDouble(),
+            height: _totalHeight - _calendarHeight-2,
+            child: GridView.builder(
+              itemBuilder: (BuildContext weekdayCtx, int weekdayIdx) {
+                return _weekdayItem(_weekdays[weekdayIdx], weekdayIdx);
+              },
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _weekdays.length,
+              ),
+              itemCount: _weekdays.length,
+            ),
           ),
           Container(
             width: Device.width,
@@ -59,11 +71,12 @@ class _CalendarBodyState extends State<CalendarBody> {
                   child: GridView.builder(
                     itemBuilder: (BuildContext gridViewCtx, int gridIdx) {
                       List<CalendarModel> models = pageModel.models;
-                      return Container();//models.isEmpty ? Container() : _gridItem(models[gridIdx]);
+                      return _gridCalendarItem(models[gridIdx]);
                     },
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 7,
+                      crossAxisCount: _weekdays.length,
                     ),
+                    itemCount: pageModel.models.length,
                   ),
                 );
               },
@@ -88,6 +101,7 @@ class _CalendarBodyState extends State<CalendarBody> {
       int initPage = (_totalPage-1) ~/ 2;
       _diffPages = initPage;
       _controller = PageController(initialPage: (_totalPage-1) ~/ 2);
+      _weekdays = DateUtil.weekdays(firstWeekday: helper.firstWeekday);
   }
 
   // 加载日历模型
@@ -95,8 +109,28 @@ class _CalendarBodyState extends State<CalendarBody> {
     _pageModels = CalendarManager.instance.mapToGridViews(_currentTime.year, _currentTime.month, firstWeekday: _helper.firstWeekday, pages: _totalPage, keep: _helper.keepCache);
   }
 
-  Widget _gridItem(CalendarModel model) {
-    print('model date time: ${model.dateTime}');
+  Widget _weekdayItem(int weekday, int idx) {
+    int len = _weekdays.length;
+    return Container(
+      width: Device.width / len,
+      height: _totalHeight - _calendarHeight,
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(
+            color: (idx != len - 1) ? Colors.green : Colors.white,
+          ),
+        ),
+      ),
+      child: Text(
+        '$weekday',
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  // 日历具体内容
+  Widget _gridCalendarItem(CalendarModel model) {
+    // print('model date time: ${model.dateTime}');
     return Container(
 
     );
