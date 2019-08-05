@@ -59,7 +59,7 @@ func (pe *payloadEncoder) Close() error {
 	}
 	var writeHeader func() error
 	if pe.supportBinary {
-		writeHeader = pe.writeBase64Header
+		writeHeader = pe.writeBinaryHeader
 	} else {
 		if pe.dt == pbs.DataType_binary {
 			writeHeader = pe.writeBase64Header
@@ -69,7 +69,7 @@ func (pe *payloadEncoder) Close() error {
 	}
 	pe.header.Reset()
 	err := writeHeader()
-	if err != nil {
+	if err == nil {
 		_, err = pe.header.WriteTo(pe.rawWriter)
 	}
 	if err == nil {

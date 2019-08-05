@@ -260,8 +260,10 @@ func TestPayloadEncoder(t *testing.T) {
 			if err != nil {
 				t.Error("payload encoder close err: ", err)
 			}
+
 		}
-		// t.Errorf("\ntest data :%v\nbufs bytes:%v", test.data, buf.Bytes())
+		t.Errorf("\ntest data :%v\nbufs bytes:%v", test.data, buf.Bytes())
+		t.Error("------------------------")
 	}
 
 }
