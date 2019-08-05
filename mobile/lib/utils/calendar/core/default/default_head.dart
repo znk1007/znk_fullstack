@@ -52,9 +52,6 @@ class DefaultHead implements CustomHead {
     ),
   );
 
-
-  
-
   @override
   set statuText(String txt) {
     _statusText = txt ?? '';

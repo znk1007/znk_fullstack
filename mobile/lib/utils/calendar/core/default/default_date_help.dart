@@ -21,7 +21,10 @@ class DefaultDateHelper implements CustomDateHelper {
   int get firstWeekday => 7;
 
   @override
-  int get numberOfPage => 3;
+  int get numberOfPage => 5;
+
+  @override
+  bool get keepCache => true;
 
   
 }

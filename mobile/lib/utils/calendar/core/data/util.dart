@@ -2,6 +2,8 @@ import 'package:znk/utils/calendar/custom/custom_date_help.dart';
 
 class DateUtil {
 
+  static List<int> _weekdays = [];
+
   // 是否是今天
   static bool isToday(DateTime time) {
     return DateTime.now().difference(time).inDays == 0;
@@ -150,6 +152,26 @@ class DateUtil {
     int addtionLine = firstWeekday ~/ 5;
     int lines = (days ~/ 7).toInt() + addtionLine + 1;
     return lines;
+  }
+  // 间隔天数的日期
+  static DateTime diffDays(DateTime time, int dayOffset) {
+    time = time ?? DateTime.now();
+    return time.add(Duration(days: dayOffset));
+  }
+  // 星期
+  static List<int> weekdays({int firstWeekday = 7}) {
+    if (_weekdays.isNotEmpty && _weekdays.first == firstWeekday) {
+      return _weekdays;
+    }
+    // _weekdays.add(firstWeekday);
+    for (var i = 0; i < 7; i++) {
+      int theDay = firstWeekday + i;
+      if (theDay > 7) {
+        theDay -= 7;
+      }
+      _weekdays.add(theDay);
+    }
+    return _weekdays;
   }
 
 }

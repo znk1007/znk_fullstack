@@ -18,5 +18,7 @@ abstract class CustomDateHelper {
   int get firstWeekday;
   // 页数，3，5，7，。。。
   int get numberOfPage;
+  // 缓存加载出来的日历数据
+  bool get keepCache;
 
 }

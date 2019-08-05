@@ -59,15 +59,9 @@ class CalendarManager {
   static CalendarManager _inner;
   CalendarManager._();
 
-  int get totalPage {
-    return _pages;
-  }
+ 
   // 模型
   Map<String, CalendarModel> _modelsMap = Map();
-  // 当前页码
-  int currentPage = 0;
-  // 总页数
-  int _pages = 0;
 
   int _firstYear = 1960;
 
@@ -499,7 +493,7 @@ class CalendarManager {
     }
     return models;
   }
-
+  // 日期和日历对应，可设置首日星期，适用二维图如GridView+pageView
   List<CalendarPageModel> mapToGridViews(
     int year, 
     int month, 
@@ -526,7 +520,8 @@ class CalendarManager {
         }
       }
     }
-    // print('  ');
+    print('  ');
+
     for (var i = 0; i < pages; i++) {
       tempMonth = month - (middlePage - i);
       if (tempMonth <= 0) {
@@ -569,9 +564,12 @@ class CalendarManager {
               } else if (lastPage.year > year) {
                 _pageModels.add(pageModel);
               } else if (firstPage.year == year) {
+                // print('firstPage.year == year: ${firstPage.year == year}');
                 if (firstPage.month > tempMonth) {
+                  // print('firstPage.month >= tempMonth: ${firstPage.month >= tempMonth}');
                   _pageModels.insert(0, pageModel);
-                } else if (lastPage.month > tempMonth) {
+                } else if (lastPage.month < tempMonth) {
+                  // print('lastPage.month > tempMonth: ${lastPage.month > tempMonth}');
                   _pageModels.add(pageModel);
                 }
               }
