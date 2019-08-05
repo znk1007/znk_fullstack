@@ -48,11 +48,13 @@ class _CalendarBodyState extends State<CalendarBody> {
             width: Device.width,
             height: _totalHeight - _calendarHeight-2,
             child: GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
               itemBuilder: (BuildContext weekdayCtx, int weekdayIdx) {
                 return _weekdayItem(_weekdays[weekdayIdx], weekdayIdx);
               },
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: _weekdays.length,
+                childAspectRatio: 1.8,
               ),
               itemCount: _weekdays.length,
             ),
@@ -121,6 +123,7 @@ class _CalendarBodyState extends State<CalendarBody> {
           ),
         ),
       ),
+      alignment: Alignment.center,
       child: Text(
         '$weekday',
         textAlign: TextAlign.center,
