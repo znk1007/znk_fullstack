@@ -43,6 +43,7 @@ class CalendarModel {
   }
   // 是否同一月
   bool isSameMonth(CalendarModel other) {
+    // print('reload same month ${this.dateTime}, other datetime: ${other.dateTime}');
     return this.year == other.year && this.month == other.month;
   }
 
@@ -520,7 +521,7 @@ class CalendarManager {
         }
       }
     }
-    print('  ');
+    // print('  ');
 
     for (var i = 0; i < pages; i++) {
       tempMonth = month - (middlePage - i);

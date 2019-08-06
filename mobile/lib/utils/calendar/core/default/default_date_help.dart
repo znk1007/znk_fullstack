@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:znk/utils/calendar/custom/custom_date_help.dart';
 
 class DefaultDateHelper implements CustomDateHelper {
@@ -25,6 +28,18 @@ class DefaultDateHelper implements CustomDateHelper {
 
   @override
   bool get keepCache => true;
+
+  @override
+  Color get weekdaySeparatorColor => Colors.grey;
+
+  @override
+  int get weekdaySeparatorWidth => 0;
+
+  @override
+  Color get outerDayColor => Colors.grey[400];
+
+  @override
+  Color get innerDayColor => Colors.black;
 
   
 }

@@ -9,8 +9,8 @@ class DateUtil {
     return DateTime.now().difference(time).inDays == 0;
   }
   // 国历星期
-  static String cnWeek(DateTime time, WeekType type) {
-    switch (time.weekday) {
+  static String cnWeek(int weekday, WeekType type) {
+    switch (weekday) {
       case DateTime.monday:
         return type == WeekType.single ? '一' : type == WeekType.short ? '周一' : '星期一';
         break;
@@ -37,8 +37,8 @@ class DateUtil {
     return '';
   }
   // 国历月份显示
-  static String cnMonth(DateTime time, MonthType type) {
-    switch (time.month) {
+  static String cnMonth(int month, MonthType type) {
+    switch (month) {
       case DateTime.january:
         return type == MonthType.short ? '一' : '一月';
         break;
@@ -148,7 +148,6 @@ class DateUtil {
     }
     int days = daysOfMonth(year, month);
     int firstWeekday = firstWeekdayOfMonthForYearMonth(year, month);
-    print('pre idx: ${firstWeekday ~/ 5}');
     int addtionLine = firstWeekday ~/ 5;
     int lines = (days ~/ 7).toInt() + addtionLine + 1;
     return lines;
@@ -158,6 +157,25 @@ class DateUtil {
     time = time ?? DateTime.now();
     return time.add(Duration(days: dayOffset));
   }
+  // 月份偏移
+  static DateTime diffMonths(DateTime time, int monthOffset) {
+    int year = time.year;
+    int month = time.month;
+    int diff = month + monthOffset;
+    int tempYear = year;
+    int tempMonth = diff;
+    if (diff > 12) {
+      int diffYear = diff ~/ 12;
+        tempMonth -= 12 * diffYear - 1;
+        tempYear = year + diffYear;
+    } else if (diff < 1) {
+      int diffYear = -tempMonth ~/ 12 + 1;
+      tempYear = year + diffYear;
+      diff += 12 * diffYear;
+    }
+    return DateTime(tempYear, tempMonth);
+  }
+  
   // 星期
   static List<int> weekdays({int firstWeekday = 7}) {
     if (_weekdays.isNotEmpty && _weekdays.first == firstWeekday) {
