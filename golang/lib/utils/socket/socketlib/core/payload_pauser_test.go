@@ -3,6 +3,7 @@ package core
 import (
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -106,5 +107,120 @@ func TestPauserConcurrencyWorkingDone(t *testing.T) {
 	for idx := 0; idx < max; idx++ {
 		go f()
 	}
+	wg.Wait()
+}
+
+func TestPauserCanWorkingDurationPauseWaiting(t *testing.T) {
+	should := assert.New(t)
+	pp := newPayloadPauser()
+	wg := sync.WaitGroup{}
+	ok := pp.Working()
+	should.True(ok)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		p := pp.Pause()
+		should.True(p)
+		defer pp.Resume()
+	}()
+	<-pp.PausingTrigger()
+	ok = pp.Working()
+	should.True(ok)
+
+	pp.Done()
+	pp.Done()
+	wg.Wait()
+}
+
+func TestPauserPauseWhenAllDone(t *testing.T) {
+	should := assert.New(t)
+	pp := newPayloadPauser()
+	n := 10
+	for idx := 0; idx < n; idx++ {
+		ok := pp.Working()
+		should.True(ok)
+	}
+	for idx := 0; idx < n; idx++ {
+		pp.Done()
+	}
+	ok := pp.Pause()
+	should.True(ok)
+
+	ok = pp.Pause()
+	should.False(ok)
+	pp.Resume()
+}
+
+func TestPauserOnlyOncePauseAfterWaiting(t *testing.T) {
+	should := assert.New(t)
+	pp := newPayloadPauser()
+	count := int64(0)
+	wg := sync.WaitGroup{}
+
+	ok := pp.Working()
+	should.True(ok)
+	wg.Add(10)
+	for idx := 0; idx < 10; idx++ {
+		go func() {
+			defer wg.Done()
+			ok := pp.Pause()
+			if ok {
+				atomic.AddInt64(&count, 1)
+			}
+		}()
+	}
+	time.Sleep(time.Second / 10)
+	pp.Done()
+	wg.Wait()
+	should.Equal(int64(1), count)
+	pp.Resume()
+}
+
+func TestPauserCannotWorkingAffterPause(t *testing.T) {
+	should := assert.New(t)
+	pp := newPayloadPauser()
+
+	ok := pp.Pause()
+	should.True(ok)
+	defer pp.Resume()
+
+	ok = pp.Working()
+	should.False(ok)
+	pp.Done()
+}
+
+func TestPauserRandom(t *testing.T) {
+	pp := newPayloadPauser()
+	wg := sync.WaitGroup{}
+	n := 100
+	f := func() {
+		defer wg.Done()
+		should := assert.New(t)
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		time.Sleep(time.Millisecond * time.Duration(r.Intn(n)))
+		ok := pp.Working()
+		should.True(ok)
+		defer pp.Done()
+		time.Sleep(time.Millisecond * time.Duration(r.Intn(n)))
+	}
+	max := 1000
+	wg.Add(max)
+	for idx := 0; idx < max; idx++ {
+		go f()
+	}
+	should := assert.New(t)
+	ok := pp.Working()
+	should.True(ok)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		time.Sleep(time.Millisecond * time.Duration(n/2))
+		pp.Done()
+	}()
+	start := time.Now()
+	ok = pp.Pause()
+	end := time.Now()
+	should.True(ok)
+	should.True(end.Sub(start) > time.Millisecond)
 	wg.Wait()
 }
