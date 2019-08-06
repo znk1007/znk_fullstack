@@ -249,21 +249,18 @@ func TestPayloadEncoder(t *testing.T) {
 			if err != nil {
 				t.Error("payload encoder next writer err: ", err)
 			}
-			t.Error("fw 1: ", fw)
 			_, err = fw.Write(pkt.data)
-			t.Error("fw 2: ", fw)
 			if err != nil {
 				t.Error("payload encoder write err: ", err)
 			}
 			err = fw.Close()
-			t.Error("fw 3: ", fw)
 			if err != nil {
 				t.Error("payload encoder close err: ", err)
 			}
 
 		}
-		t.Errorf("\ntest data :%v\nbufs bytes:%v", test.data, buf.Bytes())
-		t.Error("------------------------")
+		// t.Errorf("\ntest data :%v\nbufs bytes:%v", test.data, buf.Bytes())
+		// t.Error("------------------------")
 	}
 
 }

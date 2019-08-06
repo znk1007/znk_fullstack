@@ -1,0 +1,9 @@
+syntax = "proto3";
+package core.go;
+option go_package = "pbs";
+
+enum PauserStatus {
+    normal = 0;
+    pausing = 1;
+    paused = 2;
+}
