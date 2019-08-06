@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/rendering/sliver.dart';
 import 'package:flutter/src/rendering/sliver_grid.dart';
 import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/calendar/core/data/model.dart';
@@ -83,13 +82,10 @@ class _CalendarBodyState extends State<CalendarBody> {
                 );
               },
               onPageChanged: (int current) {
-                // print('diff page: ${current-_diffPages}');
-                
                 setState(() {
                   int diff = current - _diffPages;
                   _currentModel = CalendarModel()..dateTime = DateUtil.diffMonths(_currentTime, diff);
                 });
-                
               },
             ),
           ),
