@@ -19,8 +19,8 @@ var (
 	errOverlap = errors.New("overlap")
 )
 
-// Error payload error interface
-type Error interface {
+// PError payload error interface
+type pError interface {
 	Error() string
 	Temporary() bool
 }
@@ -30,31 +30,31 @@ type retryError struct {
 	err string
 }
 
-func (r *retryError) Error() string {
+func (r retryError) Error() string {
 	return r.err
 }
 
-func (r *retryError) Temporary() bool {
+func (r retryError) Temporary() bool {
 	return true
 }
 
-// Err error for socketlib
-type Err struct {
+// err error for socketlib
+type err struct {
 	URL       string
 	Operation string
 	E         error
 }
 
-// NewErr new *Err
-func NewErr(url, operation string, err error) *Err {
-	return &Err{
+// NewErr new *err
+func newErr(url, operation string, e error) *err {
+	return &err{
 		URL:       url,
 		Operation: operation,
-		E:         err,
+		E:         e,
 	}
 }
 
-func (e *Err) Error() string {
+func (e *err) Error() string {
 	if e.URL == "" {
 		return fmt.Sprintf("%s: %s", e.Operation, e.E.Error())
 	}
@@ -62,7 +62,7 @@ func (e *Err) Error() string {
 }
 
 // Timeout if is timeout error
-func (e *Err) Timeout() bool {
+func (e *err) Timeout() bool {
 	if r, ok := e.E.(net.Error); ok {
 		return r.Timeout()
 	}
@@ -70,7 +70,7 @@ func (e *Err) Timeout() bool {
 }
 
 // Temporary the err is temporay or not
-func (e *Err) Temporary() bool {
+func (e *err) Temporary() bool {
 	if r, ok := e.E.(net.Error); ok {
 		return r.Temporary()
 	}
