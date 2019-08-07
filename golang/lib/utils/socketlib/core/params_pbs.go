@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
+	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
 
 const isJSON = false

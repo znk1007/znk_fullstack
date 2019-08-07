@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
+	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
 
 // writeManager 写入管理

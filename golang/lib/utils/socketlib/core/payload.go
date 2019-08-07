@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
+	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
 
 type readArg struct {

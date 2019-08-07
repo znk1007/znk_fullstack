@@ -8,7 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
+	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
 
 // 有效荷载编码
@@ -144,6 +144,7 @@ func (pd *payloadDecoder) NextReader() (pbs.DataType, pbs.PacketType, io.ReadClo
 			return 0, 0, nil, pd.sendError(err)
 		}
 	}
+	fmt.Println("pd.dt: ", pd.dt)
 	return pd.dt, pd.pt, pd, nil
 }
 
@@ -189,10 +190,7 @@ func (pd *payloadDecoder) readBinary(r byteReader) (pbs.DataType, pbs.PacketType
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	fmt.Println("read binary b: ", b)
-	fmt.Println("read binary dt: ", dt)
 	pt := byteToPacketType(b, dt)
-	fmt.Println("byteToPacketType pt: ", pt)
 	l--
 	return dt, pt, l, nil
 }
@@ -216,7 +214,6 @@ func (pd *payloadDecoder) readText(r byteReader) (pbs.DataType, pbs.PacketType, 
 		}
 		l--
 	}
-	fmt.Println("read text type: ", b)
 	pt := byteToPacketType(b, pbs.DataType_string)
 	return dt, pt, l, nil
 }
