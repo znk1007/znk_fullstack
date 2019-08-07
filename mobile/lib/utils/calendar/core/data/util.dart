@@ -4,6 +4,10 @@ class DateUtil {
 
   static List<int> _weekdays = [];
 
+  static int abs(int num) {
+    return num > 0 ? num : -num;
+  }
+
   // 是否是今天
   static bool isToday(DateTime time) {
     return DateTime.now().difference(time).inDays == 0;

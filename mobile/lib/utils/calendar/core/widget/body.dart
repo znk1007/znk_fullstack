@@ -18,7 +18,6 @@ class CalendarBody extends StatefulWidget {
 class _CalendarBodyState extends State<CalendarBody> {
 
   PageController _controller;
-  int _totalPage = 0;
   CustomDateHelper _helper;
   int _diffPages = 0;
   List<CalendarPageModel> _pageModels;
@@ -64,7 +63,7 @@ class _CalendarBodyState extends State<CalendarBody> {
             width: Device.width,
             height: _calendarHeight,
             child: PageView.builder(
-              itemCount: _totalPage,
+              itemCount: _helper.numberOfPage,
               controller: _controller,
               itemBuilder: (BuildContext pageViewCtx, int pageIdx) {
                 CalendarPageModel pageModel = _pageModels[pageIdx];
@@ -84,6 +83,9 @@ class _CalendarBodyState extends State<CalendarBody> {
               onPageChanged: (int current) {
                 setState(() {
                   int diff = current - _diffPages;
+                  int tempDiff = DateUtil.abs(diff);
+                  print('temp diff: $tempDiff');
+                  print('_helper.numberOfPage - tempDiff: ${_helper.numberOfPage - tempDiff}');
                   _currentModel = CalendarModel()..dateTime = DateUtil.diffMonths(_currentTime, diff);
                 });
               },
@@ -101,16 +103,16 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   // 加载基本数据
   void _loadBase(CustomDateHelper helper) {
-      _totalPage = _helper.numberOfPage / 2 == 0 ? 3 : _helper.numberOfPage;
-      int initPage = (_totalPage-1) ~/ 2;
+      int totalPage = _helper.numberOfPage / 2 == 0 ? 3 : _helper.numberOfPage;
+      int initPage = (totalPage-1) ~/ 2;
       _diffPages = initPage;
-      _controller = PageController(initialPage: (_totalPage-1) ~/ 2);
+      _controller = PageController(initialPage: initPage);
       _weekdays = DateUtil.weekdays(firstWeekday: helper.firstWeekday);
   }
 
   // 加载日历模型
   void _loadPageModels() {
-    _pageModels = CalendarManager.instance.mapToGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, firstWeekday: _helper.firstWeekday, pages: _totalPage, keep: _helper.keepCache);
+    _pageModels = CalendarManager.instance.mapToGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, firstWeekday: _helper.firstWeekday, pages: _helper.numberOfPage, keep: _helper.keepCache);
   }
 
   Widget _weekdayItem(int weekday, int idx) {
