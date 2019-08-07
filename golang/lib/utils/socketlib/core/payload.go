@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"io"
 	"math"
 	"sync"
@@ -81,6 +82,7 @@ func (p *payload) FeedIn(r io.Reader, supportBinary bool) error {
 			r:             r,
 			supportBinary: supportBinary,
 		}:
+			fmt.Println("reader chan: ", r)
 		}
 		break
 	}

@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
+	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
 
-type packet struct {
+type paylaodPacket struct {
 	dt   pbs.DataType
 	pt   pbs.PacketType
 	data []byte
@@ -19,13 +19,13 @@ type packet struct {
 var payloadTests = []struct {
 	supportBinary bool
 	data          []byte
-	packets       []packet
+	packets       []paylaodPacket
 }{
 	{
 		true,
 		[]byte{0x00, 0x01, 0xff, '0'},
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_open,
 				[]byte{},
@@ -35,8 +35,8 @@ var payloadTests = []struct {
 	{
 		true,
 		[]byte{0x00, 0x01, 0x03, 0xff, '4', 'h', 'e', 'l', 'l', 'o', ' ', 0xe4, 0xbd, 0xa0, 0xe5, 0xa5, 0xbd},
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_message,
 				[]byte("hello 你好"),
@@ -45,9 +45,9 @@ var payloadTests = []struct {
 	},
 	{
 		true,
-		[]byte{0x00, 0x01, 0x03, 0xff, 0x04, 'h', 'e', 'l', 'l', 'o', ' ', 0xe4, 0xbd, 0xa0, 0xe5, 0xa5, 0xbd},
-		[]packet{
-			packet{
+		[]byte{0x01, 0x01, 0x03, 0xff, 0x04, 'h', 'e', 'l', 'l', 'o', ' ', 0xe4, 0xbd, 0xa0, 0xe5, 0xa5, 0xbd},
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_binary,
 				pbs.PacketType_message,
 				[]byte("hello 你好"),
@@ -61,28 +61,30 @@ var payloadTests = []struct {
 			0x00, 0x08, 0xff, '4', 0xe4, 0xbd, 0xa0, 0xe5, 0xa5, 0xbd, '\n',
 			0x00, 0x06, 0xff, '2', 'p', 'r', 'o', 'b', 'e',
 		},
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_binary,
 				pbs.PacketType_message,
 				[]byte("hello\n"),
 			},
-			packet{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_message,
 				[]byte("你好\n"),
 			},
-			packet{pbs.DataType_string,
+			paylaodPacket{
+				pbs.DataType_string,
 				pbs.PacketType_ping,
 				[]byte("probe"),
 			},
 		},
 	},
+
 	{
 		false,
 		[]byte("1:0"),
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_open,
 				[]byte{},
@@ -92,8 +94,8 @@ var payloadTests = []struct {
 	{
 		false,
 		[]byte("13:4hello 你好"),
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_message,
 				[]byte("hello 你好"),
@@ -103,8 +105,8 @@ var payloadTests = []struct {
 	{
 		false,
 		[]byte("18:b4aGVsbG8g5L2g5aW9"),
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_binary,
 				pbs.PacketType_message,
 				[]byte("hello 你好"),
@@ -114,18 +116,18 @@ var payloadTests = []struct {
 	{
 		false,
 		[]byte("10:b4aGVsbG8K8:4你好\n6:2probe"),
-		[]packet{
-			packet{
+		[]paylaodPacket{
+			paylaodPacket{
 				pbs.DataType_binary,
 				pbs.PacketType_message,
 				[]byte("hello\n"),
 			},
-			packet{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_message,
 				[]byte("你好\n"),
 			},
-			packet{
+			paylaodPacket{
 				pbs.DataType_string,
 				pbs.PacketType_ping,
 				[]byte("probe"),
@@ -171,7 +173,7 @@ func TestPayloadDecoder(t *testing.T) {
 		d := payloadDecoder{
 			readM: &manager,
 		}
-		var packets []packet
+		var packets []paylaodPacket
 		for idx := 0; idx < len(test.packets); idx++ {
 			dt, pt, fr, err := d.NextReader()
 			if err != nil {
@@ -182,7 +184,7 @@ func TestPayloadDecoder(t *testing.T) {
 			if err != nil {
 				t.Error("test payload decoder read all err: ", err)
 			}
-			pkt := packet{
+			pkt := paylaodPacket{
 				dt:   dt,
 				pt:   pt,
 				data: data,

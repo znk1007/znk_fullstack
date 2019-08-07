@@ -1,10 +1,10 @@
 package core
 
 import (
+	"fmt"
 	"bufio"
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -133,6 +133,7 @@ type payloadDecoder struct {
 func (pd *payloadDecoder) NextReader() (pbs.DataType, pbs.PacketType, io.ReadCloser, error) {
 	if pd.rawReader == nil {
 		r, supportBinary, err := pd.readM.getReader()
+		fmt.Println("r: ", r)
 		if err != nil {
 			return 0, 0, nil, err
 		}
@@ -144,7 +145,6 @@ func (pd *payloadDecoder) NextReader() (pbs.DataType, pbs.PacketType, io.ReadClo
 			return 0, 0, nil, pd.sendError(err)
 		}
 	}
-	fmt.Println("pd.dt: ", pd.dt)
 	return pd.dt, pd.pt, pd, nil
 }
 

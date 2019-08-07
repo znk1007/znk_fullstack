@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
+	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
 
 func TestPkgType(t *testing.T) {
