@@ -102,6 +102,7 @@ func (p *payload) FlushOut(w io.Writer) error {
 	select {
 	case <-p.close:
 		return p.load()
+	default:
 	}
 	if !atomic.CompareAndSwapInt64(&p.flushing, 0, 1) {
 		return newErr("", "write", errOverlap)
@@ -142,8 +143,9 @@ func (p *payload) FlushOut(w io.Writer) error {
 	}
 }
 
-func (p *payload) NextReader() (pbs.DataType, pbs.PacketType, io.Reader, error) {
-	return p.pd.NextReader()
+func (p *payload) NextReader() (pbs.DataType, pbs.PacketType, io.ReadCloser, error) {
+	ft, pt, r, err := p.pd.NextReader()
+	return ft, pt, r, err
 }
 
 func (p *payload) SetReadDeadline(t time.Time) error {
@@ -257,7 +259,7 @@ func (p *payload) getWriter() (io.Writer, error) {
 	default:
 	}
 	if ok := p.pp.Working(); !ok {
-		return nil, newErr("", "write", errTimeout)
+		return nil, newErr("", "payload", errPaused)
 	}
 	p.pp.Done()
 	for {

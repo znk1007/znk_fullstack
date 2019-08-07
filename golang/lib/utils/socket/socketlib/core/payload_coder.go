@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -188,7 +189,10 @@ func (pd *payloadDecoder) readBinary(r byteReader) (pbs.DataType, pbs.PacketType
 	if err != nil {
 		return 0, 0, 0, err
 	}
+	fmt.Println("read binary b: ", b)
+	fmt.Println("read binary dt: ", dt)
 	pt := byteToPacketType(b, dt)
+	fmt.Println("byteToPacketType pt: ", pt)
 	l--
 	return dt, pt, l, nil
 }
@@ -212,6 +216,7 @@ func (pd *payloadDecoder) readText(r byteReader) (pbs.DataType, pbs.PacketType, 
 		}
 		l--
 	}
+	fmt.Println("read text type: ", b)
 	pt := byteToPacketType(b, pbs.DataType_string)
 	return dt, pt, l, nil
 }

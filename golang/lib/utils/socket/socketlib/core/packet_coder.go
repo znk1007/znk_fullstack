@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/znk_fullstack/golang/lib/utils/socket/socketlib/protos/pbs"
@@ -55,5 +56,6 @@ func (pd *packetDecoder) NextReader() (pbs.DataType, pbs.PacketType, io.ReadClos
 	if _, err := io.ReadFull(r, b[:]); err != nil {
 		return 0, 0, nil, err
 	}
+	fmt.Println("packet coder b: ", b[0])
 	return dt, byteToPacketType(b[0], dt), r, nil
 }

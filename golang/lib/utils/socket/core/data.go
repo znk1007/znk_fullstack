@@ -391,7 +391,7 @@ func (d *Decoder) readUint64FromText(r byteReader) (uint64, bool, error) {
 			}
 			return 0, false, err
 		}
-		if '0' <= b && b <= '9' {
+		if !('0' <= b && b <= '9') {
 			r.UnreadByte()
 			return ret, hasRead, nil
 		}

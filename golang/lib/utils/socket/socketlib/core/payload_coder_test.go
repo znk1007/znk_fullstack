@@ -221,7 +221,7 @@ type testWriterManager struct {
 }
 
 func (twm *testWriterManager) getWriter() (io.Writer, error) {
-	if oe, ok := twm.returnError.(Error); ok && oe.Temporary() {
+	if oe, ok := twm.returnError.(pError); ok && oe.Temporary() {
 		twm.returnError = nil
 		return nil, oe
 	}
