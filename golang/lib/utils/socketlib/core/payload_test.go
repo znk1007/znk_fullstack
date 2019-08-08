@@ -344,3 +344,80 @@ func TestPayloadInOutPause(t *testing.T) {
 	should.Nil(err)
 	should.Equal([]byte{0x0, 0x1, 0xff, '6'}, b.Bytes())
 }
+
+func TestPayloadNextClosePause(t *testing.T) {
+	should := assert.New(t)
+	p := NewPayload(true)
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		must := require.New(t)
+		defer wg.Done()
+		err := p.FeedIn(bytes.NewReader([]byte("1:0")), false)
+		must.Nil(err)
+	}()
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		must := require.New(t)
+		defer wg.Done()
+		_, _, r, err := p.NextReader()
+		must.Nil(err)
+		time.Sleep(time.Second / 2)
+		err = r.Close()
+		must.Nil(err)
+
+		_, _, r, err = p.NextReader()
+		op, ok := err.(pError)
+		must.True(ok)
+		should.True(op.Temporary())
+	}()
+	wg.Add(1)
+	go func() {
+		must := require.New(t)
+		defer wg.Done()
+		err := p.FlushOut(ioutil.Discard)
+		must.Nil(err)
+	}()
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		must := require.New(t)
+		defer wg.Done()
+		w, err := p.NextWriter(pbs.DataType_binary, pbs.PacketType_open)
+		must.Nil(err)
+		time.Sleep(time.Second / 2)
+		err = w.Close()
+		must.Nil(err)
+
+		w, err = p.NextWriter(pbs.DataType_binary, pbs.PacketType_open)
+
+		op, ok := err.(pError)
+		must.True(ok)
+		should.True(op.Temporary())
+	}()
+
+	time.Sleep(time.Second / 10)
+	start := time.Now()
+	p.Pause()
+	end := time.Now()
+	should.True(end.Sub(start) > time.Second/5)
+
+	wg.Wait()
+
+	_, _, _, err := p.NextReader()
+	op, ok := err.(pError)
+	should.True(ok)
+	should.True(op.Temporary())
+	_, err = p.NextWriter(pbs.DataType_binary, pbs.PacketType_open)
+	op, ok = err.(pError)
+	should.True(ok)
+	should.True(op.Temporary())
+
+	b := bytes.NewBuffer(nil)
+	err = p.FlushOut(b)
+	should.Nil(err)
+	should.Equal([]byte{0x0, 0x1, 0xff, '6'}, b.Bytes())
+}
