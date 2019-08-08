@@ -73,6 +73,8 @@ func (e *err) Timeout() bool {
 func (e *err) Temporary() bool {
 	if r, ok := e.E.(net.Error); ok {
 		return r.Temporary()
+	} else if oe, ok := e.E.(pError); ok {
+		return oe.Temporary()
 	}
 	return false
 }
