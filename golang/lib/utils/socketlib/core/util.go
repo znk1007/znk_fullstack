@@ -1,6 +1,11 @@
 package core
 
-import "bytes"
+import (
+	"bytes"
+	"errors"
+	"mime"
+	"strings"
+)
 
 func writeBinaryLen(l int64, w *bytes.Buffer) error {
 	if l <= 0 {
@@ -86,4 +91,34 @@ func readTextLen(r byteReader) (int64, error) {
 		ret = ret*10 + int64(b-'0')
 	}
 	return ret, nil
+}
+
+func mimeSupportBinary(m string) (bool, error) {
+	t, p, e := mime.ParseMediaType(m)
+	if e != nil {
+		return false, e
+	}
+	switch t {
+	case "application/octet-stream":
+		return true, nil
+	case "test/plain":
+		charset := strings.ToLower(p["charset"])
+		if charset != "utf-8" {
+			return false, errors.New("invalid charset")
+		}
+		return false, nil
+	}
+	return false, errors.New("invalid content-type")
+}
+
+type addr struct {
+	Host string
+}
+
+func (a addr) Network() string {
+	return "tcp"
+}
+
+func (a addr) String() string {
+	return a.Host
 }

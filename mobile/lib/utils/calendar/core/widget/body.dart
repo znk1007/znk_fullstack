@@ -40,6 +40,7 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   @override
   Widget build(BuildContext context) {
+    CalendarManager.instance.mapToDiffPageGridViews(2019, 8, diff: 3);
     return Container(
       height: _totalHeight,
       child: Column(
@@ -112,7 +113,7 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   // 加载日历模型
   void _loadPageModels() {
-    _pageModels = CalendarManager.instance.mapToGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, firstWeekday: _helper.firstWeekday, pages: _helper.numberOfPage, keep: _helper.keepCache);
+    _pageModels = CalendarManager.instance.mapToFixedPageGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, firstWeekday: _helper.firstWeekday, pages: _helper.numberOfPage, keep: _helper.keepCache);
   }
 
   Widget _weekdayItem(int weekday, int idx) {
