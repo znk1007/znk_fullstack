@@ -24,9 +24,6 @@ class DefaultDateHelper implements CustomDateHelper {
   int get firstWeekday => 7;
 
   @override
-  int get numberOfPage => 5;
-
-  @override
   bool get keepCache => true;
 
   @override
@@ -40,6 +37,9 @@ class DefaultDateHelper implements CustomDateHelper {
 
   @override
   Color get innerDayColor => Colors.black;
+
+  @override
+  int get diffLoadPage => 3;
 
   
 }

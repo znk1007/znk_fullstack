@@ -519,18 +519,54 @@ List<CalendarPageModel> mapToDiffPageGridViews(
       }
     }
   }
+  // _diffPageModels = [];
   int tempYear = year;
-  int tempMonth = month;
   for (var i = 1; i <= diff; i++) {
-    int leftMonth = tempMonth - i;
-    
-    
-    print('left month: $leftMonth');
-    
+    int leftMonth = month - i;
+    if (leftMonth < 1) {
+      int diffYear = -leftMonth ~/ 12 + 1;
+      tempYear = year - diffYear;
+      leftMonth += 12 * diffYear;
+    } else if (leftMonth > 12) {
+      int diffYear = leftMonth ~/ 12;
+      leftMonth -= 12 * diffYear - 1;
+      tempYear = year + diffYear;
+    }
+    int idx = _diffPageModels.indexWhere((page) => page.year == tempYear && page.month == leftMonth);
+    if (idx == -1) {
+      List<CalendarModel> ms = mapToGridView(tempYear, leftMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+      CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: leftMonth, models: ms);
+      _diffPageModels.insert(0, pageModel);
+    }
+  }
+  int idx = _diffPageModels.indexWhere((page) => page.year == year && page.month == month);
+  if (idx == -1) {
+    List<CalendarModel> ms = mapToGridView(tempYear, month, firstWeekday: firstWeekday, fixedLines: fixedLines);
+    CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: month, models: ms);
+    _diffPageModels.add(pageModel);
   }
   for (var i = 1; i <= diff; i++) {
-    int rightMonth = tempMonth + i;
-    print('right month: $rightMonth');
+    int rightMonth = month + i;
+    if (rightMonth <= 0) {
+      int diffYear = -rightMonth ~/ 12 + 1;
+      tempYear = year - diffYear;
+      rightMonth += 12 * diffYear - 1;
+    } else if (rightMonth > 12) {
+      int diffYear = rightMonth ~/ 12;
+      rightMonth -= 12 * diffYear;
+      tempYear = year + diffYear;
+    }
+    int idx = _diffPageModels.indexWhere((page) => page.year == tempYear && page.month == rightMonth);
+    if (idx == -1) {
+      List<CalendarModel> ms = mapToGridView(tempYear, rightMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+      CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: rightMonth, models: ms);
+      _diffPageModels.add(pageModel);
+    }
+  }
+  
+  // _diffPageModels.sort((preModel, nextModel) => (preModel.year+preModel.month).compareTo(nextModel.year + nextModel.month));
+  for (var model in _diffPageModels) {
+    print('model year: ${model.year} month: ${model.month}');
   }
   return _diffPageModels;
 }
@@ -558,7 +594,7 @@ List<CalendarPageModel> mapToDiffPageGridViews(
         if (removeIdx < idx) {
           _fixedPageModels.removeRange(0, removeIdx);
         } else if (removeIdx > idx) {
-          _fixedPageModels.removeRange(removeIdx, len - 1);
+          _fixedPageModels.removeRange(removeIdx+1, len - 1);
         }
       }
     }
@@ -577,7 +613,6 @@ List<CalendarPageModel> mapToDiffPageGridViews(
           CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: tempMonth, models: ms);
           _fixedPageModels.insert(0, pageModel);
         }
-        // print('<=0: year = $tempYear, month = $tempMonth');
       } else if (tempMonth > 12) {
         int diffYear = tempMonth ~/ 12;
         tempMonth -= 12 * diffYear - 1;

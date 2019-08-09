@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/rendering/sliver_grid.dart';
 import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/calendar/core/data/model.dart';
 import 'package:znk/utils/calendar/core/data/util.dart';
@@ -40,7 +39,7 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   @override
   Widget build(BuildContext context) {
-    CalendarManager.instance.mapToDiffPageGridViews(2019, 8, diff: 3);
+    
     return Container(
       height: _totalHeight,
       child: Column(
@@ -64,7 +63,7 @@ class _CalendarBodyState extends State<CalendarBody> {
             width: Device.width,
             height: _calendarHeight,
             child: PageView.builder(
-              itemCount: _helper.numberOfPage,
+              itemCount: _pageModels.length,
               controller: _controller,
               itemBuilder: (BuildContext pageViewCtx, int pageIdx) {
                 CalendarPageModel pageModel = _pageModels[pageIdx];
@@ -82,12 +81,11 @@ class _CalendarBodyState extends State<CalendarBody> {
                 );
               },
               onPageChanged: (int current) {
+                
                 setState(() {
                   int diff = current - _diffPages;
-                  int tempDiff = DateUtil.abs(diff);
-                  print('temp diff: $tempDiff');
-                  print('_helper.numberOfPage - tempDiff: ${_helper.numberOfPage - tempDiff}');
                   _currentModel = CalendarModel()..dateTime = DateUtil.diffMonths(_currentTime, diff);
+                  _loadPageModels();
                 });
               },
             ),
@@ -104,7 +102,7 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   // 加载基本数据
   void _loadBase(CustomDateHelper helper) {
-      int totalPage = _helper.numberOfPage / 2 == 0 ? 3 : _helper.numberOfPage;
+      int totalPage = _helper.diffLoadPage * 2 + 1;
       int initPage = (totalPage-1) ~/ 2;
       _diffPages = initPage;
       _controller = PageController(initialPage: initPage);
@@ -113,7 +111,7 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   // 加载日历模型
   void _loadPageModels() {
-    _pageModels = CalendarManager.instance.mapToFixedPageGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, firstWeekday: _helper.firstWeekday, pages: _helper.numberOfPage, keep: _helper.keepCache);
+    _pageModels = CalendarManager.instance.mapToDiffPageGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, diff: _helper.diffLoadPage, firstWeekday: _helper.firstWeekday, keep: _helper.keepCache);
   }
 
   Widget _weekdayItem(int weekday, int idx) {
