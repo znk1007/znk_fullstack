@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:znk/utils/base/device.dart';
 import 'package:znk/utils/calendar/core/data/model.dart';
+import 'package:znk/utils/calendar/core/data/util.dart';
 import 'package:znk/utils/calendar/core/default/default_date_help.dart';
 import 'package:znk/utils/calendar/custom/custom_date_help.dart';
 
@@ -16,72 +17,137 @@ class CalendarBody extends StatefulWidget {
 class _CalendarBodyState extends State<CalendarBody> {
 
   PageController _controller;
-  int _totalPage = 0;
   CustomDateHelper _helper;
   int _diffPages = 0;
+  List<CalendarPageModel> _pageModels;
+  double _calendarHeight = 368;
+  double _totalHeight = 400;
+  DateTime _currentTime = DateTime.now();
 
-  DateTime _now = DateTime.now();
-  int _currentYear = 0;
-  int _currentMonth = 0;
+  CalendarModel _currentModel = CalendarModel()..dateTime = DateTime.now();
+
+  List<int> _weekdays;
   
   @override
   void initState() {
     super.initState();
-    _totalPage = CalendarManager.instance.totalPage;
     _helper = widget.helper ?? DefaultDateHelper();
-    _totalPage = _helper.numberOfPage / 2 == 0 ? 3 : _helper.numberOfPage;
-    int initPage = (_totalPage-1) ~/ 2;
-    _diffPages = initPage;
-    _controller = PageController(initialPage: (_totalPage-1) ~/ 2);
-    _currentYear = _now.year;
-    _currentMonth = _now.month;
+    _loadBase(_helper);
+    _loadPageModels();
   }
+  
+
   @override
   Widget build(BuildContext context) {
-    // final tests = [1,2,3,4,5,6];
-    // tests.removeRange(4, tests.length-1);
-    // print('');
-    // for (var t in tests) {
-    //   print('remove: $t');
-    // }
     
-    // int n = 100;
-    // final models = CalendarManager.instance.mapToGridViews(2019, 1, pages: 2 * n + 1);
-    // for (var m in models) {
-    //   print('year: ${m.year}');
-    //   print('month: ${m.month}');
-    // }
-    // for (var model in models) {
-    //   print(' ');
-    //   print('grid view: ${model.dateTime} weekday: ${model.dateTime.weekday} == column: ${model.column}, row: ${model.row}');
-    // }
-    // final models = CalendarManager.instance.mapToCustomView(2019, 7);
-    // for (var model in models) {
-    //   print('custom view: ${model.dateTime}');
-    // }
     return Container(
-      width: Device.width,
-      height: 300,
-      child: PageView.builder(
-        itemCount: _totalPage,
-        controller: _controller,
-        itemBuilder: (BuildContext ctx, int idx) {
-          print('idx: $idx');
-          return Container(
+      height: _totalHeight,
+      child: Column(
+        children: <Widget>[
+          Container(
             width: Device.width,
-            height: 200,
-            color: Colors.green,
-          );
-        },
-        onPageChanged: (int current) {
-          print('diff page: ${current-_diffPages}');
-        },
-      ),
+            height: _totalHeight - _calendarHeight,
+            child: GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (BuildContext weekdayCtx, int weekdayIdx) {
+                return _weekdayItem(_weekdays[weekdayIdx], weekdayIdx);
+              },
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _weekdays.length,
+                childAspectRatio: 1.8,
+              ),
+              itemCount: _weekdays.length,
+            ),
+          ),
+          Container(
+            width: Device.width,
+            height: _calendarHeight,
+            child: PageView.builder(
+              itemCount: _pageModels.length,
+              controller: _controller,
+              itemBuilder: (BuildContext pageViewCtx, int pageIdx) {
+                CalendarPageModel pageModel = _pageModels[pageIdx];
+                return GridView.builder(
+                  itemBuilder: (BuildContext gridViewCtx, int gridIdx) {
+                    List<CalendarModel> models = pageModel.models;
+                    return _gridCalendarItem(models[gridIdx]);
+                  },
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _weekdays.length,
+                    childAspectRatio: 1.2,
+                  ),
+                  itemCount: pageModel.models.length,
+                );
+              },
+              onPageChanged: (int current) {
+                
+                setState(() {
+                  int diff = current - _diffPages;
+                  _currentModel = CalendarModel()..dateTime = DateUtil.diffMonths(_currentTime, diff);
+                  _loadPageModels();
+                });
+              },
+            ),
+          ),
+        ],
+      )
     );
   }
   @override
   void dispose() { 
     _controller.dispose();
     super.dispose();
+  }
+
+  // 加载基本数据
+  void _loadBase(CustomDateHelper helper) {
+      int totalPage = _helper.diffLoadPage * 2 + 1;
+      int initPage = (totalPage-1) ~/ 2;
+      _diffPages = initPage;
+      _controller = PageController(initialPage: initPage);
+      _weekdays = DateUtil.weekdays(firstWeekday: helper.firstWeekday);
+  }
+
+  // 加载日历模型
+  void _loadPageModels() {
+    _pageModels = CalendarManager.instance.mapToDiffPageGridViews(_currentModel.dateTime.year, _currentModel.dateTime.month, diff: _helper.diffLoadPage, firstWeekday: _helper.firstWeekday, keep: _helper.keepCache);
+  }
+
+  Widget _weekdayItem(int weekday, int idx) {
+    int len = _weekdays.length;
+    return Container(
+      width: Device.width / len,
+      height: _totalHeight - _calendarHeight,
+      decoration: BoxDecoration(
+        border: _helper.weekdaySeparatorWidth != 0 ? Border(
+          right: BorderSide(
+            color: (idx != len - 1) ? _helper.weekdaySeparatorColor : Colors.white,
+          ),
+        ) : null,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '${DateUtil.cnWeek(weekday, _helper.weekType)}',
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  // 日历具体内容
+  Widget _gridCalendarItem(CalendarModel model) {
+    return Container(
+      alignment: Alignment.center,
+      child: Stack(
+        children: <Widget>[
+          Text(
+            '${model.dateTime.day}',
+            style: TextStyle(
+              color: _currentModel.isSameMonth(model) ? _helper.innerDayColor : _helper.outerDayColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

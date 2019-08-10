@@ -43,6 +43,7 @@ class CalendarModel {
   }
   // 是否同一月
   bool isSameMonth(CalendarModel other) {
+    // print('reload same month ${this.dateTime}, other datetime: ${other.dateTime}');
     return this.year == other.year && this.month == other.month;
   }
 
@@ -59,22 +60,18 @@ class CalendarManager {
   static CalendarManager _inner;
   CalendarManager._();
 
-  int get totalPage {
-    return _pages;
-  }
+ 
   // 模型
   Map<String, CalendarModel> _modelsMap = Map();
-  // 当前页码
-  int currentPage = 0;
-  // 总页数
-  int _pages = 0;
 
   int _firstYear = 1960;
 
   int _lastYear = 2060;
 
   // 分页网格已加载模型
-  List<CalendarPageModel> _pageModels = [];
+  List<CalendarPageModel> _fixedPageModels = [];
+  // 偏移当前年月模型数据
+  List<CalendarPageModel> _diffPageModels = [];
   // 键值
   String _key(int year, int month, int day) {
     return '$year' + '$month' + '$day';
@@ -500,7 +497,82 @@ class CalendarManager {
     return models;
   }
 
-  List<CalendarPageModel> mapToGridViews(
+List<CalendarPageModel> mapToDiffPageGridViews(
+  int year,
+  int month,
+  {
+    int diff = 1,
+    int firstWeekday = 7, 
+    bool fixedLines = true,
+    bool keep = true,
+  }
+) {
+  int len = _diffPageModels.length;
+  if (keep == false && _diffPageModels.isNotEmpty) {
+    int idx = _fixedPageModels.indexWhere((page) => page.year == year && page.month == month);
+    if (idx != -1) {
+      int removeIdx = len - 1 - idx;
+      if (removeIdx < idx) {
+        _fixedPageModels.removeRange(0, removeIdx);
+      } else if (removeIdx > idx) {
+        _fixedPageModels.removeRange(removeIdx, len - 1);
+      }
+    }
+  }
+  // _diffPageModels = [];
+  int tempYear = year;
+  for (var i = 1; i <= diff; i++) {
+    int leftMonth = month - i;
+    if (leftMonth < 1) {
+      int diffYear = -leftMonth ~/ 12 + 1;
+      tempYear = year - diffYear;
+      leftMonth += 12 * diffYear;
+    } else if (leftMonth > 12) {
+      int diffYear = leftMonth ~/ 12;
+      leftMonth -= 12 * diffYear - 1;
+      tempYear = year + diffYear;
+    }
+    int idx = _diffPageModels.indexWhere((page) => page.year == tempYear && page.month == leftMonth);
+    if (idx == -1) {
+      List<CalendarModel> ms = mapToGridView(tempYear, leftMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+      CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: leftMonth, models: ms);
+      _diffPageModels.insert(0, pageModel);
+    }
+  }
+  int idx = _diffPageModels.indexWhere((page) => page.year == year && page.month == month);
+  if (idx == -1) {
+    List<CalendarModel> ms = mapToGridView(tempYear, month, firstWeekday: firstWeekday, fixedLines: fixedLines);
+    CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: month, models: ms);
+    _diffPageModels.add(pageModel);
+  }
+  for (var i = 1; i <= diff; i++) {
+    int rightMonth = month + i;
+    if (rightMonth <= 0) {
+      int diffYear = -rightMonth ~/ 12 + 1;
+      tempYear = year - diffYear;
+      rightMonth += 12 * diffYear - 1;
+    } else if (rightMonth > 12) {
+      int diffYear = rightMonth ~/ 12;
+      rightMonth -= 12 * diffYear;
+      tempYear = year + diffYear;
+    }
+    int idx = _diffPageModels.indexWhere((page) => page.year == tempYear && page.month == rightMonth);
+    if (idx == -1) {
+      List<CalendarModel> ms = mapToGridView(tempYear, rightMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
+      CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: rightMonth, models: ms);
+      _diffPageModels.add(pageModel);
+    }
+  }
+  
+  // _diffPageModels.sort((preModel, nextModel) => (preModel.year+preModel.month).compareTo(nextModel.year + nextModel.month));
+  for (var model in _diffPageModels) {
+    print('model year: ${model.year} month: ${model.month}');
+  }
+  return _diffPageModels;
+}
+
+  // 日期和日历对应，可设置首日星期，适用二维图如GridView+pageView
+  List<CalendarPageModel> mapToFixedPageGridViews(
     int year, 
     int month, 
     {
@@ -514,19 +586,20 @@ class CalendarManager {
     int middlePage = pages ~/ 2;
     int tempMonth = month;
     int tempYear = year;
-    int len = _pageModels.length;
-    if (keep == false && len > pages) {
-      int idx = _pageModels.indexWhere((page) => page.year == year && page.month == month);
+    int len = _fixedPageModels.length;
+    if (keep == false && _fixedPageModels.isNotEmpty) {
+      int idx = _fixedPageModels.indexWhere((page) => page.year == year && page.month == month);
       if (idx != -1) {
         int removeIdx = len - 1 - idx;
         if (removeIdx < idx) {
-          _pageModels.removeRange(0, removeIdx);
+          _fixedPageModels.removeRange(0, removeIdx);
         } else if (removeIdx > idx) {
-          _pageModels.removeRange(removeIdx + 1, len - 1);
+          _fixedPageModels.removeRange(removeIdx+1, len - 1);
         }
       }
     }
     // print('  ');
+
     for (var i = 0; i < pages; i++) {
       tempMonth = month - (middlePage - i);
       if (tempMonth <= 0) {
@@ -534,59 +607,61 @@ class CalendarManager {
         tempYear = year - diffYear;
         // print('<0: diff year = $tempYear');
         tempMonth += 12 * diffYear;
-        int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
+        int idx = _fixedPageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
         if (idx == -1) {
           List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
           CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: tempMonth, models: ms);
-          _pageModels.insert(0, pageModel);
+          _fixedPageModels.insert(0, pageModel);
         }
-        // print('<=0: year = $tempYear, month = $tempMonth');
       } else if (tempMonth > 12) {
         int diffYear = tempMonth ~/ 12;
         tempMonth -= 12 * diffYear - 1;
         tempYear = year + diffYear;
         // print('>12: year = $tempYear, month = $tempMonth');
-        int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
+        int idx = _fixedPageModels.indexWhere((m) => m.month == tempMonth && m.year == tempYear);
         if (idx == -1) {
           List<CalendarModel> ms = mapToGridView(tempYear, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
           CalendarPageModel pageModel = CalendarPageModel(year: tempYear, month: tempMonth, models: ms);
-          _pageModels.add(pageModel);
+          _fixedPageModels.add(pageModel);
         }
       } else {
         // print('same: year = $year, month = $tempMonth');
-        int idx = _pageModels.indexWhere((m) => m.month == tempMonth && m.year == year);
+        int idx = _fixedPageModels.indexWhere((m) => m.month == tempMonth && m.year == year);
         if (idx == -1) {
           List<CalendarModel> ms = mapToGridView(year, tempMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
           CalendarPageModel pageModel = CalendarPageModel(year: year, month: tempMonth, models: ms);
-          if (_pageModels.isEmpty) {
-            _pageModels.add(pageModel);
+          if (_fixedPageModels.isEmpty) {
+            _fixedPageModels.add(pageModel);
           } else {
-            final firstPage = _pageModels.first;
-            final lastPage = _pageModels.last;
+            final firstPage = _fixedPageModels.first;
+            final lastPage = _fixedPageModels.last;
             if (firstPage.year == lastPage.year) {
               if (year < firstPage.year) {
-                _pageModels.insert(0, pageModel);
+                _fixedPageModels.insert(0, pageModel);
               } else if (lastPage.year > year) {
-                _pageModels.add(pageModel);
+                _fixedPageModels.add(pageModel);
               } else if (firstPage.year == year) {
+                // print('firstPage.year == year: ${firstPage.year == year}');
                 if (firstPage.month > tempMonth) {
-                  _pageModels.insert(0, pageModel);
-                } else if (lastPage.month > tempMonth) {
-                  _pageModels.add(pageModel);
+                  // print('firstPage.month >= tempMonth: ${firstPage.month >= tempMonth}');
+                  _fixedPageModels.insert(0, pageModel);
+                } else if (lastPage.month < tempMonth) {
+                  // print('lastPage.month > tempMonth: ${lastPage.month > tempMonth}');
+                  _fixedPageModels.add(pageModel);
                 }
               }
             } else {
               if (firstPage.year == year && firstPage.month > tempMonth) {
-                _pageModels.insert(0, pageModel);
+                _fixedPageModels.insert(0, pageModel);
               } else if (lastPage.year == year && lastPage.month < tempMonth) {
-                _pageModels.add(pageModel);
+                _fixedPageModels.add(pageModel);
               }
             }
           }
         }
       }
     }
-    return _pageModels;
+    return _fixedPageModels;
   }
 
   // 日期转视图，可设置首日是否为星期日，适用非二维图如GridView
