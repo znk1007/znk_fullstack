@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type pollingServer struct {
@@ -86,7 +87,34 @@ func (ps *pollingServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err := ps.payload.FeedIn(r.Body, supportBinary); err != nil {
-
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
+		w.Write([]byte("ok"))
+		return
+	default:
+		http.Error(w, "invalid method", http.StatusBadRequest)
 	}
+}
+
+func (ps *pollingServer) SetReadDeadline(t time.Time) error {
+	return nil
+}
+func (ps *pollingServer) SetWriteDeadline(t time.Time) error {
+	return nil
+}
+func (ps *pollingServer) ID() string {
+	return ""
+}
+func (ps *pollingServer) Context() interface{} {
+	return nil
+}
+func (ps *pollingServer) SetContext(v interface{}) {
+
+}
+func (ps *pollingServer) Namespace() string {
+	return ""
+}
+func (ps *pollingServer) Emit(msg string, v ...interface{}) {
+
 }
