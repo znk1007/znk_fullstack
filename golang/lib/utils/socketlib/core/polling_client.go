@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"sync/atomic"
+	"time"
 
 	"github.com/znk_fullstack/golang/lib/utils/socketlib/protos/pbs"
 )
@@ -203,4 +204,26 @@ func (pc *pollingClient) serveGet() {
 		}
 		pc.remoteHeader.Store(resp.Header)
 	}
+}
+
+func (ps *pollingClient) SetReadDeadline(t time.Time) error {
+	return nil
+}
+func (ps *pollingClient) SetWriteDeadline(t time.Time) error {
+	return nil
+}
+func (ps *pollingClient) ID() string {
+	return ""
+}
+func (ps *pollingClient) Context() interface{} {
+	return nil
+}
+func (ps *pollingClient) SetContext(v interface{}) {
+
+}
+func (ps *pollingClient) Namespace() string {
+	return ""
+}
+func (ps *pollingClient) Emit(msg string, v ...interface{}) {
+
 }
