@@ -532,6 +532,7 @@ List<CalendarPageModel> mapToDiffPageGridViews(
       leftMonth -= 12 * diffYear - 1;
       tempYear = year + diffYear;
     }
+    print('left year: $tempYear');
     int idx = _diffPageModels.indexWhere((page) => page.year == tempYear && page.month == leftMonth);
     if (idx == -1) {
       List<CalendarModel> ms = mapToGridView(tempYear, leftMonth, firstWeekday: firstWeekday, fixedLines: fixedLines);
