@@ -1,3 +1,5 @@
 *.dill
 *.lock
+*.dll
 ~/.dart_tool/
+*.o
