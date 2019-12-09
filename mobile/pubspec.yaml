@@ -30,11 +30,12 @@ dependencies:
   bloc: ^0.14.2
   equatable: ^0.2.6
   path_provider: ^1.1.0
-  sembast: ^1.17.0
+  sembast: ^2.1.1
   rxdart: ^0.22.0
   encrypt: ^3.2.0
   package_info: ^0.4.0+4
-  device_info: ^0.4.0+2
+  device_info: ^0.4.0+3
+  provider: ^3.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
