@@ -3,3 +3,4 @@
 *.dll
 ~/.dart_tool/
 *.o
+*.a
