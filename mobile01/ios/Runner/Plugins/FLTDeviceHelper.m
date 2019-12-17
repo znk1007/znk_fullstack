@@ -16,6 +16,7 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
+    
     if ([@"getIOSDeviceInfo" isEqualToString:call.method]) {
            UIDevice* device = [UIDevice currentDevice];
            struct utsname un;

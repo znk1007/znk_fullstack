@@ -8,7 +8,9 @@
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-    [FLTDeviceHelper registerWithRegistrar:[registry registrarForPlugin:@"DeviceHelperPlugin"]];
+    if (![registry hasPlugin:@"DeviceHelperPlugin"]) {
+        [FLTDeviceHelper registerWithRegistrar:[registry registrarForPlugin:@"DeviceHelperPlugin"]];
+    }
 }
 
 

@@ -213,7 +213,7 @@ class IOSDeviceHelper {
       model: map['model'], 
       localizedModel: map['localizedModel'], 
       identifierForVendor: map['identifierForVendor'], 
-      isPhysicalDevice: map['isPhysicalDevice'], 
+      isPhysicalDevice: map['isPhysicalDevice'] == 'true', 
       utsname: IOSUtsname._fromMap(map['utsname']?.cast<String, dynamic>()),
     );
   }

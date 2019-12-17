@@ -1,0 +1,141 @@
+name: mobile02
+description: A new Flutter project.
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  protobuf: ^0.13.12
+  grpc: ^1.0.3
+  encrypt: ^3.2.0
+  platform: ^2.0.0
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #  - images/a_dot_burr.jpeg
+  #  - images/a_dot_ham.jpeg
+  assets:
+    #certification
+    - lib/resource/security/keys/server.pem
+    - lib/resource/security/keys/ca.pem
+
+    #tabs
+    - lib/resource/images/iOS/tab_msg_n.png
+    - lib/resource/images/iOS/2.0x/tab_msg_n.png
+    - lib/resource/images/iOS/3.0x/tab_msg_n.png
+    - lib/resource/images/iOS/tab_msg_s.png
+    - lib/resource/images/iOS/2.0x/tab_msg_s.png
+    - lib/resource/images/iOS/3.0x/tab_msg_s.png
+    - lib/resource/images/iOS/tab_schedule_n.png
+    - lib/resource/images/iOS/2.0x/tab_schedule_n.png
+    - lib/resource/images/iOS/3.0x/tab_schedule_n.png
+    - lib/resource/images/iOS/tab_schedule_s.png
+    - lib/resource/images/iOS/2.0x/tab_schedule_s.png
+    - lib/resource/images/iOS/3.0x/tab_schedule_s.png
+    - lib/resource/images/iOS/tab_owner_n.png
+    - lib/resource/images/iOS/2.0x/tab_owner_n.png
+    - lib/resource/images/iOS/3.0x/tab_owner_n.png
+    - lib/resource/images/iOS/tab_owner_s.png
+    - lib/resource/images/iOS/2.0x/tab_owner_s.png
+    - lib/resource/images/iOS/3.0x/tab_owner_s.png
+
+    - lib/resource/images/iOS/launchImg.png
+    - lib/resource/images/iOS/2.0x/launchImg.png
+    - lib/resource/images/iOS/3.0x/launchImg.png
+    - lib/resource/images/iOS/launchVersionBg.png
+    - lib/resource/images/iOS/2.0x/launchVersionBg.png
+    - lib/resource/images/iOS/3.0x/launchVersionBg.png
+
+    #user
+    - lib/resource/images/iOS/background.png
+    - lib/resource/images/iOS/daxingzheng.png
+    - lib/resource/images/iOS/2.0x/daxingzheng.png
+    - lib/resource/images/iOS/3.0x/daxingzheng.png
+    - lib/resource/images/iOS/account.png
+    - lib/resource/images/iOS/2.0x/account.png
+    - lib/resource/images/iOS/3.0x/account.png
+    - lib/resource/images/iOS/password.png
+    - lib/resource/images/iOS/2.0x/password.png
+    - lib/resource/images/iOS/3.0x/password.png
+    - lib/resource/images/iOS/user_header.png
+    - lib/resource/images/iOS/2.0x/user_header.png
+    - lib/resource/images/iOS/3.0x/user_header.png
+
+    #common
+    - lib/resource/images/iOS/right_arrow.png
+    - lib/resource/images/iOS/2.0x/right_arrow.png
+    - lib/resource/images/iOS/3.0x/right_arrow.png
+
+    #owner
+    - lib/resource/images/iOS/setting.png
+    - lib/resource/images/iOS/2.0x/setting.png
+    - lib/resource/images/iOS/3.0x/setting.png
+    - lib/resource/images/iOS/setting.png
+    - lib/resource/images/iOS/2.0x/setting.png
+    - lib/resource/images/iOS/3.0x/setting.png
+    - lib/resource/images/iOS/collection.png
+    - lib/resource/images/iOS/2.0x/collection.png
+    - lib/resource/images/iOS/3.0x/collection.png
+    - lib/resource/images/iOS/file_store.png
+    - lib/resource/images/iOS/2.0x/file_store.png
+    - lib/resource/images/iOS/3.0x/file_store.png
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages
