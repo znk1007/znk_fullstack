@@ -7,7 +7,7 @@
 
 #import "PluginHelper.h"
 #import "DeviceHelper.h"
-
+#import "PathHelper.h"
 #define kPluginHelperKey @"kPluginHelperKey"
 
 
@@ -35,6 +35,12 @@
     if ([call.method isEqualToString:@"getIOSDeviceInfo"]) {
         DeviceHelper *helper = [[DeviceHelper alloc] init];
         result(helper.buildDict);
+    } else if ([call.method isEqualToString:kGetTemporaryDirectory] ||
+                [call.method isEqualToString:kGetApplicationDocumentsDirectory] ||
+               [call.method isEqualToString:kGetApplicationSupportDirectory] ||
+               [call.method isEqualToString:kGetLibraryDirectory]
+               ) {
+        [PathHelper getDevicePathWithMethod:call.method];
     } else {
         result(FlutterMethodNotImplemented);
     }

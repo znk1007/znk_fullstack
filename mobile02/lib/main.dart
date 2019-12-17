@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mobile02/3rd/device/device_helper.dart';
+import 'package:mobile02/3rd/plugins/device/device_helper.dart';
 
 void main() => runApp(MyApp());
 
