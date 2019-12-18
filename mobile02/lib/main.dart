@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '3rd/plugins/device/device_helper.dart';
 import '3rd/plugins/device/path_helper.dart' as path;
+import 'common/database/base/database.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  runApp(MyApp());
+  await DBHelper.initDeleteDBFile(dbName: 'znk');
+}
 
 class MyApp extends StatelessWidget {
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
