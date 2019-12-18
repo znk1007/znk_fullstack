@@ -1,10 +1,13 @@
 import 'dart:async';
-import '../channel.dart';
+
+import 'package:flutter/services.dart';
 
 class DeviceHelper {
   /// Instantiating method, do nothing but safe to call this
   /// repeatedly or in performance-sensitive blocks.
   DeviceHelper();
+
+  static const methodChannel = MethodChannel('device_helper_channel');
 
   /// This information does not change from call to call. Cache it.
   AndroidDeviceHelper _cachedAndroidDeviceHelper;

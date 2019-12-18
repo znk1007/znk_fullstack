@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mobile02/3rd/plugins/device/device_helper.dart';
+import '3rd/plugins/device/device_helper.dart';
+import '3rd/plugins/device/path_helper.dart' as path;
 
 void main() => runApp(MyApp());
 
@@ -52,8 +53,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static final DeviceHelper deviceInfoPlugin = DeviceHelper();
 
+  void pathTest() async {
+    print('path test');
+    try {
+      Directory dir = await path.getApplicationDocumentsDirectory();
+      print('path is ${dir.path}');
+    } catch (e) {
+      print('e === $e');
+    }
+    
+  }
+
   void _incrementCounter() {
-    initPlatformState();
+    // initPlatformState();
+    pathTest();
+    
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -61,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+      print('count: $_counter');
     });
   }
 

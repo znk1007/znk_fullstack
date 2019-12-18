@@ -7,24 +7,42 @@
 
 #import "DeviceHelper.h"
 #import <sys/utsname.h>
+#define kPluginDeviceHelperKey @"kPluginDeviceHelperKey"
+
+@interface DeviceHelper ()<FlutterPlugin>
+
+@end
 
 @implementation DeviceHelper
 
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        _buildDict = @{};
-        [self fetchDeviceInfo];
+/// 注册
+/// @param registry 注册代理
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+    if (![registry hasPlugin:kPluginDeviceHelperKey]) {
+        [self registerWithRegistrar:[registry registrarForPlugin:kPluginDeviceHelperKey]];
     }
-    return self;
 }
 
-- (void)fetchDeviceInfo {
++ (void)registerWithRegistrar:(nonnull NSObject<FlutterPluginRegistrar> *)registrar {
+    FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:@"device_helper_channel" binaryMessenger:[registrar messenger]];
+    DeviceHelper *instance = [[DeviceHelper alloc] init];
+    [registrar addMethodCallDelegate:instance channel:channel];
+}
+
+- (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
+    if ([call.method isEqualToString:@"getIOSDeviceInfo"]) {
+        result([self fetchDeviceInfo]);
+    } else {
+        result(FlutterMethodNotImplemented);
+    }
+}
+
+
+- (NSDictionary *)fetchDeviceInfo {
     UIDevice* device = [UIDevice currentDevice];
     struct utsname un;
     uname(&un);
-     _buildDict = @{
+     return @{
            @"name" : [device name],
            @"systemName" : [device systemName],
            @"systemVersion" : [device systemVersion],

@@ -5,19 +5,15 @@
 //  Created by Sam Huang on 2019/12/17.
 //
 
-#import <Foundation/Foundation.h>
-#define kGetTemporaryDirectory @"getTemporaryDirectory"
-#define kGetApplicationDocumentsDirectory @"getApplicationDocumentsDirectory"
-#define kGetApplicationSupportDirectory @"getApplicationSupportDirectory"
-#define kGetLibraryDirectory @"getLibraryDirectory"
+#import <Flutter/Flutter.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface PathHelper : NSObject
 
-/// 获取指定方法路径
-/// @param method 方法名
-+ (NSObject *)getDevicePathWithMethod:(NSString *)method;
+/// 注册
+/// @param registry 注册代理
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 
 @end
 

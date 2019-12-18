@@ -5,14 +5,15 @@
 //  Created by Sam Huang on 2019/12/17.
 //
 
-#import <UIKit/UIKit.h>
+#import <Flutter/Flutter.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DeviceHelper : NSObject
 
-/// 设备信息
-@property (nonatomic, strong) NSDictionary<NSString *, NSObject *> *buildDict;
+/// 注册
+/// @param registry 注册代理
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 
 @end
 

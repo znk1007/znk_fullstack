@@ -1,2 +1,3 @@
 #import "GeneratedPluginRegistrant.h"
-#import "PluginHelper.h"
+#import "DeviceHelper.h"
+#import "PathHelper.h"

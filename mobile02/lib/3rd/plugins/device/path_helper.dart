@@ -3,9 +3,11 @@ import 'dart:io' show Directory;
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-import '../channel.dart';
 
 Platform _platform = const LocalPlatform();
+
+const MethodChannel methodChannel = MethodChannel('path_helper_channel');
+
 
 /// This API is only exposed for the unit tests. It should not be used by
 /// any code outside of the plugin itself.

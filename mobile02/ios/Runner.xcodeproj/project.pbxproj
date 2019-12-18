@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		134A34FA23A8748900D10B03 /* DeviceHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 134A34F923A8748900D10B03 /* DeviceHelper.m */; };
-		134A34FD23A8C15F00D10B03 /* PluginHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 134A34FC23A8C15F00D10B03 /* PluginHelper.m */; };
 		134A350023A8D15700D10B03 /* PathHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 134A34FF23A8D15700D10B03 /* PathHelper.m */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -40,8 +39,6 @@
 /* Begin PBXFileReference section */
 		134A34F823A8748900D10B03 /* DeviceHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceHelper.h; sourceTree = "<group>"; };
 		134A34F923A8748900D10B03 /* DeviceHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DeviceHelper.m; sourceTree = "<group>"; };
-		134A34FB23A8C15F00D10B03 /* PluginHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PluginHelper.h; sourceTree = "<group>"; };
-		134A34FC23A8C15F00D10B03 /* PluginHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PluginHelper.m; sourceTree = "<group>"; };
 		134A34FE23A8D15700D10B03 /* PathHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PathHelper.h; sourceTree = "<group>"; };
 		134A34FF23A8D15700D10B03 /* PathHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PathHelper.m; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
@@ -127,8 +124,6 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
-				134A34FB23A8C15F00D10B03 /* PluginHelper.h */,
-				134A34FC23A8C15F00D10B03 /* PluginHelper.m */,
 				134A34F723A8745A00D10B03 /* helpers */,
 			);
 			path = Runner;
@@ -247,7 +242,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				134A34FD23A8C15F00D10B03 /* PluginHelper.m in Sources */,
 				134A350023A8D15700D10B03 /* PathHelper.m in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,

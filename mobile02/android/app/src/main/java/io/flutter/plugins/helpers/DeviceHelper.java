@@ -1,5 +1,19 @@
 package io.flutter.plugins.helpers;
 
+import java.util.List;
+
+import android.content.Context;
+
+import android.content.ContentResolver;
+import androidx.annotation.NonNull;
+import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.EventChannel;
+
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.content.ContentResolver;
@@ -9,20 +23,80 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
-public class DeviceHelper {
-    
-    public Map<String, Object> build = new HashMap<>();
-    private static final String[] EMPTY_STRING_LIST = new String[] {};
+public class DeviceHelper implements FlutterPlugin {
 
+    MethodChannel methodChannel;
+
+    private Context context;
+
+
+    public static void registerWith(Registrar registrar) {
+        // helper
+        DeviceHelper helper = new DeviceHelper();
+        helper.context = registrar.context();
+        helper.setupMethodChannel(
+            registrar.messenger(), 
+            registrar.context().getContentResolver()
+        );
+    }
+
+    @Override
+    public void onAttachedToEngine(FlutterPlugin.FlutterPluginBinding binding) {
+        context = binding.getApplicationContext();
+        setupMethodChannel(
+            binding.getFlutterEngine().getDartExecutor(),
+            binding.getApplicationContext().getContentResolver()
+        );
+    }
+
+    @Override
+    public void onDetachedFromEngine(FlutterPlugin.FlutterPluginBinding binding) {
+        teardownMethodChannel();
+    }
+
+
+    private void setupMethodChannel(BinaryMessenger messenger, ContentResolver contentResolver) {
+        methodChannel = new MethodChannel(messenger, "device_helper_channel");
+        final DeviceHelperImpl handler = new DeviceHelperImpl(contentResolver);
+        methodChannel.setMethodCallHandler(handler);
+    }
+
+    private void teardownMethodChannel() {
+        methodChannel.setMethodCallHandler(null);
+        methodChannel = null;
+    }
+    
+}
+
+class DeviceHelperImpl implements MethodChannel.MethodCallHandler {
 
     private ContentResolver contentResolver;
 
-    public DeviceHelper(ContentResolver contentResolver) {
+    private static final String[] EMPTY_STRING_LIST = new String[] {};
+    
+    /** Constructs MethodCallHandlerImpl. The {@code contentResolver} must not be null. */
+    DeviceHelperImpl(ContentResolver contentResolver) {
         this.contentResolver = contentResolver;
     }
 
-    // add device info
-    public void addDeviceInfo() {
+    @Override
+    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+        switch (call.method) {
+            case "getAndroidDeviceInfo":
+            {
+                getDeviceInfoWithResult(result);
+            }
+                break;
+            default:
+            {
+                result.notImplemented();
+            }
+                break;
+        }
+    }
+
+    private void getDeviceInfoWithResult(MethodChannel.Result result) {
+        Map<String, Object> build = new HashMap<>();
         build.put("board", Build.BOARD);
         build.put("bootloader", Build.BOOTLOADER);
         build.put("brand", Build.BRAND);
@@ -60,9 +134,9 @@ public class DeviceHelper {
         version.put("release", Build.VERSION.RELEASE);
         version.put("sdkInt", Build.VERSION.SDK_INT);
         build.put("version", version);
+        result.success(build);
     }
 
-    
     @SuppressLint("HardwareIds")
     private String getAndroidId() {
         return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID);
@@ -87,5 +161,4 @@ public class DeviceHelper {
             || Build.PRODUCT.contains("emulator")
             || Build.PRODUCT.contains("simulator");
     }
-    
 }
