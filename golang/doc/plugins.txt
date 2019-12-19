@@ -10,13 +10,13 @@ Mac: brew install go
 
 二、go环境变量
 
-$GOROOT=/usr/local/go                        GO安装目录
+$GOROOT=/usr/local/go/{version}/libexec                        GO安装目录
 
-$GOPATH=/usr/local/var/www/go          GO工作目录
+$GOPATH=/{workspace}/go          GO工作目录
 
-$GOBIN=$GOPATH/bin                          GO可执行文件目录
+$GOBIN=$GOROOT/bin                          GO可执行文件目录
 
-$PATH=$PATH:$GOBIN:$GOROOT/bin  将GO可执行文件加入PATH中，使GO指令与我们编写的GO应用可以全局调用
+$PATH=$PATH:$GOBIN:$GOPATH/bin  将GO可执行文件加入PATH中，使GO指令与我们编写的GO应用可以全局调用
 
 三、目录结构
 
@@ -111,3 +111,22 @@ git clone git@github.com:golang/net.git --depth 1
 git clone git@github.com:golang/text.git --depth 1
 
 8、重启vscode即可
+
+
+go install github.com/ramya-rao-a/go-outline
+go install github.com/acroca/go-symbols
+go install golang.org/x/tools/cmd/guru
+go install golang.org/x/tools/cmd/gorename
+go install github.com/josharian/impl
+go install github.com/rogpeppe/godef
+go install github.com/sqs/goreturns
+go install github.com/golang/lint/golint
+go install github.com/cweill/gotests/gotests
+go install github.com/ramya-rao-a/go-outline
+go install github.com/acroca/go-symbols
+go install golang.org/x/tools/cmd/guru
+go install golang.org/x/tools/cmd/gorename
+go install github.com/josharian/impl
+go install github.com/rogpeppe/godef
+go install github.com/sqs/goreturns
+go install github.com/cweill/gotests/gotests
