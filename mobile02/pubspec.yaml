@@ -24,6 +24,8 @@ dependencies:
   encrypt: ^3.2.0
   platform: ^2.2.1
   sqflite: ^1.2.0
+  dio: ^3.0.7
+  dio_cookie_manager: ^1.0.0
   
 
   # The following adds the Cupertino Icons font to your application.
