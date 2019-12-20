@@ -44,8 +44,8 @@ func main() {
 
 	// fmt.Println("after merge sort: \n", mergeSort(testArr))
 
-	quickSort(testArr)
-	fmt.Println("after quick sort: \n", testArr)
+	// quickSort(testArr)
+	// fmt.Println("after quick sort: \n", testArr)
 
 }
 
