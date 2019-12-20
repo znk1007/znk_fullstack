@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'tab_bar_item.dart';
 
 const double _kActiveFontSize = 14.0;
 const double _kInactiveFontSize = 12.0;
@@ -366,12 +365,15 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldDelegate) {
-    if (textDirection != oldDelegate.textDirection || 
-      circles.length != oldDelegate.circles.length) {
+    if (textDirection != oldDelegate.textDirection) {
       return true;
     }
     if (circles == oldDelegate.circles) {
       return false;
+    }
+
+    if (circles.length != oldDelegate.circles.length) {
+      return true;
     }
     for (var i = 0; i < circles.length; i++) {
       if (circles[i] != oldDelegate.circles[i]) {
