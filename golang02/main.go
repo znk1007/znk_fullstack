@@ -6,7 +6,7 @@
  * @Description: In User Settings Edit
  * @FilePath: /golang02/main.go
  */
- package main
+package main
 import (
 	"fmt"
 )
