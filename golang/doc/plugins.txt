@@ -47,27 +47,16 @@ go get可以暂时理解为git clone到【$GOPATH/src】 + go install
 5、进入$gopath/bin
 
 go get -u -v github.com/josharian/impl
-
 go get -u -v github.com/mdempsky/gocode
-
 go get -u -v github.com/rogpeppe/godef
-
 go get -u -v github.com/golang/lint/golint
-
 go get -u -v github.com/lukehoban/go-find-references
-
 go get -u -v github.com/lukehoban/go-outline
-
 go get -u -v github.com/sqs/goreturns
-
 go get -u -v golang.org/x/tools/cmd/gorename
-
 go get -u -v github.com/tpng/gopkgs
-
 go get -u -v github.com/newhook/go-symbols
-
 go get -u -v github.com/peterh/liner github.com/derekparker/delve/cmd/dlv
-
 go get -u -v golang.org/x/tools/cmd/guru
 
 由于被墙很多软件被墙，借助github镜像仓库来安装git clone https://github.com/golang/tools.git
@@ -77,26 +66,36 @@ tools包含各种库的源代码
 6、切换到$GOPATH目录下，安装那些你上一步没有成功的插件
 
 go install github.com/mdempsky/gocode
-
 go install github.com/rogpeppe/godef
-
 go install github.com/lukehoban/go-find-references
-
 go install github.com/lukehoban/go-outline
-
 go install github.com/sqs/goreturns
-
 go install golang.org/x/tools/cmd/gorename
-
 go install github.com/tpng/gopkgs
-
 go install github.com/josharian/impl
-
 go install github.com/newhook/go-symbols
-
 go install golang.org/x/tools/cmd/guru
 
 ---------------------
+
+go install github.com/ramya-rao-a/go-outline
+go install github.com/acroca/go-symbols
+go install golang.org/x/tools/cmd/guru
+go install golang.org/x/tools/cmd/gorename
+go install github.com/josharian/impl
+go install github.com/rogpeppe/godef
+go install github.com/sqs/goreturns
+go install github.com/golang/lint/golint
+go install github.com/cweill/gotests/gotests
+go install github.com/ramya-rao-a/go-outline
+go install github.com/acroca/go-symbols
+go install golang.org/x/tools/cmd/guru
+go install golang.org/x/tools/cmd/gorename
+go install github.com/josharian/impl
+go install github.com/rogpeppe/godef
+go install github.com/sqs/goreturns
+go install github.com/cweill/gotests/gotests
+
 
 golint比较特殊通过上面的方式还是无法安装，所以我们在x目录下打开终端执行：
 
