@@ -2,6 +2,8 @@ module github.com/znk_fullstack/golang02
 
 go 1.13
 
+require github.com/jinzhu/gorm v1.9.11
+
 replace (
 	golang.org/x/build => github.com/golang/build v0.0.0-20190416225751-b5f252a0a7dd
 	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190411191339-88737f569e3a
