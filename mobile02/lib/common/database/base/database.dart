@@ -30,8 +30,6 @@ class DBHelper {
   Database _db;
   /// 表名
   String _tableName;
-  /// 是否清理数据库
-  bool _clean = false;
   /// 数据库版本
   int _version = 1;
   /// 建表语句
@@ -47,15 +45,14 @@ class DBHelper {
   /// 初始化
   DBHelper({
     @required String tableName,
-    String configureSql, 
-    String createSql = '',
+    @required String createSql,
+    String configureSql = '', 
     String upgradeSql = '',
     String downgradeSql = '',
     String openSql = '', 
     int version = 1, 
     bool clean = false,
-  }) {
-    _clean = clean;
+  })  : assert(createSql.isNotEmpty){
     _tableName = tableName;
     _configureSql = configureSql;
     _createSql = createSql;

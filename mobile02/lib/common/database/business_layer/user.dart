@@ -1,44 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:mobile02/common/database/base/database.dart';
 
-import '../../../protos/generated/project/user.pb.dart';
-
-class UserModel {
-  User user;
-  bool isLogined;
-  String updatedAt;
-  factory UserModel.fromUser(User user, bool isLogined) {
-    return UserModel(user: user, isLogined: isLogined, updatedAt: DateTime.now().toLocal().millisecondsSinceEpoch.toString());
+class UserDB {
+  /// 单例
+  static UserDB _instance;
+  static UserDB get dao {
+    if (_instance == null) {
+      _instance = UserDB._();
+    }
+    return _instance;
   }
 
-  UserModel({@required this.user, this.isLogined, this.updatedAt});
-  // 转JSON
-  Map<String, dynamic> toJson() => {
-    'userId': user.userId,
-    'sessionId': user.sessionId,
-    'account': user.account,
-    'nickname': user.nickname,
-    'phone': user.phone,
-    'email': user.email,
-    'photo': user.photo,
-    'createdAt': user.createdAt,
-    'updatedAt': updatedAt,
-    'isLogined': isLogined,
-  };
+  DBHelper _helper;
 
-  // Map转模型
-  UserModel.fromMap(Map<String, dynamic> json){
-    if (user == null) {
-      user = User();
-    }
-    user.userId = json['userId'];
-    user.sessionId = json['sessionId'];
-    user.account = json['account'];
-    user.nickname = json['nickname'];
-    user.phone = json['phone'];
-    user.email = json['email'];
-    user.photo = json['photo'];
-    user.createdAt = json['createdAt'] ?? '';
-    updatedAt = json['updatedAt'];
-    isLogined = json['isLogined'];
+  /*
+  companyId INTEGER,
+    FOREIGN KEY (companyId) REFERENCES Company(id) 
+    ON DELETE CASCADE
+  */
+
+  UserDB._(){
+    String tableName = 'user';
+    _helper = DBHelper(
+      tableName: tableName,
+      createSql: '''
+            create table if not exists 
+            $tableName(
+              userId text primary key,
+              sessionId text,
+              account text,
+              nickname text,
+              phone text,
+              email text,
+              photo text,
+              createdAt text,
+              updatedAt text,
+              isLogined integer
+            ) '''
+    );
   }
 }
