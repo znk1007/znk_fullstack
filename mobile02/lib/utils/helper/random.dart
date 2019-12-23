@@ -12,6 +12,8 @@ const _preList = [
   "198"
 ];
 
+const _alphaNum = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890';
+
 const _colors = [
   Colors.black,
   Colors.blue,
@@ -41,5 +43,14 @@ class RandomManager {
   /// 随机颜色
   static Color randomColor() {
     return _colors[math.Random.secure().nextInt(_colors.length)];
+  }
+  
+  /* 随机字符串 */
+  static String randomString({int len = 18}) {
+    String left = '';
+    for (var i = 0; i < len; i++) {
+      left = left + _alphaNum[math.Random.secure().nextInt(_alphaNum.length)];
+    }
+    return left;
   }
 }

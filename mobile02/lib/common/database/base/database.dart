@@ -12,6 +12,9 @@ class DBHelper {
 
   /// 创建数据库文件或删除数据库
   static Future initDeleteDBFile({String dbName, bool clean = false}) async {
+    if (dbName.endsWith('.db') == false) {
+      dbName = dbName + '.db';
+    }
     final String databasePath = await getDatabasesPath();
     _dbPath = join(databasePath, dbName);
     print('db path: $_dbPath');
@@ -124,7 +127,7 @@ class DBHelper {
       await this._openDB();
       await this._db.insert(_tableName, values, conflictAlgorithm: ConflictAlgorithm.rollback);
     } catch (e) {
-      print('insert err: $e');
+      throw e;
     } finally {
       await this._closeDB();
     }
@@ -139,7 +142,7 @@ class DBHelper {
       await this._openDB();
       await this._db.delete(_tableName, where: where, whereArgs: whereArgs);
     } catch (e) {
-      print('delete err: $e');
+      throw e;
     } finally {
       await this._closeDB();
     }
@@ -154,7 +157,6 @@ class DBHelper {
       await this._openDB();
       await this._db.update(_tableName, values);
     } catch (e) {
-      print('delete err: $e');
     } finally {
       await this._closeDB();
     }
@@ -189,8 +191,7 @@ class DBHelper {
             offset: offset,
           );
         } catch (e) {
-          print('delete err: $e');
-          return null;
+          throw e;
         } finally {
           await this._closeDB();
         }

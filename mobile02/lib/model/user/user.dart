@@ -5,11 +5,15 @@ class UserModel extends ChangeNotifier {
   /// 用户数据
   User user;
   /// 是否已登录
-  bool isLogined;
-
+  int isLogined;
+  /// 记录登录时间
   String updatedAt;
-  factory UserModel.fromUser(User user, bool isLogined) {
-    return UserModel(user: user, isLogined: isLogined, updatedAt: DateTime.now().toLocal().millisecondsSinceEpoch.toString());
+  factory UserModel.fromUser(User user, int isLogined) {
+    return UserModel(
+      user: user, 
+      isLogined: isLogined, 
+      updatedAt: DateTime.now().toLocal().millisecondsSinceEpoch.toString()
+    );
   }
   UserModel({@required this.user, this.isLogined, this.updatedAt});
 
@@ -43,9 +47,45 @@ class UserModel extends ChangeNotifier {
     updatedAt = json['updatedAt'];
     isLogined = json['isLogined'];
   }
+
+  /* 更新登录状态 */
+  UserModel updateUserLoginState(
+    int isLogined,
+  ) {
+    return _copy(
+      isLogined: isLogined,
+    );
+  }
+
+  /// 拷贝对象
+  UserModel _copy({
+    String account, 
+    String nickname,
+    String phone, 
+    String email, 
+    String photo, 
+    int isLogined, 
+  }) {
+    if (this.user == null) {
+      throw 'user cannot be null';
+    }
+    User u = this.user;
+    u.account = account ?? u.account;
+    u.nickname = nickname ?? u.nickname;
+    u.phone = phone ?? u.phone;
+    u.email = email ?? u.email;
+    u.photo = photo ?? u.photo;
+    return UserModel(
+       user: u,
+       updatedAt: DateTime.now().toLocal().millisecondsSinceEpoch.toString(), 
+       isLogined: isLogined == null ? this.isLogined : isLogined, 
+    );
+  }
+
+
   /// 通知改变登录状态
   void notifyLoginState() {
     notifyListeners();
   }
-
+  
 }
