@@ -63,7 +63,12 @@ func (self *LinkedList) Length() int {
 }
 
 /*打印链表数据*/
-func (node *LinkedListNode)Print(loop bool, currentOnly bool)  {
+func (self *LinkedList)Print(currentOnly bool)  {
+	self.head.print(currentOnly)
+}
+
+/*打印链表数据*/
+func (node *LinkedListNode)print(currentOnly bool)  {
 	if node == nil {
 		return
 	}
@@ -85,10 +90,7 @@ func (node *LinkedListNode)Print(loop bool, currentOnly bool)  {
 		
 		fmt.Println("----end----")
 	}
-	
-	if loop {
-		node.next.Print(loop, currentOnly)
-	}
+	node.next.print(currentOnly)
 }
 
 /*头部节点*/
@@ -170,6 +172,7 @@ func (self *LinkedList)DeleteByIndex(index int) bool {
 	node.next = nil
 	node.data = nil
 	node = nil
+	self.size--
 	return true
 }
 /*删除指定数据节点*/
@@ -189,6 +192,7 @@ func (self *LinkedList)DeleteByData(data interface{}, all bool) bool {
 			}
 			prev.next = node.next
 			node.next = nil
+			self.size--
 			if !all {
 				return true
 			}
@@ -216,35 +220,34 @@ func (self *LinkedList)Get(index int) *LinkedListNode {
 }
 
 func (self *LinkedList)Search(data interface{}) []int  {
-	var nodes = []int{}
-	return nodes
+	var idxs = []int{}
+	node := self.head
+	idx := 0
+	for node.next != nil {
+		if reflect.TypeOf(data) == reflect.TypeOf(node.data) && data == node.data {
+			idxs = append(idxs, idx)
+		}
+		idx++
+		node = node.next
+	}
+	return idxs
 }
 
 /*销毁链表*/
-func (self *LinkedList)Destory() bool  {
-	if self == nil || self.size == 0 {
-		return false
+func (self *LinkedList)Destory()  {
+	self.head.destory()
+	self.size = 0
+}
+
+/*销毁链表*/
+func (node *LinkedListNode)destory()  {
+	if node == nil {
+		return
 	}
-	node := self.head
-	fmt.Println("node == ", node)
-	for node.next != nil {
-		node = node.next
-		if node != nil {
-			if self.single == false {
-				node.prev = nil
-			}
-			node.next = nil
-			node.data = nil
-			node = nil
-		}
-	}
-	fmt.Println("head ", self.head)
-	if self.head != nil {
-		self.head.next = nil
-		self.head.data = nil
-		self.head = nil
-	}
-	return true
+	node.next.destory()
+	node.prev = nil
+	node.next = nil
+	node.data = nil
 }
 
 
