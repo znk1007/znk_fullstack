@@ -226,18 +226,19 @@ func (self *LinkedList)Destory() bool  {
 		return false
 	}
 	node := self.head
+	fmt.Println("node == ", node)
 	for node.next != nil {
 		node = node.next
-		if node == nil {
-			return true
+		if node != nil {
+			if self.single == false {
+				node.prev = nil
+			}
+			node.next = nil
+			node.data = nil
+			node = nil
 		}
-		if self.single == false {
-			node.prev = nil
-		}
-		node.next = nil
-		node.data = nil
-		node = nil
 	}
+	fmt.Println("head ", self.head)
 	if self.head != nil {
 		self.head.next = nil
 		self.head.data = nil
