@@ -54,7 +54,7 @@ func main() {
 
 	fmt.Println("-------insert------ 2")
 
-	for i := 11; i < 20; i++ {
+	for i := 10; i < 20; i++ {
 		that.Insert(i, that.Length()+1)
 	}
 	that.Print()
@@ -63,4 +63,19 @@ func main() {
 
 
 	fmt.Println("is circular: ", that.IsCircular())
+	
+	fmt.Println("--------3------- length: ", that.Length())
+	fmt.Println("tail: ", that.Tail())
+	node := that.Get(10)
+	fmt.Println("get node: ", node)
+	
+	fmt.Println("--------4-------")
+	for i := 20; i < 30; i++ {
+		that.Insert(i, 2)
+	}
+	
+	that.Print()
+	
+	fmt.Println("--------5------- length: ", that.Length())
+	
 }

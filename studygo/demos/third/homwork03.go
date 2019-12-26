@@ -1,6 +1,9 @@
 package homework03
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 /*链表对象*/
 type LinkedList struct {
@@ -43,13 +46,31 @@ func (that *LinkedList) Length() int {
 }
 
 func (that *LinkedList)	Insert(data interface{}, index int)  {
-	if index < 0 {
+	if index < 1 {
 		that.insertHead(data)
 	} else if index > that.size {
 		that.insertTail(data)
+	} else {
+		newNode := &LinkedListNode{
+			data: data,
+			prev: nil,
+			next: nil,
+		}
+		if that.head == nil {
+			that.head = newNode
+			that.tail = newNode
+			that.size++
+		} else {
+			node := that.Get(index)
+			if node == nil {
+				return
+			}
+			newNode.next = node.next
+			node.next = newNode
+			that.size++
+		}
 	}
 }
-
 
 /*插入头部*/
 func (that *LinkedList) insertHead(data interface{})  {
@@ -90,6 +111,77 @@ func (that *LinkedList) insertTail(data interface{})  {
 		that.size++
 	}
 }
+/*获取下标节点*/
+func (that *LinkedList) Get(index int) *LinkedListNode {
+	if that == nil || index < 1 || index > that.size || that.size == 0 {
+		return nil
+	}
+	if index == 1 {
+		return that.head
+	}
+	if index == that.size {
+		return that.tail
+	}
+	node := that.head
+	idx := 1
+	for node != that.tail {
+		idx++
+		node = node.next
+		if idx == index {
+			return node
+		}
+	}
+	return nil
+}
+/*获取数据所在节点下标*/
+func (that *LinkedList) Search(data interface{}, once bool) []int  {
+	var idxes []int
+	if that == nil || data == nil  || that.size == 0 {
+		return idxes
+	}
+	node := that.head
+	idx := 1
+	for node != that.tail  {
+		if reflect.TypeOf(data) == reflect.TypeOf(node.data) && data == node.data {
+			idxes = append(idxes, idx)
+		}
+		idx++
+		node = node.next
+	}
+	idx++
+	if reflect.TypeOf(data) == reflect.TypeOf(node.data) && data == node.data {
+		idxes = append(idxes, idx)
+	}
+	return idxes
+}
+/*根据下标删除*/
+func (that *LinkedList) DeleteByIndex(index int) {
+	if that == nil || index < 1 || index > that.size || that.size == 0 {
+		return
+	}
+	node := that.head
+	if index == 1 {
+		that.head = node.next
+		node.next = nil
+		node.data = nil
+		that.size--
+	} else if index == that.size {
+		prev := that.head
+		for node != that.tail {
+			prev = node
+			node = node.next
+		}
+		that.tail =
+	}
+	
+	
+	for i := 1; i < index; i++ {
+		prev = node
+		node = node.next
+	}
+	
+}
+
 /*头结点*/
 func (that *LinkedList) Head() *LinkedListNode {
 	if that == nil {
