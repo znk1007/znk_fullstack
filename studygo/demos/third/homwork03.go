@@ -280,3 +280,99 @@ func (that *LinkedList) IsCircular() bool {
 	}
 	return that.tail.next == that.head
 }
+
+type input struct {
+	lhs float64
+	rhs float64
+}
+
+func (ip input) result(ch string) float64 {
+	switch ch {
+	case "+":
+		return ip.lhs + ip.rhs
+	case "-":
+		return ip.lhs - ip.rhs
+	case "*":
+		return ip.lhs * ip.rhs
+	case "/":
+		if ip.rhs == 0 {
+			return -1
+		}
+		return ip.lhs / ip.rhs
+	}
+	return 0
+}
+
+type caculate interface {
+	result() float64
+}
+
+type add struct {
+	input
+}
+
+func (a add)result() float64 {
+	return a.lhs + a.rhs
+}
+
+type sub struct {
+	input
+}
+
+func (s sub)result() float64 {
+	return s.lhs - s.rhs
+}
+
+type mul struct {
+	input
+}
+
+func (m mul) result() float64 {
+	return m.lhs * m.rhs
+}
+
+type div struct {
+	input
+}
+func (d div) result() float64  {
+	if d.rhs == 0 {
+		return -1
+	}
+	return d.lhs / d.rhs
+}
+
+func Calculate01(lhs float64, rhs float64, ch string) float64 {
+	i := input{
+		lhs: lhs,
+		rhs: rhs,
+	}
+	return i.result(ch)
+}
+
+func Calculate02(lhs float64, rhs float64, ch string) float64 {
+	var cal caculate
+	switch ch {
+	case "+":
+		cal = add{input{
+			lhs: lhs,
+			rhs: rhs,
+		}}
+	case "-":
+		cal = sub{input{
+			lhs: lhs,
+			rhs: rhs,
+		}}
+	case "*":
+		cal = mul{input{
+			lhs: lhs,
+			rhs: rhs,
+		}}
+	case "/":
+		cal = div{input{
+			lhs: lhs,
+			rhs: rhs,
+		}}
+	}
+	return cal.result()
+}
+
