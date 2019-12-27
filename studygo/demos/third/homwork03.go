@@ -303,7 +303,7 @@ func (ip input) result(ch string) float64 {
 	return 0
 }
 
-type caculate interface {
+type calculate interface {
 	result() float64
 }
 
@@ -350,7 +350,7 @@ func Calculate01(lhs float64, rhs float64, ch string) float64 {
 }
 
 func Calculate02(lhs float64, rhs float64, ch string) float64 {
-	var cal caculate
+	var cal calculate
 	switch ch {
 	case "+":
 		cal = add{input{
