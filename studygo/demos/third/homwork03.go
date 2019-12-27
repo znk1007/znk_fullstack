@@ -144,9 +144,15 @@ func (that *LinkedList) Search(data interface{}, once bool) []int  {
 	for node != that.tail  {
 		if reflect.TypeOf(data) == reflect.TypeOf(node.data) && data == node.data {
 			idxes = append(idxes, idx)
+			if once {
+				return idxes
+			}
 		}
 		idx++
 		node = node.next
+	}
+	if len(idxes) != 0 && once {
+		return idxes
 	}
 	idx++
 	if reflect.TypeOf(data) == reflect.TypeOf(node.data) && data == node.data {
@@ -160,10 +166,15 @@ func (that *LinkedList) DeleteByIndex(index int) {
 		return
 	}
 	node := that.head
-	if index == 1 {
+	if that.size == 1 {
+		 that.head = nil
+		 that.tail = nil
+		 that.size = 0
+	} else if index == 1 {
 		that.head = node.next
 		node.next = nil
 		node.data = nil
+		node = nil
 		that.size--
 	} else if index == that.size {
 		prev := that.head
@@ -171,15 +182,81 @@ func (that *LinkedList) DeleteByIndex(index int) {
 			prev = node
 			node = node.next
 		}
-		that.tail =
+		that.tail = prev
+		that.tail.next = that.head
+		node.next = nil
+		node.data = nil
+		node = nil
+		that.size--
+	} else {
+		prev := that.head
+		for i := 2; i <= index; i++ {
+			prev = node
+			node = node.next
+		}
+		prev.next = node.next
+		node.next = nil
+		node.data = nil
+		node = nil
+		that.size--
 	}
-	
-	
-	for i := 1; i < index; i++ {
-		prev = node
-		node = node.next
+}
+/*根据数据删除*/
+func (that *LinkedList) DeleteByData(data interface{}, once bool) {
+	if that == nil || data == nil || that.size == 0 {
+		return
 	}
-	
+	var del bool = false
+	node := that.head
+	prev := node
+	if that.size == 1 && reflect.TypeOf(data) == reflect.TypeOf(that.head.data) && data == that.head.data {
+		that.head = nil
+		that.tail = nil
+		that.size--
+	} else {
+		for node != that.tail {
+			if reflect.TypeOf(data) == reflect.TypeOf(that.head.data) && data == that.head.data {
+				that.tail.next = node.next
+				that.head = node.next
+				node.next = nil
+				node.data = nil
+				node = nil
+				that.size--
+				del = true
+				if once {
+					return
+				}
+			} else {
+				if reflect.TypeOf(data) == reflect.TypeOf(node.data) && data == node.data {
+					prev.next = node.next
+					node.next = nil
+					node.data = nil
+					node = nil
+					del = true
+					that.size--
+					if once {
+						return
+					}
+				}
+			}
+			prev = node
+			node = node.next
+		}
+	}
+
+	if once && del {
+		return
+	}
+
+	if that.tail != nil && reflect.TypeOf(data) == reflect.TypeOf(that.tail.data) && data == that.tail.data {
+		prev.next = node.next
+		that.tail = prev
+		that.tail.next = that.head
+		node.next = nil
+		node.data = nil
+		node = nil
+		that.size--
+	}
 }
 
 /*头结点*/
