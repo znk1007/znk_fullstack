@@ -3,6 +3,7 @@ package homework03
 import (
 	"fmt"
 	"reflect"
+	"sync"
 )
 
 /*链表对象*/
@@ -375,4 +376,98 @@ func Calculate02(lhs float64, rhs float64, ch string) float64 {
 	}
 	return cal.result()
 }
+
+
+/*约瑟夫环*/
+type Josephus struct {
+	mutex *sync.RWMutex
+	head *JosephusNode
+	tail *JosephusNode
+	size int
+}
+/*约瑟夫环*/
+type JosephusNode struct {
+	data interface{}
+	next *JosephusNode
+}
+/*创建约瑟夫环*/
+func CreateJosephus() *Josephus {
+	return &Josephus{
+		mutex:new(sync.RWMutex),
+		head: nil,
+		tail:nil,
+		size: 0,
+	}
+}
+
+func (that *Josephus) Insert(datas ...interface{}) bool {
+	if that == nil || len(datas) == 0 {
+		return false
+	}
+	that.mutex.Lock()
+	defer that.mutex.Unlock()
+	for _, data := range datas {
+		newNode := &JosephusNode{
+			data: data,
+			next: nil,
+		}
+		if that.head == nil {
+			that.head = newNode
+			that.tail = newNode
+		} else {
+			that.tail.next = newNode
+			that.tail = newNode
+		}
+		that.size++
+	}
+	that.tail.next = that.head
+	return true
+}
+/*打印约瑟夫环*/
+func (that *Josephus) Print() {
+	if that == nil || that.size == 0 {
+		return
+	}
+	node := that.head
+	for node != that.tail {
+		fmt.Println("node data: ", node.data)
+		node = node.next
+	}
+	fmt.Println("node data: ", node.data)
+}
+/*约瑟夫环长度*/
+func (that *Josephus) Length() int {
+	if that == nil {
+		return 0
+	}
+	return that.size
+}
+/*逃命*/
+func (that *Josephus) Escape() {
+	if that == nil || that.size == 0 {
+		return
+	}
+	n := that.size
+	m := 3
+	node := that.head // 第一节点
+	tempNode := that.head
+	m %= n // 2
+	for node != node.next {
+		for i := 1; i < m - 1; i++ {
+			node = node.next // 第二节点
+		}
+		fmt.Printf("%v->", node.next.data) // n / 3 == 0节点数据
+		tempNode = node.next // 需要删除的 n / 3 == 0 节点
+		node.next = tempNode.next
+		tempNode.data = nil
+		tempNode.next = nil
+		tempNode = nil
+		node = node.next
+	}
+	fmt.Printf("%v ", node.data)
+	fmt.Println("head: ", that.head)
+	fmt.Println("tail: ", that.tail)
+
+}
+
 

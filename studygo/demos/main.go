@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	homework03 "github.com/znk_fullstack/studygo/demos/third"
+	"sync"
 )
 
 func main() {
@@ -44,7 +45,7 @@ func main() {
 	//list.Destory()
 	//list.Print(true)
 	//fmt.Println("-------insert------ 1")
-	that := homework03.CreateLinkedList()
+	//that := homework03.CreateLinkedList()
 	//for i := 0; i < 10; i++ {
 	//	that.Insert(i, -1)
 	//}
@@ -76,36 +77,79 @@ func main() {
 	//
 	//that.Print()
 	
-	fmt.Println("--------5-------")
-
-	for i := 1; i < 11; i++ {
-		that.Insert(i, that.Length()+1)
+	//fmt.Println("--------5-------")
+	//
+	//for i := 1; i < 11; i++ {
+	//	that.Insert(i, that.Length()+1)
+	//}
+	//
+	//that.Print()
+	//fmt.Println("--------5------- is circular: ", that.IsCircular())
+	//fmt.Println("--------5------- length: ", that.Length())
+	//
+	//fmt.Println("--------6------- delete: ")
+	//
+	//that.DeleteByIndex(2)
+	//
+	//that.Print()
+	//fmt.Println("--------6------- is circular: ", that.IsCircular())
+	//fmt.Println("--------6------- length: ", that.Length())
+	//
+	//fmt.Println("--------7-------")
+	//
+	//node := that.Search(10, true)
+	//fmt.Println("search node: ", node)
+	//
+	//fmt.Println("--------8------- delete")
+	//
+	//that.DeleteByData(10, true)
+	//that.Print()
+	//fmt.Println("--------8------- head: ", that.Head())
+	//fmt.Println("--------8------- tail: ", that.Tail())
+	//fmt.Println("--------8------- is circular: ", that.IsCircular())
+	//fmt.Println("--------8------- length: ", that.Length())
+	
+	that := homework03.CreateJosephus()
+	that.Insert(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+		11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+		21, 22, 23, 24, 25, 26, 27, 28, 28, 30,
+		31, 32, 33, 34, 35, 36, 37, 38, 38, 40,
+		41,
+	)
+	//that.Print()
+	fmt.Println("length: ", that.Length())
+	that.Escape()
+	
+	ch := make(chan int)
+	
+	go func() {
+		for val := range ch {
+			fmt.Println("value 1: ", val)
+		}
+	}()
+	ch <- 100
+	
+	ch = make(chan int, 1)
+	ch <- 123
+	close(ch)
+	value := <-ch
+	fmt.Println("value 2: ", value)
+	
+	var m sync.Mutex
+	c := 0
+	wait := sync.WaitGroup{}
+	for i := 0; i < 100; i++ {
+		wait.Add(1)
+		go func() {
+			m.Lock()
+			defer m.Unlock()
+			wait.Done()
+			//fmt.Println("current c: ", c)
+			c++
+		}()
 	}
-
-	that.Print()
-	fmt.Println("--------5------- is circular: ", that.IsCircular())
-	fmt.Println("--------5------- length: ", that.Length())
-
-	fmt.Println("--------6------- delete: ")
-
-	that.DeleteByIndex(2)
-
-	that.Print()
-	fmt.Println("--------6------- is circular: ", that.IsCircular())
-	fmt.Println("--------6------- length: ", that.Length())
-
-	fmt.Println("--------7-------")
-
-	node := that.Search(10, true)
-	fmt.Println("search node: ", node)
-
-	fmt.Println("--------8------- delete")
-
-	that.DeleteByData(10, true)
-	that.Print()
-	fmt.Println("--------8------- head: ", that.Head())
-	fmt.Println("--------8------- tail: ", that.Tail())
-	fmt.Println("--------8------- is circular: ", that.IsCircular())
-	fmt.Println("--------8------- length: ", that.Length())
+	
+	wait.Wait()
+	fmt.Println("c:", c)
 	
 }
