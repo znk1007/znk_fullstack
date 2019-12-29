@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	homework03 "github.com/znk_fullstack/studygo/demos/third"
-	"sync"
+	homework04 "github.com/znk_fullstack/studygo/demos/forth"
 )
 
 func main() {
@@ -109,47 +108,56 @@ func main() {
 	//fmt.Println("--------8------- is circular: ", that.IsCircular())
 	//fmt.Println("--------8------- length: ", that.Length())
 	
-	that := homework03.CreateJosephus()
-	that.Insert(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-		11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-		21, 22, 23, 24, 25, 26, 27, 28, 28, 30,
-		31, 32, 33, 34, 35, 36, 37, 38, 38, 40,
-		41,
-	)
-	//that.Print()
-	fmt.Println("length: ", that.Length())
-	that.Escape()
+	//that := homework03.CreateJosephus()
+	//that.Insert(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+	//	11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+	//	21, 22, 23, 24, 25, 26, 27, 28, 28, 30,
+	//	31, 32, 33, 34, 35, 36, 37, 38, 38, 40,
+	//	41,
+	//)
+	////that.Print()
+	//fmt.Println("length: ", that.Length())
+	//that.Escape()
+	//
+	//ch := make(chan int)
+	//
+	//go func() {
+	//	for val := range ch {
+	//		fmt.Println("value 1: ", val)
+	//	}
+	//}()
+	//ch <- 100
+	//
+	//ch = make(chan int, 1)
+	//ch <- 123
+	//close(ch)
+	//value := <-ch
+	//fmt.Println("value 2: ", value)
+	//
+	//var m sync.Mutex
+	//c := 0
+	//wait := sync.WaitGroup{}
+	//for i := 0; i < 100; i++ {
+	//	wait.Add(1)
+	//	go func() {
+	//		m.Lock()
+	//		defer m.Unlock()
+	//		wait.Done()
+	//		//fmt.Println("current c: ", c)
+	//		c++
+	//	}()
+	//}
+	//
+	//wait.Wait()
+	//fmt.Println("c:", c)
 	
-	ch := make(chan int)
+	that := homework04.CreateSimpleGoRoutine()
 	
-	go func() {
-		for val := range ch {
-			fmt.Println("value 1: ", val)
-		}
-	}()
-	ch <- 100
-	
-	ch = make(chan int, 1)
-	ch <- 123
-	close(ch)
-	value := <-ch
-	fmt.Println("value 2: ", value)
-	
-	var m sync.Mutex
-	c := 0
-	wait := sync.WaitGroup{}
-	for i := 0; i < 100; i++ {
-		wait.Add(1)
-		go func() {
-			m.Lock()
-			defer m.Unlock()
-			wait.Done()
-			//fmt.Println("current c: ", c)
-			c++
-		}()
+	that.Read(func(data interface{}) {
+		fmt.Println("read simple data: ", data)
+	})
+	for i := 1; i <= 100; i++ {
+		that.Write(i)
 	}
-	
-	wait.Wait()
-	fmt.Println("c:", c)
 	
 }
