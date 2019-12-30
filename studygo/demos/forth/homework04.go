@@ -1,5 +1,5 @@
 package forth
-
+//https://blog.csdn.net/Jeanphorn/article/details/79018205
 import (
 	"fmt"
 )
@@ -35,10 +35,6 @@ func (r *SimpleGoRoutine) Read(callback Callback) {
 	}()
 }
 
-/*事件压入事务池回调*/
-type PoolExec func()
-
-var test bool = true
 
 /*事务处理接口*/
 type Job interface {
@@ -77,7 +73,7 @@ func (w Worker) ExecJob() {
 func (w Worker) ExecJobWithQueue(wq chan chan Job) {
 	go func() {
 		for {
-			wq <- w.JobQueue
+			wq <- w.JobQueue//注册当前job队列到事务池中
 			select {
 			case job := <-w.JobQueue:
 				job.Do()
@@ -104,55 +100,28 @@ func CreateWorkerPool(workerLen int) WorkerPool {
 	}
 	for i := 0; i < workerLen; i++ {
 		w := CreateWorker()
-		if test {
-			wp.WorkerChan <- w
-		} else {
-			w.ExecJobWithQueue(wp.WorkerQueue)
-		}
+		w.ExecJobWithQueue(wp.WorkerQueue)
 	}
 	return wp
 }
 
 /*事务池写入事务*/
 func (wp WorkerPool) WriteJob(job Job) {
-	if test {
-		go func() {
-			for {
-				select {
-				case w := <-wp.WorkerChan:
-					w.WriteJob(job)
-				}
-			}
-		}()
-	} else {
-		wp.JobQueue <- job
-	}
+	wp.JobQueue <- job
 
 }
 
 /*事务池分发事务处理对象执行事务*/
 func (wp WorkerPool) ExecWorker() {
-	if test {
-		go func() {
-			for  {
-				select {
-				case w := <-wp.WorkerChan:
-					w.ExecJob()
-				}
+	go func() {
+		for {
+			select {
+			case job := <-wp.JobQueue:
+				w := <-wp.WorkerQueue
+				w <- job
 			}
-		}()
-	} else {
-		go func() {
-			for {
-				select {
-				case job := <-wp.JobQueue:
-					w := <-wp.WorkerQueue
-					w <- job
-				}
-			}
-		}()
-	}
-
+		}
+	}()
 }
 
 type Score struct {
