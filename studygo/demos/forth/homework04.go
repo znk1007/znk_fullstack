@@ -38,6 +38,8 @@ func (r *SimpleGoRoutine) Read(callback Callback) {
 /*事件压入事务池回调*/
 type PoolExec func()
 
+var test bool = true
+
 /*事务处理接口*/
 type Job interface {
 	Do()
@@ -59,20 +61,20 @@ func (w Worker) WriteJob(job Job) {
 }
 
 /*单个事务执行job*/
-func (w Worker) ExecJob(exec PoolExec) {
+func (w Worker) ExecJob() {
 	go func() {
 		for {
-			exec()
 			select {
 			case job := <-w.JobQueue:
+				fmt.Println("w.JobQueue: ", job)
 				job.Do()
 			}
 		}
 	}()
 }
 
-/*执行单个事务处理实例处理事务*/
-func (w Worker) Run(wq chan chan Job) {
+/*事务池执行job*/
+func (w Worker) ExecJobWithQueue(wq chan chan Job) {
 	go func() {
 		for {
 			wq <- w.JobQueue
@@ -89,6 +91,7 @@ type WorkerPool struct {
 	workerLen   int
 	JobQueue    chan Job
 	WorkerQueue chan chan Job
+	WorkerChan  chan Worker
 }
 
 /*创建事务处理池实例*/
@@ -97,32 +100,59 @@ func CreateWorkerPool(workerLen int) WorkerPool {
 		workerLen:   workerLen,
 		JobQueue:    make(chan Job),
 		WorkerQueue: make(chan chan Job, workerLen),
+		WorkerChan:  make(chan Worker, workerLen),
 	}
 	for i := 0; i < workerLen; i++ {
 		w := CreateWorker()
-		w.ExecJob(func() {
-			wp.WorkerQueue <- w.JobQueue
-		})
+		if test {
+			wp.WorkerChan <- w
+		} else {
+			w.ExecJobWithQueue(wp.WorkerQueue)
+		}
 	}
 	return wp
 }
 
 /*事务池写入事务*/
-func (wp WorkerPool)WriteJob(job Job)  {
-	wp.JobQueue <- job
+func (wp WorkerPool) WriteJob(job Job) {
+	if test {
+		go func() {
+			for {
+				select {
+				case w := <-wp.WorkerChan:
+					w.WriteJob(job)
+				}
+			}
+		}()
+	} else {
+		wp.JobQueue <- job
+	}
+
 }
 
 /*事务池分发事务处理对象执行事务*/
 func (wp WorkerPool) ExecWorker() {
-	go func() {
-		for {
-			select {
-			case job := <-wp.JobQueue:
-				w := <- wp.WorkerQueue
-				w <- job
+	if test {
+		go func() {
+			for  {
+				select {
+				case w := <-wp.WorkerChan:
+					w.ExecJob()
+				}
 			}
-		}
-	}()
+		}()
+	} else {
+		go func() {
+			for {
+				select {
+				case job := <-wp.JobQueue:
+					w := <-wp.WorkerQueue
+					w <- job
+				}
+			}
+		}()
+	}
+
 }
 
 type Score struct {

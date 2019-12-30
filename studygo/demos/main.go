@@ -76,7 +76,7 @@ func main() {
 	//}
 	//
 	//that.Print()
-	
+
 	//fmt.Println("--------5-------")
 	//
 	//for i := 1; i < 11; i++ {
@@ -108,7 +108,7 @@ func main() {
 	//fmt.Println("--------8------- tail: ", that.Tail())
 	//fmt.Println("--------8------- is circular: ", that.IsCircular())
 	//fmt.Println("--------8------- length: ", that.Length())
-	
+
 	//that := homework03.CreateJosephus()
 	//that.Insert(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 	//	11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -151,7 +151,7 @@ func main() {
 	//
 	//wait.Wait()
 	//fmt.Println("c:", c)
-	
+
 	//that := homework04.CreateSimpleGoRoutine()
 	//
 	//that.Read(func(data interface{}) {
@@ -178,8 +178,9 @@ func main() {
 	wp.ExecWorker()
 	dataNum := 100 * 100 * 100 //* 100
 	for i := 1; i <= dataNum; i++ {
-		sc := &homework04.Score{Num:i}
+		sc := &homework04.Score{Num: i}
 		wp.WriteJob(sc)
 	}
-	fmt.Println("end time: ", time.Now().Second() - start.Second())
+
+	fmt.Println("end time: ", time.Now().Second()-start.Second())
 }
