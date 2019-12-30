@@ -8,14 +8,12 @@ type Job interface {
 
 /*事务对象*/
 type Worker struct {
-	workerPool chan chan Job
 	jobQueue   chan Job
 	quit       chan bool
 }
 /*创建事务实例*/
-func CreateWorker(wp chan chan Job) Worker {
+func CreateWorker() Worker {
 	return Worker{
-		workerPool: wp,
 		jobQueue:   make(chan Job),
 		quit:       make(chan bool),
 	}
@@ -27,12 +25,12 @@ func (w Worker) Write(job Job) {
 }
 
 /*处理事务*/
-func (w Worker) Run() {
+func (w Worker) Run(wp chan chan Job) {
 	go func() {
 		for {
-			if w.workerPool != nil {
+			if wp != nil {
 				// 如果设置事务池，这把当前事务加入池中
-				w.workerPool <- w.jobQueue
+				wp <- w.jobQueue
 			}
 			select {
 			case job := <-w.jobQueue:
@@ -67,16 +65,18 @@ func CreateWorkerPool(maxWorker int) WorkerPool {
 /*创建事务群并分发任务*/
 func (wp WorkerPool) Run() {
 	for i := 0; i < wp.maxWorker; i++ {
-		fmt.Println("idx: ", i)
-		work := CreateWorker(wp.WorkerQueue)
-		work.Run()
+		work := CreateWorker()
+		work.Run(wp.WorkerQueue)
 	}
 	go wp.dispatch()
+	
 }
 
 /*写入事务*/
 func (wp WorkerPool) Write(job Job) {
-	wp.JobQueue <- job
+	go func() {
+		wp.JobQueue <- job
+	}()
 }
 
 /*事务分发给事务处理对象*/
@@ -84,10 +84,8 @@ func (wp WorkerPool) dispatch() {
 	for {
 		select {
 		case job := <-wp.JobQueue:
-			go func(job2 Job) {
-				worker := <- wp.WorkerQueue
-				worker <- job2
-			}(job)
+			worker := <- wp.WorkerQueue
+			worker <- job
 		}
 	}
 }

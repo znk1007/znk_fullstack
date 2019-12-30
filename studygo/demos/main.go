@@ -129,7 +129,7 @@ func main() {
 	//}()
 	//ch <- 100
 	//
-	//ch = make(chan int, 1)
+	//ch = make(chan int, 1CreateWorker)
 	//ch <- 123
 	//close(ch)
 	//value := <-ch
@@ -191,13 +191,15 @@ func main() {
 	//	w.Write(t)
 	//}
 	start := time.Now()
-	workLen := 100 * 100 * 100 * 20
+	fmt.Println("start time: ", start)
+	workLen := 100 //* 100 * 100 * 20
 	wp := pool.CreateWorkerPool(workLen)
-	wp.Run()
+	
 	for i := 0; i < dataNum; i++ {
 		t := pool.Task{Num:i}
 		wp.Write(t)
 	}
+	wp.Run()
 	fmt.Println("end time: ", time.Now().Second()-start.Second())
 }
 
