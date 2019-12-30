@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	homework04 "github.com/znk_fullstack/studygo/demos/forth"
+	"github.com/znk_fullstack/studygo/demos/pool"
 	"time"
 )
 
@@ -169,17 +169,36 @@ func main() {
 	//	//wp.ExecWorker(sc)
 	//	w.WriteJob(sc)
 	//}
+	//start := time.Now()
+	//fmt.Println("start time: ", start)
+	//num := 100 * 100 * 100
+	//wp := homework04.CreateWorkerPool(num)
+	//wp.ExecWorker()
+	//dataNum := 100 * 100 * 100 //* 100
+	//for i := 1; i <= dataNum; i++ {
+	//	sc := &homework04.Score{Num: i}
+	//	wp.WriteJob(sc)
+	//}
+	//
+	//fmt.Println("end time: ", time.Now().Second()-start.Second())
+	
+	//pool.CreateWorker(nil)
+	dataNum := 100 * 100 * 100 * 100
+	//w := pool.CreateWorker(nil)
+	//w.Run()
+	//for i := 0; i < dataNum; i++ {
+	//	t := pool.Task{Num:i}
+	//	w.Write(t)
+	//}
 	start := time.Now()
-	fmt.Println("start time: ", start)
-	num := 100 * 100 * 100
-	wp := homework04.CreateWorkerPool(num)
-	wp.ExecWorker()
-	dataNum := 100 * 100 * 100 //* 100
-	for i := 1; i <= dataNum; i++ {
-		sc := &homework04.Score{Num: i}
-		wp.WriteJob(sc)
+	workLen := 100 * 100 * 100 * 20
+	wp := pool.CreateWorkerPool(workLen)
+	wp.Run()
+	for i := 0; i < dataNum; i++ {
+		t := pool.Task{Num:i}
+		wp.Write(t)
 	}
-
 	fmt.Println("end time: ", time.Now().Second()-start.Second())
 }
+
 
