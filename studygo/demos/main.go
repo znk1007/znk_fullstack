@@ -162,9 +162,7 @@ func main() {
 	//}
 
 	//w := homework04.CreateWorker()
-	//w.ExecJob(func() {
-	//
-	//})
+	//w.ExecJob()
 	//dataNum := 100 * 100 * 100 * 100
 	//for i := 1; i <= dataNum; i++ {
 	//	sc := &homework04.Score{Num:i}
@@ -184,3 +182,4 @@ func main() {
 
 	fmt.Println("end time: ", time.Now().Second()-start.Second())
 }
+

@@ -38,7 +38,7 @@ func (r *SimpleGoRoutine) Read(callback Callback) {
 /*事件压入事务池回调*/
 type PoolExec func()
 
-var test bool = true
+var test bool = false
 
 /*事务处理接口*/
 type Job interface {
@@ -134,7 +134,7 @@ func (wp WorkerPool) WriteJob(job Job) {
 func (wp WorkerPool) ExecWorker() {
 	if test {
 		go func() {
-			for  {
+			for {
 				select {
 				case w := <-wp.WorkerChan:
 					w.ExecJob()
