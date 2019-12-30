@@ -1,5 +1,9 @@
 package homework04
 
+import (
+	"fmt"
+)
+
 type Callback func(data interface{})
 
 type SimpleGoRoutine struct {
@@ -31,6 +35,9 @@ func (r *SimpleGoRoutine) Read(callback Callback) {
 	}()
 }
 
+/*事件压入事务池回调*/
+type PoolExec func()
+
 /*事务处理接口*/
 type Job interface {
 	Do()
@@ -45,17 +52,19 @@ type Worker struct {
 func CreateWorker() Worker {
 	return Worker{JobQueue: make(chan Job)}
 }
+
 /*单个事务写入job*/
-func (w Worker) WriteJob(job Job)  {
+func (w Worker) WriteJob(job Job) {
 	w.JobQueue <- job
 }
 
 /*单个事务执行job*/
-func (w Worker) ExecJob()  {
+func (w Worker) ExecJob(exec PoolExec) {
 	go func() {
 		for {
+			exec()
 			select {
-			case job := <- w.JobQueue:
+			case job := <-w.JobQueue:
 				job.Do()
 			}
 		}
@@ -77,20 +86,53 @@ func (w Worker) Run(wq chan chan Job) {
 
 /*事务处理池对象*/
 type WorkerPool struct {
-	wokerLen    int
+	workerLen   int
 	JobQueue    chan Job
 	WorkerQueue chan chan Job
 }
 
 /*创建事务处理池实例*/
 func CreateWorkerPool(workerLen int) WorkerPool {
-	return WorkerPool{
-		wokerLen:    workerLen,
+	wp := WorkerPool{
+		workerLen:   workerLen,
 		JobQueue:    make(chan Job),
-		WorkerQueue: make(chan chan Job),
+		WorkerQueue: make(chan chan Job, workerLen),
 	}
+	for i := 0; i < workerLen; i++ {
+		w := CreateWorker()
+		w.ExecJob(func() {
+			wp.WorkerQueue <- w.JobQueue
+		})
+	}
+	return wp
 }
 
-func (wp WorkerPool) Run() {
+/*事务池写入事务*/
+func (wp WorkerPool)WriteJob(job Job)  {
+	wp.JobQueue <- job
+}
 
+/*事务池分发事务处理对象执行事务*/
+func (wp WorkerPool) ExecWorker() {
+	go func() {
+		for {
+			select {
+			case job := <-wp.JobQueue:
+				w := <- wp.WorkerQueue
+				w <- job
+			}
+		}
+	}()
+}
+
+type Score struct {
+	Num int
+}
+
+var Cnt int
+
+func (s *Score) Do() {
+	fmt.Println("num is: ", s.Num)
+	Cnt++
+	//time.Sleep(time.Second * 1)
 }

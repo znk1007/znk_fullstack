@@ -1,6 +1,8 @@
 *.dill
 *.lock
 *.dll
-~/.dart_tool/
+~/.dart_tool/*
 *.o
 *.a
+login/.dart_tool/*
+login/.packages

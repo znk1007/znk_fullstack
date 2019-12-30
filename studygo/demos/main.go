@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	homework04 "github.com/znk_fullstack/studygo/demos/forth"
+	"time"
 )
 
 func main() {
@@ -151,13 +152,34 @@ func main() {
 	//wait.Wait()
 	//fmt.Println("c:", c)
 	
-	that := homework04.CreateSimpleGoRoutine()
-	
-	that.Read(func(data interface{}) {
-		fmt.Println("read simple data: ", data)
-	})
-	for i := 1; i <= 100; i++ {
-		that.Write(i)
+	//that := homework04.CreateSimpleGoRoutine()
+	//
+	//that.Read(func(data interface{}) {
+	//	fmt.Println("read simple data: ", data)
+	//})
+	//for i := 1; i <= 100; i++ {
+	//	that.Write(i)
+	//}
+
+	//w := homework04.CreateWorker()
+	//w.ExecJob(func() {
+	//
+	//})
+	//dataNum := 100 * 100 * 100 * 100
+	//for i := 1; i <= dataNum; i++ {
+	//	sc := &homework04.Score{Num:i}
+	//	//wp.ExecWorker(sc)
+	//	w.WriteJob(sc)
+	//}
+	start := time.Now()
+	fmt.Println("start time: ", start)
+	num := 100 * 100 * 100
+	wp := homework04.CreateWorkerPool(num)
+	wp.ExecWorker()
+	dataNum := 100 * 100 * 100 //* 100
+	for i := 1; i <= dataNum; i++ {
+		sc := &homework04.Score{Num:i}
+		wp.WriteJob(sc)
 	}
-	
+	fmt.Println("end time: ", time.Now().Second() - start.Second())
 }
