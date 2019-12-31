@@ -1,6 +1,40 @@
 package pool
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type Callback func(data interface{})
+
+type SimpleGoRoutine struct {
+	dataChan chan interface{}
+}
+
+/*创建简单goroutine*/
+func CreateSimpleGoRoutine() *SimpleGoRoutine {
+	return &SimpleGoRoutine{dataChan: make(chan interface{})}
+}
+
+/*写入数据*/
+func (r *SimpleGoRoutine) Write(data interface{}) {
+	if r == nil {
+		return
+	}
+	r.dataChan <- data
+}
+
+/*读取数据*/
+func (r *SimpleGoRoutine) Read(callback Callback) {
+	go func() {
+		for {
+			select {
+			case data := <-r.dataChan:
+				callback(data)
+			}
+		}
+	}()
+}
+
 
 type Job interface {
 	Do()
@@ -28,10 +62,8 @@ func (w Worker) Write(job Job) {
 func (w Worker) Run(wp chan chan Job) {
 	go func() {
 		for {
-			if wp != nil {
-				// 如果设置事务池，这把当前事务加入池中
-				wp <- w.jobQueue
-			}
+			// 这把当前事务加入池中
+			wp <- w.jobQueue
 			select {
 			case job := <-w.jobQueue:
 				job.Do()
@@ -57,7 +89,7 @@ type WorkerPool struct {
 func CreateWorkerPool(maxWorker int) WorkerPool {
 	wp := WorkerPool{
 		maxWorker:   maxWorker,
-		WorkerQueue: make(chan chan Job),
+		WorkerQueue: make(chan chan Job, maxWorker),
 		JobQueue:    make(chan Job),
 	}
 	return wp
@@ -74,9 +106,7 @@ func (wp WorkerPool) Run() {
 
 /*写入事务*/
 func (wp WorkerPool) Write(job Job) {
-	go func() {
-		wp.JobQueue <- job
-	}()
+	wp.JobQueue <- job
 }
 
 /*事务分发给事务处理对象*/
@@ -97,3 +127,30 @@ type Task struct {
 func (t Task) Do() {
 	fmt.Println("task do, num: ", t.Num)
 }
+
+//func main() {
+//	dataNum := 100 * 100 * 100 * 100
+//	test := true
+//	if test {
+//		start := time.Now()
+//		fmt.Println("start time: ", start)
+//		workLen := 100 * 100 * 100
+//		wp := pool.CreateWorkerPool(workLen)
+//		wp.Run()
+//		for i := 0; i < dataNum; i++ {
+//			t := pool.Task{Num:i}
+//			wp.Write(t)
+//		}
+//
+//		fmt.Println("end time: ", time.Now().Second()-start.Second())
+//	} else {
+//		w := pool.CreateWorker()
+//		w.Run(nil)
+//		for i := 0; i < dataNum; i++ {
+//			t := pool.Task{Num:i}
+//			w.Write(t)
+//		}
+//	}
+//
+//
+//}

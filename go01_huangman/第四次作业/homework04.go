@@ -1,4 +1,4 @@
-package forth
+package pool
 
 import (
 	"fmt"
@@ -35,165 +35,122 @@ func (r *SimpleGoRoutine) Read(callback Callback) {
 	}()
 }
 
-/*事件压入事务池回调*/
-type PoolExec func()
 
-var test bool = false
-
-/*事务处理接口*/
 type Job interface {
 	Do()
 }
 
-/*事务处理对象*/
+/*事务对象*/
 type Worker struct {
-	JobQueue chan Job
+	jobQueue   chan Job
+	quit       chan bool
 }
-
-/*创建事务处理实例*/
+/*创建事务实例*/
 func CreateWorker() Worker {
-	return Worker{JobQueue: make(chan Job)}
-}
-
-/*单个事务写入job*/
-func (w Worker) WriteJob(job Job) {
-	w.JobQueue <- job
-}
-
-/*单个事务执行job*/
-func (w Worker) ExecJob() {
-	go func() {
-		for {
-			select {
-			case job := <-w.JobQueue:
-				fmt.Println("w.JobQueue: ", job)
-				job.Do()
-			}
-		}
-	}()
-}
-
-/*事务池执行job*/
-func (w Worker) ExecJobWithQueue(wq chan chan Job) {
-	go func() {
-		for {
-			wq <- w.JobQueue
-			select {
-			case job := <-w.JobQueue:
-				job.Do()
-			}
-		}
-	}()
-}
-
-/*事务处理池对象*/
-type WorkerPool struct {
-	workerLen   int
-	JobQueue    chan Job
-	WorkerQueue chan chan Job
-	WorkerChan  chan Worker
-}
-
-/*创建事务处理池实例*/
-func CreateWorkerPool(workerLen int) WorkerPool {
-	wp := WorkerPool{
-		workerLen:   workerLen,
-		JobQueue:    make(chan Job),
-		WorkerQueue: make(chan chan Job, workerLen),
-		WorkerChan:  make(chan Worker, workerLen),
+	return Worker{
+		jobQueue:   make(chan Job),
+		quit:       make(chan bool),
 	}
-	for i := 0; i < workerLen; i++ {
-		w := CreateWorker()
-		if test {
-			wp.WorkerChan <- w
-		} else {
-			w.ExecJobWithQueue(wp.WorkerQueue)
+}
+
+/*写入事务*/
+func (w Worker) Write(job Job) {
+	w.jobQueue <- job
+}
+
+/*处理事务*/
+func (w Worker) Run(wp chan chan Job) {
+	go func() {
+		for {
+			// 这把当前事务加入池中
+			wp <- w.jobQueue
+			select {
+			case job := <-w.jobQueue:
+				job.Do()
+			case <-w.quit:
+				return
+			}
 		}
+	}()
+}
+/*停止事务处理*/
+func (w Worker) Stop() {
+	go func() {
+		w.quit <- true
+	}()
+}
+/*事务池对象*/
+type WorkerPool struct {
+	maxWorker   int
+	WorkerQueue chan chan Job
+	JobQueue    chan Job
+}
+/*创建事务池*/
+func CreateWorkerPool(maxWorker int) WorkerPool {
+	wp := WorkerPool{
+		maxWorker:   maxWorker,
+		WorkerQueue: make(chan chan Job, maxWorker),
+		JobQueue:    make(chan Job),
 	}
 	return wp
 }
-
-/*事务池写入事务*/
-func (wp WorkerPool) WriteJob(job Job) {
-	if test {
-		go func() {
-			for {
-				select {
-				case w := <-wp.WorkerChan:
-					w.WriteJob(job)
-				}
-			}
-		}()
-	} else {
-		wp.JobQueue <- job
+/*创建事务群并分发任务*/
+func (wp WorkerPool) Run() {
+	for i := 0; i < wp.maxWorker; i++ {
+		work := CreateWorker()
+		work.Run(wp.WorkerQueue)
 	}
-
+	go wp.dispatch()
+	
 }
 
-/*事务池分发事务处理对象执行事务*/
-func (wp WorkerPool) ExecWorker() {
-	if test {
-		go func() {
-			for {
-				select {
-				case w := <-wp.WorkerChan:
-					w.ExecJob()
-				}
-			}
-		}()
-	} else {
-		go func() {
-			for {
-				select {
-				case job := <-wp.JobQueue:
-					w := <-wp.WorkerQueue
-					w <- job
-				}
-			}
-		}()
-	}
-
+/*写入事务*/
+func (wp WorkerPool) Write(job Job) {
+	wp.JobQueue <- job
 }
 
-type Score struct {
+/*事务分发给事务处理对象*/
+func (wp WorkerPool) dispatch() {
+	for {
+		select {
+		case job := <-wp.JobQueue:
+			worker := <- wp.WorkerQueue
+			worker <- job
+		}
+	}
+}
+
+type Task struct {
 	Num int
 }
 
-var Cnt int
-
-func (s *Score) Do() {
-	fmt.Println("num is: ", s.Num)
-	Cnt++
-	//time.Sleep(time.Second * 1)
+func (t Task) Do() {
+	fmt.Println("task do, num: ", t.Num)
 }
 
 //func main() {
-//that := homework04.CreateSimpleGoRoutine()
-//
-//that.Read(func(data interface{}) {
-//	fmt.Println("read simple data: ", data)
-//})
-//for i := 1; i <= 100; i++ {
-//	that.Write(i)
-//}
-//	w := homework04.CreateWorker()
-//	w.ExecJob()
 //	dataNum := 100 * 100 * 100 * 100
-//	for i := 1; i <= dataNum; i++ {
-//		sc := &homework04.Score{Num:i}
-//		//wp.ExecWorker(sc)
-//		w.WriteJob(sc)
-//	}
-//	start := time.Now()
-//	fmt.Println("start time: ", start)
-//	num := 100 * 100 * 100
-//	wp := homework04.CreateWorkerPool(num)
-//	wp.ExecWorker()
-//	dataNum := 100 * 100 * 100 //* 100
-//	for i := 1; i <= dataNum; i++ {
-//		sc := &homework04.Score{Num: i}
-//		wp.WriteJob(sc)
+//	test := true
+//	if test {
+//		start := time.Now()
+//		fmt.Println("start time: ", start)
+//		workLen := 100 * 100 * 100
+//		wp := pool.CreateWorkerPool(workLen)
+//		wp.Run()
+//		for i := 0; i < dataNum; i++ {
+//			t := pool.Task{Num:i}
+//			wp.Write(t)
+//		}
+//
+//		fmt.Println("end time: ", time.Now().Second()-start.Second())
+//	} else {
+//		w := pool.CreateWorker()
+//		w.Run(nil)
+//		for i := 0; i < dataNum; i++ {
+//			t := pool.Task{Num:i}
+//			w.Write(t)
+//		}
 //	}
 //
-//	fmt.Println("end time: ", time.Now().Second()-start.Second())
+//
 //}
