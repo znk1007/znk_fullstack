@@ -2,7 +2,11 @@ module github.com/znk_fullstack/golang02
 
 go 1.13
 
-require github.com/jinzhu/gorm v1.9.11
+//require github.com/jinzhu/gorm v1.9.11
+
+//require github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3
+
+//require cloud.google.com/go v0.37.4
 
 replace (
 	golang.org/x/build => github.com/golang/build v0.0.0-20190416225751-b5f252a0a7dd
