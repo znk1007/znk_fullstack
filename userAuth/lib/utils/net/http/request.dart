@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 
 class NetRequest {
   Dio _dio = Dio();
-
+  /// 单例
   static NetRequest _instance;
   static get shared {
     if (_instance == null) {
@@ -46,6 +46,19 @@ class NetRequest {
      Function(bool succ, Map<String, dynamic>) callback 
     }
   ) async {
-    
+    Response res = NetRequest.shared._dio.post(
+      path,
+      data: data,
+      options: Options(headers: headers)
+    );
+    if (res.statusCode != 200) {
+      callback ?? callback(false, null);
+      return;
+    }
+    if (res.data is Map) {
+      callback ?? callback(true, res.data);
+    } else {
+      callback ?? callback(false, null);
+    }
   }
 }
