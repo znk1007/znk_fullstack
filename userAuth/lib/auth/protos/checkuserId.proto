@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package protos.checkuserId;
+option go_package = "protos";
+
+
+
+service CheckUserId {
+    rpc check (CheckUserIdRequest) returns (CheckUserIdResponse);
+}
+
+message CheckUserIdRequest {
+    string account = 1;
+    string device = 2;//设备
+}
+
+message CheckUserIdResponse {
+    string message = 1;//状态消息
+    int32 code = 2;//状态码
+    string userId = 3;// 是否可用
+    int32 status = 4;// 请求状态 0失败，1成功
+}
