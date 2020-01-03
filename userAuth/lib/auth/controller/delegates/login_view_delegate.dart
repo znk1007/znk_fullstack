@@ -1,5 +1,7 @@
 
-abstract class LoginViewDelegate {
+import 'package:flutter/cupertino.dart';
+
+abstract class LoginViewDelegate extends Widget {
   /// 账号
   String get account;
   /// 密码
