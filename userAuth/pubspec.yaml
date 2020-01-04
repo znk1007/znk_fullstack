@@ -47,6 +47,16 @@ flutter:
   # assets:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
+  assets:
+    - lib/auth/resource/images/iOS/auth_account.png
+    - lib/auth/resource/images/iOS/auth_bg_image.png
+    - lib/auth/resource/images/iOS/auth_input_delete.png
+    - lib/auth/resource/images/iOS/auth_lock.png
+    - lib/auth/resource/images/iOS/auth_logo.png
+    - lib/auth/resource/images/iOS/auth_safe.png
+    - lib/auth/resource/images/iOS/auth_keep_password_norm.png
+    - lib/auth/resource/images/iOS/auth_unsafe.png
+    - lib/auth/resource/images/iOS/auth_keep_password.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
