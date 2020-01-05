@@ -1,6 +1,7 @@
 package fifth
 
 import "fmt"
+
 //s = s[low : high : max] 切片的三个参数的切片截取的意义为
 //low为截取的起始下标（含），
 //high为窃取的结束下标（不含high），
@@ -30,6 +31,7 @@ func AppendSlice() {
 type Test struct {
 	Name string
 }
+
 /*
 list[“name”]不是⼀个普通的指针值，map的value本身是不可寻址的，因为map中的值会在内存
 中移动，并且旧的指针地址在map改变时会变得⽆效。 定义的是var list map[string]Test，注意
@@ -39,17 +41,17 @@ map[string]*Test。
 */
 func MapTest() {
 	var testMap map[string]Test = map[string]Test{}
-	testMap["name"] = Test{Name:"测试"}
+	testMap["name"] = Test{Name: "测试"}
 	fmt.Println("name: ", testMap["name"])
 	
-	var testMap1 map[string]*Test  = map[string]*Test{}
-	testMap1["name"] = &Test{Name:"测试一"}
+	var testMap1 map[string]*Test = map[string]*Test{}
+	testMap1["name"] = &Test{Name: "测试一"}
 	testMap1["name"].Name = "测试二"
 	fmt.Println("name1: ", testMap1["name"])
 }
 
 const (
-	a = iota//iota 换⾏值+1
+	a = iota //iota 换⾏值+1
 	b
 	c = "c"
 	d = iota
@@ -59,7 +61,7 @@ func PrintConst() {
 	fmt.Println(a, b, c, d)
 }
 
-func Foo(x interface{})  {
+func Foo(x interface{}) {
 	fmt.Println(x)
 	if x == nil {
 		fmt.Println("empty interface")
@@ -68,19 +70,71 @@ func Foo(x interface{})  {
 	fmt.Println("non-empty interface")
 }
 
-func test() []func() {
-	var funcs []func()
+func test() ([]func(), []func()) {
+	var funcs1 []func()
 	for i := 0; i < 2; i++ {
-		funcs = append(funcs, func() {
+		funcs1 = append(funcs1, func() {
 			fmt.Println(&i, i)
 		})
 	}
-	return funcs
+	var funcs2 []func()
+	for i := 0; i < 2; i++ {
+		i := i
+		funcs2 = append(funcs2, func() {
+			fmt.Println(&i, i)
+		})
+	}
+	return funcs1, funcs2
 }
+
 // 闭包延迟求值 for循环复⽤局部变量i，每⼀次放⼊匿名函数的应⽤都是同⼀个变量。
 func AppendFunc() {
-	funcs := test()
-	for _, f := range funcs {
+	funcs1, funcs2 := test()
+	for _, f := range funcs1 {
 		f()
 	}
+	for _, f := range funcs2 {
+		f()
+	}
+}
+
+func reverse(str string) string {
+	rs := []rune(str)
+	strLen := len(rs)
+	
+	var tt = make([]rune, 0)
+	for i := 0; i < strLen; i++ {
+		tt = append(tt, rs[strLen-i-1])
+	}
+	return string(tt[0:])
+}
+
+func reverse1(str string) string {
+	rs := []rune(str)
+	strLen := len(rs)
+	for i := 0; i < strLen/2; i++ {
+		rs[i], rs[strLen-1-i] = rs[strLen-1-i], rs[i]
+	}
+	return string(rs)
+}
+
+func ReverseStr() {
+	str := "锄⽲⽇当午"
+	fmt.Println("reverse: ", reverse(str))
+	str = "锄⽲⽇当午，汗滴禾下土"
+	fmt.Println("reverse1: ", reverse1(str))
+}
+
+type People interface {
+	Speak(string) string
+}
+
+type Student struct{}
+func(stu*Student)Speak(think string)(talk string) {
+	if think == "法师" {
+		talk = "法师，我爱你哟～"
+	} else {
+		talk = "hi"
+	}
+	return
 }

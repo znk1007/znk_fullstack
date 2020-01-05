@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/znk_fullstack/studygo/demos/fifth"
 )
 
@@ -210,6 +211,17 @@ func main() {
 	
 	var x *int  = nil
 	fifth.Foo(x)
+	
+	fifth.AppendFunc()
+	
+	fifth.ReverseStr()
+	
+	var stu = fifth.Student{}
+	var peo fifth.People = &fifth.Student{}
+	stuStr := stu.Speak("法师")
+	fmt.Println("stu str: ", stuStr)
+	peoStr := peo.Speak("法师")
+	fmt.Println("peo str: ", peoStr)
 }
 
 
