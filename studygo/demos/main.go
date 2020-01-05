@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"github.com/znk_fullstack/studygo/demos/forth"
-	"github.com/znk_fullstack/studygo/demos/pool"
-	"time"
+	"github.com/znk_fullstack/studygo/demos/fifth"
 )
 
 func main() {
@@ -170,44 +167,49 @@ func main() {
 	//	//wp.ExecWorker(sc)
 	//	w.WriteJob(sc)
 	//}
-	test := false
-	if test {
-		start := time.Now()
-		fmt.Println("start time: ", start)
-		num := 100 * 100 * 100
-		wp := forth.CreateWorkerPool(num)
-		wp.ExecWorker()
-		dataNum := 100 * 100 * 100 //* 100
-		for i := 1; i <= dataNum; i++ {
-			sc := &forth.Score{Num: i}
-			wp.WriteJob(sc)
-		}
+	//test := false
+	//if test {
+	//	start := time.Now()
+	//	fmt.Println("start time: ", start)
+	//	num := 100 * 100 * 100
+	//	wp := forth.CreateWorkerPool(num)
+	//	wp.ExecWorker()
+	//	dataNum := 100 * 100 * 100 //* 100
+	//	for i := 1; i <= dataNum; i++ {
+	//		sc := &forth.Score{Num: i}
+	//		wp.WriteJob(sc)
+	//	}
+	//
+	//	fmt.Println("end time: ", time.Now().Second()-start.Second())
+	//} else {
+	//
+	//	dataNum := 100 * 100 * 100 //* 100
+	//	//w := pool.CreateWorker()
+	//	//w.Run(nil)
+	//	//for i := 0; i < dataNum; i++ {
+	//	//	t := pool.Task{Num:i}
+	//	//	w.Write(t)
+	//	//}
+	//	start := time.Now()
+	//	fmt.Println("start time: ", start)
+	//	workLen := 100 * 100 * 100
+	//	wp := pool.CreateWorkerPool(workLen)
+	//	wp.Run()
+	//	for i := 0; i < dataNum; i++ {
+	//		t := pool.Task{Num:i}
+	//		wp.Write(t)
+	//	}
+	//
+	//	fmt.Println("end time: ", time.Now().Second()-start.Second())
+	//}
 
-		fmt.Println("end time: ", time.Now().Second()-start.Second())
-	} else {
-
-		dataNum := 100 * 100 * 100 //* 100
-		//w := pool.CreateWorker()
-		//w.Run(nil)
-		//for i := 0; i < dataNum; i++ {
-		//	t := pool.Task{Num:i}
-		//	w.Write(t)
-		//}
-		start := time.Now()
-		fmt.Println("start time: ", start)
-		workLen := 100 * 100 * 100
-		wp := pool.CreateWorkerPool(workLen)
-		wp.Run()
-		for i := 0; i < dataNum; i++ {
-			t := pool.Task{Num:i}
-			wp.Write(t)
-		}
-
-		fmt.Println("end time: ", time.Now().Second()-start.Second())
-	}
-
+	fifth.Array()
+	fifth.AppendSlice()
+	fifth.MapTest()
+	fifth.PrintConst()
 	
-
+	var x *int  = nil
+	fifth.Foo(x)
 }
 
 
