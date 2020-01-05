@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:userAuth/auth/controller/login_page.dart';
+import 'package:userAuth/auth/default/default_login_view.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  var isAuth = false;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -20,7 +23,11 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: isAuth ? 
+        MyHomePage(title: 'Flutter Demo Home Page') : 
+        LoginPage(
+          value: DefaultLoginView(),
+        ),
     );
   }
 }
