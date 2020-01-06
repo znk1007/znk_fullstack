@@ -18,7 +18,7 @@ func Array() {
 	sli2 := msg[2:3]
 	fmt.Println("sli1, len, cap", sli1, len(sli1), cap(sli1))
 	fmt.Println("sli2, len, cap", sli2, len(sli2), cap(sli2))
-	
+
 }
 
 func AppendSlice() {
@@ -43,7 +43,7 @@ func MapTest() {
 	var testMap map[string]Test = map[string]Test{}
 	testMap["name"] = Test{Name: "测试"}
 	fmt.Println("name: ", testMap["name"])
-	
+
 	var testMap1 map[string]*Test = map[string]*Test{}
 	testMap1["name"] = &Test{Name: "测试一"}
 	testMap1["name"].Name = "测试二"
@@ -101,7 +101,7 @@ func AppendFunc() {
 func reverse(str string) string {
 	rs := []rune(str)
 	strLen := len(rs)
-	
+
 	var tt = make([]rune, 0)
 	for i := 0; i < strLen; i++ {
 		tt = append(tt, rs[strLen-i-1])
@@ -130,7 +130,8 @@ type People interface {
 }
 
 type Student struct{}
-func(stu*Student)Speak(think string)(talk string) {
+
+func (stu *Student) Speak(think string) (talk string) {
 	if think == "法师" {
 		talk = "法师，我爱你哟～"
 	} else {
