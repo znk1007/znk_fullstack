@@ -40,7 +40,7 @@ class DefaultLoginView extends StatelessWidget implements LoginViewDelegate {
         child: Stack(
           overflow: Overflow.visible,
           children: <Widget>[
-            // _fixedBackgroundWidget(),
+            _fixedBackgroundWidget(),
             _BackgroundView(),
             Container(
               child: Text('测试二'),
@@ -83,6 +83,7 @@ class __BackgroundViewState extends State<_BackgroundView> with TickerProviderSt
     initController();
     initAnimation();
     startAnimate();
+    
   }
   /// 初始化动画控制器
   void initController() {
@@ -110,138 +111,25 @@ class __BackgroundViewState extends State<_BackgroundView> with TickerProviderSt
   /// 配置items
   List<TweenSequenceItem> configItems() {
     List<TweenSequenceItem> items = [];
-
+    double idx = 0;
+    double step = 0.125;
+    while (idx <= 1) {
+      print("idx == $idx");
+      print("idx reverse == ${-1-idx}");
+    //   TweenSequenceItem item = TweenSequenceItem(
+    //   tween: EdgeInsetsTween(
+    //     begin: EdgeInsets.only(left: idx, top: -1 - idx),
+    //     end: EdgeInsets.only(left: idx + step, top: -0.125),
+    //   ),
+    //   weight: 1,
+    // );
+    // items.add(item);
+      idx+=step;
+    }
     TweenSequenceItem item = TweenSequenceItem(
       tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: -0.5, top: 0),
-        end: EdgeInsets.only(left: 0.125, top: -0.25),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.125, top: -0.25),
-        end: EdgeInsets.only(left: 0.25, top: -0.5),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.25, top: -0.25),
-        end: EdgeInsets.only(left: 0.375, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.375, top: -0.75),
-        end: EdgeInsets.only(left: 0.5, top: -0.5),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.5, top: -0.75),
-        end: EdgeInsets.only(left: 0.625, top: -0.875),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.625, top: -0.875),
-        end: EdgeInsets.only(left: 0.75, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-    
-    /// 右下
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.75, top: -1.0),
-        end: EdgeInsets.only(left: 0.875, top: -0.875),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.875, top: -0.875),
-        end: EdgeInsets.only(left: 1.0, top: -0.75),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.875, top: -0.875),
-        end: EdgeInsets.only(left: 0.75, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.75, top: -0.875),
-        end: EdgeInsets.only(left: 0.625, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.625, top: -0.875),
-        end: EdgeInsets.only(left: 0.5, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.5, top: -0.875),
-        end: EdgeInsets.only(left: 0.375, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.375, top: -0.875),
-        end: EdgeInsets.only(left: 0.25, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.25, top: -0.875),
-        end: EdgeInsets.only(left: 0.125, top: -1.0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
-
-    item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0.125, top: -0.875),
-        end: EdgeInsets.only(left: 0, top: -1.0),
+        begin: EdgeInsets.only(left: 0, top: 0),
+        end: EdgeInsets.only(left: 0.125, top: 0),
       ),
       weight: 1,
     );
@@ -264,17 +152,18 @@ class __BackgroundViewState extends State<_BackgroundView> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    print('movement === $_movement');
     if (_movement == null) {
       return Container();
     }
     return Container(
-      child: ImageHelper.load('auth_bg_image.png',
-        fit: BoxFit.fitWidth, 
-        height: _bgImageHeight,
-        width: ScreenHelper.screenWidth),
+      child: ImageHelper.load(
+          'auth_bg_image.png',
+          fit: BoxFit.fill,
+          height: _bgImageHeight,
+          width: ScreenHelper.screenWidth,
+        ),
       alignment: Alignment.topCenter,
-      padding: _movement.value,
+      // padding: _movement.value,
     );
   }
 }
