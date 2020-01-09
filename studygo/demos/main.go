@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"github.com/znk_fullstack/studygo/demos/fifth"
-)
+import "github.com/znk_fullstack/studygo/demos/seventh"
 
 func main() {
 	//list := chain.CreateLinkedList(true)
@@ -204,24 +201,26 @@ func main() {
 	//	fmt.Println("end time: ", time.Now().Second()-start.Second())
 	//}
 
-	fifth.Array()
-	fifth.AppendSlice()
-	fifth.MapTest()
-	fifth.PrintConst()
-	
-	var x *int  = nil
-	fifth.Foo(x)
-	
-	fifth.AppendFunc()
-	
-	fifth.ReverseStr()
-	
-	var stu = fifth.Student{}
-	var peo fifth.People = &fifth.Student{}
-	stuStr := stu.Speak("法师")
-	fmt.Println("stu str: ", stuStr)
-	peoStr := peo.Speak("法师")
-	fmt.Println("peo str: ", peoStr)
+	//fifth.Array()
+	//fifth.AppendSlice()
+	//fifth.MapTest()
+	//fifth.PrintConst()
+	//
+	//var x *int  = nil
+	//fifth.Foo(x)
+	//
+	//fifth.AppendFunc()
+	//
+	//fifth.ReverseStr()
+	//
+	//var stu = fifth.Student{}
+	//var peo fifth.People = &fifth.Student{}
+	//stuStr := stu.Speak("法师")
+	//fmt.Println("stu str: ", stuStr)
+	//peoStr := peo.Speak("法师")
+	//fmt.Println("peo str: ", peoStr)
+	translation := seventh.Translation{}
+	translation.Translate("测试")
 }
 
 
