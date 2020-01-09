@@ -1,6 +1,9 @@
 package main
 
-import "github.com/znk_fullstack/studygo/demos/seventh"
+import (
+	"fmt"
+	"github.com/znk_fullstack/studygo/demos/seventh"
+)
 
 func main() {
 	//list := chain.CreateLinkedList(true)
@@ -219,8 +222,12 @@ func main() {
 	//fmt.Println("stu str: ", stuStr)
 	//peoStr := peo.Speak("法师")
 	//fmt.Println("peo str: ", peoStr)
-	translation := seventh.Translation{}
-	translation.Translate("测试")
+	translation := seventh.Translation{
+		File:"seventh/dict.txt",
+	}
+	translation.Translate("嫣然")
+	fmt.Println("src: ", translation.Src)
+	fmt.Println("val: ", translation.Target)
 }
 
 
