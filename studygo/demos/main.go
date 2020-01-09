@@ -222,12 +222,16 @@ func main() {
 	//fmt.Println("stu str: ", stuStr)
 	//peoStr := peo.Speak("法师")
 	//fmt.Println("peo str: ", peoStr)
-	translation := seventh.Translation{
-		File:"seventh/dict.txt",
-	}
-	translation.Translate("嫣然")
-	fmt.Println("src: ", translation.Src)
-	fmt.Println("val: ", translation.Target)
+	//translation := seventh.Translation{
+	//	File:"seventh/dict.txt",
+	//}
+	//translation.Translate("嫣然")
+	//fmt.Println("src: ", translation.Src)
+	//fmt.Println("val: ", translation.Target)
+	trans := seventh.CreateTranslation("seventh/dict.txt")
+	result := trans.Result()
+	fmt.Println("result = ", result)
+	trans.Translate("嫣然")
 }
 
 
