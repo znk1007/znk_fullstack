@@ -7,6 +7,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type Result struct {
@@ -14,12 +15,14 @@ type Result struct {
 	Target string
 }
 
+
 /*翻译对象*/
 type Translation struct {
 	middle   chan string
-	result   chan Result
+	result   func(string, string)
 	quit     chan bool
 	filePath string
+	
 }
 
 /*初始化翻译对象*/
@@ -32,7 +35,7 @@ func CreateTranslation(fileName string) *Translation {
 	thePath := path.Join(path.Dir(name), fileName)
 	var trans = &Translation{
 		middle:   make(chan string),
-		result:   make(chan Result),
+		result:   nil,
 		quit:     make(chan bool),
 		filePath: thePath,
 	}
@@ -46,13 +49,11 @@ func (trans *Translation) run() {
 		case middleStr := <-trans.middle:
 			strs := strings.Split(middleStr, "\n")
 			fmt.Println("middleStr: ===", middleStr, len(strs))
-			
 			if len(strs) >= 2 {
 				fmt.Println("strs 0:", strs[0])
 				fmt.Println("strs 1:", strs[1])
-				trans.result <- Result{
-					Src:    strs[0],
-					Target: strs[1],
+				if trans.result != nil {
+					trans.result(strs[0], strs[1])
 				}
 			} else {
 				return
@@ -64,26 +65,8 @@ func (trans *Translation) run() {
 }
 
 /*翻译结果*/
-func (trans *Translation) Result() Result {
-	//result := <-trans.result
-	//fmt.Println(result)
-	//return result
-	go func() {
-		for {
-			select {
-			case result := <-trans.result:
-				fmt.Println("final result: ", result)
-				//return result
-			case <-trans.quit:
-				return
-				//return Result{
-				//	Src:    "",
-				//	Target: "",
-				//}
-			}
-		}
-	}()
-	return Result{}
+func (trans *Translation) GetResult(result func(src string, result string)) {
+	trans.result = result
 }
 
 /*翻译*/
@@ -112,9 +95,13 @@ func (trans *Translation) Translate(src string) {
 		for _, val := range strs {
 			//fmt.Println("str val: ", val)
 			if strings.HasPrefix(val, src) {
-				trans.middle <- val
-				fmt.Println("find val: ", val)
-				fmt.Println("find src: ", src)
+				go func() {
+					trans.middle <- val
+				}()
+				//trans.middle <- val
+				//fmt.Println("find val: ", val)
+				//fmt.Println("find src: ", src)
+				time.Sleep(time.Second)
 				return
 			}
 		}

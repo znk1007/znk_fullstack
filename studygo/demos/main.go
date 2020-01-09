@@ -229,8 +229,10 @@ func main() {
 	//fmt.Println("src: ", translation.Src)
 	//fmt.Println("val: ", translation.Target)
 	trans := seventh.CreateTranslation("seventh/dict.txt")
-	result := trans.Result()
-	fmt.Println("result = ", result)
+	trans.GetResult(func(src string, result string) {
+		fmt.Println("src: ", src)
+		fmt.Println("result: ", result)
+	})
 	trans.Translate("嫣然")
 }
 
