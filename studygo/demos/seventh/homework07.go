@@ -113,8 +113,8 @@ func (trans *Translation) Translate(src string) {
 			//fmt.Println("str val: ", val)
 			if strings.HasPrefix(val, src) {
 				trans.middle <- val
-				//fmt.Println("find val: ", val)
-				//fmt.Println("find src: ", src)
+				fmt.Println("find val: ", val)
+				fmt.Println("find src: ", src)
 				return
 			}
 		}
