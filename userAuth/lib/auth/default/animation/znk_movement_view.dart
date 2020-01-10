@@ -1,4 +1,5 @@
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class MovementWidget extends StatefulWidget {
@@ -11,6 +12,8 @@ class MovementWidget extends StatefulWidget {
 class _MovementWidgetState extends State<MovementWidget> {
   @override
   Widget build(BuildContext context) {
+    OffsetPair.fromEventPosition(event)
+    Transform.scale()
     return Container(
        child: PageView.builder(
          
