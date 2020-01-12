@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:userAuth/auth/default/animation/znk_movement_view.dart';
 import 'package:userAuth/auth/delegate/login_view_delegate.dart';
 import 'package:userAuth/auth/resource/images/image_helper.dart';
 import 'package:userAuth/auth/utils/tools/screen_helper.dart';
@@ -40,8 +41,16 @@ class DefaultLoginView extends StatelessWidget implements LoginViewDelegate {
         child: Stack(
           overflow: Overflow.visible,
           children: <Widget>[
-            _fixedBackgroundWidget(),
-            _BackgroundView(),
+            // _fixedBackgroundWidget(),
+            // _BackgroundView(),
+            MovementWidget(
+              child: ImageHelper.load(
+                'auth_bg_image.png',
+                fit: BoxFit.fill,
+                height: _bgImageHeight,
+                width: ScreenHelper.screenWidth,
+              ),
+            ),
             Container(
               child: Text('测试二'),
             ),

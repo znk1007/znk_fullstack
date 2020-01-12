@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/znk_fullstack/studygo/demos/seventh"
+	"os"
 )
 
 func main() {
@@ -230,10 +231,32 @@ func main() {
 	//fmt.Println("val: ", translation.Target)
 	trans := seventh.CreateTranslation("seventh/dict.txt")
 	trans.GetResult(func(src string, result string) {
-		fmt.Println("src: ", src)
-		fmt.Println("result: ", result)
+		fmt.Println("src1: ", src)
+		fmt.Println("result1: ", result)
 	})
 	trans.Translate("嫣然")
+	trans.Translate2("嫣然", func(src string, target string) {
+		fmt.Println("src2: ", src)
+		fmt.Println("result2: ", target)
+	})
+	
+	//src -> /Users/huangsam/Downloads/Boom_40054.zip
+	//dst -> /Users/huangsam/Downloads/Boom_40051.zip
+	
+	// go run main.go /Users/huangsam/Downloads/Boom_40054.zip /Users/huangsam/Downloads/Boom_40051.zip
+	
+	args := os.Args
+	if args != nil && len(args) >= 3 {
+		srcPath := args[1] //获取输⼊的第⼀个参数
+		dstPath := args[2] //获取输⼊的第⼆个参数
+		fmt.Printf("srcPath = %s, dstPath = %s\n", srcPath, dstPath)
+		if srcPath != dstPath {
+			c := seventh.CreateCopy(srcPath, dstPath)
+			c.Copy()
+		}
+		
+	}
+	
 }
 
 

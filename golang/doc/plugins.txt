@@ -129,3 +129,19 @@ go install github.com/josharian/impl
 go install github.com/rogpeppe/godef
 go install github.com/sqs/goreturns
 go install github.com/cweill/gotests/gotests
+
+
+进入"%GOPATH%\src\github.com\derekparker"（没有这些目录的话就自己手动创建，GOPATH这个环境变量也要事先配置好），将dlv文件夹删除（没有这个文件夹就忽略），然后在当前目录下执行下面的命令将dlv项目拷贝下来：
+
+ git clone https://github.com/derekparker/delve.git
+待所有文件下载完，再执行官方的安装命令：
+
+go get -u github.com/derekparker/delve/cmd/dlv 
+————————————————
+
+export GOROOT=/usr/local/Cellar/go/1.13.5/libexec
+export PATH=$PATH:$GOROOT/bin:/usr/local/git/bin
+export GOPATH=$HOME/Desktop/golang
+export GOBIN=$GOROOT/bin
+export GOPROXY=https://goproxy.cn
+export PATH=$PATH:$GOBIN
