@@ -157,7 +157,6 @@ class _MovementWidgetState extends State<MovementWidget> with TickerProviderStat
   }
   /* 根据半径，x坐标，计算圆的y坐标 */
   double _y(double x, double r) {
-    print('x $x');
     return math.sqrt(r * r - x * x);
   }
 
