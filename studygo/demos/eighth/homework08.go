@@ -1,9 +1,13 @@
 package eighth
 
+import "github.com/360EntSecGroup-Skylar/excelize"
+
+import "fmt"
+
 /*
  * @Author: your name
  * @Date: 2020-01-12 21:33:47
- * @LastEditTime : 2020-01-12 22:14:48
+ * @LastEditTime : 2020-01-13 21:46:28
  * @LastEditors  : Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /demos/eighth/homework08.go
@@ -25,12 +29,49 @@ type Coder struct {
 type CoderInfo struct {
 	coders    []Coder
 	writeXLSX bool
+	coder     chan Coder
+	quit      chan bool
 }
 
-//CrateCoderInfo 创建CrateCoderInfo对象
-func CrateCoderInfo(writeXLSX bool) CoderInfo {
+//CreateCoderInfo 创建CrateCoderInfo对象
+func CreateCoderInfo(writeXLSX bool) CoderInfo {
 	return CoderInfo{
 		coders:    []Coder{},
 		writeXLSX: writeXLSX,
+		coder:     make(chan Coder),
+		quit:      make(chan bool),
+	}
+}
+
+func (info CoderInfo) write() {
+	// go func() {
+	for {
+		select {
+		case coder := <-info.coder:
+			info.coders = append(info.coders, coder)
+		case <-info.quit:
+			return
+		}
+	}
+	// }()
+}
+
+func (info CoderInfo) Read(filePath string) {
+	if len(filePath) == 0 {
+		info.quit <- true
+		return
+	}
+	f, err := excelize.OpenFile(filePath)
+	if err != nil {
+		fmt.Println("open file: ", err.Error())
+		info.quit <- true
+		return
+	}
+	rows, err := f.GetRows("工作表 1 - 2019-12-17 资深Go语言工程师实战课")
+	for _, row := range rows {
+		// for _, colCell := range row {
+		// 	fmt.Println(colCell)
+		// }
+		fmt.Println(row)
 	}
 }
