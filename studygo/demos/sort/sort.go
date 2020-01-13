@@ -6,7 +6,7 @@
  * @Description: In User Settings Edit
  * @FilePath: /demos/sort/main.go
  */
-package main
+package sort
 
 import "fmt"
 
