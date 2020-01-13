@@ -13,10 +13,22 @@ class _CircleCurve extends Curve {
 
 class MovementWidget extends StatefulWidget {
   final Widget child;
+  final double offset;
+  final int itemCount;
+  final double maxScale;
   MovementWidget({
     Key key,
-    @required this.child
-  }): super(key: key);
+    @required this.child,
+    double offset = 5,
+    int itemCount = 50,
+    double scale = 1.0,
+  }): offset = offset, 
+    itemCount = itemCount, 
+    maxScale = scale,
+    assert(offset != 0), 
+    assert(itemCount != 0),
+    assert(scale >= 1.0),
+    super(key: key);
 
   @override
   _MovementWidgetState createState() => _MovementWidgetState();
@@ -35,50 +47,80 @@ class _MovementWidgetState extends State<MovementWidget> with TickerProviderStat
 
   void _initAnimations() {
     List<TweenSequenceItem> items = List<TweenSequenceItem>();
-    int cnt = 5;
-    for (int i = 0; i < cnt; i++) {/*dx [-5 ... -0], dy[0 ... -5]*/
+    int cnt = widget.itemCount > 0 ? widget.itemCount : 10;
+    double r = widget.offset > 0 ? widget.offset : 5;
+    r = r / 2.0;
+    double step = r / cnt.toDouble();
+    double tmpStep = -r;
+    // 第一象限
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = -_y(x1, r);
+      tmpStep+=step;
+      double x2 = tmpStep;
+      double y2 = -_y(x2, r);
       TweenSequenceItem item = TweenSequenceItem(
         tween: Tween(
-          begin: Offset(-((cnt - i).toDouble()), ((-i).toDouble())),
-          end: Offset(-((cnt - i - 1).toDouble()), -((-i - 1).toDouble()))
+          begin: Offset(x1, y1),
+          end: Offset(x2, y2)
+        ),
+        weight: 1,
+      );
+      items.add(item);
+    }
+    //第二象限
+    tmpStep = 0;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = -_y(x1, r);
+      tmpStep+=step;
+      double x2 = tmpStep;
+      double y2 = -_y(x2, r);
+      TweenSequenceItem item = TweenSequenceItem(
+        tween: Tween(
+          begin: Offset(x1, y1),
+          end: Offset(x2, y2)
+        ),
+        weight: 1,
+      );
+      items.add(item);
+    }
+    // 第三象限
+    tmpStep = r;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = _y(x1, r);
+      tmpStep-=step;
+      double x2 = tmpStep;
+      double y2 = _y(x2, r);
+      TweenSequenceItem item = TweenSequenceItem(
+        tween: Tween(
+          begin: Offset(x1, y1),
+          end: Offset(x2, y2)
+        ),
+        weight: 1,
+      );
+      items.add(item);
+    }
+
+    // 第四象限
+    tmpStep = 0;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = _y(x1, r);
+      tmpStep-=step;
+      double x2 = tmpStep;
+      double y2 = _y(x2, r);
+      TweenSequenceItem item = TweenSequenceItem(
+        tween: Tween(
+          begin: Offset(x1, y1),
+          end: Offset(x2, y2)
         ),
         weight: 1,
       );
       items.add(item);
     }
     
-    for (int i = 0; i < cnt; i++) {
-      TweenSequenceItem item = TweenSequenceItem(
-        tween: Tween(
-          begin: Offset((i).toDouble(), (-(cnt - i)).toDouble()),
-          end: Offset((i + 1).toDouble(), (-(cnt - i - 1)).toDouble())
-        ),
-        weight: 1,
-      );
-      items.add(item);
-    }
-
-    for (int i = 0; i < cnt; i++) {
-      TweenSequenceItem item = TweenSequenceItem(
-        tween: Tween(
-          begin: Offset((cnt - i).toDouble(), (i).toDouble()),
-          end: Offset((cnt - i - 1).toDouble(), (i + 1).toDouble())
-        ),
-        weight: 1,
-      );
-      items.add(item);
-    }
-
-    for (int i = 0; i < cnt; i++) {
-      TweenSequenceItem item = TweenSequenceItem(
-        tween: Tween(
-          begin: Offset((-i).toDouble(), (cnt - i).toDouble()),
-          end: Offset((-i - 1).toDouble(), (cnt - i - 1).toDouble())
-        ),
-        weight: 1,
-      );
-      items.add(item);
-    }
 
     _movement = TweenSequence(items).animate(
       CurvedAnimation(
@@ -113,6 +155,11 @@ class _MovementWidgetState extends State<MovementWidget> with TickerProviderStat
       }
     }
   }
+  /* 根据半径，x坐标，计算圆的y坐标 */
+  double _y(double x, double r) {
+    print('x $x');
+    return math.sqrt(r * r - x * x);
+  }
 
   @override
   void dispose() {
@@ -122,12 +169,13 @@ class _MovementWidgetState extends State<MovementWidget> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {    
+    // _configCircle();
     if (_movement == null) {
       return Container();
     }
     return ClipRect(
       child: Transform.scale(
-        scale: 1.2,
+        scale: widget.maxScale,
         child: Transform.translate(
           offset: _movement?.value,
           child: widget.child,
@@ -136,6 +184,65 @@ class _MovementWidgetState extends State<MovementWidget> with TickerProviderStat
     );
   }
 }
+
+/*
+/* 根据半径，x坐标，计算圆的y坐标 */
+  double _y(double x, double r) {
+    print('x $x');
+    return math.sqrt(r * r - x * x);
+  }
+
+  void _configCircle() {
+    int cnt = 10;
+    double r = 5 / 2.0;
+    double step = r / cnt.toDouble();
+    // 第一象限
+    double tmpStep = -r;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = -_y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep+=step;
+      double x2 = tmpStep;
+      double y2 = -_y(x2, r);
+      print('x2 = $x2 y2 == $y2');
+    }
+    //第二象限
+    tmpStep = 0;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = -_y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep+=step;
+      double x2 = tmpStep;
+      double y2 = -_y(x2, r);
+      print('x2 = $x2 y2 == $y2');
+    }
+    // 第三象限
+    tmpStep = r;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = _y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep-=step;
+      double x2 = tmpStep;
+      double y2 = _y(x2, r);
+      print('x2 = $x2 y2 == $y2');
+    }
+
+    // 第四象限
+    tmpStep = 0;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = _y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep-=step;
+      double x2 = tmpStep;
+      double y2 = _y(x2, r);
+      print('x2 = $x2 y2 == $y2');
+    }
+  }
+*/
 /*
 目录
 

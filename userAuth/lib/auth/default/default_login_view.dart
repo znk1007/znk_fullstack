@@ -3,6 +3,7 @@ import 'package:userAuth/auth/default/animation/znk_movement_view.dart';
 import 'package:userAuth/auth/delegate/login_view_delegate.dart';
 import 'package:userAuth/auth/resource/images/image_helper.dart';
 import 'package:userAuth/auth/utils/tools/screen_helper.dart';
+import 'dart:math' as math;
 
 final double _bgImageHeight = ScreenHelper.setWidth(400);
 
@@ -41,9 +42,8 @@ class DefaultLoginView extends StatelessWidget implements LoginViewDelegate {
         child: Stack(
           overflow: Overflow.visible,
           children: <Widget>[
-            // _fixedBackgroundWidget(),
-            // _BackgroundView(),
             MovementWidget(
+              scale: 1.5,
               child: ImageHelper.load(
                 'auth_bg_image.png',
                 fit: BoxFit.fill,
@@ -58,121 +58,67 @@ class DefaultLoginView extends StatelessWidget implements LoginViewDelegate {
         ),
         onTap: () {
           print('tap view');
+          _configCircle();
         },
       ),
     );
   }
-  /// 固定的背景组件
-  Widget _fixedBackgroundWidget() {
-    return Container(
-      child: ImageHelper.load('auth_bg_image.png',
-        fit: BoxFit.fitWidth, 
-        height: _bgImageHeight,
-        width: ScreenHelper.screenWidth,
-      ),
-    );
+
+  /* 根据半径，x坐标，计算圆的y坐标 */
+  double _y(double x, double r) {
+    // print('x $x');
+    return math.sqrt(r * r - x * x);
   }
-  
 
-}
-
-class _BackgroundView extends StatefulWidget {
-  _BackgroundView({Key key}) : super(key: key);
-
-  @override
-  __BackgroundViewState createState() => __BackgroundViewState();
-}
-
-class __BackgroundViewState extends State<_BackgroundView> with TickerProviderStateMixin{
-  AnimationController _controller;
-  Animation<dynamic> _movement;
-  @override
-  void initState() {
-    super.initState();
-    initController();
-    initAnimation();
-    startAnimate();
-    
-  }
-  /// 初始化动画控制器
-  void initController() {
-    _controller = AnimationController(duration: Duration(seconds: 1), vsync: this);
-  }
-  /// 初始化动画
-  void initAnimation() {
-    _movement = TweenSequence(configItems()).animate(
-      CurvedAnimation(
-        parent: _controller, 
-        curve: Interval(
-          0.1, 
-          0.5,
-          curve: Curves.linear
-        ),
-      ),
-    )
-    ..addListener(() {
-
-    })
-    ..addStatusListener((status) {
-
-    });
-  }
-  /// 配置items
-  List<TweenSequenceItem> configItems() {
-    List<TweenSequenceItem> items = [];
-    double idx = 0;
-    double step = 0.125;
-    while (idx <= 1) {
-      print("idx == $idx");
-      print("idx reverse == ${-1-idx}");
-    //   TweenSequenceItem item = TweenSequenceItem(
-    //   tween: EdgeInsetsTween(
-    //     begin: EdgeInsets.only(left: idx, top: -1 - idx),
-    //     end: EdgeInsets.only(left: idx + step, top: -0.125),
-    //   ),
-    //   weight: 1,
-    // );
-    // items.add(item);
-      idx+=step;
+  void _configCircle() {
+    int cnt = 10;
+    double r = 5 / 2.0;
+    double step = r / cnt.toDouble();
+    // 第一象限
+    double tmpStep = -r;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = -_y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep+=step;
+      double x2 = tmpStep;
+      double y2 = -_y(x2, r);
+      print('x2 = $x2 y2 == $y2');
     }
-    TweenSequenceItem item = TweenSequenceItem(
-      tween: EdgeInsetsTween(
-        begin: EdgeInsets.only(left: 0, top: 0),
-        end: EdgeInsets.only(left: 0.125, top: 0),
-      ),
-      weight: 1,
-    );
-    items.add(item);
+    //第二象限
+    tmpStep = 0;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = -_y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep+=step;
+      double x2 = tmpStep;
+      double y2 = -_y(x2, r);
+      print('x2 = $x2 y2 == $y2');
+    }
+    // 第三象限
+    tmpStep = r;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = _y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep-=step;
+      double x2 = tmpStep;
+      double y2 = _y(x2, r);
+      print('x2 = $x2 y2 == $y2');
+    }
 
-    return items;
-  }
-  /// 开始动画
-  Future startAnimate() async {
-    try {
-      await _controller.repeat();
-    } catch (e) {
-      if (e is TickerCanceled) {
-        print('ticker canceled');
-      } else {
-        print('animation failed $e');
-      }
+    // 第四象限
+    tmpStep = 0;
+    for (var i = 0; i < cnt; i++) {
+      double x1 = tmpStep;
+      double y1 = _y(x1, r);
+      print('x1 = $x1 and y1 = $y1');
+      tmpStep-=step;
+      double x2 = tmpStep;
+      double y2 = _y(x2, r);
+      print('x2 = $x2 y2 == $y2');
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_movement == null) {
-      return Container();
-    }
-    return Container(
-      child: ImageHelper.load(
-          'auth_bg_image.png',
-          fit: BoxFit.fill,
-          height: _bgImageHeight,
-          width: ScreenHelper.screenWidth,
-        ),
-      alignment: Alignment.topCenter,
-      // padding: _movement.value,
-    );
-  }
 }
+
