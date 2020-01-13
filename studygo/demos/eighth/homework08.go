@@ -9,11 +9,6 @@ package eighth
  * @FilePath: /demos/eighth/homework08.go
  */
 
-//Coders 攻城狮信息数组
-type Coders struct {
-	coders []Coder
-}
-
 //Coder 攻城狮信息
 type Coder struct {
 	Name      string //名称
@@ -24,4 +19,18 @@ type Coder struct {
 	Job       string // 职位
 	Salary    string // 薪水
 	Language  string // 编程语言
+}
+
+//CoderInfo 攻城狮信息数组
+type CoderInfo struct {
+	coders    []Coder
+	writeXLSX bool
+}
+
+//CrateCoderInfo 创建CrateCoderInfo对象
+func CrateCoderInfo(writeXLSX bool) CoderInfo {
+	return CoderInfo{
+		coders:    []Coder{},
+		writeXLSX: writeXLSX,
+	}
 }
