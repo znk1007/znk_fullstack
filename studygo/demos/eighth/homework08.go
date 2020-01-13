@@ -9,7 +9,12 @@ package eighth
  * @FilePath: /demos/eighth/homework08.go
  */
 
-//Coder 攻城狮
+//Coders 攻城狮信息数组
+type Coders struct {
+	coders []Coder
+}
+
+//Coder 攻城狮信息
 type Coder struct {
 	Name      string //名称
 	Education string //学历
@@ -20,4 +25,3 @@ type Coder struct {
 	Salary    string // 薪水
 	Language  string // 编程语言
 }
-
