@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:userAuth/auth/default/animation/znk_movement_view.dart';
 import 'package:userAuth/auth/delegate/login_view_delegate.dart';
 import 'package:userAuth/auth/resource/images/image_helper.dart';
@@ -6,6 +7,7 @@ import 'package:userAuth/auth/utils/tools/screen_helper.dart';
 import 'dart:math' as math;
 
 final double _bgImageHeight = ScreenHelper.setWidth(400);
+final double _fieldHeight = ScreenHelper.setHeight(55);
 
 class DefaultLoginView extends StatelessWidget implements LoginViewDelegate {
   /// 账号
@@ -51,74 +53,54 @@ class DefaultLoginView extends StatelessWidget implements LoginViewDelegate {
                 width: ScreenHelper.screenWidth,
               ),
             ),
-            Container(
-              child: Text('测试二'),
+            _AccPswInput(
+              height: _fieldHeight  * 2,
             ),
           ],
         ),
         onTap: () {
           print('tap view');
-          _configCircle();
+          // _configCircle();
         },
       ),
     );
   }
+}
 
-  /* 根据半径，x坐标，计算圆的y坐标 */
-  double _y(double x, double r) {
-    // print('x $x');
-    return math.sqrt(r * r - x * x);
-  }
+class _AccPswInput extends StatefulWidget {
+  final double height;
+  _AccPswInput({
+    Key key, 
+    @required double height
+  }) : height = height, 
+        super(key: key);
 
-  void _configCircle() {
-    int cnt = 10;
-    double r = 5 / 2.0;
-    double step = r / cnt.toDouble();
-    // 第一象限
-    double tmpStep = -r;
-    for (var i = 0; i < cnt; i++) {
-      double x1 = tmpStep;
-      double y1 = -_y(x1, r);
-      print('x1 = $x1 and y1 = $y1');
-      tmpStep+=step;
-      double x2 = tmpStep;
-      double y2 = -_y(x2, r);
-      print('x2 = $x2 y2 == $y2');
-    }
-    //第二象限
-    tmpStep = 0;
-    for (var i = 0; i < cnt; i++) {
-      double x1 = tmpStep;
-      double y1 = -_y(x1, r);
-      print('x1 = $x1 and y1 = $y1');
-      tmpStep+=step;
-      double x2 = tmpStep;
-      double y2 = -_y(x2, r);
-      print('x2 = $x2 y2 == $y2');
-    }
-    // 第三象限
-    tmpStep = r;
-    for (var i = 0; i < cnt; i++) {
-      double x1 = tmpStep;
-      double y1 = _y(x1, r);
-      print('x1 = $x1 and y1 = $y1');
-      tmpStep-=step;
-      double x2 = tmpStep;
-      double y2 = _y(x2, r);
-      print('x2 = $x2 y2 == $y2');
-    }
+  @override
+  __AccPswInputState createState() => __AccPswInputState();
+}
 
-    // 第四象限
-    tmpStep = 0;
-    for (var i = 0; i < cnt; i++) {
-      double x1 = tmpStep;
-      double y1 = _y(x1, r);
-      print('x1 = $x1 and y1 = $y1');
-      tmpStep-=step;
-      double x2 = tmpStep;
-      double y2 = _y(x2, r);
-      print('x2 = $x2 y2 == $y2');
-    }
+class __AccPswInputState extends State<_AccPswInput> {
+  final TextEditingController _acController = TextEditingController();
+  final TextEditingController _psdController = TextEditingController();
+  final FocusNode _acFocusNode = FocusNode();
+  final FocusNode _psdFocusNode = FocusNode();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: widget.height,
+       child: Row(
+         children: <Widget>[
+          //  TextField(
+          //    controller: _acController,
+          //    focusNode: _acFocusNode,
+          //  ),
+          //  TextField(
+          //    controller: _psdController,
+          //    focusNode: _psdFocusNode,
+          //  ),
+         ],
+       ),
+    );
   }
 }
 

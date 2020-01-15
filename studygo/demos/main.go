@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/znk_fullstack/studygo/demos/eighth"
-	"github.com/znk_fullstack/studygo/demos/seventh"
+	"time"
 )
 
 func main() {
@@ -230,16 +228,16 @@ func main() {
 	//translation.Translate("嫣然")
 	//fmt.Println("src: ", translation.Src)
 	//fmt.Println("val: ", translation.Target)
-	trans := seventh.CreateTranslation("seventh/dict.txt")
-	trans.GetResult(func(src string, result string) {
-		fmt.Println("src1: ", src)
-		fmt.Println("result1: ", result)
-	})
-	trans.Translate("嫣然")
-	trans.Translate2("嫣然", func(src string, target string) {
-		fmt.Println("src2: ", src)
-		fmt.Println("result2: ", target)
-	})
+	// trans := seventh.CreateTranslation("seventh/dict.txt")
+	// trans.GetResult(func(src string, result string) {
+	// 	fmt.Println("src1: ", src)
+	// 	fmt.Println("result1: ", result)
+	// })
+	// trans.Translate("嫣然")
+	// trans.Translate2("嫣然", func(src string, target string) {
+	// 	fmt.Println("src2: ", src)
+	// 	fmt.Println("result2: ", target)
+	// })
 
 	//src -> /Users/huangsam/Downloads/Boom_40054.zip
 	//dst -> /Users/huangsam/Downloads/Boom_40051.zip
@@ -257,7 +255,10 @@ func main() {
 	// 	}
 
 	// }
-	filePath := "/Users/huangsam/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表.xlsx"
-	codeInfo := eighth.CreateCoderInfo(true)
-	codeInfo.Read(filePath)
+	srcPath := "/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表.xlsx"
+	dstPath := "/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表-New.xlsx"
+	codeInfo := eighth.CreateCoderInfo(srcPath, dstPath)
+	codeInfo.ReadAndSave("1-3年")
+
+	time.Sleep(time.Millisecond * 500)
 }
