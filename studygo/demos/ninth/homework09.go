@@ -36,8 +36,10 @@ func (prod Product) Consume(consume func(data interface{})) {
 }
 
 type (
-	subscriber chan interface{}         //订阅者为一个管道
-	topicFunc  func(v interface{}) bool //主题为一个过滤器
+	//Subscriber 订阅者，订阅者为一个管道
+	Subscriber chan interface{}
+	//TopicFunc 主题， 主题为一个过滤器
+	TopicFunc func(v interface{}) bool
 )
 
 //Publisher 发布对象
@@ -45,14 +47,36 @@ type Publisher struct {
 	lock        sync.RWMutex
 	bufferSize  int
 	timeout     time.Duration
-	subscribers map[subscriber]topicFunc
+	subscribers map[Subscriber]TopicFunc
 }
 
 //CreatePubliser 创建发布者
-func CreatePubliser(timeout time.Duration, bufferSize int) Publisher {
-	return Publisher{
+func CreatePubliser(timeout time.Duration, bufferSize int) *Publisher {
+	return &Publisher{
 		bufferSize:  bufferSize,
 		timeout:     timeout,
-		subscribers: make(map[subscriber]topicFunc),
+		subscribers: make(map[Subscriber]TopicFunc),
 	}
+}
+
+//SubscribeTopic 订阅主题
+func (pub *Publisher) SubscribeTopic(topic TopicFunc) chan interface{} {
+	ch := make(chan interface{}, pub.bufferSize)
+	pub.lock.Lock()
+	defer pub.lock.Unlock()
+	pub.subscribers[ch] = topic
+	return ch
+}
+
+//Subscribe 订阅所有主题
+func (pub *Publisher) Subscribe() chan interface{} {
+	return pub.SubscribeTopic(nil)
+}
+
+//Cancel 取消订阅
+func (pub *Publisher) Cancel(sub chan interface{}) {
+	pub.lock.Lock()
+	defer pub.lock.Unlock()
+	delete(pub.subscribers, sub)
+	close(sub)
 }
