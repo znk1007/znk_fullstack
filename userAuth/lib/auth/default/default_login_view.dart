@@ -71,6 +71,7 @@ class _AccPswInput extends StatefulWidget {
   final double height;
   _AccPswInput({
     Key key, 
+    
     @required double height
   }) : height = height, 
         super(key: key);
@@ -90,14 +91,14 @@ class __AccPswInputState extends State<_AccPswInput> {
       height: widget.height,
        child: Row(
          children: <Widget>[
-          //  TextField(
-          //    controller: _acController,
-          //    focusNode: _acFocusNode,
-          //  ),
-          //  TextField(
-          //    controller: _psdController,
-          //    focusNode: _psdFocusNode,
-          //  ),
+           TextField(
+             controller: _acController,
+             focusNode: _acFocusNode,
+           ),
+           TextField(
+             controller: _psdController,
+             focusNode: _psdFocusNode,
+           ),
          ],
        ),
     );

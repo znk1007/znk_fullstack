@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/znk_fullstack/studygo/demos/eighth"
+	"fmt"
 	"time"
+
+	"github.com/znk_fullstack/studygo/demos/ninth"
 )
 
 func main() {
@@ -255,10 +257,16 @@ func main() {
 	// 	}
 
 	// }
-	srcPath := "/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表.xlsx"
-	dstPath := "/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表-New.xlsx"
-	codeInfo := eighth.CreateCoderInfo(srcPath, dstPath)
-	codeInfo.ReadAndSave("1-3年")
+	// srcPath := "/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表.xlsx"
+	// dstPath := "/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/studygo/demos/eighth/Go语言工程师信息表-New.xlsx"
+	// codeInfo := eighth.CreateCoderInfo(srcPath, dstPath)
+	// codeInfo.ReadAndSave("1-3年")
 
+	prod := ninth.CreateProduct()
+	prod.Consume(func(data interface{}) {
+		fmt.Println("consume data: ", data)
+	})
+	prod.Produce(3)
+	prod.Produce("测试")
 	time.Sleep(time.Millisecond * 500)
 }
