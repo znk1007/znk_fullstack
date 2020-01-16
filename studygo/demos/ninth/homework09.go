@@ -59,6 +59,18 @@ func CreatePubliser(timeout time.Duration, bufferSize int) *Publisher {
 	}
 }
 
+//Publish 发布信息
+func (pub *Publisher) Publish(v interface{}) {
+	pub.lock.Lock()
+	defer pub.lock.Unlock()
+	var wg sync.WaitGroup
+	for sub, topic := range pub.subscribers {
+		wg.Add(1)
+		go pub.serndTopic(sub, topic, v, &wg)
+	}
+	wg.Wait()
+}
+
 //SubscribeTopic 订阅主题
 func (pub *Publisher) SubscribeTopic(topic TopicFunc) chan interface{} {
 	ch := make(chan interface{}, pub.bufferSize)
@@ -79,4 +91,30 @@ func (pub *Publisher) Cancel(sub chan interface{}) {
 	defer pub.lock.Unlock()
 	delete(pub.subscribers, sub)
 	close(sub)
+}
+
+//Close 取消所有订阅
+func (pub *Publisher) Close() {
+	pub.lock.Lock()
+	defer pub.lock.Unlock()
+	for sub := range pub.subscribers {
+		close(sub)
+	}
+}
+
+//serndTopic 分发主题
+func (pub *Publisher) serndTopic(
+	sub Subscriber,
+	topic TopicFunc,
+	v interface{},
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+	if topic != nil && !topic(v) || topic == nil {
+		return
+	}
+	select {
+	case sub <- v:
+	case <-time.After(pub.timeout):
+	}
 }

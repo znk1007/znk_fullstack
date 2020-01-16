@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/znk_fullstack/studygo/demos/ninth"
@@ -262,11 +263,33 @@ func main() {
 	// codeInfo := eighth.CreateCoderInfo(srcPath, dstPath)
 	// codeInfo.ReadAndSave("1-3年")
 
+	pub := ninth.CreatePubliser(100*time.Millisecond, 10)
+	all := pub.Subscribe()
+	sub := pub.SubscribeTopic(func(v interface{}) bool {
+		if s, ok := v.(string); ok {
+			return strings.Contains(s, "subscribe")
+		}
+		return false
+	})
+	pub.Publish("hello, world!")
+	pub.Publish("hello, subscribe!")
+	go func() {
+		for msg := range all {
+			fmt.Println("all: ", msg)
+		}
+	}()
+	go func() {
+		for msg := range sub {
+			fmt.Println("subscribe: ", msg)
+		}
+	}()
+
 	prod := ninth.CreateProduct()
 	prod.Consume(func(data interface{}) {
 		fmt.Println("consume data: ", data)
 	})
 	prod.Produce(3)
 	prod.Produce("测试")
+
 	time.Sleep(time.Millisecond * 500)
 }
