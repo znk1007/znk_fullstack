@@ -118,3 +118,36 @@ func (pub *Publisher) serndTopic(
 	case <-time.After(pub.timeout):
 	}
 }
+
+type (
+	subscriber chan interface{}
+	topicKey   interface{}
+)
+
+//MessageQueue 消息队列
+type MessageQueue struct {
+	lock     sync.RWMutex
+	timeout  time.Duration
+	topicMap map[topicKey]subscriber
+}
+
+//CreateMessageQueue 创建消息队列
+func CreateMessageQueue(timeout time.Duration) *MessageQueue {
+	return &MessageQueue{
+		topicMap: make(map[topicKey]subscriber),
+		timeout:  timeout,
+	}
+}
+
+//AddTopic 添加主题
+func (mq *MessageQueue) AddTopic(topics ...interface{}) {
+	mq.lock.Lock()
+	defer mq.lock.Unlock()
+	for _, tp := range topics {
+		mq.topicMap[tp] = make(subscriber)
+	}
+}
+
+func (mq *MessageQueue) handleTopic(topic interface{}, sub subscriber, wg *sync.WaitGroup) {
+	defer wg.Done()
+}
