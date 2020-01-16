@@ -47,8 +47,8 @@ class _MovementWidgetState extends State<MovementWidget> with TickerProviderStat
 
   void _initAnimations() {
     List<TweenSequenceItem> items = List<TweenSequenceItem>();
-    int cnt = widget.itemCount > 0 ? widget.itemCount : 10;
-    double r = widget.offset > 0 ? widget.offset : 5;
+    int cnt = (widget.itemCount > 0) ? widget.itemCount : 10;
+    double r = (widget.offset > 0) ? widget.offset : 5;
     r = r / 2.0;
     double step = r / cnt.toDouble();
     double tmpStep = -r;
