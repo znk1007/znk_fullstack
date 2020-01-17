@@ -131,7 +131,6 @@ type MessageQueue struct {
 	lock     sync.RWMutex
 	timeout  time.Duration
 	messages map[topicKey]subscriber
-	unsub    map[topicKey]unSubscriber
 }
 
 //CreateMessageQueue 创建消息队列
@@ -139,7 +138,6 @@ func CreateMessageQueue(timeout time.Duration, topics ...interface{}) *MessageQu
 	mq := &MessageQueue{
 		messages: make(map[topicKey]subscriber),
 		timeout:  timeout,
-		unsub:    make(map[topicKey]unSubscriber),
 	}
 	mq.AddTopic(topics...)
 	return mq
@@ -157,29 +155,48 @@ func (mq *MessageQueue) AddTopic(topics ...interface{}) {
 	}
 }
 
+//ActiveTopic 激活主题
+func (mq *MessageQueue) ActiveTopic(topic interface{}, active bool) {
+	sub, ok := mq.messages[topic]
+	if !ok {
+		return
+	}
+	select {
+	case data, ok := <-sub:
+		fmt.Println("sub is ok: ", ok)
+		fmt.Println("sub data: ", data)
+	}
+
+	// _, ok = <-sub
+	// if ok && !active {
+	// 	close(mq.messages[topic])
+	// 	fmt.Println("inactive ok")
+	// } else if !ok && active {
+	// 	mq.messages[topic] = make(subscriber)
+	// 	fmt.Println("active ok")
+	// }
+}
+
 //Publish 发布相关主题消息
 func (mq *MessageQueue) Publish(topic interface{}, v interface{}) {
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
-
 	if topic == nil {
 		var wg sync.WaitGroup
-		for tp, sub := range mq.messages {
-			if hasSub, ok := mq.hasSubMsg[tp]; ok {
-				if hasSub {
-					wg.Add(1)
-					go mq.handleMessages(sub, v, &wg)
-				}
+		for _, sub := range mq.messages {
+			if _, ok := <-sub; ok {
+				wg.Add(1)
+				go mq.handleMessages(sub, v, &wg)
+			} else {
+				wg.Done()
 			}
 		}
 		wg.Wait()
 		return
 	}
-	if hasSub, ok := mq.hasSubMsg[topic]; ok {
-		if hasSub {
-			if sub, ok := mq.messages[topic]; ok {
-				go mq.handleMessage(sub, v)
-			}
+	if sub, ok := mq.messages[topic]; ok {
+		if _, ok := <-sub; ok {
+			go mq.handleMessage(sub, v)
 		}
 	}
 }
@@ -189,8 +206,7 @@ func (mq *MessageQueue) Subscribe(topic interface{}, subFunc func(v interface{})
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
 	if topic == nil {
-		for tp, sub := range mq.messages {
-			mq.hasSubMsg[tp] = true
+		for _, sub := range mq.messages {
 			for {
 				select {
 				case v := <-sub:
@@ -203,7 +219,6 @@ func (mq *MessageQueue) Subscribe(topic interface{}, subFunc func(v interface{})
 		}
 	} else {
 		if sub, ok := mq.messages[topic]; ok {
-			mq.hasSubMsg[topic] = true
 			select {
 			case v := <-sub:
 				if subFunc != nil {
@@ -221,7 +236,6 @@ func (mq *MessageQueue) UnSubscribe(topics ...interface{}) {
 	mq.lock.Unlock()
 	for idx, topic := range topics {
 		if sub, ok := mq.messages[topic]; ok {
-			mq.hasSubMsg[topic] = false
 			close(sub)
 			fmt.Println("unsub ok: ", ok)
 		}
@@ -239,9 +253,8 @@ func (mq *MessageQueue) handleMessages(sub subscriber, v interface{}, wg *sync.W
 }
 
 //handleMessage 处理消息
-func (mq *MessageQueue) handleMessage(topic interface{}, sub subscriber, v interface{}) {
+func (mq *MessageQueue) handleMessage(sub subscriber, v interface{}) {
 	select {
-	case <-mq.unsub[topic]:
 	case sub <- v:
 	case <-time.After(mq.timeout):
 	}

@@ -290,22 +290,24 @@ func main() {
 	// prod.Produce("测试")
 
 	mq := ninth.CreateMessageQueue(time.Millisecond*100, "测试一", "测试二", "测试三")
-	mq.Subscribe("测试一", func(v interface{}) {
-		fmt.Println("topic: 测试一", "v: ", v)
-	})
-	mq.Subscribe("测试二", func(v interface{}) {
-		fmt.Println("topic: 测试二", "v: ", v)
-	})
-	mq.Subscribe("测试三", func(v interface{}) {
-		fmt.Println("topic: 测试三", "v: ", v)
-	})
-	mq.Subscribe("测试四", func(v interface{}) {
-		fmt.Println("topic: 测试三", "v: ", v)
-	})
-	mq.Publish("测试一", "hello world 1")
-	mq.Publish("测试二", "hello world 2")
-	mq.Publish("测试三", "hello world 3")
-	// mq.UnSubscribe("测试二")
-	mq.Publish("测试四", "hello world")
+	fmt.Println(mq)
+	// mq.Subscribe("测试一", func(v interface{}) {
+	// 	fmt.Println("topic: 测试一", "v: ", v)
+	// })
+	// mq.Subscribe("测试二", func(v interface{}) {
+	// 	fmt.Println("topic: 测试二", "v: ", v)
+	// })
+	// mq.Subscribe("测试三", func(v interface{}) {
+	// 	fmt.Println("topic: 测试三", "v: ", v)
+	// })
+	// mq.Subscribe("测试四", func(v interface{}) {
+	// 	fmt.Println("topic: 测试三", "v: ", v)
+	// })
+	// mq.Publish("测试一", "hello world 1")
+	// mq.Publish("测试二", "hello world 2")
+	// mq.Publish("测试三", "hello world 3")
+	// // mq.UnSubscribe("测试二")
+	// mq.Publish("测试四", "hello world")
+	mq.ActiveTopic("测试二", false)
 	time.Sleep(time.Millisecond * 500)
 }
