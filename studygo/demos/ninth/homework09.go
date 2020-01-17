@@ -1,6 +1,7 @@
 package ninth
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -120,34 +121,128 @@ func (pub *Publisher) serndTopic(
 }
 
 type (
-	subscriber chan interface{}
-	topicKey   interface{}
+	subscriber   chan interface{}
+	unSubscriber chan bool
+	topicKey     interface{}
 )
 
 //MessageQueue 消息队列
 type MessageQueue struct {
 	lock     sync.RWMutex
 	timeout  time.Duration
-	topicMap map[topicKey]subscriber
+	messages map[topicKey]subscriber
+	unsub    map[topicKey]unSubscriber
 }
 
 //CreateMessageQueue 创建消息队列
-func CreateMessageQueue(timeout time.Duration) *MessageQueue {
-	return &MessageQueue{
-		topicMap: make(map[topicKey]subscriber),
+func CreateMessageQueue(timeout time.Duration, topics ...interface{}) *MessageQueue {
+	mq := &MessageQueue{
+		messages: make(map[topicKey]subscriber),
 		timeout:  timeout,
+		unsub:    make(map[topicKey]unSubscriber),
 	}
+	mq.AddTopic(topics...)
+	return mq
 }
 
 //AddTopic 添加主题
 func (mq *MessageQueue) AddTopic(topics ...interface{}) {
+	if topics == nil || len(topics) == 0 {
+		return
+	}
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
 	for _, tp := range topics {
-		mq.topicMap[tp] = make(subscriber)
+		mq.messages[tp] = make(subscriber)
 	}
 }
 
-func (mq *MessageQueue) handleTopic(topic interface{}, sub subscriber, wg *sync.WaitGroup) {
+//Publish 发布相关主题消息
+func (mq *MessageQueue) Publish(topic interface{}, v interface{}) {
+	mq.lock.Lock()
+	defer mq.lock.Unlock()
+
+	if topic == nil {
+		var wg sync.WaitGroup
+		for tp, sub := range mq.messages {
+			if hasSub, ok := mq.hasSubMsg[tp]; ok {
+				if hasSub {
+					wg.Add(1)
+					go mq.handleMessages(sub, v, &wg)
+				}
+			}
+		}
+		wg.Wait()
+		return
+	}
+	if hasSub, ok := mq.hasSubMsg[topic]; ok {
+		if hasSub {
+			if sub, ok := mq.messages[topic]; ok {
+				go mq.handleMessage(sub, v)
+			}
+		}
+	}
+}
+
+//Subscribe 订阅主题
+func (mq *MessageQueue) Subscribe(topic interface{}, subFunc func(v interface{})) {
+	mq.lock.Lock()
+	defer mq.lock.Unlock()
+	if topic == nil {
+		for tp, sub := range mq.messages {
+			mq.hasSubMsg[tp] = true
+			for {
+				select {
+				case v := <-sub:
+					if subFunc != nil {
+						subFunc(v)
+					}
+				case <-time.After(mq.timeout):
+				}
+			}
+		}
+	} else {
+		if sub, ok := mq.messages[topic]; ok {
+			mq.hasSubMsg[topic] = true
+			select {
+			case v := <-sub:
+				if subFunc != nil {
+					subFunc(v)
+				}
+			case <-time.After(mq.timeout):
+			}
+		}
+	}
+}
+
+//UnSubscribe 取消订阅
+func (mq *MessageQueue) UnSubscribe(topics ...interface{}) {
+	mq.lock.Lock()
+	mq.lock.Unlock()
+	for idx, topic := range topics {
+		if sub, ok := mq.messages[topic]; ok {
+			mq.hasSubMsg[topic] = false
+			close(sub)
+			fmt.Println("unsub ok: ", ok)
+		}
+		fmt.Println("topic idx: ", idx)
+	}
+}
+
+//handleMessage 处理消息群
+func (mq *MessageQueue) handleMessages(sub subscriber, v interface{}, wg *sync.WaitGroup) {
 	defer wg.Done()
+	select {
+	case sub <- v:
+	case <-time.After(mq.timeout):
+	}
+}
+
+//handleMessage 处理消息
+func (mq *MessageQueue) handleMessage(topic interface{}, sub subscriber, v interface{}) {
+	select {
+	case <-mq.unsub[topic]:
+	case sub <- v:
+	case <-time.After(mq.timeout):
+	}
 }
