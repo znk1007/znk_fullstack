@@ -1,6 +1,7 @@
 package ninth
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -120,24 +121,30 @@ func (pub *Publisher) serndTopic(
 	}
 }
 
-type (
-	subscriber   chan interface{}
-	unSubscriber chan bool
-	topicKey     interface{}
-)
+type identify interface{}
+
+type topic struct {
+	isActive   bool
+	subscriber chan interface{}
+	identify   interface{}
+}
 
 //MessageQueue 消息队列
 type MessageQueue struct {
 	lock     sync.RWMutex
 	timeout  time.Duration
-	messages map[topicKey]subscriber
+	messages map[identify]*topic
+	ctx      context.Context
+	cancel   chan bool
 }
 
 //CreateMessageQueue 创建消息队列
 func CreateMessageQueue(timeout time.Duration, topics ...interface{}) *MessageQueue {
 	mq := &MessageQueue{
-		messages: make(map[topicKey]subscriber),
+		messages: make(map[identify]*topic),
 		timeout:  timeout,
+		ctx:      context.TODO(),
+		cancel:   make(chan bool),
 	}
 	mq.AddTopic(topics...)
 	return mq
@@ -150,83 +157,68 @@ func (mq *MessageQueue) AddTopic(topics ...interface{}) {
 	}
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
+
 	for _, tp := range topics {
-		mq.messages[tp] = make(subscriber)
+		_, ok := mq.messages[tp]
+		if ok {
+			orgTopic := mq.messages[tp]
+			if orgTopic == nil {
+				mq.messages[tp] = &topic{
+					isActive: false,
+					identify: tp,
+				}
+			}
+		} else {
+			mq.messages[tp] = &topic{
+				isActive: false,
+				identify: tp,
+			}
+		}
 	}
-}
-
-//ActiveTopic 激活主题
-func (mq *MessageQueue) ActiveTopic(topic interface{}, active bool) {
-	sub, ok := mq.messages[topic]
-	if !ok {
-		return
-	}
-	select {
-	case data, ok := <-sub:
-		fmt.Println("sub is ok: ", ok)
-		fmt.Println("sub data: ", data)
-	}
-
-	// _, ok = <-sub
-	// if ok && !active {
-	// 	close(mq.messages[topic])
-	// 	fmt.Println("inactive ok")
-	// } else if !ok && active {
-	// 	mq.messages[topic] = make(subscriber)
-	// 	fmt.Println("active ok")
-	// }
 }
 
 //Publish 发布相关主题消息
 func (mq *MessageQueue) Publish(topic interface{}, v interface{}) {
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
-	if topic == nil {
-		var wg sync.WaitGroup
-		for _, sub := range mq.messages {
-			if _, ok := <-sub; ok {
-				wg.Add(1)
-				go mq.handleMessages(sub, v, &wg)
-			} else {
-				wg.Done()
-			}
-		}
-		wg.Wait()
-		return
-	}
-	if sub, ok := mq.messages[topic]; ok {
-		if _, ok := <-sub; ok {
-			go mq.handleMessage(sub, v)
+	if tp, ok := mq.messages[topic]; ok {
+		if tp.isActive {
+			go mq.handleMessage(tp.subscriber, v)
+		} else {
+			go func() {
+				mq.cancel <- true
+			}()
 		}
 	}
 }
 
 //Subscribe 订阅主题
 func (mq *MessageQueue) Subscribe(topic interface{}, subFunc func(v interface{})) {
+	if topic == nil {
+		return
+	}
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
-	if topic == nil {
-		for _, sub := range mq.messages {
+	if tp, ok := mq.messages[topic]; ok {
+		tp.isActive = true
+		tp.subscriber = make(chan interface{})
+		go func() {
 			for {
 				select {
-				case v := <-sub:
+				case <-mq.ctx.Done():
+					fmt.Println("ctx done")
+					return
+				case v := <-tp.subscriber:
+					fmt.Println("result v: ", v)
 					if subFunc != nil {
 						subFunc(v)
 					}
 				case <-time.After(mq.timeout):
+					fmt.Println("result timeout")
+					return
 				}
 			}
-		}
-	} else {
-		if sub, ok := mq.messages[topic]; ok {
-			select {
-			case v := <-sub:
-				if subFunc != nil {
-					subFunc(v)
-				}
-			case <-time.After(mq.timeout):
-			}
-		}
+		}()
 	}
 }
 
@@ -234,28 +226,34 @@ func (mq *MessageQueue) Subscribe(topic interface{}, subFunc func(v interface{})
 func (mq *MessageQueue) UnSubscribe(topics ...interface{}) {
 	mq.lock.Lock()
 	mq.lock.Unlock()
-	for idx, topic := range topics {
-		if sub, ok := mq.messages[topic]; ok {
-			close(sub)
-			fmt.Println("unsub ok: ", ok)
+	for _, tp := range topics {
+		if topic, ok := mq.messages[tp]; ok {
+			go func() {
+				var cancel context.CancelFunc
+				mq.ctx, cancel = context.WithCancel(context.Background())
+				close(topic.subscriber)
+				cancel()
+			}()
+			topic.isActive = false
 		}
-		fmt.Println("topic idx: ", idx)
-	}
-}
-
-//handleMessage 处理消息群
-func (mq *MessageQueue) handleMessages(sub subscriber, v interface{}, wg *sync.WaitGroup) {
-	defer wg.Done()
-	select {
-	case sub <- v:
-	case <-time.After(mq.timeout):
 	}
 }
 
 //handleMessage 处理消息
-func (mq *MessageQueue) handleMessage(sub subscriber, v interface{}) {
+func (mq *MessageQueue) handleMessage(sub chan interface{}, v interface{}) {
+	// _, ok := <-sub
+	// if !ok {
+	// 	return
+	// }
 	select {
+	case <-mq.cancel:
+		fmt.Println("cancel")
+	case <-mq.ctx.Done():
+		fmt.Println("close done")
+		return
 	case sub <- v:
 	case <-time.After(mq.timeout):
+		fmt.Println("timeout")
+		return
 	}
 }
