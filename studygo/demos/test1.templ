@@ -1,8 +1,8 @@
 Your age is: {{.Age}}
-{{if .GreaterThan60}}
+{{if .GreaterThan60 -}}
 Old People!
-{{else if .GreaterThan40}}
+{{- else if .GreaterThan40 -}}
 Middle Aged!
-{{else}}
+{{- else -}}
 Young!
-{{end}}
+{{- end -}}

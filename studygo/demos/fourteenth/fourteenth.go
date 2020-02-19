@@ -47,7 +47,7 @@ func FileTemplate(fp string) {
 	if err != nil {
 		log.Fatal("Execute file template error: ", err)
 	}
-	fmt.Println("\n")
+	fmt.Println("")
 }
 
 func (u User) String() string {
