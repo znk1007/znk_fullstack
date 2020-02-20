@@ -161,3 +161,28 @@ func NestTemplate(file1 string, file2 string) {
 		log.Fatal("nest execute error: ", err)
 	}
 }
+
+//User1 用户模型1
+type User1 struct {
+	FirstName string
+	LastName  string
+}
+
+func (u User1) FullName() string {
+	return u.FirstName + " " + u.LastName
+}
+
+//User1Template 用户模板1
+func User1Template(file string) {
+	t, err := template.ParseFiles(file)
+	if err != nil {
+		log.Fatal("user1 parse err: ", err)
+	}
+	err = t.Execute(os.Stdout, User1{
+		FirstName: "lianshi",
+		LastName:  "ls",
+	})
+	if err != nil {
+		log.Fatal("user1 execute err: ", err)
+	}
+}

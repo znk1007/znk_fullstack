@@ -11,13 +11,14 @@ func main() {
 
 	// itemFile := getDebugFilePath("item.templ")
 	// fourteenth.ItemTemplate(itemFile)
-	petFile := getDebugFilePath("templatefiles/pet.templ")
-	fourteenth.PetTemplate(petFile)
+	// petFile := getDebugFilePath("templatefiles/pet.templ")
+	// fourteenth.PetTemplate(petFile)
 
-	nest1File := getDebugFilePath("templatefiles/nest1.templ")
-	nest2file := getDebugFilePath("templatefiles/nest2.templ")
-	fourteenth.NestTemplate(nest1File, nest2file)
-
+	// nest1File := getDebugFilePath("templatefiles/nest1.templ")
+	// nest2file := getDebugFilePath("templatefiles/nest2.templ")
+	// fourteenth.NestTemplate(nest1File, nest2file)
+	user1file := getDebugFilePath("templatefiles/user1.templ")
+	fourteenth.User1Template(user1file)
 }
 
 func getDebugFilePath(relativePath string) string {
