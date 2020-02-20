@@ -9,17 +9,14 @@ import (
 
 func main() {
 
-	// webdemo.StartServer(false, func(mux *http.ServeMux) {
-	// 	webdemo.Hello("world", mux)
-	// 	webdemo.JSONRequest(mux)
-	// })
+	// itemFile := getDebugFilePath("item.templ")
+	// fourteenth.ItemTemplate(itemFile)
+	petFile := getDebugFilePath("templatefiles/pet.templ")
+	fourteenth.PetTemplate(petFile)
 
-	fourteenth.StringLiteralTemplate()
-	filePath := getDebugFilePath("testfile.templ")
-	fourteenth.FileTemplate(filePath)
-	fourteenth.DotActionTemplate()
-	filePath = getDebugFilePath("test1.templ")
-	fourteenth.AgeInfoTemplate(filePath)
+	nest1File := getDebugFilePath("templatefiles/nest1.templ")
+	nest2file := getDebugFilePath("templatefiles/nest2.templ")
+	fourteenth.NestTemplate(nest1File, nest2file)
 
 }
 
@@ -39,6 +36,17 @@ func getDebugFilePath(relativePath string) string {
 // }
 
 /*
+// webdemo.StartServer(false, func(mux *http.ServeMux) {
+	// 	webdemo.Hello("world", mux)
+	// 	webdemo.JSONRequest(mux)
+	// })
+
+	// fourteenth.StringLiteralTemplate()
+	// filePath := getDebugFilePath("testfile.templ")
+	// fourteenth.FileTemplate(filePath)
+	// fourteenth.DotActionTemplate()
+	// filePath = getDebugFilePath("test1.templ")
+	// fourteenth.AgeInfoTemplate(filePath)
 -	//list := chain.CreateLinkedList(true)
 -	//for i := 0; i < 12; i++ {
 -	//	list.InsertLinkedListNode(-1, i)

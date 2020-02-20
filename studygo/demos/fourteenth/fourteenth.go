@@ -96,3 +96,68 @@ func AgeInfoTemplate(fp string) {
 		log.Fatal("Execute error: ", err)
 	}
 }
+
+//Item ...
+type Item struct {
+	Name  string
+	Price int
+}
+
+//ItemTemplate Item模板
+func ItemTemplate(file string) {
+	t, err := template.ParseFiles(file)
+	if err != nil {
+		log.Fatal("Parse error: ", err)
+		return
+	}
+	items := []Item{
+		{"iPhone", 699},
+		{"iPad", 799},
+		{"iWatch", 199},
+		{"MacBook", 999},
+	}
+	err = t.Execute(os.Stdout, items)
+	if err != nil {
+		log.Fatal("Execute error: ", err)
+	}
+}
+
+//Pet 宠物
+type Pet struct {
+	Name  string
+	Age   int
+	Owner User
+}
+
+//PetTemplate 宠物模板
+func PetTemplate(file string) {
+	t, err := template.ParseFiles(file)
+	if err != nil {
+		log.Fatal("Parse error: ", err)
+	}
+	p := Pet{
+		Name: "Orange",
+		Age:  2,
+		Owner: User{
+			Name: "ls",
+			Age:  18,
+		},
+	}
+	err = t.Execute(os.Stdout, p)
+	if err != nil {
+		log.Fatal("Execute error: ", err)
+	}
+	fmt.Println("")
+}
+
+//NestTemplate 包含动作模板
+func NestTemplate(file1 string, file2 string) {
+	t, err := template.ParseFiles(file1, file2)
+	if err != nil {
+		log.Fatal("nest parse err: ", err)
+	}
+	err = t.Execute(os.Stdout, "test data")
+	if err != nil {
+		log.Fatal("nest execute error: ", err)
+	}
+}
