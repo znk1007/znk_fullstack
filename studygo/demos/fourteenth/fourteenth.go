@@ -186,3 +186,11 @@ func User1Template(file string) {
 		log.Fatal("user1 execute err: ", err)
 	}
 }
+
+//Login 登录
+type Login struct {
+	Account  string
+	Password string
+}
+
+
