@@ -3,20 +3,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Test</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 </head>
 <body>
     <div>
-        <form action="/login" method="get">
+        <form id="loginForm" method="post" enctype="application/json">
             <div>
                 <h5>account:</h5>
-                <input type="text" name="name" id="input_name" value="输入姓名">
-            </div>  
-            <h5>
+                <input type="text" name="name" id="input_name" required="required" value="{{- .Account}}">
                 <h5>password:</h5>
-                <input type="password" name="password" id="input_password" class="form-control" required="required" title="">
-            </div>          
+                <input type="password" name="password" id="input_password" class="form-control" required="required" title="{{- .Password}}">
+            </div>
+            <button type="submit" id="login">登录</button>          
         </form>
     </div>
     
 </body>
+<script>
+    $("#login").click(function() {
+    var name = $("#input_name").val()
+    var psd = $("#input_password").val()
+    $.ajax({
+      url: "http://localhost:8080/login",
+      dataType: "json",
+      type: "post",
+      contentType: "application/json",
+      data: {"name":name, "password": psd},
+
+      success: function(result) { 
+        alert(result)
+        console.log(result);
+      },
+      error: function(data) {
+        alert(data)
+        console.log("err: ", data);
+      }
+    });
+  });
+</script>
 </html>

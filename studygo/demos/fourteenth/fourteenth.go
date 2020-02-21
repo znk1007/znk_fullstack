@@ -2,10 +2,13 @@ package fourteenth
 
 import (
 	// "crypto/rand"
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"time"
 )
@@ -189,8 +192,75 @@ func User1Template(file string) {
 
 //Login 登录
 type Login struct {
-	Account  string
-	Password string
+	Account   string
+	Password  string
+	templfile string
 }
 
+func (l Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if len(l.templfile) == 0 {
+		log.Fatal("template file cannot be empty")
+		return
+	}
+	t, err := template.ParseFiles(l.templfile)
+	if err != nil {
+		w.Write([]byte("parse template error: " + err.Error()))
+		return
+	}
 
+	err = t.Execute(w, l)
+	if err != nil {
+		w.Write([]byte("execute login error: " + err.Error()))
+		return
+	}
+}
+
+//LoginServe 登录服务
+func LoginServe(mux *http.ServeMux, templfile string) {
+	if len(templfile) == 0 {
+		return
+	}
+	mux.Handle("/loginpage", Login{templfile: templfile})
+}
+
+//LoginResponse 登录响应
+func LoginResponse(mux *http.ServeMux) {
+	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		data := make([]byte, r.ContentLength)
+		cnttype := r.Header.Get("Content-Type")
+		fmt.Println("content type: ", cnttype)
+		_, err := r.Body.Read(data)
+		defer r.Body.Close()
+		if err != nil && err != io.EOF {
+			w.Write([]byte("get data err: " + err.Error()))
+			return
+		}
+		fmt.Println("data: ", string(data))
+		lg := &Login{}
+		err = json.Unmarshal(data, lg)
+		fmt.Println("unmarshal err: ", err.Error())
+		if err != nil {
+			w.Write([]byte("unmarshal err: " + err.Error()))
+			return
+		}
+		fmt.Println("login result: ", lg)
+		w.Write([]byte("login success"))
+	})
+}
+
+//StartServer 开启服务
+func StartServer(muxHandler func(mux *http.ServeMux)) {
+	mux := http.NewServeMux()
+	if muxHandler != nil {
+		muxHandler(mux)
+	}
+	serve := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+	if err := serve.ListenAndServe(); err != nil {
+		if muxHandler != nil {
+			muxHandler(nil)
+		}
+	}
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"path"
 	"runtime"
 
@@ -17,8 +18,16 @@ func main() {
 	// nest1File := getDebugFilePath("templatefiles/nest1.templ")
 	// nest2file := getDebugFilePath("templatefiles/nest2.templ")
 	// fourteenth.NestTemplate(nest1File, nest2file)
-	user1file := getDebugFilePath("templatefiles/user1.templ")
-	fourteenth.User1Template(user1file)
+	// user1file := getDebugFilePath("templatefiles/user1.templ")
+	// fourteenth.User1Template(user1file)
+
+	loginfile := getDebugFilePath("templatefiles/form.html")
+	fourteenth.StartServer(func(mux *http.ServeMux) {
+		if mux != nil {
+			fourteenth.LoginServe(mux, loginfile)
+			fourteenth.LoginResponse(mux)
+		}
+	})
 }
 
 func getDebugFilePath(relativePath string) string {
