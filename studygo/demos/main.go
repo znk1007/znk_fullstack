@@ -1,9 +1,10 @@
 package main
 
 import (
-	"net/http"
 	"path"
 	"runtime"
+	"text/template"
+	"time"
 
 	"github.com/znk_fullstack/studygo/demos/fourteenth"
 )
@@ -21,13 +22,22 @@ func main() {
 	// user1file := getDebugFilePath("templatefiles/user1.templ")
 	// fourteenth.User1Template(user1file)
 
-	loginfile := getDebugFilePath("templatefiles/form.html")
-	fourteenth.StartServer(func(mux *http.ServeMux) {
-		if mux != nil {
-			fourteenth.LoginServe(mux, loginfile)
-			fourteenth.LoginResponse(mux)
-		}
-	})
+	// loginfile := getDebugFilePath("templatefiles/form.html")
+	// fourteenth.StartServer(func(mux *http.ServeMux) {
+	// 	if mux != nil {
+	// 		fourteenth.LoginServe(mux, loginfile)
+	// 		fourteenth.LoginResponse(mux)
+	// 	}
+	// })
+	funcMap := template.FuncMap{
+		"fdate": formatDate,
+	}
+	funcfile := getDebugFilePath("templatefiles/funcs.templ")
+	fourteenth.FuncTemplate(funcMap, funcfile, "funcs.templ")
+}
+
+func formatDate(t time.Time) string {
+	return t.Format("2016-01-02")
 }
 
 func getDebugFilePath(relativePath string) string {

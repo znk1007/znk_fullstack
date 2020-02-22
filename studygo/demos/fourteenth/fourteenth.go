@@ -270,3 +270,17 @@ func StartServer(muxHandler func(mux *http.ServeMux)) {
 		}
 	}
 }
+
+//FuncTemplate 函数模板
+func FuncTemplate(funcMap map[string]interface{}, file, name string) {
+	fm := template.FuncMap(funcMap)
+	t := template.New(name).Funcs(fm)
+	t, err := t.ParseFiles(file)
+	if err != nil {
+		log.Fatal("parse func template error: ", err)
+	}
+	err = t.Execute(os.Stdout, time.Now())
+	if err != nil {
+		log.Fatal("Execute error: ", err)
+	}
+}
