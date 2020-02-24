@@ -7,5 +7,6 @@ import (
 func main() {
 	httprouterdemo.GetMethodParam("greet", ":user", "hello world")
 	httprouterdemo.PostMethod("test/post")
+	httprouterdemo.HeadMethod("test/head")
 	httprouterdemo.StartEngine()
 }

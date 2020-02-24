@@ -32,7 +32,7 @@ func StartEngine() {
 	}
 }
 
-func getMethodParamHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func getMethodParamHandle(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	fmt.Println("user: ", ps.ByName("user"))
 	w.Write([]byte(ps.ByName("user")))
 }
@@ -49,10 +49,10 @@ func GetMethodParam(route string, id string, data interface{}) {
 	if len(path) == 0 {
 		return
 	}
-	demo.router.GET(path, getMethodParamHandler)
+	demo.router.GET(path, getMethodParamHandle)
 }
 
-func postMethoHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func postMethoHandle(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	bs := make([]byte, r.ContentLength)
 	r.Body.Read(bs)
 	defer r.Body.Close()
@@ -79,5 +79,34 @@ func PostMethod(route string) {
 	if !strings.HasPrefix(route, "/") {
 		path = "/" + path
 	}
-	demo.router.POST(path, postMethoHandler)
+	demo.router.POST(path, postMethoHandle)
 }
+
+func headMethodHandle(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Println(r)
+	bs := make([]byte, r.ContentLength)
+	head1 := r.Header.Get("head1")
+	head2 := r.Header.Get("head2")
+	fmt.Println("head1: ", head1)
+	fmt.Println("head2: ", head2)
+	_, err := r.Body.Read(bs)
+	if err != nil {
+		w.Write([]byte("read byte error: " + err.Error()))
+		return
+	}
+	fmt.Println("head bs: ", string(bs))
+	w.Write([]byte("head method request succ"))
+}
+
+//HeadMethod head请求
+func HeadMethod(route string) {
+	path := route
+	if !strings.HasPrefix(route, "/") {
+		path = "/" + path
+	}
+	demo.router.HEAD(path, headMethodHandle)
+}
+
+// func GroupMethod() {
+// 	demo.router
+// }
