@@ -82,10 +82,17 @@ class SqliteDB {
     print('db version ${await db.getVersion()}');
   }
 
-  Future<bool> createTable(String tableSql) async {
+  /* 建表 */
+  Future<void> createTable(String tableSql) async {
     Database db = await this._getDB();
     await db.execute("CREATE TABLE IF NOT EXISTS ${tableSql}");
   }
+
+  Future<int> insert(String table, Map<String, dynamic> values) async {
+    Database db = await this._getDB();
+    await db.insert(table, values)
+  }
+
 
   /// 关闭数据库
   void close() {
