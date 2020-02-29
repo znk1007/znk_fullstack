@@ -10,5 +10,8 @@ func main() {
 	// httprouterdemo.HeadMethod("test/head")
 	// httprouterdemo.StartEngine()
 	gindemo.SlashGet()
-	gindemo.Run()
+	gindemo.WelcomeGet()
+	gindemo.UploadFile()
+	gindemo.UploadFiles()
+	gindemo.Run(":9527")
 }
