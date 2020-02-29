@@ -164,10 +164,32 @@ func LoginForm() {
 func LoginURI() {
 	router.GET("/:user/:password", func(c *gin.Context) {
 		var uri Login
-		if err := c.ShouldBindUri(&login); err != nil {
+		if err := c.ShouldBindUri(&uri); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"username": uri.User, "password": uri.Password})
+	})
+}
+
+//IndexTempl 加载模板
+func IndexTempl() {
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.templ", gin.H{
+			"title": "Main website",
+		})
+	})
+}
+
+//IndexTempl1 加载模板
+func IndexTempl1() {
+	router.LoadHTMLGlob("templates/**/*", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "posts/index.templ", gin.H{
+			"title": "Posts",
+		})
+		c.HTML(http.StatusOK, "users/index.templ", gin.H{
+			"title": "Users",
+		})
 	})
 }
