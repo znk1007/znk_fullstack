@@ -2,9 +2,13 @@ package gindemo
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
+	"time"
 
+	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
 )
 
@@ -184,7 +188,8 @@ func IndexTempl() {
 
 //IndexTempl1 加载模板
 func IndexTempl1() {
-	router.LoadHTMLGlob("templates/**/*", func(c *gin.Context) {
+	router.LoadHTMLGlob("templates/**/*")
+	router.GET("/posts/index", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "posts/index.templ", gin.H{
 			"title": "Posts",
 		})
@@ -192,4 +197,196 @@ func IndexTempl1() {
 			"title": "Users",
 		})
 	})
+}
+
+//IndexTempl2 加载模板
+func IndexTempl2() {
+	html := template.Must(template.ParseFiles("file1", "file2"))
+	router.SetHTMLTemplate(html)
+}
+
+//IndexTempl3 加载模板
+func IndexTempl3() {
+	router.SetFuncMap(template.FuncMap{
+		"safe": func(str string) template.HTML {
+			return template.HTML(str)
+		},
+	})
+	router.LoadHTMLFiles("./index.templ")
+	router.GET("/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "./index.templ", "<a href='https://lianshiclass.com'>练识课堂</a>")
+	})
+}
+
+//LoadTemplates 加载自定义模板
+func LoadTemplates(templatesDir string) {
+	r := multitemplate.NewRenderer()
+	layouts, err := filepath.Glob(templatesDir + "/layouts/*.templ")
+	if err != nil {
+		panic(err.Error())
+	}
+	includes, err := filepath.Glob(templatesDir + "/includes/*.templ")
+	for _, include := range includes {
+		layoutCopy := make([]string, len(layouts))
+		copy(layoutCopy, layouts)
+		files := append(layoutCopy, include)
+		r.AddFromFiles(filepath.Base(include), files...)
+	}
+	router.HTMLRender = r
+	router.GET("/index", indexFunc)
+	router.GET("/home", homeFunc)
+}
+
+func indexFunc(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.templ", nil)
+}
+
+func homeFunc(c *gin.Context) {
+	c.HTML(http.StatusOK, "home.templ", nil)
+}
+
+//LoadStaticFiles 加载静态文件
+func LoadStaticFiles() {
+	router.StaticFS("/showDir", http.Dir("."))
+	router.StaticFS("/files", http.Dir("/bin"))
+	router.StaticFile("/image", "./assets/image.jpg")
+}
+
+//Redirect 重定向
+func Redirect() {
+	router.GET("/redirect", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "http://www.baidu.com/")
+	})
+}
+
+//RouterRedirect 路由重定向
+func RouterRedirect() {
+	router.GET("/test", func(c *gin.Context) {
+		c.Request.URL.Path = "/test2"
+		router.HandleContext(c)
+	})
+	router.GET("/test2", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"hello": "world"})
+	})
+}
+
+func LongAsync() {
+	router.GET("/long_async", func(c *gin.Context) {
+		cCP := c.Copy()
+		go func() {
+			time.Sleep(5 * time.Second)
+			log.Println("Done! in path " + cCP.Request.URL.Path)
+		}()
+	})
+	router.GET("/long_sync", func(c *gin.Context) {
+		time.Sleep(5 * time.Second)
+		log.Println("Done! in path " + c.Request.URL.Path)
+	})
+}
+
+//MiddleWare 中间件
+func MiddleWare() {
+	hf := func(c *gin.Context) {
+		t := time.Now()
+		fmt.Println("before middleware")
+		c.Set("request", "client_request")
+		//发送request之前
+		c.Next()
+		//发送request之后
+		status := c.Writer.Status()
+		fmt.Println("after middleware", status)
+		t2 := time.Since(t)
+		fmt.Println("time: ", t2)
+	}
+	router.Use(hf)
+	router.GET("/middleware", func(c *gin.Context) {
+		request := c.MustGet("request").(string)
+		req, _ := c.Get("request")
+		fmt.Println("request: ", request)
+		c.JSON(http.StatusOK, gin.H{
+			"middle_request": request,
+			"request":        req,
+		})
+	})
+}
+
+func AuthMiddleware() {
+	secrets := gin.H{
+		"ls": gin.H{
+			"email": "ls@lianshiclass.com",
+			"phone": "123456",
+		},
+		"yang": gin.H{
+			"email": "yang@lianshiclass.com",
+			"phone": "111111",
+		},
+		"edu": gin.H{
+			"email": "edu@lianshiclass.com",
+			"phone": "6666666",
+		},
+	}
+	authed := router.Group("/admin", gin.BasicAuth(gin.Accounts{
+		"ls":   "123",
+		"yang": "111",
+		"edu":  "666",
+		"lucy": "4321",
+	}))
+	authed.GET("/secrets", func(c *gin.Context) {
+		//获取提交的用户名(AuthUserKey).(string)
+		u := c.MustGet(gin.AuthUserKey).(string)
+		if sec, ok := secrets[u]; ok {
+			c.JSON(http.StatusOK, gin.H{
+				"user":   u,
+				"secret": sec,
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"user":   u,
+				"secret": "NO SECRET",
+			})
+		}
+	})
+}
+
+//CookieRequet cookie相关请求
+func CookieRequet() {
+	router.POST("/login", cookieMiddleware, func(c *gin.Context) {
+		var login Login
+		if err := c.ShouldBindJSON(&login); err != nil {
+			c.String(http.StatusOK, "登录失败")
+			return
+		}
+		if login.User != "ls" && login.Password != "123456" {
+			return
+		}
+		c.String(http.StatusOK, "登录成功")
+	})
+}
+
+func cookieMiddleware(c *gin.Context) {
+	var login Login
+	if err := c.ShouldBindJSON(&login); err != nil {
+		return
+	}
+	if login.User != "ls" && login.Password != "123456" {
+		return
+	}
+	c.SetCookie(
+		"username",
+		login.User,
+		0,
+		"/login",
+		"localhost",
+		true,
+		true,
+	)
+	c.SetCookie(
+		"session",
+		login.Password,
+		0,
+		"/login",
+		"localhost",
+		true,
+		true,
+	)
 }
