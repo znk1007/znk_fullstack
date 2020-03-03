@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database"
-	_ "github.com/znk_fullstack/controlcenter/lib/source/database/user"
 )
 
 func main() {
