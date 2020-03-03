@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database/dbmgr"
+	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database"
 )
 
 func main() {
