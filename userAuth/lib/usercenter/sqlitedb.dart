@@ -88,11 +88,50 @@ class SqliteDB {
     await db.execute("CREATE TABLE IF NOT EXISTS ${tableSql}");
   }
 
+  /* 插入数据 */
   Future<int> insert(String table, Map<String, dynamic> values) async {
     Database db = await this._getDB();
-    await db.insert(table, values)
+    await db.insert(table, values);
   }
 
+  /* 删除数据 */
+  Future<int> delete(String table, {String where, List<dynamic> whereArgs}) async {
+    Database db = await this._getDB();
+    return await db.delete(table, where: where, whereArgs: whereArgs);
+  }
+
+  Future<int> update(String table, Map<String, dynamic> values,
+      {String where,
+      List<dynamic> whereArgs,
+      ConflictAlgorithm conflictAlgorithm}) async {
+    Database db = await this._getDB();
+    return await db.update(table, values, where: where, whereArgs: whereArgs, conflictAlgorithm: conflictAlgorithm);
+  }
+  /* 查询数据 */
+  Future<List<Map<String, dynamic>>> find(String table,
+      {bool distinct,
+      List<String> columns,
+      String where,
+      List<dynamic> whereArgs,
+      String groupBy,
+      String having,
+      String orderBy,
+      int limit,
+      int offset}) async {
+    Database db = await this._getDB();
+    return await db.query(
+      table, 
+      distinct: distinct, 
+      columns: columns, 
+      where: where, 
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit, 
+      offset: offset
+    );
+  }
 
   /// 关闭数据库
   void close() {
