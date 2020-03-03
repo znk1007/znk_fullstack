@@ -1,4 +1,4 @@
-package ccmydb
+package ccdb
 
 import "github.com/jinzhu/gorm"
 
