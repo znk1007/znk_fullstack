@@ -20,5 +20,7 @@ func CreateUserTBL() error {
 	if dbConn == nil {
 		return errors.New("Connect database first")
 	}
+	u := &CCUserTBL{}
+	dbConn.db.CreateTable(u)
 	return nil
 }
