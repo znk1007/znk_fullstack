@@ -13,5 +13,7 @@ func main() {
 		panic(err)
 	}
 	err = ccdb.CreateUserTBL()
-	fmt.Println("create user table err: ", err)
+	if err != nil {
+		fmt.Println("create user table err: ", err)
+	}
 }
