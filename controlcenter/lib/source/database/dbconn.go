@@ -25,9 +25,11 @@ type CCDB struct {
 	dbName   string
 }
 
-//CreateCCDB 创建数据库管理对象
-func CreateCCDB(dialect string, host string, user string, password string, dbName string) CCDB {
-	return CCDB{
+var dbConn *CCDB
+
+//createCCDB 创建数据库管理对象
+func createCCDB(dialect string, host string, user string, password string, dbName string) *CCDB {
+	return &CCDB{
 		user:     user,
 		password: password,
 		host:     host,
@@ -37,23 +39,24 @@ func CreateCCDB(dialect string, host string, user string, password string, dbNam
 }
 
 //ConnectDB 连接MySql数据库
-func (the CCDB) ConnectDB() error {
-	if len(the.user) == 0 || len(the.password) == 0 || len(the.dialect) == 0 || len(the.host) == 0 || len(the.dbName) == 0 {
+func ConnectDB(dialect string, host string, user string, password string, dbName string) error {
+	if len(user) == 0 || len(password) == 0 || len(dialect) == 0 || len(host) == 0 || len(dbName) == 0 {
 		return errors.New("user, password, dialect and dbName cannot be empty")
 	}
-	authformat := the.user + ":" + the.password + "@(" + the.host + ")/" + the.dbName
+	dbConn = createCCDB(dialect, host, user, password, dbName)
+	authformat := user + ":" + password + "@(" + host + ")/" + dbName
 	db, err := gorm.Open("mysql", authformat+"?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		return err
 	}
-	the.db = db
+	dbConn.db = db
 	return nil
 }
 
 //CloseDB 关闭数据库
-func (the CCDB) CloseDB() {
-	if the.db == nil {
+func CloseDB() {
+	if dbConn.db == nil {
 		return
 	}
-	the.db.Close()
+	dbConn.db.Close()
 }

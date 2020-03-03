@@ -4,13 +4,15 @@ import (
 	"fmt"
 
 	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database"
+	_ "github.com/znk_fullstack/controlcenter/lib/source/database/user"
 )
 
 func main() {
-	dbmgr := ccdb.CreateCCDB("mysql", "localhost:3306", "root", "znk1007!", "znk")
-	err := dbmgr.ConnectDB()
+	err := ccdb.ConnectDB("mysql", "localhost:3306", "root", "znk1007!", "znk")
 	if err != nil {
 		fmt.Println("connect db err: ", err.Error())
 		panic(err)
 	}
+	err = ccdb.CreateUserTBL()
+	fmt.Println("create user table err: ", err)
 }
