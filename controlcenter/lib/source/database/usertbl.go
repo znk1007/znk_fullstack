@@ -36,5 +36,8 @@ func InsertUser(user *CCUserTBL) error {
 
 //UpdateUser 更新用户信息
 func UpdateUser() error {
-
+	if dbConn == nil {
+		return errors.New("Connect database first")
+	}
+	dbConn.db.Update()
 }
