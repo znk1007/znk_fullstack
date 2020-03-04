@@ -9,12 +9,20 @@ import 'package:synchronized/synchronized.dart';
 
 class SqliteDB {
   ///数据库地址
-  final String name;
+  String _name;
 
   ///初始化
-  SqliteDB(this.name) {
-    
+  SqliteDB._();
+  static final SqliteDB _instance = new SqliteDB._();
+  factory SqliteDB() {
+    return _instance;
   }
+  static SqliteDB get shared => _instance;
+  /* 设置数据库名称 */
+  void setdbName(String name) {
+    this._name = name;
+  }
+
   ///数据库句柄
   Database _database;
   /// 锁
@@ -35,7 +43,7 @@ class SqliteDB {
 
   ///初始化数据库地址
   Future<String> _initDataBasePath() async {
-    final path = await _getFilePath(this.name);
+    final path = await _getFilePath(this._name);
     bool isDB =  await _isDatabase(path);
     if (!isDB) {
       await _createFile(path);
