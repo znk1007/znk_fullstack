@@ -24,3 +24,17 @@ func CreateUserTBL() error {
 	dbConn.db.CreateTable(u)
 	return nil
 }
+
+//InsertUser 插入用户数据
+func InsertUser(user *CCUserTBL) error {
+	if dbConn == nil {
+		return errors.New("Connect database first")
+	}
+	dbConn.db.Create(&user)
+	return nil
+}
+
+//UpdateUser 更新用户信息
+func UpdateUser() error {
+
+}
