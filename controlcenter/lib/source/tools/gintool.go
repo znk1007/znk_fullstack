@@ -12,6 +12,13 @@ type ginTool struct {
 	router *gin.Engine
 }
 
+//NetHandler 网络处理对象
+type NetHandler struct {
+	Method      string
+	Path        string
+	HandlerFunc gin.HandlerFunc
+}
+
 var gt ginTool
 
 func init() {
@@ -30,8 +37,27 @@ func init() {
 	}
 }
 
-func Get() {
+//Group 路由组
+func Group(path string, handlers []NetHandler) {
+	g := gt.router.Group(path)
+	for _, handler := range handlers {
+		g.Handle(handler.Method, handler.Path, handler.HandlerFunc)
+	}
+}
 
+//Handler 请求处理
+func Handler(handler NetHandler) {
+	gt.router.Handle(handler.Method, handler.Path, handler.HandlerFunc)
+}
+
+//Get Get请求
+func Get(handler NetHandler) {
+	gt.router.GET(handler.Method, handler.HandlerFunc)
+}
+
+//Post post请求
+func Post(handler NetHandler) {
+	gt.router.POST(handler.Method, handler.HandlerFunc)
 }
 
 //Listen 监听服务

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database"
+	"github.com/znk_fullstack/controlcenter/lib/source/tools"
 )
 
 func main() {
@@ -16,4 +17,6 @@ func main() {
 	if err != nil {
 		fmt.Println("create user table err: ", err)
 	}
+
+	tools.Listen()
 }
