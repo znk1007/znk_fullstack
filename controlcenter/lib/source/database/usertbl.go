@@ -2,6 +2,7 @@ package ccdb
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/jinzhu/gorm"
 )
@@ -23,7 +24,11 @@ func CreateUserTBL() error {
 		return errors.New("Connect database first")
 	}
 	u := &CCUserTBL{}
-	dbConn.db.CreateTable(u)
+	exists := dbConn.db.HasTable(u)
+	fmt.Println("table exists")
+	if !exists {
+		dbConn.db.CreateTable(u)
+	}
 	return nil
 }
 
