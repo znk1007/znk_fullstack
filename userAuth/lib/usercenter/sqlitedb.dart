@@ -97,9 +97,9 @@ class SqliteDB {
   }
 
   /* 插入数据 */
-  Future<int> insert(String table, Map<String, dynamic> values) async {
+  Future<int> upsert(String table, Map<String, dynamic> values) async {
     Database db = await this._getDB();
-    await db.insert(table, values);
+    return await db.insert(table, values, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   /* 删除数据 */

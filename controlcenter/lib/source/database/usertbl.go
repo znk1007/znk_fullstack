@@ -14,6 +14,7 @@ type CCUserTBL struct {
 	Account  string `gorm:"type:varchar(50)"`
 	Password string `gorm:"type:varchar(100)"`
 	Phone    string `gorm:"type:varchar(20)"`
+	Photo    string `gorm:"type:varchar(200)"`
 }
 
 //CreateUserTBL 创建用户表
