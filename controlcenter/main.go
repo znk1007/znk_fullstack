@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/znk_fullstack/controlcenter/lib/source/cms"
 	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database"
 	"github.com/znk_fullstack/controlcenter/lib/source/tools"
 )
@@ -17,6 +18,6 @@ func main() {
 	if err != nil {
 		fmt.Println("create user table err: ", err)
 	}
-
+	cms.Start()
 	tools.Listen()
 }
