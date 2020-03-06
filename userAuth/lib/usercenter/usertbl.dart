@@ -15,15 +15,36 @@ class UserModel with ChangeNotifier {
   ///邮箱
   String email;
 
+  static final _dbName = 'user';
+
+  /* 模型转换 */
   Map<String, dynamic> toMap() {
     var map = new Map<String, dynamic>();
-    
+    map['userId'] = userId;
+    map['account'] = account;
+    map['username'] = username;
+    map['photo'] = photo;
+    map['phone'] = phone;
+    map['email'] = email;
+    return map;
+  }
+
+  /* 字典转模型 */
+  static UserModel fromMap(Map<String, dynamic> map) {
+    UserModel userModel = new UserModel();
+    userModel.userId = map['userId'] ?? '';
+    userModel.account = map['account'] ?? '';
+    userModel.username = map['username'] ?? '';
+    userModel.photo = map['photo'] ?? '';
+    userModel.phone = map['phone'] ?? '';
+    userModel.email = map['email'] ?? '';
+    return userModel;
   }
 
   /* 创建用户名 */
   Future<void> createUserTBL() async {
     await SqliteDB.shared.createTable('''
-    user (
+    $_dbName (
       userId text not null primary key,
       account text not null,
       username text not null,
@@ -34,7 +55,17 @@ class UserModel with ChangeNotifier {
     ''');
   }
 
-  Future<int> upsertUser() async {
+  /* 插入货更新数据 */
+  Future<int> upsertUser(UserModel userModel) async {
+    return await SqliteDB.shared.upsert(_dbName, userModel.toMap());
+  }
+
+  /* 删除指定用户 */
+  Future<int> deleteUser(String userId) async {
+    return await SqliteDB.shared.delete(_dbName, where: 'userId = ?', whereArgs: [userId]);
+  }
+
+  Future<UserModel> findUser(String userId) async {
 
   }
 
