@@ -60,6 +60,10 @@ func Post(handler NetHandler) {
 	gt.router.POST(handler.Method, handler.HandlerFunc)
 }
 
+func LoadHTMLGlob(pattern string) {
+	gt.router.LoadHTMLGlob(pattern)
+}
+
 //Listen 监听服务
 func Listen() {
 	gt.serve.ListenAndServe()
