@@ -1,7 +1,7 @@
 package cms
 
-import "github.com/znk_fullstack/controlcenter/lib/source/cms/pages"
-
-func CMSVersion1() {
-	pages.LoginPage()
+//Handler cms处理器
+type Handler struct {
+	ver     string
+	verpath string
 }
