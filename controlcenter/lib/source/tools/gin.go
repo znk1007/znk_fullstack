@@ -30,7 +30,6 @@ func init() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-
 	gt = ginTool{
 		serve:  s,
 		router: r,
@@ -52,12 +51,12 @@ func Handler(handler NetHandler) {
 
 //Get Get请求
 func Get(handler NetHandler) {
-	gt.router.GET(handler.Method, handler.HandlerFunc)
+	gt.router.GET(handler.Path, handler.HandlerFunc)
 }
 
 //Post post请求
 func Post(handler NetHandler) {
-	gt.router.POST(handler.Method, handler.HandlerFunc)
+	gt.router.POST(handler.Path, handler.HandlerFunc)
 }
 
 func LoadHTMLGlob(pattern string) {

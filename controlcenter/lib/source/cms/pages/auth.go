@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/znk_fullstack/controlcenter/lib/source/tools"
@@ -11,7 +13,7 @@ func AuthPage() {
 	tools.Get(tools.NetHandler{
 		Path: "/cms",
 		HandlerFunc: func(c *gin.Context) {
-
+			c.String(http.StatusOK, "校验成功")
 		},
 	})
 }

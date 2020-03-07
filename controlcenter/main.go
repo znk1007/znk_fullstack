@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+
 	err := ccdb.ConnectDB("mysql", "localhost:3306", "root", "znk1007!", "znk")
 	if err != nil {
 		fmt.Println("connect db err: ", err.Error())

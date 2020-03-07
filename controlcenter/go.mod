@@ -5,5 +5,6 @@ go 1.13
 require (
 	github.com/gin-gonic/gin v1.5.0
 	github.com/jinzhu/gorm v1.9.12
-	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
