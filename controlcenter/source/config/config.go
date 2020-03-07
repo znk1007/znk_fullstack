@@ -13,13 +13,13 @@ type itemsConfig struct {
 }
 
 type itemConfig struct {
-	Env string     `json:"env"`
+	Env Env        `json:"env"`
 	DBs []DBConfig `json:"dbs"`
 }
 
 //DBConfig 数据库配置
 type DBConfig struct {
-	Name string `json:"name"`
+	Name DBName `json:"name"`
 	Host string `json:"host"`
 	Port string `json:"port"`
 }
@@ -78,14 +78,20 @@ func GetFilePathFromCurrent(relativePath string) string {
 }
 
 //GetDBConfig 获取数据库配置信息
-func GetDBConfig(env Env, name DBName) {
+func GetDBConfig(env Env, name DBName) DBConfig {
 	if items == nil {
 		readDBItems()
 	}
-
+	var dbcf DBConfig
 	for _, item := range items.Items {
 		if item.Env == env {
-
+			for _, db := range item.DBs {
+				if db.Name == name {
+					dbcf = db
+					break
+				}
+			}
 		}
 	}
+	return dbcf
 }
