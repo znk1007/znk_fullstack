@@ -17,6 +17,13 @@ type itemConfig struct {
 	DBs []DBConfig `json:"dbs"`
 }
 
+//DBConfig 数据库配置
+type DBConfig struct {
+	Name string `json:"name"`
+	Host string `json:"host"`
+	Port string `json:"port"`
+}
+
 //Env 环境
 type Env string
 
@@ -38,13 +45,6 @@ const (
 	//Gorm gorm连接库
 	Gorm DBName = "gorm"
 )
-
-//DBConfig 数据库配置
-type DBConfig struct {
-	Name string `json:"name"`
-	Host string `json:"host"`
-	Port string `json:"port"`
-}
 
 var items *itemsConfig
 
@@ -82,7 +82,10 @@ func GetDBConfig(env Env, name DBName) {
 	if items == nil {
 		readDBItems()
 	}
-	for _, item := range items.Items {
 
+	for _, item := range items.Items {
+		if item.Env == env {
+
+		}
 	}
 }

@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/znk_fullstack/controlcenter/source/cms"
-	ccdb "github.com/znk_fullstack/controlcenter/source/database"
+	_ "github.com/znk_fullstack/controlcenter/source/config"
+	ccdb "github.com/znk_fullstack/controlcenter/source/dao"
 	"github.com/znk_fullstack/controlcenter/source/tools"
 )
 
