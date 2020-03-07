@@ -1,6 +1,6 @@
 package cms
 
-import "github.com/znk_fullstack/controlcenter/lib/source/cms/pages"
+import "github.com/znk_fullstack/controlcenter/source/cms/pages"
 
 //Handler cms处理器
 type Handler struct {

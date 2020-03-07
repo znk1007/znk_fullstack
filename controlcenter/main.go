@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/znk_fullstack/controlcenter/lib/source/cms"
-	ccdb "github.com/znk_fullstack/controlcenter/lib/source/database"
-	"github.com/znk_fullstack/controlcenter/lib/source/tools"
+	"github.com/znk_fullstack/controlcenter/source/cms"
+	ccdb "github.com/znk_fullstack/controlcenter/source/database"
+	"github.com/znk_fullstack/controlcenter/source/tools"
 )
 
 func main() {
