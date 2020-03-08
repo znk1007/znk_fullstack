@@ -4,6 +4,5 @@
 ~/.dart_tool/*
 *.o
 *.a
-auth/.dart_tool/*
-auth/.packages
-auth/.metadata
+/flutter_plugins/$HOME/*
+/flutter_plugins/znk_auth/.idea/*
