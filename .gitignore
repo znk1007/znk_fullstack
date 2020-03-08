@@ -4,5 +4,6 @@
 ~/.dart_tool/*
 *.o
 *.a
-userAuth/.dart_tool/*
-userAuth/.packages
+auth/.dart_tool/*
+auth/.packages
+auth/.metadata
