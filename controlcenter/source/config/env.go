@@ -29,7 +29,7 @@ type EnvConfig struct {
 var ec *EnvConfig
 
 func init() {
-
+	readEnv()
 }
 
 func readEnv() {
@@ -51,5 +51,8 @@ func readEnv() {
 
 //CurEnv 当前环境
 func CurEnv() Env {
+	if ec == nil {
+		log.Panic().Msg("get current env failed")
+	}
 	return ec.Env
 }

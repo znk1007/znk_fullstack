@@ -8,6 +8,9 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/rs/zerolog/log"
+
+	"github.com/znk_fullstack/controlcenter/source/config"
 )
 
 //CCDB 数据库管理对象
@@ -23,36 +26,34 @@ type CCDB struct {
 var dbConn *CCDB
 
 func init() {
-	// dbcf := config.GetDBConfig()
+	dbConn = createCCDB()
 }
 
 //createCCDB 创建数据库管理对象
-func createCCDB(dialect string, host string, user string, password string, dbName string) *CCDB {
+func createCCDB() *CCDB {
 	if dbConn != nil {
 		return dbConn
 	}
-	return &CCDB{
-		user:     user,
-		password: password,
-		host:     host,
-		dialect:  dialect,
-		dbName:   dbName,
-	}
-}
-
-//ConnectDB 连接MySql数据库
-func ConnectDB(dialect string, host string, user string, password string, dbName string) error {
+	dbcf := config.GetDBConfig(config.Gorm)
+	user := dbcf.Username
+	password := dbcf.Password
+	dialect := dbcf.Dialect
+	host := dbcf.Host
+	dbName := dbcf.Name
 	if len(user) == 0 || len(password) == 0 || len(dialect) == 0 || len(host) == 0 || len(dbName) == 0 {
-		return errors.New("user, password, dialect and dbName cannot be empty")
+		log.Panic().Err(errors.New("user, password, dialect and dbName cannot be empty"))
 	}
-	dbConn = createCCDB(dialect, host, user, password, dbName)
-	authformat := user + ":" + password + "@(" + host + ")/" + dbName
-	db, err := gorm.Open("mysql", authformat+"?charset=utf8&parseTime=True&loc=Local")
-	if err != nil {
-		return err
+	authformat := user + ":" + password + "@(" + host + ")/" + string(dbName)
+	db, err := gorm.Open(dialect, authformat+"?charset=utf8&parseTime=True&loc=Local")
+	log.Print("db: ", db)
+	log.Print("err: ", err.Error())
+	if err != nil || db == nil {
+		log.Panic().Err(err)
+		dbConn = nil
+		return nil
 	}
 	dbConn.db = db
-	return nil
+	return dbConn
 }
 
 //CloseDB 关闭数据库
@@ -61,4 +62,5 @@ func CloseDB() {
 		return
 	}
 	dbConn.db.Close()
+	dbConn = nil
 }

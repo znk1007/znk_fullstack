@@ -2,9 +2,9 @@ package ccdb
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/gorm"
+	"github.com/rs/zerolog/log"
 )
 
 //CCUserTBL 用户信息模型
@@ -19,23 +19,23 @@ type CCUserTBL struct {
 }
 
 //CreateUserTBL 创建用户表
-func CreateUserTBL() error {
+func CreateUserTBL() {
 	if dbConn == nil {
-		return errors.New("Connect database first")
+		log.Panic().Err(errors.New("Connect database first"))
+		return
 	}
 	u := &CCUserTBL{}
 	exists := dbConn.db.HasTable(u)
-	fmt.Println("table exists")
 	if !exists {
 		dbConn.db.CreateTable(u)
 	}
-	return nil
 }
 
 //UpsertUser 插入用户数据
-func UpsertUser(user *CCUserTBL) error {
+func UpsertUser(user *CCUserTBL) {
 	if dbConn == nil {
-		return errors.New("Connect database first")
+		log.Panic().Err(errors.New("Connect database first"))
+		return
 	}
 	var u *CCUserTBL
 	dbConn.db.Where("userID = ?", user.UserID).First(&u)
@@ -43,28 +43,29 @@ func UpsertUser(user *CCUserTBL) error {
 		dbConn.db.Model(&u).Updates(CCUserTBL{Phone: user.Phone, Username: user.Username})
 	}
 	dbConn.db.Create(&user)
-	return nil
 }
 
 //UpdateUser 更新用户信息
-func UpdateUser(userID string, values map[string]interface{}) error {
+func UpdateUser(userID string, values map[string]interface{}) {
 	if dbConn == nil {
-		return errors.New("Connect database first")
+		log.Panic().Err(errors.New("Connect database first"))
+		return
 	}
 	var user *CCUserTBL
 	dbConn.db.Model(&user).Where("userId = ?", userID).Updates(values)
-	return nil
 }
 
 //FindUser 查询用户第一条数据
-func FindUser(userID string) (*CCUserTBL, error) {
+func FindUser(userID string) *CCUserTBL {
 	if dbConn == nil {
-		return nil, errors.New("Connect database first")
+		log.Panic().Err(errors.New("Connect database first"))
+		return nil
 	}
 	var u *CCUserTBL
 	dbConn.db.Where("userID = ?", userID).First(&u)
 	if u == nil {
-		return nil, errors.New("user not exists")
+		log.Info().Msg("user not exists")
+		return nil
 	}
-	return u, nil
+	return u
 }

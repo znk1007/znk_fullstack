@@ -12,6 +12,5 @@ type Handler struct {
 
 //Start 运行cms系统
 func Start() {
-
 	pages.CMSAuth()
 }

@@ -21,9 +21,19 @@ type itemConfig struct {
 
 //DBConfig 数据库配置
 type DBConfig struct {
-	Name DBName `json:"name"`
-	Host string `json:"host"`
-	Port string `json:"port"`
+	Name     DBName `json:"name"`
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Dialect  string `json:"dialect"`
+}
+
+func (dbcf DBConfig) String() string {
+	if len(dbcf.Dialect) == 0 {
+		return "name=" + string(dbcf.Name) + "|host=" + dbcf.Host + "|port=" + dbcf.Port
+	}
+	return "name=" + string(dbcf.Name) + "|host=" + dbcf.Host + "|port=" + dbcf.Port + "|dialect=" + dbcf.Dialect
 }
 
 //DBName 数据库类名

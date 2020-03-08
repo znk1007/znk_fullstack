@@ -7,13 +7,18 @@
                     "name":"redis",
                     "host":"localhost",
                     "port":"6379",
-                    "password":""
+                    "username":"",
+                    "password":"",
+                    "dialect":""
                 },
                 {
                     "name":"gorm",
                     "host":"localhost",
                     "port":"3306",
-                    "password":"znk1007!"
+                    "username":"znk",
+                    "password":"znk1007!",
+                    "dialect":"mysql"
+
                 }
             ]
         },
@@ -24,13 +29,17 @@
                     "name":"redis",
                     "host":"localhost",
                     "port":"6379",
-                    "password":""
+                    "username":"",
+                    "password":"",
+                    "dialect":""
                 },
                 {
                     "name":"gorm",
                     "host":"localhost",
                     "port":"3306",
-                    "password":"znk1007!"
+                    "username":"znk",
+                    "password":"znk1007!",
+                    "dialect":"mysql"
                 }
             ]
         },
@@ -41,13 +50,17 @@
                     "name":"redis",
                     "host":"localhost",
                     "port":"6379",
-                    "password":""
+                    "username":"",
+                    "password":"",
+                    "dialect":""
                 },
                 {
                     "name":"gorm",
                     "host":"localhost",
                     "port":"3306",
-                    "password":"znk1007!"
+                    "username":"znk",
+                    "password":"znk1007!",
+                    "dialect":"mysql"
                 }
             ]
         }
