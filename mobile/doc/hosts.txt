@@ -1,5 +1,0 @@
-https://github.com/googlehosts/hosts
-
-sudo cp <source hosts path> /etc/hosts
-
-sudo killall -HUP mDNSResponder
