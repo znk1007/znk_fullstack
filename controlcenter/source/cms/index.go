@@ -1,6 +1,8 @@
 package cms
 
-import "github.com/znk_fullstack/controlcenter/source/cms/pages"
+import (
+	"github.com/znk_fullstack/controlcenter/source/cms/pages"
+)
 
 //Handler cms处理器
 type Handler struct {
@@ -10,5 +12,6 @@ type Handler struct {
 
 //Start 运行cms系统
 func Start() {
-	pages.AuthPage()
+
+	pages.CMSAuth()
 }

@@ -10,11 +10,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-// import _ "github.com/jinzhu/gorm/dialects/mysql"
-// import _ "github.com/jinzhu/gorm/dialects/postgres"
-// import _ "github.com/jinzhu/gorm/dialects/sqlite"
-// import _ "github.com/jinzhu/gorm/dialects/mssql"
-
 //CCDB 数据库管理对象
 type CCDB struct {
 	db       *gorm.DB
@@ -27,8 +22,15 @@ type CCDB struct {
 
 var dbConn *CCDB
 
+func init() {
+	// dbcf := config.GetDBConfig()
+}
+
 //createCCDB 创建数据库管理对象
 func createCCDB(dialect string, host string, user string, password string, dbName string) *CCDB {
+	if dbConn != nil {
+		return dbConn
+	}
 	return &CCDB{
 		user:     user,
 		password: password,

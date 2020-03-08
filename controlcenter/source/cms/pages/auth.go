@@ -8,8 +8,8 @@ import (
 	"github.com/znk_fullstack/controlcenter/source/tools"
 )
 
-//AuthPage 验证页面
-func AuthPage() {
+//CMSAuth 校验
+func CMSAuth() {
 	tools.Get(tools.NetHandler{
 		Path: "/cms",
 		HandlerFunc: func(c *gin.Context) {
