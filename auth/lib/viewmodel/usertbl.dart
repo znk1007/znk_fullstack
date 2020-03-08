@@ -16,7 +16,7 @@ class UserModel with ChangeNotifier {
   ///邮箱
   String email;
 
-  static final _dbName = 'user';
+  String get _dbName => 'user';
 
   /* 模型转换 */
   Map<String, dynamic> toMap() {
@@ -65,9 +65,11 @@ class UserModel with ChangeNotifier {
   Future<int> deleteUser(String userId) async {
     return await SqliteDB.shared.delete(_dbName, where: 'userId = ?', whereArgs: [userId]);
   }
-
+  // 
   Future<UserModel> findUser(String userId) async {
-
+    final users = await SqliteDB.shared.find(_dbName, where: 'userId = ?', whereArgs:[userId]);
+    final userMap = users.last;
+    return UserModel.fromMap(userMap);
   }
 
 }
