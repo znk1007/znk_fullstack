@@ -1,31 +1,31 @@
 ///
 //  Generated code. Do not modify.
 //  source: updatephoto.proto
-///
-// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name
+//
+// @dart = 2.3
+// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 import 'dart:async' as $async;
 
+import 'dart:core' as $core;
+
 import 'package:grpc/service_api.dart' as $grpc;
-
-import 'dart:core' as $core show int, String, List;
-
-import 'updatephoto.pb.dart' as $8;
-import 'updatephoto.pb.dart';
+import 'updatephoto.pb.dart' as $7;
 export 'updatephoto.pb.dart';
 
 class UpdatePhotoClient extends $grpc.Client {
   static final _$photo =
-      $grpc.ClientMethod<UpdatePhotoRequest, UpdatePhotoResponse>(
+      $grpc.ClientMethod<$7.UpdatePhotoRequest, $7.UpdatePhotoResponse>(
           '/protos.updatephoto.UpdatePhoto/photo',
-          (UpdatePhotoRequest value) => value.writeToBuffer(),
+          ($7.UpdatePhotoRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
-              UpdatePhotoResponse.fromBuffer(value));
+              $7.UpdatePhotoResponse.fromBuffer(value));
 
   UpdatePhotoClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
       : super(channel, options: options);
 
-  $grpc.ResponseFuture<UpdatePhotoResponse> photo(UpdatePhotoRequest request,
+  $grpc.ResponseFuture<$7.UpdatePhotoResponse> photo(
+      $7.UpdatePhotoRequest request,
       {$grpc.CallOptions options}) {
     final call = $createCall(_$photo, $async.Stream.fromIterable([request]),
         options: options);
@@ -37,20 +37,22 @@ abstract class UpdatePhotoServiceBase extends $grpc.Service {
   $core.String get $name => 'protos.updatephoto.UpdatePhoto';
 
   UpdatePhotoServiceBase() {
-    $addMethod($grpc.ServiceMethod<UpdatePhotoRequest, UpdatePhotoResponse>(
-        'photo',
-        photo_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => UpdatePhotoRequest.fromBuffer(value),
-        (UpdatePhotoResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$7.UpdatePhotoRequest, $7.UpdatePhotoResponse>(
+            'photo',
+            photo_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $7.UpdatePhotoRequest.fromBuffer(value),
+            ($7.UpdatePhotoResponse value) => value.writeToBuffer()));
   }
 
-  $async.Future<UpdatePhotoResponse> photo_Pre(
-      $grpc.ServiceCall call, $async.Future request) async {
+  $async.Future<$7.UpdatePhotoResponse> photo_Pre($grpc.ServiceCall call,
+      $async.Future<$7.UpdatePhotoRequest> request) async {
     return photo(call, await request);
   }
 
-  $async.Future<UpdatePhotoResponse> photo(
-      $grpc.ServiceCall call, UpdatePhotoRequest request);
+  $async.Future<$7.UpdatePhotoResponse> photo(
+      $grpc.ServiceCall call, $7.UpdatePhotoRequest request);
 }

@@ -1,4 +1,4 @@
-name: znk
+name: mobile02
 description: A new Flutter project.
 
 # The following defines the version and build number for your application.
@@ -19,23 +19,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  protobuf: ^1.0.1
+  grpc: ^1.0.3
+  encrypt: ^3.2.0
+  platform: ^2.2.1
+  sqflite: ^1.2.0
+  dio: ^3.0.7
+  dio_cookie_manager: ^1.0.0
+  package_info: ^0.4.0+13
+  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
-  english_words: ^3.1.0
-  protobuf: ^0.13.12
-  grpc: ^1.0.3
-  flutter_bloc: ^0.17.0
-  bloc: ^0.14.2
-  equatable: ^0.2.6
-  path_provider: ^1.1.0
-  sembast: ^2.1.1
-  rxdart: ^0.22.0
-  encrypt: ^3.2.0
-  package_info: ^0.4.0+4
-  device_info: ^0.4.0+3
-  provider: ^3.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -58,69 +55,69 @@ flutter:
   #  - images/a_dot_ham.jpeg
   assets:
     #certification
-    - lib/utils/security/keys/server.pem
-    - lib/utils/security/keys/ca.pem
+    - lib/resource/security/keys/server.pem
+    - lib/resource/security/keys/ca.pem
 
     #tabs
-    - lib/images/iOS/tabs/tab_msg_n.png
-    - lib/images/iOS/tabs/2.0x/tab_msg_n.png
-    - lib/images/iOS/tabs/3.0x/tab_msg_n.png
-    - lib/images/iOS/tabs/tab_msg_s.png
-    - lib/images/iOS/tabs/2.0x/tab_msg_s.png
-    - lib/images/iOS/tabs/3.0x/tab_msg_s.png
-    - lib/images/iOS/tabs/tab_schedule_n.png
-    - lib/images/iOS/tabs/2.0x/tab_schedule_n.png
-    - lib/images/iOS/tabs/3.0x/tab_schedule_n.png
-    - lib/images/iOS/tabs/tab_schedule_s.png
-    - lib/images/iOS/tabs/2.0x/tab_schedule_s.png
-    - lib/images/iOS/tabs/3.0x/tab_schedule_s.png
-    - lib/images/iOS/tabs/tab_owner_n.png
-    - lib/images/iOS/tabs/2.0x/tab_owner_n.png
-    - lib/images/iOS/tabs/3.0x/tab_owner_n.png
-    - lib/images/iOS/tabs/tab_owner_s.png
-    - lib/images/iOS/tabs/2.0x/tab_owner_s.png
-    - lib/images/iOS/tabs/3.0x/tab_owner_s.png
+    - lib/resource/images/iOS/tab_msg_n.png
+    - lib/resource/images/iOS/2.0x/tab_msg_n.png
+    - lib/resource/images/iOS/3.0x/tab_msg_n.png
+    - lib/resource/images/iOS/tab_msg_s.png
+    - lib/resource/images/iOS/2.0x/tab_msg_s.png
+    - lib/resource/images/iOS/3.0x/tab_msg_s.png
+    - lib/resource/images/iOS/tab_schedule_n.png
+    - lib/resource/images/iOS/2.0x/tab_schedule_n.png
+    - lib/resource/images/iOS/3.0x/tab_schedule_n.png
+    - lib/resource/images/iOS/tab_schedule_s.png
+    - lib/resource/images/iOS/2.0x/tab_schedule_s.png
+    - lib/resource/images/iOS/3.0x/tab_schedule_s.png
+    - lib/resource/images/iOS/tab_owner_n.png
+    - lib/resource/images/iOS/2.0x/tab_owner_n.png
+    - lib/resource/images/iOS/3.0x/tab_owner_n.png
+    - lib/resource/images/iOS/tab_owner_s.png
+    - lib/resource/images/iOS/2.0x/tab_owner_s.png
+    - lib/resource/images/iOS/3.0x/tab_owner_s.png
 
-    - lib/images/iOS/launch/launchImg.png
-    - lib/images/iOS/launch/2.0x/launchImg.png
-    - lib/images/iOS/launch/3.0x/launchImg.png
-    - lib/images/iOS/launch/launchVersionBg.png
-    - lib/images/iOS/launch/2.0x/launchVersionBg.png
-    - lib/images/iOS/launch/3.0x/launchVersionBg.png
+    - lib/resource/images/iOS/launchImg.png
+    - lib/resource/images/iOS/2.0x/launchImg.png
+    - lib/resource/images/iOS/3.0x/launchImg.png
+    - lib/resource/images/iOS/launchVersionBg.png
+    - lib/resource/images/iOS/2.0x/launchVersionBg.png
+    - lib/resource/images/iOS/3.0x/launchVersionBg.png
 
     #user
-    - lib/images/iOS/user/background.png
-    - lib/images/iOS/user/daxingzheng.png
-    - lib/images/iOS/user/2.0x/daxingzheng.png
-    - lib/images/iOS/user/3.0x/daxingzheng.png
-    - lib/images/iOS/user/account.png
-    - lib/images/iOS/user/2.0x/account.png
-    - lib/images/iOS/user/3.0x/account.png
-    - lib/images/iOS/user/password.png
-    - lib/images/iOS/user/2.0x/password.png
-    - lib/images/iOS/user/3.0x/password.png
-    - lib/images/iOS/user/user_header.png
-    - lib/images/iOS/user/2.0x/user_header.png
-    - lib/images/iOS/user/3.0x/user_header.png
+    - lib/resource/images/iOS/background.png
+    - lib/resource/images/iOS/daxingzheng.png
+    - lib/resource/images/iOS/2.0x/daxingzheng.png
+    - lib/resource/images/iOS/3.0x/daxingzheng.png
+    - lib/resource/images/iOS/account.png
+    - lib/resource/images/iOS/2.0x/account.png
+    - lib/resource/images/iOS/3.0x/account.png
+    - lib/resource/images/iOS/password.png
+    - lib/resource/images/iOS/2.0x/password.png
+    - lib/resource/images/iOS/3.0x/password.png
+    - lib/resource/images/iOS/user_header.png
+    - lib/resource/images/iOS/2.0x/user_header.png
+    - lib/resource/images/iOS/3.0x/user_header.png
 
     #common
-    - lib/images/iOS/common/right_arrow.png
-    - lib/images/iOS/common/2.0x/right_arrow.png
-    - lib/images/iOS/common/3.0x/right_arrow.png
+    - lib/resource/images/iOS/right_arrow.png
+    - lib/resource/images/iOS/2.0x/right_arrow.png
+    - lib/resource/images/iOS/3.0x/right_arrow.png
 
     #owner
-    - lib/images/iOS/owner/setting.png
-    - lib/images/iOS/owner/2.0x/setting.png
-    - lib/images/iOS/owner/3.0x/setting.png
-    - lib/images/iOS/owner/setting.png
-    - lib/images/iOS/owner/2.0x/setting.png
-    - lib/images/iOS/owner/3.0x/setting.png
-    - lib/images/iOS/owner/collection.png
-    - lib/images/iOS/owner/2.0x/collection.png
-    - lib/images/iOS/owner/3.0x/collection.png
-    - lib/images/iOS/owner/file_store.png
-    - lib/images/iOS/owner/2.0x/file_store.png
-    - lib/images/iOS/owner/3.0x/file_store.png
+    - lib/resource/images/iOS/setting.png
+    - lib/resource/images/iOS/2.0x/setting.png
+    - lib/resource/images/iOS/3.0x/setting.png
+    - lib/resource/images/iOS/setting.png
+    - lib/resource/images/iOS/2.0x/setting.png
+    - lib/resource/images/iOS/3.0x/setting.png
+    - lib/resource/images/iOS/collection.png
+    - lib/resource/images/iOS/2.0x/collection.png
+    - lib/resource/images/iOS/3.0x/collection.png
+    - lib/resource/images/iOS/file_store.png
+    - lib/resource/images/iOS/2.0x/file_store.png
+    - lib/resource/images/iOS/3.0x/file_store.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

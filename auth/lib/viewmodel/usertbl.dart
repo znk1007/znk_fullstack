@@ -5,14 +5,19 @@ import 'package:flutter/material.dart';
 class UserModel with ChangeNotifier {
   ///用户唯一id
   String userId;
+
   ///用户账号
   String account;
+
   ///用户昵称
   String username;
+
   ///用户头像
   String photo;
+
   ///手机号
   String phone;
+
   ///邮箱
   String email;
 
@@ -63,14 +68,14 @@ class UserModel with ChangeNotifier {
 
   /* 删除指定用户 */
   Future<int> deleteUser(String userId) async {
-    return await SqliteDB.shared.delete(_dbName, where: 'userId = ?', whereArgs: [userId]);
+    return await SqliteDB.shared
+        .delete(_dbName, where: 'userId = ?', whereArgs: [userId]);
   }
-  // 
+  /* 查找指定用户 */
   Future<UserModel> findUser(String userId) async {
-    final users = await SqliteDB.shared.find(_dbName, where: 'userId = ?', whereArgs:[userId]);
+    final users = await SqliteDB.shared
+        .find(_dbName, where: 'userId = ?', whereArgs: [userId]);
     final userMap = users.last;
     return UserModel.fromMap(userMap);
   }
-
 }
-

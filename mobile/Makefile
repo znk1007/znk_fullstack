@@ -1,8 +1,8 @@
-PROTO_ROOT_DIR = $(shell brew --prefix)/Cellar/protobuf/3.7.1/include
-VERSION=0.1.0
-
+PROTO_ROOT_DIR = $(shell brew --prefix)/Cellar/protobuf/3.11.2/include
+VERSION=0.0.1
 default: clean stubs
 
+## Dart requires you to manually ship all google provided proto files too.
 ## Dart requires you to manually ship all google provided proto files too.
 stubs:
 	mkdir -p lib/protos/generated

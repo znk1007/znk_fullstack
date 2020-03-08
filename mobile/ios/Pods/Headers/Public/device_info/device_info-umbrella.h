@@ -1,1 +1,0 @@
-../../../Target Support Files/device_info/device_info-umbrella.h
