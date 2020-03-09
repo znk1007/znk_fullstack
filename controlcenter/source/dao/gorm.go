@@ -45,8 +45,6 @@ func createCCDB() *CCDB {
 	}
 	authformat := user + ":" + password + "@(" + host + ")/" + string(dbName)
 	db, err := gorm.Open(dialect, authformat+"?charset=utf8&parseTime=True&loc=Local")
-	log.Print("db: ", db)
-	log.Print("err: ", err.Error())
 	if err != nil || db == nil {
 		log.Panic().Err(err)
 		dbConn = nil

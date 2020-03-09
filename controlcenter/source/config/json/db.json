@@ -4,7 +4,8 @@
             "env":"dev",
             "dbs":[
                 {
-                    "name":"redis",
+                    "type":"redis",
+                    "name":"",
                     "host":"localhost",
                     "port":"6379",
                     "username":"",
@@ -12,10 +13,11 @@
                     "dialect":""
                 },
                 {
-                    "name":"gorm",
+                    "type":"gorm",
+                    "name":"znk",
                     "host":"localhost",
                     "port":"3306",
-                    "username":"znk",
+                    "username":"root",
                     "password":"znk1007!",
                     "dialect":"mysql"
 
@@ -26,7 +28,8 @@
             "env":"test",
             "dbs":[
                 {
-                    "name":"redis",
+                    "type":"redis",
+                    "name":"",
                     "host":"localhost",
                     "port":"6379",
                     "username":"",
@@ -34,10 +37,11 @@
                     "dialect":""
                 },
                 {
-                    "name":"gorm",
+                    "type":"gorm",
+                    "name":"znk",
                     "host":"localhost",
                     "port":"3306",
-                    "username":"znk",
+                    "username":"root",
                     "password":"znk1007!",
                     "dialect":"mysql"
                 }
@@ -47,7 +51,8 @@
             "env":"prod",
             "dbs":[
                 {
-                    "name":"redis",
+                    "type":"redis",
+                    "name":"",
                     "host":"localhost",
                     "port":"6379",
                     "username":"",
@@ -55,10 +60,11 @@
                     "dialect":""
                 },
                 {
-                    "name":"gorm",
+                    "type":"gorm",
+                    "name":"znk",
                     "host":"localhost",
                     "port":"3306",
-                    "username":"znk",
+                    "username":"root",
                     "password":"znk1007!",
                     "dialect":"mysql"
                 }
