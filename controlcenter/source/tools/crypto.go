@@ -123,3 +123,8 @@ func generateKey(keyByte []byte) (genKey []byte) {
 	}
 	return genKey
 }
+
+//GetSecurityKey 获取加密密钥
+func GetSecurityKey() string {
+	return key
+}
