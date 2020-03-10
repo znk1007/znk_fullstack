@@ -50,8 +50,10 @@ func createCCDB() *CCDB {
 		dbConn = nil
 		return nil
 	}
-	dbConn.db = db
-	return dbConn
+	conn := &CCDB{
+		db: db,
+	}
+	return conn
 }
 
 //CloseDB 关闭数据库

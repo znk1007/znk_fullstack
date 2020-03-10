@@ -1,21 +1,15 @@
 package pages
 
-import (
-	"net/http"
+import "github.com/gin-gonic/gin"
 
-	"github.com/gin-gonic/gin"
+type authInfo struct {
+	Account  string `json:"account"`
+	Password string `json:"password"`
+}
 
-	"github.com/znk_fullstack/controlcenter/source/tools"
-)
+//CMSAuth 校验用户数据
+func CMSAuth(ctx *gin.Context) {
 
-//CMSAuth 校验
-func CMSAuth() {
-	tools.Get(tools.NetHandler{
-		Path: "/cms",
-		HandlerFunc: func(c *gin.Context) {
-			c.String(http.StatusOK, "校验成功")
-		},
-	})
 }
 
 func loginPage() {

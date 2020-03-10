@@ -7,6 +7,7 @@ import (
 	"github.com/znk_fullstack/controlcenter/source/cms"
 	_ "github.com/znk_fullstack/controlcenter/source/config"
 	ccdb "github.com/znk_fullstack/controlcenter/source/dao"
+	"github.com/znk_fullstack/controlcenter/source/tools"
 	_ "github.com/znk_fullstack/controlcenter/source/tools"
 )
 
@@ -20,5 +21,5 @@ func main() {
 
 	ccdb.CreateUserTBL()
 	cms.Start()
-	// tools.Listen()
+	tools.Listen()
 }

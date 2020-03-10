@@ -9,7 +9,7 @@ import (
 
 type ginTool struct {
 	serve  *http.Server
-	router *gin.Engine
+	Router *gin.Engine
 }
 
 //NetHandler 网络处理对象
@@ -19,7 +19,8 @@ type NetHandler struct {
 	HandlerFunc gin.HandlerFunc
 }
 
-var gt ginTool
+//Gt gin 管理工具
+var Gt ginTool
 
 func init() {
 	r := gin.Default()
@@ -30,40 +31,13 @@ func init() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	gt = ginTool{
+	Gt = ginTool{
 		serve:  s,
-		router: r,
+		Router: r,
 	}
-}
-
-//Group 路由组
-func Group(path string, handlers []NetHandler) {
-	g := gt.router.Group(path)
-	for _, handler := range handlers {
-		g.Handle(handler.Method, handler.Path, handler.HandlerFunc)
-	}
-}
-
-//Handler 请求处理
-func Handler(handler NetHandler) {
-	gt.router.Handle(handler.Method, handler.Path, handler.HandlerFunc)
-}
-
-//Get Get请求
-func Get(handler NetHandler) {
-	gt.router.GET(handler.Path, handler.HandlerFunc)
-}
-
-//Post post请求
-func Post(handler NetHandler) {
-	gt.router.POST(handler.Path, handler.HandlerFunc)
-}
-
-func LoadHTMLGlob(pattern string) {
-	gt.router.LoadHTMLGlob(pattern)
 }
 
 //Listen 监听服务
 func Listen() {
-	gt.serve.ListenAndServe()
+	Gt.serve.ListenAndServe()
 }
