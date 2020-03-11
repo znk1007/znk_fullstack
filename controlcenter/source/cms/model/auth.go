@@ -20,6 +20,7 @@ type RegistInfo struct {
 
 //LoginInfo 登录信息
 type LoginInfo struct {
+	Account  string `form:"account" json:"account" xml:"account" binding:"required"`
 	UserID   string `form:"userId" json:"userId" xml:"userId" binding:"required"`
 	Token    string `form:"token" json:"token" xml:"token" binding:"required"`
 	Platform string `form:"platform" json:"platform" xml:"platform" binding:"required"`

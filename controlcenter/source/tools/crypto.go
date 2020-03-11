@@ -124,7 +124,12 @@ func generateKey(keyByte []byte) (genKey []byte) {
 	return genKey
 }
 
-//GetSecurityKey 获取加密密钥
-func GetSecurityKey() string {
+//GetSecurityKeyString 获取加密密钥
+func GetSecurityKeyString() string {
 	return key
+}
+
+//GetSecurityKeyByte 获取加密密钥
+func GetSecurityKeyByte() []byte {
+	return []byte(key)
 }
