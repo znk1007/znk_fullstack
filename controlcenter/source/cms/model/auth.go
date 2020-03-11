@@ -7,6 +7,11 @@ import (
 //Platform 平台
 type Platform string
 
+const (
+	Web    Platform = "web"    //Web网页
+	Mobile Platform = "mobile" //Mobile 移动端
+)
+
 //AuthInfo 验证信息
 type AuthInfo struct {
 	Token    string   `form:"token" json:"token" xml:"token" binding:"required"`

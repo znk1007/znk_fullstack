@@ -18,5 +18,5 @@ func Start() {
 
 func firstVersion() {
 	cmsGroup := tools.Gt.Router.Group("/")
-	cmsGroup.POST("cms", middleware.UserAuthState)
+	cmsGroup.POST("cms", middleware.Auth, pages.)
 }
