@@ -1,18 +1,13 @@
 package pages
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
 
-//CMSAuth 校验用户数据
-func CMSAuth(ctx *gin.Context) {
+//Login 登录
+func Login(c *gin.Context) {
 
 }
 
-func loginPage() {
-
-}
-
-func registerPage() {
+//Regist 注册
+func Regist(c *gin.Context) {
 
 }

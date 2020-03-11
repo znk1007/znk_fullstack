@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,12 +10,17 @@ import (
 )
 
 //UserAuthState 用户验证状态
-func UserAuthState(ctx *gin.Context) {
+func Auth(c *gin.Context) {
 	var u model.AuthInfo
-	if err := ctx.ShouldBind(&u); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		ctx.Abort()
+	if err := c.ShouldBind(&u); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if len(u.Platform) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("platform cannot be empty")})
+		return
+	}
+	if u.Platform == "web" {
 
+	}
 }
