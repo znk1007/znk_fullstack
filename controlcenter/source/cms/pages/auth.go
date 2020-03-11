@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/znk_fullstack/controlcenter/source/tools"
+	"github.com/znk_fullstack/controlcenter/lib/source/tools"
 )
 
 //AuthPage 验证页面

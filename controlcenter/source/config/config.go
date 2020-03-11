@@ -13,15 +13,8 @@ type itemsConfig struct {
 }
 
 type itemConfig struct {
-	Env Env        `json:"env"`
+	Env string     `json:"env"`
 	DBs []DBConfig `json:"dbs"`
-}
-
-//DBConfig 数据库配置
-type DBConfig struct {
-	Name DBName `json:"name"`
-	Host string `json:"host"`
-	Port string `json:"port"`
 }
 
 //Env 环境
@@ -45,6 +38,13 @@ const (
 	//Gorm gorm连接库
 	Gorm DBName = "gorm"
 )
+
+//DBConfig 数据库配置
+type DBConfig struct {
+	Name string `json:"name"`
+	Host string `json:"host"`
+	Port string `json:"port"`
+}
 
 var items *itemsConfig
 
@@ -78,20 +78,11 @@ func GetFilePathFromCurrent(relativePath string) string {
 }
 
 //GetDBConfig 获取数据库配置信息
-func GetDBConfig(env Env, name DBName) DBConfig {
+func GetDBConfig(env Env, name DBName) {
 	if items == nil {
 		readDBItems()
 	}
-	var dbcf DBConfig
 	for _, item := range items.Items {
-		if item.Env == env {
-			for _, db := range item.DBs {
-				if db.Name == name {
-					dbcf = db
-					break
-				}
-			}
-		}
+
 	}
-	return dbcf
 }
