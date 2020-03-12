@@ -9,7 +9,7 @@ import (
 	"github.com/znk_fullstack/controlcenter/source/cms/model"
 )
 
-//UserAuthState 用户验证状态
+//Auth 用户验证状态
 func Auth(c *gin.Context) {
 	var u model.AuthInfo
 	if err := c.ShouldBind(&u); err != nil {
@@ -20,7 +20,14 @@ func Auth(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("platform cannot be empty")})
 		return
 	}
-	if u.Platform == "web" {
 
+	if u.Platform == model.Web {
+
+	} else if u.Platform == model.Mobile {
+
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("platform should be `web` or `mobile`")})
+		return
 	}
+	c.Next()
 }

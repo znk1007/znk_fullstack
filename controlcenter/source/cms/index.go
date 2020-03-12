@@ -1,6 +1,7 @@
 package cms
 
 import (
+	"github.com/znk_fullstack/controlcenter/source/cms/controller"
 	"github.com/znk_fullstack/controlcenter/source/cms/middleware"
 	"github.com/znk_fullstack/controlcenter/source/tools"
 )
@@ -18,5 +19,5 @@ func Start() {
 
 func firstVersion() {
 	cmsGroup := tools.Gt.Router.Group("/")
-	cmsGroup.POST("cms", middleware.Auth, pages.)
+	cmsGroup.POST("cms", middleware.Auth, controller.Home)
 }
