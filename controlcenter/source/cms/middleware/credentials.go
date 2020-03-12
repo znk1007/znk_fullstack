@@ -22,7 +22,11 @@ func Auth(c *gin.Context) {
 	}
 
 	if u.Platform == model.Web {
-
+		tkstr := c.GetHeader("token")
+		if tkstr == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("platform cannot be empty")})
+			return
+		}
 	} else if u.Platform == model.Mobile {
 
 	} else {

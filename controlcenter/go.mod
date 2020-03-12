@@ -10,4 +10,5 @@ require (
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/rs/zerolog v1.18.0
 	github.com/segmentio/ksuid v1.0.2
+	go.uber.org/zap v1.14.0 // indirect
 )

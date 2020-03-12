@@ -1,8 +1,9 @@
 package cms
 
 import (
+	"fmt"
+
 	"github.com/znk_fullstack/controlcenter/source/cms/controller"
-	"github.com/znk_fullstack/controlcenter/source/cms/middleware"
 	"github.com/znk_fullstack/controlcenter/source/tools"
 )
 
@@ -18,6 +19,15 @@ func Start() {
 }
 
 func firstVersion() {
-	cmsGroup := tools.Gt.Router.Group("/")
-	cmsGroup.POST("cms", middleware.Auth, controller.Home)
+	fp := tools.GetFilePathFromCurrent("view/cms")
+	fmt.Println("file path: ", fp)
+	tools.Gt.Router.LoadHTMLGlob(fp + "/html/*")
+	tools.Gt.Router.Static("/static", fp+"/")
+
+	vGroup := tools.Gt.Router.Group("/v1")
+
+	cmsGroup := vGroup.Group("/cms")
+	cmsGroup.GET("", controller.Home)
+	cmsGroup.POST("/regist", controller.Regist)
+	cmsGroup.POST("/login", controller.Login)
 }
