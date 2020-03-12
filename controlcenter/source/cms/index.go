@@ -22,12 +22,12 @@ func firstVersion() {
 	fp := tools.GetFilePathFromCurrent("view/cms")
 	fmt.Println("file path: ", fp)
 	tools.Gt.Router.LoadHTMLGlob(fp + "/html/*")
-	tools.Gt.Router.Static("", fp+"/")
+	tools.Gt.Router.Static("/static", fp+"/")
 
 	vGroup := tools.Gt.Router.Group("/v1")
 
 	cmsGroup := vGroup.Group("/cms")
-	cmsGroup.GET("/static", controller.Home)
+	cmsGroup.GET("", controller.Home)
 	cmsGroup.POST("/regist", controller.Regist)
 	cmsGroup.POST("/login", controller.Login)
 }
