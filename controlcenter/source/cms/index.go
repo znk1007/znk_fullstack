@@ -19,7 +19,7 @@ func Start() {
 }
 
 func firstVersion() {
-	fp := tools.GetFilePathFromCurrent("view/cms")
+	fp := tools.GetFilePathFromCurrent("view")
 	fmt.Println("file path: ", fp)
 	tools.Gt.Router.LoadHTMLGlob(fp + "/html/*")
 	tools.Gt.Router.Static("/static", fp+"/")
