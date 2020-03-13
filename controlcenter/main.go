@@ -6,7 +6,6 @@ import (
 
 	"github.com/znk_fullstack/controlcenter/source/auth"
 	_ "github.com/znk_fullstack/controlcenter/source/config"
-	ccdb "github.com/znk_fullstack/controlcenter/source/dao"
 	"github.com/znk_fullstack/controlcenter/source/tools"
 	_ "github.com/znk_fullstack/controlcenter/source/tools"
 )
@@ -19,7 +18,7 @@ func init() {
 
 func main() {
 
-	ccdb.CreateUserTBL()
+	// ccdb.CreateUserTBL()
 	auth.Start()
 	tools.Listen()
 }

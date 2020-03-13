@@ -10,7 +10,8 @@ import (
 func Start() {
 	fp := tools.GetFilePathFromCurrent("view")
 	fmt.Println("file path: ", fp)
-	tools.Gt.Router.LoadHTMLGlob(fp + "/html/*")
-	tools.Gt.Router.Static("assets", fp+"/assets")
-
+	tools.LoadHTMLS(fp + "/html/*")
+	tools.LoadStatic("assets", fp+"/assets")
+	vGroup := tools.Gt.V1
+	vGroup.POST("/login")
 }
