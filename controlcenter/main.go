@@ -4,7 +4,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/znk_fullstack/controlcenter/source/cms"
+	"github.com/znk_fullstack/controlcenter/source/auth"
 	_ "github.com/znk_fullstack/controlcenter/source/config"
 	ccdb "github.com/znk_fullstack/controlcenter/source/dao"
 	"github.com/znk_fullstack/controlcenter/source/tools"
@@ -20,6 +20,6 @@ func init() {
 func main() {
 
 	ccdb.CreateUserTBL()
-	cms.Start()
+	auth.Start()
 	tools.Listen()
 }

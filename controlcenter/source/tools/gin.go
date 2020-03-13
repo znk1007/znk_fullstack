@@ -9,14 +9,8 @@ import (
 
 type ginTool struct {
 	serve  *http.Server
-	Router *gin.Engine
-}
-
-//NetHandler 网络处理对象
-type NetHandler struct {
-	Method      string
-	Path        string
-	HandlerFunc gin.HandlerFunc
+	router *gin.Engine
+	V1     *gin.RouterGroup
 }
 
 //Gt gin 管理工具
@@ -31,10 +25,27 @@ func init() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
 	Gt = ginTool{
 		serve:  s,
-		Router: r,
+		router: r,
+		V1:     versionGenerator("v1", r),
 	}
+}
+
+//versionGenerator 版本生成
+func versionGenerator(ver string, r *gin.Engine) *gin.RouterGroup {
+	return r.Group(ver)
+}
+
+//LoadHTMLS 加载HTML文件组
+func LoadHTMLS(pattern string) {
+	Gt.router.LoadHTMLGlob(pattern)
+}
+
+//LoadStatic 加载静态资源
+func LoadStatic(relativePath string, root string) {
+	Gt.router.Static(relativePath, root)
 }
 
 //Listen 监听服务
