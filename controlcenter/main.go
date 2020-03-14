@@ -7,7 +7,6 @@ import (
 	"github.com/znk_fullstack/controlcenter/source/auth"
 	_ "github.com/znk_fullstack/controlcenter/source/config"
 	"github.com/znk_fullstack/controlcenter/source/tools"
-	_ "github.com/znk_fullstack/controlcenter/source/tools"
 )
 
 func init() {

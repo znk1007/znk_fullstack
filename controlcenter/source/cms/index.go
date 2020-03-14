@@ -1,8 +1,6 @@
 package cms
 
 import (
-	"fmt"
-
 	"github.com/znk_fullstack/controlcenter/source/cms/controller"
 	"github.com/znk_fullstack/controlcenter/source/tools"
 )
@@ -20,7 +18,6 @@ func Start() {
 
 func firstVersion() {
 	fp := tools.GetFilePathFromCurrent("view")
-	fmt.Println("file path: ", fp)
 	tools.LoadHTMLS(fp + "/html/*")
 	tools.LoadStatic("/static", fp+"/")
 
