@@ -1,6 +1,4 @@
-abstract class UrlDelegate {
-  /* 请求地址域名 */
-  String get baseUrl;
+abstract class ZnkUrlConfig {
   /* 获取验证码 */
   String get getVerifyCode;
   /* 校验验证码 */
