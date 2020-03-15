@@ -57,16 +57,32 @@ class UserModel with ChangeNotifier {
 
   /* 插入货更新数据 */
   Future<int> upsertUser(UserModel userModel) async {
-    return await SqliteDB.shared.upsert(_dbName, userModel.toMap());
+    return await SqliteDB.shared.upsert(
+      _dbName, 
+      userModel.toMap()
+    );
   }
 
   /* 删除指定用户 */
   Future<int> deleteUser(String userId) async {
-    return await SqliteDB.shared.delete(_dbName, where: 'userId = ?', whereArgs: [userId]);
+    return await SqliteDB.shared.delete(
+      _dbName, 
+      where: 'userId = ?', 
+      whereArgs: [userId]
+    );
   }
 
   Future<UserModel> findUser(String userId) async {
-
+    List<Map<String, dynamic>> users = await SqliteDB.shared.find(
+      _dbName,
+      where: 'userId = ?',
+      whereArgs: [userId],
+    );
+    Map<String, dynamic> user = users.first;
+    if (user == null) {
+      return null;
+    }
+    return UserModel.fromMap(user);
   }
 
 }
