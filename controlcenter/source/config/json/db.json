@@ -6,7 +6,7 @@
                 {
                     "type":"redis",
                     "name":"",
-                    "host":"localhost",
+                    "host":"47.105.85.107",
                     "port":"6379",
                     "username":"",
                     "password":"",
@@ -14,11 +14,11 @@
                 },
                 {
                     "type":"gorm",
-                    "name":"znk",
-                    "host":"localhost",
+                    "name":"znk_dev",
+                    "host":"47.105.85.107",
                     "port":"3306",
                     "username":"root",
-                    "password":"znk1007!",
+                    "password":"man_znk-1007",
                     "dialect":"mysql"
 
                 }
@@ -30,7 +30,7 @@
                 {
                     "type":"redis",
                     "name":"",
-                    "host":"localhost",
+                    "host":"47.105.85.107",
                     "port":"6379",
                     "username":"",
                     "password":"",
@@ -38,11 +38,11 @@
                 },
                 {
                     "type":"gorm",
-                    "name":"znk",
-                    "host":"localhost",
+                    "name":"znk_test",
+                    "host":"47.105.85.107",
                     "port":"3306",
                     "username":"root",
-                    "password":"znk1007!",
+                    "password":"man_znk-1007",
                     "dialect":"mysql"
                 }
             ]
@@ -53,7 +53,7 @@
                 {
                     "type":"redis",
                     "name":"",
-                    "host":"localhost",
+                    "host":"47.105.85.107",
                     "port":"6379",
                     "username":"",
                     "password":"",
@@ -62,10 +62,10 @@
                 {
                     "type":"gorm",
                     "name":"znk",
-                    "host":"localhost",
+                    "host":"47.105.85.107",
                     "port":"3306",
                     "username":"root",
-                    "password":"znk1007!",
+                    "password":"man_znk-1007",
                     "dialect":"mysql"
                 }
             ]
