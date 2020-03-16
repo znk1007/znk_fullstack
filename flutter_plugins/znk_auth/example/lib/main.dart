@@ -52,6 +52,7 @@ class _MyAppState extends State<MyApp> {
           child: Text('Running on: $_platformVersion\n'),
         ),
       ),
+      routes: ZnkAuth.znkRoute(context),
     );
   }
 }

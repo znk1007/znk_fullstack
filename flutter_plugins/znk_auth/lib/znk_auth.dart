@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:znk_auth/controller/auth.dart';
 import 'package:znk_auth/model/delegate/auth.dart';
 
-import 'model/delegate/url.dart';
-
 export 'model/delegate/auth.dart';
 
 class ZnkAuth {
@@ -30,13 +28,20 @@ class ZnkAuth {
   /* 路由名称 */
   static String get znkRouteName => '/znkauth';
   /* 路由 */
-  static Map<String, Widget Function(BuildContext)> znkRoute(BuildContext context) => {znkRouteName: (context) => AuthPage()};
+  static Map<String, Widget Function(BuildContext)> znkRoute(BuildContext context) => {znkRouteName: (context) => AuthPage(config: _config)};
   /* push 到验证页面 */
-  static void push(BuildContext context) {
+  static void push(BuildContext context, Callback callback) {
+    if (!_isOK || _config == null) {
+      if (callback != null) {
+        callback(false, '缺少配置参数');
+      }
+      return;
+    }
+    callback(true, '缺少配置参数');
     Navigator.push(
       context, 
       MaterialPageRoute(
-        builder: (context) => AuthPage(),
+        builder: (context) => AuthPage(config: _config),
       ),
     );
   }

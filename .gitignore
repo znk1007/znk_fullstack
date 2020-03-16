@@ -6,3 +6,6 @@
 *.a
 /flutter_plugins/$HOME/*
 /flutter_plugins/znk_auth/.idea/*
+/flutter_plugins/znk_auth/.dart_tool/*
+/flutter_plugins/znk_auth/.packages
+/flutter_plugins/znk_auth/example/.packages
