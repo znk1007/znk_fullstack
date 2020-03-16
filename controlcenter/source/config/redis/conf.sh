@@ -94,7 +94,7 @@ touch $dir
 echo bind 172.100.0.2 >> $dir
 echo protected-mode no >> $dir
 
-echo port 6391 >> $dir
+echo port $port >> $dir
 echo tcp-backlog 511 >> $dir
 echo timeout 0 >> $dir
 echo tcp-keepalive 300 >> $dir
