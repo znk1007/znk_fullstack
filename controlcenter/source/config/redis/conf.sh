@@ -94,68 +94,68 @@ touch $dir
 echo bind 172.100.0.2 >> $dir
 echo protected-mode no >> $dir
 
-# port 6391 \
-# tcp-backlog 511 \
-# timeout 0 \
-# tcp-keepalive 300 \
-# daemonize no \
-# supervised no \
-# pidfile /var/run/redis_6391.pid \
-# loglevel notice \
-# logfile "logs/nodes-$port.log" \
-# databases 16 \
-# always-show-logo yes \
-# save 900 1 \
-# save 300 10 \
-# save 60 10000 \
-# stop-writes-on-bgsave-error yes \
-# rdbcompression yes \
-# rdbchecksum yes \
-# dbfilename dump-$port.rdb \
-# dir ./ \
-# replica-serve-stale-data yes \
-# replica-read-only yes \
-# repl-diskless-sync no \
-# repl-diskless-sync-delay 5 \
-# repl-disable-tcp-nodelay no \
-# replica-priority 100 \
-# lazyfree-lazy-eviction no \
-# lazyfree-lazy-expire no \
-# lazyfree-lazy-server-del no \
-# replica-lazy-flush no \
-# appendonly no \
-# appendfilename "appendonly.aof" \
-# appendfsync everysec \
-# no-appendfsync-on-rewrite no \
-# auto-aof-rewrite-percentage 100 \
-# auto-aof-rewrite-min-size 64mb \
-# aof-load-truncated yes \
-# aof-use-rdb-preamble yes \
-# lua-time-limit 5000 \
-# cluster-enabled yes \
-# cluster-config-file "cluster/nodes-$port.conf" \
-# cluster-node-timeout 15000 \
-# slowlog-log-slower-than 10000 \
-# slowlog-max-len 128 \
-# latency-monitor-threshold 0 \
-# notify-keyspace-events "" \
-# hash-max-ziplist-entries 512 \
-# hash-max-ziplist-value 64 \
-# list-max-ziplist-size -2 \
-# list-compress-depth 0 \
-# set-max-intset-entries 512 \
-# zset-max-ziplist-entries 128 \
-# zset-max-ziplist-value 64 \
-# hll-sparse-max-bytes 3000 \
-# stream-node-max-bytes 4096 \
-# stream-node-max-entries 100 \
-# activerehashing yes \
-# client-output-buffer-limit normal 0 0 0 \
-# client-output-buffer-limit replica 256mb 64mb 60 \
-# client-output-buffer-limit pubsub 32mb 8mb 60 \
-# hz 10 \
-# dynamic-hz yes \
-# aof-rewrite-incremental-fsync yes \
-# rdb-save-incremental-fsync yes  \
-# > $dir
+echo port 6391 >> $dir
+echo tcp-backlog 511 >> $dir
+echo timeout 0 >> $dir
+echo tcp-keepalive 300 >> $dir
+echo daemonize no >> $dir
+echo supervised no >> $dir
+echo pidfile /var/run/redis_6391.pid >> $dir
+echo loglevel notice >> $dir
+echo logfile "logs/nodes-$port.log" >> $dir
+echo databases 16 >> $dir
+echo always-show-logo yes >> $dir
+echo save 900 1 >> $dir
+echo save 300 10 >> $dir
+echo save 60 10000 >> $dir
+echo stop-writes-on-bgsave-error yes >> $dir
+echo rdbcompression yes >> $dir
+echo rdbchecksum yes >> $dir
+echo dbfilename dump-$port.rdb >> $dir
+echo dir ./ >> $dir
+echo replica-serve-stale-data yes >> $dir
+echo replica-read-only yes >> $dir
+echo repl-diskless-sync no >> $dir
+echo repl-diskless-sync-delay 5 >> $dir
+echo repl-disable-tcp-nodelay no >> $dir
+echo replica-priority 100 >> $dir
+echo lazyfree-lazy-eviction no >> $dir
+echo lazyfree-lazy-expire no >> $dir
+echo lazyfree-lazy-server-del no >> $dir
+echo replica-lazy-flush no >> $dir
+echo appendonly no >> $dir
+echo appendfilename "appendonly.aof" >> $dir
+echo appendfsync everysec >> $dir
+echo no-appendfsync-on-rewrite no >> $dir
+echo auto-aof-rewrite-percentage 100 >> $dir
+echo auto-aof-rewrite-min-size 64mb >> $dir
+echo aof-load-truncated yes >> $dir
+echo aof-use-rdb-preamble yes >> $dir
+echo lua-time-limit 5000 >> $dir
+echo cluster-enabled yes >> $dir
+echo cluster-config-file "cluster/nodes-$port.conf" >> $dir
+echo cluster-node-timeout 15000 >> $dir
+echo slowlog-log-slower-than 10000 >> $dir
+echo slowlog-max-len 128 >> $dir
+echo latency-monitor-threshold 0 >> $dir
+echo notify-keyspace-events "" >> $dir
+echo hash-max-ziplist-entries 512 >> $dir
+echo hash-max-ziplist-value 64 >> $dir
+echo list-max-ziplist-size -2 >> $dir
+echo list-compress-depth 0 >> $dir
+echo set-max-intset-entries 512 >> $dir
+echo zset-max-ziplist-entries 128 >> $dir
+echo zset-max-ziplist-value 64 >> $dir
+echo hll-sparse-max-bytes 3000 >> $dir
+echo stream-node-max-bytes 4096 >> $dir
+echo stream-node-max-entries 100 >> $dir
+echo activerehashing yes >> $dir
+echo client-output-buffer-limit normal 0 0 0 >> $dir
+echo client-output-buffer-limit replica 256mb 64mb 60 >> $dir
+echo client-output-buffer-limit pubsub 32mb 8mb 60 >> $dir
+echo hz 10 >> $dir
+echo dynamic-hz yes >> $dir
+echo aof-rewrite-incremental-fsync yes >> $dir
+echo rdb-save-incremental-fsync yes  >> $dir
+
 done
