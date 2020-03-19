@@ -11,6 +11,8 @@ class ZnkAuth {
   /* 配置是否OK */
   static bool _isOK = false;
 
+  static bool _isTest = true;
+
   static ZnkAuthConfig _config;
   /* 通道 */
   static const MethodChannel _channel =
@@ -29,13 +31,15 @@ class ZnkAuth {
   static String get znkRouteName => '/znkauth';
   /* 路由 */
   static Map<String, Widget Function(BuildContext)> znkRoute(BuildContext context) => {znkRouteName: (context) => AuthPage(config: _config)};
-  /* push 到验证页面 */
-  static void push(BuildContext context, Callback callback) {
+  /* show 显示验证页面 */
+  static void show(BuildContext context, Callback callback) {
     if (!_isOK || _config == null) {
       if (callback != null) {
         callback(false, '缺少配置参数');
       }
-      return;
+      if (!_isTest) {
+        return;
+      }
     }
     callback(true, '缺少配置参数');
     Navigator.push(
