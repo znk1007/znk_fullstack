@@ -85,7 +85,7 @@ ports="6379 6391 6392 6393 6394 6395 6396"
 dir=""
 for port in $ports;
 do
-dir="nodes-$port.conf"
+dir="/conf/nodes-$port.conf"
 if [ -f "$dir" ];then
 rm -r $dir
 fi
@@ -157,5 +157,4 @@ echo hz 10 >> $dir
 echo dynamic-hz yes >> $dir
 echo aof-rewrite-incremental-fsync yes >> $dir
 echo rdb-save-incremental-fsync yes  >> $dir
-
 done
