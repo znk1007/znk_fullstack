@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:znk_auth/model/protos/generated/auth/user.pb.dart';
+import 'package:znk_auth/znk_auth.dart';
 import 'sqlitedb.dart';
 ///UserModel 用户模型
-class UserTBL with ChangeNotifier {
-
+class UserTBL {
+  /* 数据表格名 */
   static final _dbName = 'user';
+  /* 配置 */
+  ZnkAuthConfig _config;
+
+  UserTBL._();
+  /* 工厂模式 */
+  factory UserTBL(ZnkAuthConfig config) {
+
+  }
 
   /* 模型转换 */
-  Map<String, dynamic> toMap(User user) {
+  Map<String, dynamic> _toMap(User user) {
     var map = new Map<String, dynamic>();
     map['userID'] = user.userID;
     map['account'] = user.account;
@@ -17,11 +26,12 @@ class UserTBL with ChangeNotifier {
     map['email'] = user.email;
     map['createdAt'] = user.createdAt;
     map['updatedAt'] = DateTime.now().toString();
+    map['online'] = user.online;
     return map;
   }
 
   /* 字典转模型 */
-  User fromMap(Map<String, dynamic> map) {
+  User _fromMap(Map<String, dynamic> map) {
     User user = new User();
     user.userID = map['userID'] ?? '';
     user.account = map['account'] ?? '';
@@ -31,7 +41,7 @@ class UserTBL with ChangeNotifier {
     user.email = map['email'] ?? '';
     user.createdAt = map['createdAt'] ?? '';
     user.updatedAt = map['updatedAt'] ?? '';
-    user.isOnline = map['isOnline'] ?? 0;
+    user.online = map['online'] ?? 0;
     return user;
   }
 
@@ -56,9 +66,11 @@ class UserTBL with ChangeNotifier {
   Future<int> upsertUser(User user) async {
     int state = await SqliteDB.shared.upsert(
       _dbName, 
-      toMap(user)
+      _toMap(user)
     );
-    notifyListeners();
+    if (_config != null) {
+      _config.authenticate(user, user.online);
+    }
     return state;
   }
 
@@ -81,7 +93,7 @@ class UserTBL with ChangeNotifier {
     if (userMap == null) {
       return null;
     }
-    return fromMap(userMap);
+    return _fromMap(userMap);
   }
   /* 上次登录的用户 */
   Future<User> lastLoginUser() async {
@@ -93,7 +105,7 @@ class UserTBL with ChangeNotifier {
     if (userMap == null) {
       return null;
     }
-    return fromMap(userMap);
+    return _fromMap(userMap);
   }
 
   /* 当前登录用户 */
@@ -107,7 +119,7 @@ class UserTBL with ChangeNotifier {
     if (userMap == null) {
       return null;
     }
-    return fromMap(userMap);
+    return _fromMap(userMap);
   }
 
 }

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:znk_auth/viewmodel/db/usertbl.dart';
 import 'package:znk_auth/znk_auth.dart';
 
 /* 回调 */
 typedef Callback = void Function(bool succ, String msg) ;
 class AuthPage extends StatefulWidget {
+  /* 配置 */
   final ZnkAuthConfig config;
-  AuthPage({Key key, this.config}) : super(key: key);
+  /* 数据库 */
+  final UserTBL userTBL;
+  AuthPage({Key key, this.config, this.userTBL}) : super(key: key);
 
   @override
   _AuthPageState createState() => _AuthPageState();
