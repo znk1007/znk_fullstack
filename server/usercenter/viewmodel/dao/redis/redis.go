@@ -1,19 +1,27 @@
 package redis
 
 import (
+	"fmt"
 	"path"
 	"runtime"
+
+	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
 )
 
-type conf struct {
+type redisConf struct {
+	Env  userconf.Env `json:"env"`
+	Host string       `json:"host"`
+	Port string       `json:"port"`
 }
 
-func init() {
+var rc redisConf
 
-}
-
+//Start 启动Redis
 func Start() {
-
+	switch userconf.GetEnv() {
+	case userconf.Dev:
+		fmt.Println()
+	}
 }
 
 //readFile 获取指定文件地址
