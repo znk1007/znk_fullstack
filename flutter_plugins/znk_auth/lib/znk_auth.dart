@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:znk_auth/controller/auth.dart';
 import 'package:znk_auth/model/delegate/auth.dart';
+import 'package:znk_auth/model/protos/generated/auth/user.pb.dart';
 
 export 'model/delegate/auth.dart';
+export 'model/protos/generated/auth/user.pb.dart';
 
 class ZnkAuth {
   /* 配置是否OK */
@@ -48,5 +50,9 @@ class ZnkAuth {
         builder: (context) => AuthPage(config: _config),
       ),
     );
+  }
+  /* 退出登录 */
+  static void logout(User user) {
+    
   }
 }

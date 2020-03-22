@@ -7,7 +7,7 @@ class UserTBL with ChangeNotifier {
   static final _dbName = 'user';
 
   /* 模型转换 */
-  static Map<String, dynamic> toMap(User user) {
+  Map<String, dynamic> toMap(User user) {
     var map = new Map<String, dynamic>();
     map['userID'] = user.userID;
     map['account'] = user.account;
@@ -21,7 +21,7 @@ class UserTBL with ChangeNotifier {
   }
 
   /* 字典转模型 */
-  static User fromMap(Map<String, dynamic> map) {
+  User fromMap(Map<String, dynamic> map) {
     User user = new User();
     user.userID = map['userID'] ?? '';
     user.account = map['account'] ?? '';
@@ -36,7 +36,7 @@ class UserTBL with ChangeNotifier {
   }
 
   /* 创建用户名 */
-  static Future<void> createUserTBL() async {
+  Future<void> createUserTBL() async {
     await SqliteDB.shared.createTable('''
     $_dbName (
       userID text not null primary key,
@@ -53,15 +53,17 @@ class UserTBL with ChangeNotifier {
   }
 
   /* 插入货更新数据 */
-  static Future<int> upsertUser(User user) async {
-    return await SqliteDB.shared.upsert(
+  Future<int> upsertUser(User user) async {
+    int state = await SqliteDB.shared.upsert(
       _dbName, 
-      UserTBL.toMap(user)
+      toMap(user)
     );
+    notifyListeners();
+    return state;
   }
 
   /* 删除指定用户 */
-  static Future<int> deleteUser(String userID) async {
+  Future<int> deleteUser(String userID) async {
     return await SqliteDB.shared.delete(
       _dbName, 
       where: 'userID = ?', 
@@ -79,10 +81,10 @@ class UserTBL with ChangeNotifier {
     if (userMap == null) {
       return null;
     }
-    return UserTBL.fromMap(userMap);
+    return fromMap(userMap);
   }
   /* 上次登录的用户 */
-  static Future<User> lastLoginUser() async {
+  Future<User> lastLoginUser() async {
     List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
       _dbName,
       orderBy: 'updatedAt DESC',
@@ -91,11 +93,11 @@ class UserTBL with ChangeNotifier {
     if (userMap == null) {
       return null;
     }
-    return UserTBL.fromMap(userMap);
+    return fromMap(userMap);
   }
 
   /* 当前登录用户 */
-  static Future<User> currentUser() async {
+  Future<User> currentUser() async {
     List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
       _dbName,
       where: 'isOnline = 1',
@@ -105,7 +107,7 @@ class UserTBL with ChangeNotifier {
     if (userMap == null) {
       return null;
     }
-    return UserTBL.fromMap(userMap);
+    return fromMap(userMap);
   }
 
 }
