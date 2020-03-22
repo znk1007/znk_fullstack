@@ -1,0 +1,28 @@
+{
+    "gorm":[
+        {
+            "env":"dev",
+            "host":"47.105.85.107",
+            "port":"3306",
+            "username":"root",
+            "password":"man_znk-1007",
+            "dialect":"mysql"
+        },
+        {
+            "env":"test",
+            "host":"47.105.85.107",
+            "port":"3306",
+            "username":"root",
+            "password":"man_znk-1007",
+            "dialect":"mysql"
+        },
+        {
+            "env":"prod",
+            "host":"47.105.85.107",
+            "port":"3306",
+            "username":"root",
+            "password":"man_znk-1007",
+            "dialect":"mysql"
+        }
+    ]
+}
