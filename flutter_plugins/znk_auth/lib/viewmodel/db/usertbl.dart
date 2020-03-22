@@ -62,7 +62,7 @@ class UserTBL with ChangeNotifier {
       whereArgs: [userID]
     );
   }
-
+  /* 查找用户 */
   Future<User> findUser(String userID) async {
     List<Map<String, dynamic>> users = await SqliteDB.shared.find(
       _dbName,
@@ -74,6 +74,10 @@ class UserTBL with ChangeNotifier {
       return null;
     }
     return UserTBL.fromMap(user);
+  }
+  
+  Future<User> newestUser() async {
+
   }
 
 }
