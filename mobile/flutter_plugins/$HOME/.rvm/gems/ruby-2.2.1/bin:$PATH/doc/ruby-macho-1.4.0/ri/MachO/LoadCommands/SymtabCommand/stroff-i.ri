@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"stroff:ETI".MachO::LoadCommands::SymtabCommand#stroff;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"0@return [Integer] the string table's offset;T:
+@fileI"lib/macho/load_commands.rb;T:0@omit_headings_from_table_of_contents_below0F@I"'MachO::LoadCommands::SymtabCommand;TcRDoc::NormalClass0

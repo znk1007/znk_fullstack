@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"sizeofcmds:ETI"*MachO::Headers::MachHeader#sizeofcmds;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"M@return [Integer] the size of all load commands, in bytes, in the Mach-O;T:
+@fileI"lib/macho/headers.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Headers::MachHeader;TcRDoc::NormalClass0

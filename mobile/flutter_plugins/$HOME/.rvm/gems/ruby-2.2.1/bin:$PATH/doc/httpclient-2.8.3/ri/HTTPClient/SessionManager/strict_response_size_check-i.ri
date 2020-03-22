@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"strict_response_size_check:ETI":HTTPClient::SessionManager#strict_response_size_check;TI"RW;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"cRaise BadResponseError if response size does not match with Content-Length header in response.;T:
+@fileI"lib/httpclient/session.rb;T:0@omit_headings_from_table_of_contents_below0F@I"HTTPClient::SessionManager;TcRDoc::NormalClass0

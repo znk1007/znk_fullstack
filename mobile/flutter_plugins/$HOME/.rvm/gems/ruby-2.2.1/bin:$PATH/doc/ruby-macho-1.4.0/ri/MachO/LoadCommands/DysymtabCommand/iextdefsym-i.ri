@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"iextdefsym:ETI"4MachO::LoadCommands::DysymtabCommand#iextdefsym;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I">@return [Integer] the index to externally defined symbols;T:
+@fileI"lib/macho/load_commands.rb;T:0@omit_headings_from_table_of_contents_below0F@I")MachO::LoadCommands::DysymtabCommand;TcRDoc::NormalClass0

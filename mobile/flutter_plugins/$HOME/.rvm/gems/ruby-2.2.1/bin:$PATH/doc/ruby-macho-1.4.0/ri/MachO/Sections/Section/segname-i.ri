@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"segname:ETI"%MachO::Sections::Section#segname;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"G@return [String] the name of the segment's section, including null;To:RDoc::Markup::Verbatim;	[I"pad bytes;T:@format0:
+@fileI"lib/macho/sections.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Sections::Section;TcRDoc::NormalClass0

@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"sandbox_root:ETI"8Pod::Generator::PrepareArtifactsScript#sandbox_root;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"9@return [Pathname] the root directory of the sandbox;T:
+@fileI"8lib/cocoapods/generator/prepare_artifacts_script.rb;T:0@omit_headings_from_table_of_contents_below0F@I"+Pod::Generator::PrepareArtifactsScript;TcRDoc::NormalClass0

@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"	size:ETI"!MachO::Headers::FatArch#size;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"=@return [Integer] the size, in bytes, of the Mach-O data;T:
+@fileI"lib/macho/headers.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Headers::FatArch;TcRDoc::NormalClass0

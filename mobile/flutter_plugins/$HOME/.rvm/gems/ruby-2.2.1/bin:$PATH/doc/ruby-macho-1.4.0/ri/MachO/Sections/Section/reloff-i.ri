@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"reloff:ETI"$MachO::Sections::Section#reloff;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"J@return [Integer] the file offset of the section's relocation entries;T:
+@fileI"lib/macho/sections.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Sections::Section;TcRDoc::NormalClass0

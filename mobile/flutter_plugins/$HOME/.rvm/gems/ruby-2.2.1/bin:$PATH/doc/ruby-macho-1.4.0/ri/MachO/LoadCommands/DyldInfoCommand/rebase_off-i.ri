@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"rebase_off:ETI"4MachO::LoadCommands::DyldInfoCommand#rebase_off;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"@@return [Integer] the file offset to the rebase information;T:
+@fileI"lib/macho/load_commands.rb;T:0@omit_headings_from_table_of_contents_below0F@I")MachO::LoadCommands::DyldInfoCommand;TcRDoc::NormalClass0

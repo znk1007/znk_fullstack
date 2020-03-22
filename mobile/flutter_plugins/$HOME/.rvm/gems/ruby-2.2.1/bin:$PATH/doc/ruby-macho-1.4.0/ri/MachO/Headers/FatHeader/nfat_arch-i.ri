@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"nfat_arch:ETI"(MachO::Headers::FatHeader#nfat_arch;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"U@return [Integer] the number of fat architecture structures following the header;T:
+@fileI"lib/macho/headers.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Headers::FatHeader;TcRDoc::NormalClass0

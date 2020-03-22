@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"sub_client:ETI"5MachO::LoadCommands::SubClientCommand#sub_client;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"3@return [LCStr] the subclient name as an LCStr;T:
+@fileI"lib/macho/load_commands.rb;T:0@omit_headings_from_table_of_contents_below0F@I"*MachO::LoadCommands::SubClientCommand;TcRDoc::NormalClass0

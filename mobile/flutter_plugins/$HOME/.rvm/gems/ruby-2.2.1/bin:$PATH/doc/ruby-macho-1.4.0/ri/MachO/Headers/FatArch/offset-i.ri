@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"offset:ETI"#MachO::Headers::FatArch#offset;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"J@return [Integer] the file offset to the beginning of the Mach-O data;T:
+@fileI"lib/macho/headers.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Headers::FatArch;TcRDoc::NormalClass0

@@ -1,0 +1,2 @@
+U:RDoc::Attr[iI"reserved1:ETI"'MachO::Sections::Section#reserved1;TI"R;T:publico:RDoc::Markup::Document:@parts[o:RDoc::Markup::Paragraph;	[I"2@return [void] reserved (for offset or index);T:
+@fileI"lib/macho/sections.rb;T:0@omit_headings_from_table_of_contents_below0F@I"MachO::Sections::Section;TcRDoc::NormalClass0
