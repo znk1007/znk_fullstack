@@ -16,6 +16,7 @@ const User$json = const {
     const {'1': 'photo', '3': 6, '4': 1, '5': 9, '10': 'photo'},
     const {'1': 'createdAt', '3': 7, '4': 1, '5': 9, '10': 'createdAt'},
     const {'1': 'updatedAt', '3': 8, '4': 1, '5': 9, '10': 'updatedAt'},
+    const {'1': 'isOnline', '3': 9, '4': 1, '5': 5, '10': 'isOnline'},
   ],
 };
 

@@ -29,6 +29,9 @@ class UserTBL with ChangeNotifier {
     user.photo = map['photo'] ?? '';
     user.phone = map['phone'] ?? '';
     user.email = map['email'] ?? '';
+    user.createdAt = map['createdAt'] ?? '';
+    user.updatedAt = map['updatedAt'] ?? '';
+    user.isOnline = map['isOnline'] ?? 0;
     return user;
   }
 
@@ -42,6 +45,9 @@ class UserTBL with ChangeNotifier {
       photo text not null,
       phone text not null, 
       email text not null,
+      createdAt text not null,
+      updatedAt text not null,
+      isOnline integer,
     )
     ''');
   }
@@ -64,20 +70,42 @@ class UserTBL with ChangeNotifier {
   }
   /* 查找用户 */
   Future<User> findUser(String userID) async {
-    List<Map<String, dynamic>> users = await SqliteDB.shared.find(
+    List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
       _dbName,
       where: 'userID = ?',
       whereArgs: [userID],
     );
-    Map<String, dynamic> user = users.first;
-    if (user == null) {
+    Map<String, dynamic> userMap = userMaps.first;
+    if (userMap == null) {
       return null;
     }
-    return UserTBL.fromMap(user);
+    return UserTBL.fromMap(userMap);
   }
-  
-  Future<User> newestUser() async {
+  /* 上次登录的用户 */
+  static Future<User> lastLoginUser() async {
+    List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
+      _dbName,
+      orderBy: 'updatedAt DESC',
+    );
+    Map<String, dynamic> userMap = userMaps.first;
+    if (userMap == null) {
+      return null;
+    }
+    return UserTBL.fromMap(userMap);
+  }
 
+  /* 当前登录用户 */
+  static Future<User> currentUser() async {
+    List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
+      _dbName,
+      where: 'isOnline = 1',
+      orderBy: 'updatedAt DESC',
+    );
+    Map<String, dynamic> userMap = userMaps.first;
+    if (userMap == null) {
+      return null;
+    }
+    return UserTBL.fromMap(userMap);
   }
 
 }

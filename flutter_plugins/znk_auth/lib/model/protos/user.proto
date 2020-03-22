@@ -9,4 +9,5 @@ message User {
     string photo = 6;
     string createdAt = 7;
     string updatedAt = 8;
+    int32 isOnline = 9;
 }

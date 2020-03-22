@@ -19,6 +19,7 @@ class User extends $pb.GeneratedMessage {
     ..aOS(6, 'photo')
     ..aOS(7, 'createdAt', protoName: 'createdAt')
     ..aOS(8, 'updatedAt', protoName: 'updatedAt')
+    ..a<$core.int>(9, 'isOnline', $pb.PbFieldType.O3, protoName: 'isOnline')
     ..hasRequiredFields = false
   ;
 
@@ -108,5 +109,14 @@ class User extends $pb.GeneratedMessage {
   $core.bool hasUpdatedAt() => $_has(7);
   @$pb.TagNumber(8)
   void clearUpdatedAt() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.int get isOnline => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set isOnline($core.int v) { $_setSignedInt32(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasIsOnline() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearIsOnline() => clearField(9);
 }
 
