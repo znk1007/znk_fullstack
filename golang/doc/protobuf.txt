@@ -156,22 +156,22 @@ message Foo {
 对于Python ， 一点点不同 —– Python编译器生成有一个静态的对每个消息的描述器的模块。然后，用一个元类在运行时创建必要的Python数据访问类。
 对于Go ， 编译器对文件中的每个消息生成一个.pb.go文件。
 标量
-proto	Note	C++	Java	Python	Go
-float		float	float	float	*float32
-double		double	double	float	*float64
-int32	变长编码. 编码负数效率底下– 打算使用负数的话请使用 sint32.	int32	int	int	*int32
-int64	变长编码. 编码负数效率底下– 打算使用负数的话请使用 sint64.	int64	long	int/long	*int64
-uint32	变长编码.	uint32	int	int/long	*uint32
-uint64	变长编码.	uint64	long	int/long	*uint64
-sint32	U变长编码. 数值有符号，负数编码效率高于int32	int32	int	int	*int32
-sint64	U变长编码. 数值有符号，负数编码效率高于int64	int64	long	int/long	*int64
-fixed32	固定4byte， 如果数值经常大于2的28次方的话效率高于uint32.	uint32	int	int	*uint32
-fixed64	固定8byte， 如果数值经常大于2的56次方的话效率高于uint64.	uint64	long	int/long	*uint64
-sfixed32	固定4byte.	int32	int	int	*int32
-sfixed64	固定8byte.	int64	long	int/long	*int64
-bool		bool	boolean	bool	*bool
-string	字符串内容应该是 UTF-8 编码或者7-bit ASCII 文本.	string	String	str/unicode	*string
-bytes	任意二进制数据.	string	ByteString	str	[]byte
+proto	Note						C++	Java		Python		Go
+float							float	float		float		float32
+double							double	double		float		float64
+int32	变长编码. 编码负数效率底下– 打算使用负数的话请使用sint32.	int32	int		int		int32
+int64	变长编码. 编码负数效率底下– 打算使用负数的话请使用sint64.	int64	long		int/long	int64
+uint32	变长编码.						uint32	int		int/long	uint32
+uint64	变长编码.						uint64	long		int/long	uint64
+sint32	U变长编码. 数值有符号，负数编码效率高于int32		int32	int		int		int32
+sint64	U变长编码. 数值有符号，负数编码效率高于int64		int64	long		int/long	int64
+fixed32	固定4byte， 如果数值经常大于2的28次方的话效率高于uint32.	uint32	int		int		uint32
+fixed64	固定8byte， 如果数值经常大于2的56次方的话效率高于uint64.	uint64	long		int/long	uint64
+sfixed32固定4byte.					int32	int		int		int32
+sfixed64固定8byte.					int64	long		int/long	int64
+bool							bool	boolean		bool		bool
+string	字符串内容应该是 UTF-8 编码或者7-bit ASCII 文本.	string	String		str/unicode	string
+bytes	任意二进制数据.					string	ByteString	str		[]byte
 optional字段和默认初始值
 按照上面提到的，元素可以被标记为optional的。一个正确格式的消息可以有也可以没有包含这个可选的字段。再解析消息的时候，如果个可选的字段没有被设置，那么他的值就会被设置成默认值。默认值可以作为消息描述的一不部分 ：
 

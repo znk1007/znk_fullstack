@@ -1,53 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:znk_auth/model/protos/generated/auth/user.pb.dart';
 import 'sqlitedb.dart';
 ///UserModel 用户模型
-class UserModel with ChangeNotifier {
-  ///用户唯一id
-  String userId;
-  ///用户账号
-  String account;
-  ///用户昵称
-  String username;
-  ///用户头像
-  String photo;
-  ///手机号
-  String phone;
-  ///邮箱
-  String email;
+class UserTBL with ChangeNotifier {
 
   static final _dbName = 'user';
 
   /* 模型转换 */
-  Map<String, dynamic> toMap() {
+  static Map<String, dynamic> toMap(User user) {
     var map = new Map<String, dynamic>();
-    map['userId'] = userId;
-    map['account'] = account;
-    map['username'] = username;
-    map['photo'] = photo;
-    map['phone'] = phone;
-    map['email'] = email;
+    map['userID'] = user.userID;
+    map['account'] = user.account;
+    map['nickname'] = user.nickname;
+    map['photo'] = user.photo;
+    map['phone'] = user.phone;
+    map['email'] = user.email;
+    map['createdAt'] = user.createdAt;
+    map['updatedAt'] = DateTime.now().toString();
     return map;
   }
 
   /* 字典转模型 */
-  static UserModel fromMap(Map<String, dynamic> map) {
-    UserModel userModel = new UserModel();
-    userModel.userId = map['userId'] ?? '';
-    userModel.account = map['account'] ?? '';
-    userModel.username = map['username'] ?? '';
-    userModel.photo = map['photo'] ?? '';
-    userModel.phone = map['phone'] ?? '';
-    userModel.email = map['email'] ?? '';
-    return userModel;
+  static User fromMap(Map<String, dynamic> map) {
+    User user = new User();
+    user.userID = map['userID'] ?? '';
+    user.account = map['account'] ?? '';
+    user.nickname = map['nickname'] ?? '';
+    user.photo = map['photo'] ?? '';
+    user.phone = map['phone'] ?? '';
+    user.email = map['email'] ?? '';
+    return user;
   }
 
   /* 创建用户名 */
-  Future<void> createUserTBL() async {
+  static Future<void> createUserTBL() async {
     await SqliteDB.shared.createTable('''
     $_dbName (
-      userId text not null primary key,
+      userID text not null primary key,
       account text not null,
-      username text not null,
+      nickname text not null,
       photo text not null,
       phone text not null, 
       email text not null,
@@ -56,33 +47,33 @@ class UserModel with ChangeNotifier {
   }
 
   /* 插入货更新数据 */
-  Future<int> upsertUser(UserModel userModel) async {
+  static Future<int> upsertUser(User user) async {
     return await SqliteDB.shared.upsert(
       _dbName, 
-      userModel.toMap()
+      UserTBL.toMap(user)
     );
   }
 
   /* 删除指定用户 */
-  Future<int> deleteUser(String userId) async {
+  static Future<int> deleteUser(String userID) async {
     return await SqliteDB.shared.delete(
       _dbName, 
-      where: 'userId = ?', 
-      whereArgs: [userId]
+      where: 'userID = ?', 
+      whereArgs: [userID]
     );
   }
 
-  Future<UserModel> findUser(String userId) async {
+  Future<User> findUser(String userID) async {
     List<Map<String, dynamic>> users = await SqliteDB.shared.find(
       _dbName,
-      where: 'userId = ?',
-      whereArgs: [userId],
+      where: 'userID = ?',
+      whereArgs: [userID],
     );
     Map<String, dynamic> user = users.first;
     if (user == null) {
       return null;
     }
-    return UserModel.fromMap(user);
+    return UserTBL.fromMap(user);
   }
 
 }

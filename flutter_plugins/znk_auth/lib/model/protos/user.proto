@@ -1,0 +1,12 @@
+syntax="proto3";
+
+message User {
+    string userID = 1;
+    string account = 2;
+    string nickname = 3;
+    string phone = 4;
+    string email = 5;
+    string photo = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+}
