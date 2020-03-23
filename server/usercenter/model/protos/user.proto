@@ -1,6 +1,6 @@
 syntax = "proto3";
 package user;
-option go_package = "user";
+option go_package = "userproto";
 
 enum Permission {
     super = 0;
