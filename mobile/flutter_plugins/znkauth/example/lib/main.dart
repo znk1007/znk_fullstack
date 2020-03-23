@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:znkauth/znkauth.dart';
 
+import 'home.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -27,7 +29,7 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await Znkauth.platformVersion;
+      platformVersion = await ZnkAuth.platformVersion;
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -45,14 +47,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
-      ),
+      // routes: ,
+      home: HomePage(),
+      routes: ZnkAuth.znkRoute(context),
     );
   }
 }
