@@ -18,6 +18,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await Znkauth.platformVersion, '42');
+    expect(await ZnkAuth.platformVersion, '42');
   });
 }
