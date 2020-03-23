@@ -13,13 +13,13 @@ import 'package:grpc/service_api.dart' as $grpc;
 import 'regist.pb.dart' as $1;
 export 'regist.pb.dart';
 
-class RegistClient extends $grpc.Client {
+class RegistSrvClient extends $grpc.Client {
   static final _$userReigst = $grpc.ClientMethod<$1.RegistReq, $1.RegistRes>(
-      '/regist.Regist/UserReigst',
+      '/regist.RegistSrv/UserReigst',
       ($1.RegistReq value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $1.RegistRes.fromBuffer(value));
 
-  RegistClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
+  RegistSrvClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
       : super(channel, options: options);
 
   $grpc.ResponseFuture<$1.RegistRes> userReigst($1.RegistReq request,
@@ -31,10 +31,10 @@ class RegistClient extends $grpc.Client {
   }
 }
 
-abstract class RegistServiceBase extends $grpc.Service {
-  $core.String get $name => 'regist.Regist';
+abstract class RegistSrvServiceBase extends $grpc.Service {
+  $core.String get $name => 'regist.RegistSrv';
 
-  RegistServiceBase() {
+  RegistSrvServiceBase() {
     $addMethod($grpc.ServiceMethod<$1.RegistReq, $1.RegistRes>(
         'UserReigst',
         userReigst_Pre,

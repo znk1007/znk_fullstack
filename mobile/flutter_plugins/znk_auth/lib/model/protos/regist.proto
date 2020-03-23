@@ -1,7 +1,7 @@
 syntax = "proto3";
 package regist;
 option go_package = "userproto";
-service Regist {
+service RegistSrv {
     //用户注册
     rpc UserReigst (RegistReq) returns (RegistRes);
 }
