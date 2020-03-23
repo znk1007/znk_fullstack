@@ -1,0 +1,17 @@
+syntax = "proto3";
+package timestamp;
+option go_package = "userproto";
+
+service TimestampSrv {
+    rpc getTimestamp (TSReq) returns (TSReq);
+}
+
+message TSReq {
+    //平台类型
+    string platform = 1;
+}
+
+message TSRes {
+    //时间戳
+    int64 timestamp = 1;
+}

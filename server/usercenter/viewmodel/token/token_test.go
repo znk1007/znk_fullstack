@@ -1,6 +1,8 @@
-package token
+package usertoken
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestCreateToken(t *testing.T) {
 	auth := map[string]interface{}{
@@ -10,7 +12,7 @@ func TestCreateToken(t *testing.T) {
 		"email":    "xxxx@xxx.com",
 		"phone":    "123456",
 	}
-	tkStr, e := CreateToken(auth)
+	tkStr, e := CreateToken(0, auth)
 	if e != nil {
 		t.Error("create token failed: ", e)
 		return

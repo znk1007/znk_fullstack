@@ -1,4 +1,4 @@
-package token
+package usertoken
 
 import (
 	"fmt"
@@ -9,15 +9,18 @@ import (
 )
 
 //CreateToken 生成token字符串
-func CreateToken(params map[string]interface{}) (token string, err error) {
+func CreateToken(expired time.Duration, params map[string]interface{}) (token string, err error) {
 	// jwt.MapClaims
 	// clms := jwt.StandardClaims{
 	// 	Issuer:    "znk_1007",
 	// 	ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(),
 	// }
-
+	tmpExp := expired
+	if tmpExp == 0 {
+		tmpExp = time.Hour * 24 * 7
+	}
 	mclms := jwt.MapClaims{
-		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
+		"exp": time.Now().Add(tmpExp).Unix(),
 	}
 	pm := reflect.ValueOf(params)
 	if pm.Kind() == reflect.Map {
@@ -67,4 +70,9 @@ func ParseToken(token string) (res map[string]interface{}, err error) {
 
 	}
 	return
+}
+
+//ExpiredDuration 两分钟响应超时失效
+func ExpiredDuration() time.Duration {
+	return time.Duration(time.Minute * 2)
 }
