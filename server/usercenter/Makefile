@@ -5,7 +5,7 @@ default: clean generated
 
 generated:
 	mkdir -p model/protos/generated
-	protoc -I=model/protos --go_out=grpc:model/protos/generated model/protos/*.proto
+	protoc -I=model/protos --go_out=plugins=grpc:model/protos/generated model/protos/*.proto
 
 clean:
 	rm -rf build model/protos/generated

@@ -3,7 +3,7 @@ package timestamp;
 option go_package = "userproto";
 
 service TimestampSrv {
-    rpc getTimestamp (TSReq) returns (TSReq);
+    rpc userTimestamp (TSReq) returns (TSReq) {}
 }
 
 message TSReq {

@@ -4,8 +4,12 @@
 package userproto
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -128,13 +132,94 @@ func init() {
 }
 
 var fileDescriptor_67c21677aa7f4e4f = []byte{
-	// 128 bytes of a gzipped FileDescriptorProto
+	// 132 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xce, 0xc9, 0x4f, 0xcf,
 	0xcc, 0xd3, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x05, 0x73, 0x94, 0xac, 0xb8, 0x38, 0x7c,
 	0x40, 0x8c, 0xa0, 0xd4, 0x42, 0x21, 0x09, 0x2e, 0xf6, 0xc4, 0xe4, 0xe4, 0xfc, 0xd2, 0xbc, 0x12,
 	0x09, 0x46, 0x05, 0x46, 0x0d, 0xce, 0x20, 0x18, 0x57, 0x48, 0x84, 0x8b, 0xb5, 0x24, 0x3f, 0x3b,
-	0x35, 0x4f, 0x82, 0x09, 0x2c, 0x0e, 0xe1, 0x20, 0xe9, 0x2d, 0x26, 0x55, 0xaf, 0x91, 0x29, 0x54,
-	0x6f, 0x70, 0x51, 0x99, 0x90, 0x26, 0x17, 0xc4, 0x31, 0x42, 0xfc, 0x7a, 0x10, 0x17, 0xc2, 0x5c,
-	0x24, 0x85, 0x2e, 0xe0, 0xc4, 0x1d, 0xc5, 0x59, 0x5a, 0x9c, 0x5a, 0x04, 0xf6, 0x42, 0x12, 0x1b,
-	0x98, 0x32, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0xdc, 0x8c, 0xfb, 0xca, 0xd8, 0x00, 0x00, 0x00,
+	0x35, 0x4f, 0x82, 0x09, 0x2c, 0x0e, 0xe1, 0x20, 0xe9, 0x2d, 0x26, 0x55, 0xaf, 0x91, 0x35, 0x54,
+	0x6f, 0x70, 0x51, 0x99, 0x90, 0x3e, 0x17, 0x67, 0x69, 0x71, 0x6a, 0x11, 0x98, 0x2f, 0xc4, 0xaf,
+	0x07, 0x71, 0x25, 0xcc, 0x55, 0x52, 0xe8, 0x02, 0x4a, 0x0c, 0x4e, 0xdc, 0x51, 0x60, 0x0d, 0x60,
+	0x8f, 0x24, 0xb1, 0x81, 0x29, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x12, 0xb0, 0xcc, 0x1d,
+	0xde, 0x00, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// LoginSrvClient is the client API for LoginSrv service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type LoginSrvClient interface {
+	UserLogin(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginReq, error)
+}
+
+type loginSrvClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewLoginSrvClient(cc grpc.ClientConnInterface) LoginSrvClient {
+	return &loginSrvClient{cc}
+}
+
+func (c *loginSrvClient) UserLogin(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginReq, error) {
+	out := new(LoginReq)
+	err := c.cc.Invoke(ctx, "/login.LoginSrv/userLogin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// LoginSrvServer is the server API for LoginSrv service.
+type LoginSrvServer interface {
+	UserLogin(context.Context, *LoginReq) (*LoginReq, error)
+}
+
+// UnimplementedLoginSrvServer can be embedded to have forward compatible implementations.
+type UnimplementedLoginSrvServer struct {
+}
+
+func (*UnimplementedLoginSrvServer) UserLogin(ctx context.Context, req *LoginReq) (*LoginReq, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserLogin not implemented")
+}
+
+func RegisterLoginSrvServer(s *grpc.Server, srv LoginSrvServer) {
+	s.RegisterService(&_LoginSrv_serviceDesc, srv)
+}
+
+func _LoginSrv_UserLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginSrvServer).UserLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/login.LoginSrv/UserLogin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginSrvServer).UserLogin(ctx, req.(*LoginReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _LoginSrv_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "login.LoginSrv",
+	HandlerType: (*LoginSrvServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "userLogin",
+			Handler:    _LoginSrv_UserLogin_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "login.proto",
 }

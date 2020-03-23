@@ -4,8 +4,12 @@
 package userproto
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -134,8 +138,90 @@ var fileDescriptor_33eb661bf4b357e0 = []byte{
 	0x83, 0xc0, 0xac, 0xa0, 0xd4, 0x42, 0x21, 0x09, 0x2e, 0xf6, 0xc4, 0xe4, 0xe4, 0xfc, 0xd2, 0xbc,
 	0x12, 0x09, 0x46, 0x05, 0x46, 0x0d, 0xce, 0x20, 0x18, 0x57, 0x48, 0x84, 0x8b, 0xb5, 0x24, 0x3f,
 	0x3b, 0x35, 0x4f, 0x82, 0x09, 0x2c, 0x0e, 0xe1, 0x20, 0x6b, 0x2e, 0x26, 0x46, 0x33, 0x0b, 0x92,
-	0x66, 0x23, 0x7b, 0x98, 0xe6, 0xe0, 0xa2, 0x32, 0x21, 0x23, 0x2e, 0xae, 0xd0, 0xe2, 0xd4, 0xa2,
+	0x66, 0x23, 0x47, 0x98, 0xe6, 0xe0, 0xa2, 0x32, 0x21, 0x13, 0x2e, 0xae, 0xd2, 0xe2, 0xd4, 0xa2,
 	0xa0, 0xd4, 0xcc, 0xf4, 0xe2, 0x12, 0x21, 0x41, 0x3d, 0xa8, 0x5b, 0xe1, 0x4e, 0x93, 0xc2, 0x10,
-	0x2a, 0x76, 0xe2, 0x8e, 0xe2, 0x2c, 0x2d, 0x4e, 0x2d, 0x02, 0xfb, 0x27, 0x89, 0x0d, 0x4c, 0x19,
-	0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xb8, 0x09, 0x09, 0xb7, 0xe6, 0x00, 0x00, 0x00,
+	0x2a, 0x56, 0x62, 0x70, 0xe2, 0x8e, 0xe2, 0x04, 0xe9, 0x02, 0xfb, 0x28, 0x89, 0x0d, 0x4c, 0x19,
+	0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xf5, 0x7e, 0xc1, 0xae, 0xe8, 0x00, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// RegistSrvClient is the client API for RegistSrv service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type RegistSrvClient interface {
+	//用户注册
+	UserReigst(ctx context.Context, in *RegistReq, opts ...grpc.CallOption) (*RegistRes, error)
+}
+
+type registSrvClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewRegistSrvClient(cc grpc.ClientConnInterface) RegistSrvClient {
+	return &registSrvClient{cc}
+}
+
+func (c *registSrvClient) UserReigst(ctx context.Context, in *RegistReq, opts ...grpc.CallOption) (*RegistRes, error) {
+	out := new(RegistRes)
+	err := c.cc.Invoke(ctx, "/regist.RegistSrv/userReigst", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// RegistSrvServer is the server API for RegistSrv service.
+type RegistSrvServer interface {
+	//用户注册
+	UserReigst(context.Context, *RegistReq) (*RegistRes, error)
+}
+
+// UnimplementedRegistSrvServer can be embedded to have forward compatible implementations.
+type UnimplementedRegistSrvServer struct {
+}
+
+func (*UnimplementedRegistSrvServer) UserReigst(ctx context.Context, req *RegistReq) (*RegistRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserReigst not implemented")
+}
+
+func RegisterRegistSrvServer(s *grpc.Server, srv RegistSrvServer) {
+	s.RegisterService(&_RegistSrv_serviceDesc, srv)
+}
+
+func _RegistSrv_UserReigst_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegistReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistSrvServer).UserReigst(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/regist.RegistSrv/UserReigst",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistSrvServer).UserReigst(ctx, req.(*RegistReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _RegistSrv_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "regist.RegistSrv",
+	HandlerType: (*RegistSrvServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "userReigst",
+			Handler:    _RegistSrv_UserReigst_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "regist.proto",
 }

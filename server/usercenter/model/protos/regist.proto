@@ -3,7 +3,7 @@ package regist;
 option go_package = "userproto";
 service RegistSrv {
     //用户注册
-    rpc UserReigst (RegistReq) returns (RegistRes);
+    rpc userReigst (RegistReq) returns (RegistRes) {}
 }
 
 message RegistReq {

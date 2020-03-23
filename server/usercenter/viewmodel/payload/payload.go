@@ -1,4 +1,4 @@
-package payload
+package userpayload
 
 //Job 执行事务接口
 type Job interface {
