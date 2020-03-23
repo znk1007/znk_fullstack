@@ -40,8 +40,8 @@ func readFile(relativePath string) string {
 	return path.Join(path.Dir(curPath) + "/" + relativePath)
 }
 
-//CACredentials ca安全认证
-func CACredentials() (credentials.TransportCredentials, error) {
+//CATLSCredentials ca证书tls安全认证
+func CATLSCredentials() (credentials.TransportCredentials, error) {
 	cert, err := tls.LoadX509KeyPair(tc.srvPemfile, tc.srvKeyfile)
 	if err != nil {
 		log.Info().Msg(err.Error())
@@ -52,4 +52,24 @@ func CACredentials() (credentials.TransportCredentials, error) {
 		log.Info().Msg("set x509 pem failed")
 		return nil, errors.New("set x509 pem failed")
 	}
+	tcl := credentials.NewTLS(
+		&tls.Config{
+			Certificates: []tls.Certificate{
+				cert,
+			},
+			ClientAuth: tls.RequireAndVerifyClientCert,
+			ClientCAs:  certPool,
+		},
+	)
+	return tcl, nil
+}
+
+//TLSCredentials tls安全验证
+func TLSCredentials() (credentials.TransportCredentials, error) {
+	tcl, err := credentials.NewServerTLSFromFile(tc.srvPemfile, tc.srvKeyfile)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		return nil, err
+	}
+	return tcl, nil
 }

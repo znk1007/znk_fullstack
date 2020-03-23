@@ -9,8 +9,12 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'user.pbenum.dart';
+
+export 'user.pbenum.dart';
+
 class User extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('User', createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('User', package: const $pb.PackageName('user'), createEmptyInstance: create)
     ..aOS(1, 'userID', protoName: 'userID')
     ..aOS(2, 'account')
     ..aOS(3, 'nickname')
@@ -20,6 +24,7 @@ class User extends $pb.GeneratedMessage {
     ..aOS(7, 'createdAt', protoName: 'createdAt')
     ..aOS(8, 'updatedAt', protoName: 'updatedAt')
     ..a<$core.int>(9, 'online', $pb.PbFieldType.O3)
+    ..e<Permission>(10, 'permission', $pb.PbFieldType.OE, defaultOrMaker: Permission.super_, valueOf: Permission.valueOf, enumValues: Permission.values)
     ..hasRequiredFields = false
   ;
 
@@ -118,5 +123,14 @@ class User extends $pb.GeneratedMessage {
   $core.bool hasOnline() => $_has(8);
   @$pb.TagNumber(9)
   void clearOnline() => clearField(9);
+
+  @$pb.TagNumber(10)
+  Permission get permission => $_getN(9);
+  @$pb.TagNumber(10)
+  set permission(Permission v) { setField(10, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasPermission() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearPermission() => clearField(10);
 }
 
