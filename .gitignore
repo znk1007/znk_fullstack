@@ -12,3 +12,10 @@
 /flutter_plugins/znk_auth/example/.packages
 /flutter_plugins/znk_auth/example/ios
 /flutter_plugins/znk_auth/example/build
+/flutter_plugins/znkauth/.idea/*
+/flutter_plugins/znkauth/.dart_tool
+/flutter_plugins/znkauth/.packages
+/flutter_plugins/znkauth/example/.dart_tool
+/flutter_plugins/znkauth/example/.packages
+/flutter_plugins/znkauth/example/ios
+/flutter_plugins/znkauth/example/build
