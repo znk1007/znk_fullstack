@@ -15,7 +15,7 @@ export 'regist.pb.dart';
 
 class RegistSrvClient extends $grpc.Client {
   static final _$userReigst = $grpc.ClientMethod<$1.RegistReq, $1.RegistRes>(
-      '/regist.RegistSrv/UserReigst',
+      '/regist.RegistSrv/userReigst',
       ($1.RegistReq value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $1.RegistRes.fromBuffer(value));
 
@@ -36,7 +36,7 @@ abstract class RegistSrvServiceBase extends $grpc.Service {
 
   RegistSrvServiceBase() {
     $addMethod($grpc.ServiceMethod<$1.RegistReq, $1.RegistRes>(
-        'UserReigst',
+        'userReigst',
         userReigst_Pre,
         false,
         false,

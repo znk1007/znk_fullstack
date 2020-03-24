@@ -12,7 +12,7 @@ import 'package:protobuf/protobuf.dart' as $pb;
 class RegistReq extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('RegistReq', package: const $pb.PackageName('regist'), createEmptyInstance: create)
     ..aOS(1, 'account')
-    ..aOS(2, 'sign')
+    ..aOS(2, 'token')
     ..hasRequiredFields = false
   ;
 
@@ -41,19 +41,19 @@ class RegistReq extends $pb.GeneratedMessage {
   void clearAccount() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get sign => $_getSZ(1);
+  $core.String get token => $_getSZ(1);
   @$pb.TagNumber(2)
-  set sign($core.String v) { $_setString(1, v); }
+  set token($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasSign() => $_has(1);
+  $core.bool hasToken() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSign() => clearField(2);
+  void clearToken() => clearField(2);
 }
 
 class RegistRes extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('RegistRes', package: const $pb.PackageName('regist'), createEmptyInstance: create)
     ..aOS(1, 'account')
-    ..aOS(4, 'sign')
+    ..aOS(4, 'token')
     ..hasRequiredFields = false
   ;
 
@@ -82,12 +82,12 @@ class RegistRes extends $pb.GeneratedMessage {
   void clearAccount() => clearField(1);
 
   @$pb.TagNumber(4)
-  $core.String get sign => $_getSZ(1);
+  $core.String get token => $_getSZ(1);
   @$pb.TagNumber(4)
-  set sign($core.String v) { $_setString(1, v); }
+  set token($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(4)
-  $core.bool hasSign() => $_has(1);
+  $core.bool hasToken() => $_has(1);
   @$pb.TagNumber(4)
-  void clearSign() => clearField(4);
+  void clearToken() => clearField(4);
 }
 

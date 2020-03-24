@@ -14,17 +14,17 @@ import 'login.pb.dart' as $0;
 export 'login.pb.dart';
 
 class LoginSrvClient extends $grpc.Client {
-  static final _$login = $grpc.ClientMethod<$0.LoginReq, $0.LoginReq>(
-      '/login.LoginSrv/login',
+  static final _$userLogin = $grpc.ClientMethod<$0.LoginReq, $0.LoginReq>(
+      '/login.LoginSrv/userLogin',
       ($0.LoginReq value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.LoginReq.fromBuffer(value));
 
   LoginSrvClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
       : super(channel, options: options);
 
-  $grpc.ResponseFuture<$0.LoginReq> login($0.LoginReq request,
+  $grpc.ResponseFuture<$0.LoginReq> userLogin($0.LoginReq request,
       {$grpc.CallOptions options}) {
-    final call = $createCall(_$login, $async.Stream.fromIterable([request]),
+    final call = $createCall(_$userLogin, $async.Stream.fromIterable([request]),
         options: options);
     return $grpc.ResponseFuture(call);
   }
@@ -35,18 +35,19 @@ abstract class LoginSrvServiceBase extends $grpc.Service {
 
   LoginSrvServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.LoginReq, $0.LoginReq>(
-        'login',
-        login_Pre,
+        'userLogin',
+        userLogin_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $0.LoginReq.fromBuffer(value),
         ($0.LoginReq value) => value.writeToBuffer()));
   }
 
-  $async.Future<$0.LoginReq> login_Pre(
+  $async.Future<$0.LoginReq> userLogin_Pre(
       $grpc.ServiceCall call, $async.Future<$0.LoginReq> request) async {
-    return login(call, await request);
+    return userLogin(call, await request);
   }
 
-  $async.Future<$0.LoginReq> login($grpc.ServiceCall call, $0.LoginReq request);
+  $async.Future<$0.LoginReq> userLogin(
+      $grpc.ServiceCall call, $0.LoginReq request);
 }

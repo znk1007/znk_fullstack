@@ -2,7 +2,7 @@ syntax = "proto3";
 package login;
 option go_package = "userproto";
 service LoginSrv {
-    rpc login (LoginReq) returns (LoginReq);
+    rpc userLogin (LoginReq) returns (LoginReq) {}
 }
 
 message LoginReq {
