@@ -35,6 +35,14 @@ func (rs *registService) run() {
 	}
 }
 
+type registJob struct {
+	req *userproto.RegistReq
+}
+
+func (j registJob) Do() {
+
+}
+
 //UserReigst 注册
 func (rs *registService) UserReigst(context.Context, *userproto.RegistReq) (*userproto.RegistRes, error) {
 	return nil, errors.New("regist failed")

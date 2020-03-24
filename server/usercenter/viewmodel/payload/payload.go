@@ -1,5 +1,12 @@
 package userpayload
 
+//Pool 事务池
+var Pool WorkerPool
+
+func init() {
+	workLen := 100
+}
+
 //Job 执行事务接口
 type Job interface {
 	Do()
