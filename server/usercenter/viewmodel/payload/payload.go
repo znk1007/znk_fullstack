@@ -1,5 +1,6 @@
 package userpayload
 
+//https://blog.51cto.com/11140372/2342953?source=dra
 //Pool 事务池
 var Pool WorkerPool
 
