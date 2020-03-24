@@ -5,6 +5,8 @@ var Pool WorkerPool
 
 func init() {
 	workLen := 100
+	Pool = CreateWorkerPool(workLen)
+	Pool.Run()
 }
 
 //Job 执行事务接口
@@ -53,6 +55,7 @@ func (w Worker) Stop() {
 	}()
 }
 
+//WorkerPool 事务池
 type WorkerPool struct {
 	maxWorker   int
 	WorkerQueue chan chan Job

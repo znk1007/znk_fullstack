@@ -3,47 +3,43 @@ package usernet
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
-)
-
-var (
-	reqChan chan *userproto.RegistReq
-	resChan chan *userproto.RegistRes
+	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
+	"google.golang.org/grpc"
 )
 
 var rs *registService
 
 func init() {
-	reqChan = make(chan *userproto.RegistReq)
-	resChan = make(chan *userproto.RegistRes)
-	rs = &registService{}
-	go rs.run()
+	rs = &registService{
+		reqChan: make(chan *userproto.RegistReq),
+		resChan: make(chan *userproto.RegistRes),
+	}
 }
 
 //RegistService 注册
 type registService struct {
-}
-
-func (rs *registService) run() {
-	for {
-		select {
-		case req := <-reqChan:
-			fmt.Println(req)
-		}
-	}
+	reqChan chan *userproto.RegistReq
+	resChan chan *userproto.RegistRes
 }
 
 type registJob struct {
 	req *userproto.RegistReq
 }
 
-func (j registJob) Do() {
+func (s *registService) Do() {
 
 }
 
+//RegisterRegistServer 注册到注册请求服务
+func RegisterRegistServer(srv *grpc.Server) {
+	userproto.RegisterRegistSrvServer(srv, rs)
+}
+
 //UserReigst 注册
-func (rs *registService) UserReigst(context.Context, *userproto.RegistReq) (*userproto.RegistRes, error) {
+func (s *registService) UserReigst(ctx context.Context, req *userproto.RegistReq) (*userproto.RegistRes, error) {
+	rs.reqChan <- req
+	userpayload.Pool.Write(rs)
 	return nil, errors.New("regist failed")
 }
