@@ -12,6 +12,7 @@ class CryptManager {
   /* 加密 */
   static String encrypt(String src){
     final encrypted = encrypter.encrypt(src, iv: _iv);
+    print('encrypted: ${encrypted.base16.toString()}');
     return encrypted.base64.toString();
   }
   /* 解密 */
