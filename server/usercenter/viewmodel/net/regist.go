@@ -3,8 +3,11 @@ package usernet
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
 
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	"google.golang.org/grpc"
 )
@@ -36,6 +39,47 @@ func (s registService) handleRegist() {
 	req := s.req
 	acc := req.GetAccount()
 	fmt.Println(acc)
+
+}
+
+/*
+参数密码：password[CBCEncrypt]，
+设备ID：deviceID，
+平台：platform[web,iOS,Android]，
+时间戳：timestamp，
+应用标识：appkey
+*/
+
+func checkRegistToken(reqMap map[string]interface{}) {
+	var deviceID string
+	var password string
+	var ts string
+	var ok bool
+	deviceID, ok = reqMap["deviceID"]
+	if !ok {
+
+	}
+
+}
+
+/*
+用户ID：userID，
+时间戳：timestamp，
+状态码：code，
+反馈消息：message
+*/
+func generateRegistToken(userID string, code int, msg string) (tk string, err error) {
+	ts := time.Now().Unix()
+	resMap := map[string]interface{}{
+		"timestamp": ts,
+		"code":      code,
+		"message":   msg,
+	}
+	if code == http.StatusOK {
+		resMap["userID"] = userID
+	}
+	tk, err = userjwt.CreateToken(time.Duration(time.Minute*1), resMap)
+	return
 }
 
 //RegisterRegistServer 注册到注册请求服务
