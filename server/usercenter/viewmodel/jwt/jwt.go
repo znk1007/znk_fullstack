@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
 //CreateToken 生成token字符串
@@ -33,7 +34,7 @@ func CreateToken(expired time.Duration, params map[string]interface{}) (token st
 	}
 	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, mclms)
 
-	token, err = tk.SignedString(GetSecurityKeyByte())
+	token, err = tk.SignedString(usercrypto.GetSecurityKeyByte())
 	if err != nil {
 		return
 	}
@@ -47,7 +48,7 @@ func ParseToken(token string) (res map[string]interface{}, err error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected login method %v", t.Header["alg"])
 		}
-		return GetSecurityKeyByte(), nil
+		return usercrypto.GetSecurityKeyByte(), nil
 	})
 	if err != nil {
 		return

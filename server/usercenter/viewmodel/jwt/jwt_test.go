@@ -1,7 +1,7 @@
 package userjwt
 
 import "testing"
-package userjwt
+
 func TestCreateToken(t *testing.T) {
 	auth := map[string]interface{}{
 		"userId":   "xxxxx",

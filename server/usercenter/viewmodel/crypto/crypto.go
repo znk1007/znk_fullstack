@@ -1,4 +1,4 @@
-package usertoken
+package usercrypto
 
 import (
 	"bytes"
