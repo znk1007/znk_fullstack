@@ -14,16 +14,50 @@ func (j simpleJob) Do() {
 }
 
 func BenchmarkSimpleWorkerPool(t *testing.B) {
-	workerLen := 100 * 100 * 100
+	workerLen := 100 * 100 * 10
 	p := CreateWorkerPool(workerLen)
 	p.Run()
-
-	for i := 0; i < t.N; i++ {
-		j := simpleJob{
-			num: i,
+	p.WriteHandler(func(jq chan Job) {
+		for i := 0; i < t.N; i++ {
+			j := simpleJob{
+				num: i,
+			}
+			jq <- j
 		}
-		p.Write(j)
-	}
+	})
+
+}
+
+func TestSimpleWorkerPoolHandler(t *testing.T) {
+	workerLen := 100 * 10
+	p := CreateWorkerPool(workerLen)
+	p.Run()
+	num := 100 * 500
+	p.WriteHandler(func(jq chan Job) {
+
+		for i := 0; i < num; i++ {
+			j := simpleJob{
+				num: i,
+			}
+			jq <- j
+		}
+	})
+}
+
+func BenchmarkSimpleWorkerPoolHandler(t *testing.B) {
+	workerLen := 100 * 10
+	p := CreateWorkerPool(workerLen)
+	p.Run()
+	// num := 100 * 500
+	p.WriteHandler(func(jq chan Job) {
+
+		for i := 0; i < t.N; i++ {
+			j := simpleJob{
+				num: i,
+			}
+			jq <- j
+		}
+	})
 }
 
 type chanJob struct {
@@ -32,8 +66,10 @@ type chanJob struct {
 }
 
 func (cj chanJob) Do() {
-	fmt.Println("send: ", cj.send)
-	cj.sendChan <- cj.send
+	go func() {
+		fmt.Println("send: ", cj.send)
+		cj.sendChan <- cj.send
+	}()
 }
 
 func TestChannelWorkerPool(t *testing.T) {
@@ -42,13 +78,15 @@ func TestChannelWorkerPool(t *testing.T) {
 		sendChan: make(chan int),
 	}
 
-	workerLen := 100
+	workerLen := 1000
 	p := CreateWorkerPool(workerLen)
 	p.Run()
-	for i := 0; i < 100; i++ {
-		cj.send = i
-		p.Write(cj)
-	}
+	p.WriteHandler(func(jq chan Job) {
+		for i := 0; i < 100; i++ {
+			cj.send = i
+			jq <- cj
+		}
+	})
 	for {
 		select {
 		case s := <-cj.sendChan:
@@ -65,10 +103,12 @@ func BenchmarkChannelWorkerPool(t *testing.B) {
 	workerLen := 100
 	p := CreateWorkerPool(workerLen)
 	p.Run()
-	for i := 0; i < t.N; i++ {
-		cj.send = i
-		p.Write(cj)
-	}
+	p.WriteHandler(func(jq chan Job) {
+		for i := 0; i < 100; i++ {
+			cj.send = i
+			jq <- cj
+		}
+	})
 	for {
 		select {
 		case s := <-cj.sendChan:
