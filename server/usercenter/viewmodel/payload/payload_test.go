@@ -104,7 +104,7 @@ func BenchmarkChannelWorkerPool(t *testing.B) {
 	p := CreateWorkerPool(workerLen)
 	p.Run()
 	p.WriteHandler(func(jq chan Job) {
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 2; i++ {
 			cj.send = i
 			jq <- cj
 		}

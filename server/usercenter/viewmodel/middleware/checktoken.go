@@ -1,13 +1,9 @@
-package middleware
-
-import (
-	"context"
-	"errors"
+package middlewar"errors"
 	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	usertoken "github.com/znk_fullstack/server/usercenter/viewmodel/token"
+	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -28,7 +24,7 @@ func CheckToken(ctx context.Context, checkTS bool) error {
 		log.Info().Msg("miss param `sign` or `sign` is empty")
 		return errors.New("miss param `sign` or `sign` is empty")
 	}
-	tk, err := usertoken.ParseToken(sign)
+	tk, err := userjwt.ParseToken(sign)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		return err
@@ -64,4 +60,9 @@ func CheckToken(ctx context.Context, checkTS bool) error {
 	}
 
 	return nil
+}
+
+//ExpiredDuration 两分钟响应超时失效
+func ExpiredDuration() time.Duration {
+	return time.Duration(time.Minute * 2)
 }
