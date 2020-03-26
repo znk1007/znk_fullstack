@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	"google.golang.org/grpc"
@@ -50,16 +52,39 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func checkRegistToken(reqMap map[string]interface{}) {
+func checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
 	var deviceID string
 	var password string
-	var ts string
-	var ok bool
-	deviceID, ok = reqMap["deviceID"]
-	if !ok {
-
+	var platform string
+	dID, ok := reqMap["deviceID"]
+	deviceID = dID.(string)
+	if !ok || len(deviceID) == 0 {
+		log.Info().Msg("deviceID cannot be empty")
+		tk, err = generateRegistToken("", http.StatusBadRequest, "deviceID cannot be empty")
+		return
+	}
+	plf, ok := reqMap["platform"]
+	platform = plf.(string)
+	if !ok || len(platform) == 0 {
+		log.Info().Msg("platform cannot be empty")
+		tk, err = generateRegistToken("", http.StatusBadRequest, "platform cannot be empty")
+		return
+	}
+	psd, ok := reqMap["password"]
+	password = psd.(string)
+	if !ok || len(password) == 0 {
+		log.Info().Msg("password cannot be empty")
+		tk, err = generateRegistToken("", http.StatusBadRequest, "password cannot be empty")
+		return
+	}
+	_, e := usercrypto.CBCEncrypt(password)
+	if e != nil {
+		log.Info().Msg("encrypt password err: " + e.Error())
+		tk, err = generateRegistToken("", http.StatusInternalServerError, "interval server error")
+		return
 	}
 
+	return
 }
 
 /*
