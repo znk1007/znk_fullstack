@@ -69,6 +69,15 @@ func Get(key string) (val string, err error) {
 	return
 }
 
+//Del 删除
+func Del(key ...string) error {
+	if err := checkRds(); err != nil {
+		return err
+	}
+	rds.Del(key...)
+	return redis.Nil
+}
+
 //HSet hash存值
 func HSet(key string, values ...interface{}) error {
 	if err := checkRds(); err != nil {
@@ -76,6 +85,50 @@ func HSet(key string, values ...interface{}) error {
 	}
 	rds.HSet(key, values...)
 	return redis.Nil
+}
+
+//HGet hash读取
+func HGet(key string, field string) (val string, err error) {
+	if e := checkRds(); e != nil {
+		val = ""
+		err = e
+		return
+	}
+	val, err = rds.HGet(key, field).Result()
+	err = nil
+	return
+}
+
+//HDel hash删除
+func HDel(key string, field ...string) error {
+	if err := checkRds(); err != nil {
+		return err
+	}
+	rds.HDel(key, field...)
+	return redis.Nil
+}
+
+// MSet is like Set but accepts multiple values:
+//   - MSet("key1", "value1", "key2", "value2")
+//   - MSet([]string{"key1", "value1", "key2", "value2"})
+//   - MSet(map[string]interface{}{"key1": "value1", "key2": "value2"})
+func MSet(values ...interface{}) error {
+	if err := checkRds(); err != nil {
+		return err
+	}
+	rds.MSet(values...)
+	return redis.Nil
+}
+
+//MGet 取值
+func MGet(key ...string) (slc []interface{}, err error) {
+	if e := checkRds(); e != nil {
+		slc = nil
+		err = e
+		return
+	}
+	slc, err = rds.MGet(key...).Result()
+	return
 }
 
 //checkRds 校验rds实例
