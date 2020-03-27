@@ -79,6 +79,12 @@ func Del(key ...string) error {
 }
 
 //HSet hash存值
+//HSet accepts values in following formats:
+//   - HMSet("myhash", "key1", "value1", "key2", "value2")
+//   - HMSet("myhash", []string{"key1", "value1", "key2", "value2"})
+//   - HMSet("myhash", map[string]interface{}{"key1": "value1", "key2": "value2"})
+//
+// Note that it requires Redis v4 for multiple field/value pairs support.
 func HSet(key string, values ...interface{}) error {
 	if err := checkRds(); err != nil {
 		return err
