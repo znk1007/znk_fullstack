@@ -1,6 +1,9 @@
 package userjwt
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestCreateToken(t *testing.T) {
 	auth := map[string]interface{}{
@@ -10,7 +13,7 @@ func TestCreateToken(t *testing.T) {
 		"email":    "xxxx@xxx.com",
 		"phone":    "123456",
 	}
-	tkStr, e := CreateToken(0, auth)
+	tkStr, e := CreateToken(time.Duration(time.Millisecond), auth)
 	if e != nil {
 		t.Error("create token failed: ", e)
 		return

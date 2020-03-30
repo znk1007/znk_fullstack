@@ -9,7 +9,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
-	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
@@ -24,11 +23,7 @@ func init() {
 	}
 }
 
-type registState struct {
-	succ bool
-	msg  string
-}
-
+//registResponse 注册响应
 type registResponse struct {
 	res *userproto.RegistRes
 	err error
@@ -58,6 +53,7 @@ func (s registService) handleRegist() {
 		}
 		s.resChan <- res
 	}
+	//第一层redis，防止频繁操作数据库
 	exists := userredis.Exists(acc)
 	if exists {
 		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, acc+"has registed")
@@ -128,12 +124,12 @@ func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk strin
 		tk, err = s.generateRegistToken("", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
-	_, e := usercrypto.CBCEncrypt(password)
-	if e != nil {
-		log.Info().Msg("encrypt password err: " + e.Error())
-		tk, err = s.generateRegistToken("", http.StatusInternalServerError, "interval server error")
-		return
-	}
+	// _, e := usercrypto.CBCEncrypt(password)
+	// if e != nil {
+	// 	log.Info().Msg("encrypt password err: " + e.Error())
+	// 	tk, err = s.generateRegistToken("", http.StatusInternalServerError, "interval server error")
+	// 	return
+	// }
 
 	return
 }
