@@ -2,6 +2,7 @@ package usernet
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
+	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	"google.golang.org/grpc"
@@ -18,7 +20,7 @@ var rs *registService
 
 func init() {
 	rs = &registService{
-		resChan: make(chan *userproto.RegistRes),
+		resChan: make(chan registResponse),
 	}
 }
 
@@ -27,10 +29,15 @@ type registState struct {
 	msg  string
 }
 
+type registResponse struct {
+	res *userproto.RegistRes
+	err error
+}
+
 //RegistService 注册
 type registService struct {
 	req     *userproto.RegistReq
-	resChan chan *userproto.RegistRes
+	resChan chan registResponse
 }
 
 func (s registService) Do() {
@@ -41,7 +48,51 @@ func (s registService) handleRegist() {
 	req := s.req
 	acc := req.GetAccount()
 	fmt.Println(acc)
+	genRes := func(acc string, tk string, e error) {
+		res := registResponse{
+			res: &userproto.RegistRes{
+				Account: "",
+				Token:   tk,
+			},
+			err: e,
+		}
+		s.resChan <- res
+	}
+	exists := userredis.Exists(acc)
+	if exists {
+		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, acc+"has registed")
+		genRes(acc, tk, e)
+		return
+	}
 
+	if len(acc) == 0 {
+		log.Info().Msg("account cannot be empty")
+		tk, e := s.generateRegistToken("", http.StatusBadRequest, "account cannot be empty")
+		if e != nil {
+			genRes("", tk, e)
+			return
+		}
+		genRes("", tk, errors.New("account cannot be empty"))
+		return
+	}
+	tkMap, e := userjwt.ParseToken(s.req.Token)
+	if e != nil {
+		log.Info().Msg(e.Error())
+		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
+		genRes(acc, tk, e)
+		return
+	}
+
+	_, e = s.checkRegistToken(tkMap)
+	if e != nil {
+		log.Info().Msg(e.Error())
+		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
+		genRes(acc, tk, e)
+		return
+	}
+
+	tsstr := acc + "_" + string(time.Now().Unix())
+	userredis.HSet(acc, tsstr)
 }
 
 /*
@@ -52,7 +103,7 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
+func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
 	var deviceID string
 	var password string
 	var platform string
@@ -60,27 +111,27 @@ func checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
 	deviceID = dID.(string)
 	if !ok || len(deviceID) == 0 {
 		log.Info().Msg("deviceID cannot be empty")
-		tk, err = generateRegistToken("", http.StatusBadRequest, "deviceID cannot be empty")
+		tk, err = s.generateRegistToken("", http.StatusBadRequest, "deviceID cannot be empty")
 		return
 	}
 	plf, ok := reqMap["platform"]
 	platform = plf.(string)
 	if !ok || len(platform) == 0 {
 		log.Info().Msg("platform cannot be empty")
-		tk, err = generateRegistToken("", http.StatusBadRequest, "platform cannot be empty")
+		tk, err = s.generateRegistToken("", http.StatusBadRequest, "platform cannot be empty")
 		return
 	}
 	psd, ok := reqMap["password"]
 	password = psd.(string)
 	if !ok || len(password) == 0 {
 		log.Info().Msg("password cannot be empty")
-		tk, err = generateRegistToken("", http.StatusBadRequest, "password cannot be empty")
+		tk, err = s.generateRegistToken("", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
 	_, e := usercrypto.CBCEncrypt(password)
 	if e != nil {
 		log.Info().Msg("encrypt password err: " + e.Error())
-		tk, err = generateRegistToken("", http.StatusInternalServerError, "interval server error")
+		tk, err = s.generateRegistToken("", http.StatusInternalServerError, "interval server error")
 		return
 	}
 
@@ -93,7 +144,7 @@ func checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
 状态码：code，
 反馈消息：message
 */
-func generateRegistToken(userID string, code int, msg string) (tk string, err error) {
+func (s registService) generateRegistToken(userID string, code int, msg string) (tk string, err error) {
 	ts := time.Now().Unix()
 	resMap := map[string]interface{}{
 		"timestamp": ts,
@@ -121,7 +172,7 @@ func (s registService) UserReigst(ctx context.Context, req *userproto.RegistReq)
 	for {
 		select {
 		case res := <-s.resChan:
-			return res, nil
+			return res.res, res.err
 		}
 	}
 }
