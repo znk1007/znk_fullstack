@@ -111,3 +111,10 @@ func (userJWT UserJWT) Expired() (exp bool, err error) {
 	err = userJWT.err
 	return
 }
+
+//Result 结果
+func (userJWT UserJWT) Result() (res map[string]interface{}, err error) {
+	res = userJWT.res
+	err = userJWT.err
+	return
+}
