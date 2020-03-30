@@ -17,7 +17,7 @@ const RegistRes$json = const {
   '1': 'RegistRes',
   '2': const [
     const {'1': 'account', '3': 1, '4': 1, '5': 9, '10': 'account'},
-    const {'1': 'token', '3': 4, '4': 1, '5': 9, '10': 'token'},
+    const {'1': 'token', '3': 2, '4': 1, '5': 9, '10': 'token'},
   ],
 };
 

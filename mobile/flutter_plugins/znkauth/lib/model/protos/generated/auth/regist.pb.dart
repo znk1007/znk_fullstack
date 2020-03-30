@@ -53,7 +53,7 @@ class RegistReq extends $pb.GeneratedMessage {
 class RegistRes extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('RegistRes', package: const $pb.PackageName('regist'), createEmptyInstance: create)
     ..aOS(1, 'account')
-    ..aOS(4, 'token')
+    ..aOS(2, 'token')
     ..hasRequiredFields = false
   ;
 
@@ -81,13 +81,13 @@ class RegistRes extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearAccount() => clearField(1);
 
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(2)
   $core.String get token => $_getSZ(1);
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(2)
   set token($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(2)
   $core.bool hasToken() => $_has(1);
-  @$pb.TagNumber(4)
-  void clearToken() => clearField(4);
+  @$pb.TagNumber(2)
+  void clearToken() => clearField(2);
 }
 

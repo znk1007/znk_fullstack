@@ -50,6 +50,20 @@ func readConf() {
 	})
 }
 
+//Exists key是否存在
+func Exists(key ...string) bool {
+	if err := checkRds(); err != nil {
+		log.Info().Msg(err.Error())
+		return false
+	}
+	idx, err := rds.Exists(key...).Result()
+	if err != nil {
+		log.Info().Msg(err.Error())
+		return false
+	}
+	return idx == 1
+}
+
 //Set 保存数据
 func Set(key string, val interface{}, exp time.Duration) error {
 	if err := checkRds(); err != nil {

@@ -1,7 +1,7 @@
 PROTO_ROOT = $(shell brew --prefix)/Cellar/protobuf/3.11.2/include
 VERSION = 0.0.2
 default: clean generate
-
+#3.11.4
 clean:
 	rm -rf build lib/model/protos/generated
 ## Dart requires you to manually ship all google provided proto files too.

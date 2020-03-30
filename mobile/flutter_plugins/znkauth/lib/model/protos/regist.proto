@@ -17,5 +17,5 @@ message RegistRes {
     //账号
     string account = 1;
     //注册响应签名（JSON字符串，参数包括用户ID：userID，时间戳：timestamp，状态码：code，反馈消息：message）
-    string token = 4;
+    string token = 2;
 }

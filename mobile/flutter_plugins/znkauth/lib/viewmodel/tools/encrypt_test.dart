@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:znkauth/viewmodel/tools/crypt.dart';
+import 'package:znkauth/viewmodel/tools/crypto.dart';
 void main() {
   test('encrypt test', () {
     final plainText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit';
