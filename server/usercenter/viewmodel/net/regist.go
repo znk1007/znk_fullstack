@@ -10,17 +10,19 @@ import (
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
-	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
+	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	"google.golang.org/grpc"
 )
 
 var rs *registService
+var check usermiddleware.CheckToken
 
 func init() {
 	rs = &registService{
 		resChan: make(chan registResponse),
 	}
+	check = usermiddleware.Create(1000 * 60 * 5)
 }
 
 //registResponse 注册响应
@@ -60,7 +62,6 @@ func (s registService) handleRegist() {
 		genRes(acc, tk, e)
 		return
 	}
-
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
 		tk, e := s.generateRegistToken("", http.StatusBadRequest, "account cannot be empty")
@@ -71,7 +72,8 @@ func (s registService) handleRegist() {
 		genRes("", tk, errors.New("account cannot be empty"))
 		return
 	}
-	tkMap, e := userjwt.ParseToken(s.req.Token)
+	check.UJWT.Parse(s.req.GetToken())
+	tkMap, _, e := check.UJWT.Result()
 	if e != nil {
 		log.Info().Msg(e.Error())
 		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
@@ -150,7 +152,7 @@ func (s registService) generateRegistToken(userID string, code int, msg string) 
 	if code == http.StatusOK {
 		resMap["userID"] = userID
 	}
-	tk, err = userjwt.CreateToken(time.Duration(time.Minute*1), resMap)
+	tk, err = check.UJWT.Token(resMap)
 	return
 }
 

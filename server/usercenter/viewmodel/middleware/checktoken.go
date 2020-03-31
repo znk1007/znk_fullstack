@@ -1,73 +1,71 @@
 package usermiddleware
 
 import (
-	"context"
 	"errors"
-	"strconv"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
-	"google.golang.org/grpc/metadata"
 
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
-//CheckToken 校验token
-func CheckToken(ctx context.Context, checkTS bool) (map[string]interface{}, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		log.Info().Msg("check token failed")
-		return nil, errors.New("check token failed")
+//CheckToken token校验
+type CheckToken struct {
+	UJWT userjwt.UserJWT
+}
+
+//Create 创建校验对象
+func Create(expiredinterval int64) CheckToken {
+	return CheckToken{
+		UJWT: userjwt.CreateUserJWT(expiredinterval),
 	}
-	var sign string
-	if val, ok := md["sign"]; ok {
-		if len(val) > 0 {
-			sign = val[0]
-		}
+}
+
+//Do 校验token
+func (check CheckToken) Do(md map[string]interface{}, expiredinterval int64) (expired bool, ts string, err error) {
+	var token string
+	if val, ok := md["token"]; ok {
+		token = val.(string)
 	}
-	if len(sign) == 0 {
+	if len(token) == 0 {
 		log.Info().Msg("miss param `sign` or `sign` is empty")
-		return nil, errors.New("miss param `sign` or `sign` is empty")
+		expired = true
+		err = errors.New("miss param `sign` or `sign` is empty")
+		return
 	}
-	tk, err := userjwt.ParseToken(sign)
-	if err != nil {
+	check.UJWT.Parse(token)
+	tk, exp, e := check.UJWT.Result()
+	expired = exp
+	if e != nil {
 		log.Info().Msg(err.Error())
-		return nil, err
+		exp = true
+		err = e
+		return
 	}
 	key, ok := tk["appkey"]
 	appkey := key.(string)
 	if !ok {
 		log.Info().Msg("miss param `appkey`")
-		return nil, errors.New("miss param `appkey`")
+		err = errors.New("miss param `appkey`")
+		return
 	}
 	if len(appkey) == 0 {
 		log.Info().Msg("appkey is empty")
-		return nil, errors.New("appkey is empty")
+		err = errors.New("appkey is empty")
+		return
 	}
 	if appkey != usercrypto.GetSecurityKeyString() {
-		log.Info().Msg("appkey is wrong")
-		return nil, errors.New("appkey is wrong")
+		log.Info().Msg("appkey is bad")
+		err = errors.New("appkey is bad")
+		return
 	}
-	if checkTS {
-		var ts interface{}
-		ts, ok = tk["timestamp"]
-		if !ok {
-			log.Info().Msg("miss param `timestamp`")
-			return nil, errors.New("miss param `timestamp`")
-		}
-		var timestamp int64
-		timestamp, err = strconv.ParseInt(ts.(string), 10, 64)
-		now := time.Now().Unix()
-		if now-timestamp > ExpiredDuration().Microseconds() {
-			log.Info().Msg("time expired")
-			return nil, errors.New("time expired")
-		}
+	var tsVal interface{}
+	tsVal, ok = tk["timestamp"]
+	if !ok {
+		log.Info().Msg("miss param `timestamp`")
+		err = errors.New("miss param `timestamp`")
+		return
 	}
-	return tk, nil
-}
-
-//ExpiredDuration 两分钟响应超时失效
-func ExpiredDuration() time.Duration {
-	return time.Duration(time.Minute * 2)
+	ts = tsVal.(string)
+	return
 }

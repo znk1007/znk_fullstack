@@ -14,32 +14,35 @@ import (
 
 //UserJWT 用户jwt验证对象
 type UserJWT struct {
-	expired  int64
-	params   map[string]interface{}
-	isExp    bool
-	isParsed bool
-	err      error
-	res      map[string]interface{}
+	expiredinterval int64
+	isExp           bool
+	parseSucc       bool
+	err             error
+	res             map[string]interface{}
+}
+
+//DefaultInterval 默认时间间隔
+func DefaultInterval() int64 {
+	return 1000 * 60 * 5
 }
 
 //CreateUserJWT 创建用户jwt验证 expired 纳秒级别
-func CreateUserJWT(expired int64, params map[string]interface{}) UserJWT {
+func CreateUserJWT(expiredinterval int64) UserJWT {
 	return UserJWT{
-		expired: expired,
-		params:  params,
+		expiredinterval: expiredinterval,
 	}
 }
 
 //Token token令牌 纳秒级别
-func (userJWT UserJWT) Token() (token string, err error) {
-	tmpExp := userJWT.expired
+func (userJWT UserJWT) Token(params map[string]interface{}) (token string, err error) {
+	tmpExp := userJWT.expiredinterval
 	if tmpExp == 0 {
 		tmpExp = 1000 * 60 * 5
 	}
 	mclms := jwt.MapClaims{
 		"exp": time.Now().Add(time.Duration(tmpExp)).UnixNano(),
 	}
-	for idx, val := range userJWT.params {
+	for idx, val := range params {
 		mclms[idx] = val
 	}
 	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, mclms)
@@ -55,7 +58,9 @@ func (userJWT UserJWT) Parse(token string) {
 		}
 		return usercrypto.GetSecurityKeyByte(), nil
 	})
-	userJWT.isParsed = true
+	userJWT.parseSucc = false
+	userJWT.err = err
+	userJWT.res = nil
 	if err != nil {
 		log.Info().Msg(err.Error())
 		userJWT.err = err
@@ -70,9 +75,9 @@ func (userJWT UserJWT) Parse(token string) {
 			userJWT.err = err
 			return
 		}
-		nTS := time.Now().UnixNano()
+		nTS := time.Now().UTC().UnixNano()
 		diss := nTS - oldTS
-		if diss > userJWT.expired {
+		if diss > userJWT.expiredinterval {
 			userJWT.isExp = true
 		} else {
 			userJWT.isExp = false
@@ -93,27 +98,21 @@ func (userJWT UserJWT) Parse(token string) {
 			}
 			userJWT.err = nil
 			userJWT.res = kMap
+			userJWT.parseSucc = true
+		} else {
+
 		}
+
 	} else {
 		userJWT.res = nil
 		userJWT.err = errors.New("parse error")
 	}
-}
 
-//Expired 是否已过期
-func (userJWT UserJWT) Expired() (exp bool, err error) {
-	if !userJWT.isParsed {
-		exp = false
-		err = errors.New("call Parse method first")
-		return
-	}
-	exp = userJWT.isExp
-	err = userJWT.err
-	return
 }
 
 //Result 结果
-func (userJWT UserJWT) Result() (res map[string]interface{}, err error) {
+func (userJWT UserJWT) Result() (res map[string]interface{}, expired bool, err error) {
+	expired = userJWT.isExp
 	res = userJWT.res
 	err = userJWT.err
 	return

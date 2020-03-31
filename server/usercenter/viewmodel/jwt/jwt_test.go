@@ -2,7 +2,6 @@ package userjwt
 
 import (
 	"testing"
-	"time"
 )
 
 func TestCreateToken(t *testing.T) {
@@ -13,14 +12,16 @@ func TestCreateToken(t *testing.T) {
 		"email":    "xxxx@xxx.com",
 		"phone":    "123456",
 	}
-	tkStr, e := CreateToken(time.Duration(time.Millisecond), auth)
+	uJWT := CreateUserJWT(0)
+	tkStr, e := uJWT.Token(auth)
 	if e != nil {
 		t.Error("create token failed: ", e)
 		return
 	}
 	t.Log("token string: ", tkStr)
 
-	res, e := ParseToken(tkStr)
+	uJWT.Parse(tkStr)
+	res, _, e := uJWT.Result()
 	if e != nil {
 		t.Error("parse token failed: ", e)
 		return
