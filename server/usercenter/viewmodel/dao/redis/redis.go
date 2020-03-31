@@ -151,6 +151,17 @@ func MGet(key ...string) (slc []interface{}, err error) {
 	return
 }
 
+//HMGet 取值
+func HMGet(key string, field ...string) (slc []interface{}, err error) {
+	if e := checkRds(); e != nil {
+		slc = nil
+		err = e
+		return
+	}
+	slc, err = rds.HMGet(key, field...).Result()
+	return
+}
+
 //checkRds 校验rds实例
 func checkRds() error {
 	if rds == nil {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -55,11 +56,18 @@ func (s registService) handleRegist() {
 		}
 		s.resChan <- res
 	}
-	//redis 第一波防止，防止频繁操作数据库
+	//redis 第一波墙，防止频繁操作数据库
 	exists := userredis.Exists(acc)
 	if exists {
-		tk, e := s.makeToken(acc, http.StatusBadRequest, acc+"has registed")
-		genRes(acc, tk, e)
+		regS, _ := userredis.HMGet(acc, "ts", "registed")
+		ts, err := strconv.ParseInt(regS[0].(string), 10, 64)
+		if err != nil {
+			tk, e := s.makeToken(acc, http.StatusBadRequest, "param `timestamp is error type`")
+			genRes(acc, tk, e)
+			return
+		}
+		// tk, e := s.makeToken(acc, http.StatusBadRequest, acc+"has registed")
+		// genRes(acc, tk, e)
 		return
 	}
 	if len(acc) == 0 {
