@@ -40,7 +40,7 @@ func (userJWT UserJWT) Token(params map[string]interface{}) (token string, err e
 		tmpExp = 1000 * 60 * 5
 	}
 	mclms := jwt.MapClaims{
-		"exp": time.Now().Add(time.Duration(tmpExp)).UnixNano(),
+		"timestamp": time.Now().Add(time.Duration(tmpExp)).UnixNano(),
 	}
 	for idx, val := range params {
 		mclms[idx] = val
@@ -61,6 +61,7 @@ func (userJWT UserJWT) Parse(token string) {
 	userJWT.parseSucc = false
 	userJWT.err = err
 	userJWT.res = nil
+	userJWT.isExp = true
 	if err != nil {
 		log.Info().Msg(err.Error())
 		userJWT.err = err
@@ -68,7 +69,7 @@ func (userJWT UserJWT) Parse(token string) {
 	}
 	clms, ok := tk.Claims.(jwt.MapClaims)
 	if ok && tk.Valid {
-		exp := clms["exp"].(string)
+		exp := clms["timestamp"].(string)
 		oldTS, err := strconv.ParseInt(exp, 10, 64)
 		if err != nil {
 			log.Info().Msg(err.Error())
@@ -77,15 +78,8 @@ func (userJWT UserJWT) Parse(token string) {
 		}
 		nTS := time.Now().UTC().UnixNano()
 		diss := nTS - oldTS
-		if diss > userJWT.expiredinterval {
-			userJWT.isExp = true
-		} else {
+		if diss < userJWT.expiredinterval {
 			userJWT.isExp = false
-		}
-		if userJWT.isExp {
-			userJWT.err = errors.New("token is expired")
-			userJWT.res = nil
-			return
 		}
 		v := reflect.ValueOf(clms)
 		if v.Kind() == reflect.Map {
@@ -100,11 +94,9 @@ func (userJWT UserJWT) Parse(token string) {
 			userJWT.res = kMap
 			userJWT.parseSucc = true
 		} else {
-
+			userJWT.err = errors.New("type error")
 		}
-
 	} else {
-		userJWT.res = nil
 		userJWT.err = errors.New("parse error")
 	}
 

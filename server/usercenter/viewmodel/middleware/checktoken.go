@@ -14,15 +14,21 @@ type CheckToken struct {
 	uJWT userjwt.UserJWT
 }
 
-//Create 创建校验对象
-func Create(expiredinterval int64) CheckToken {
+//Initialize 初始化校验对象
+func Initialize(expiredinterval int64) CheckToken {
 	return CheckToken{
 		uJWT: userjwt.CreateUserJWT(expiredinterval),
 	}
 }
 
-//Do 校验token
-func (check CheckToken) Do(token string) (res map[string]interface{}, expired bool, err error) {
+//Generate 生成token
+func (check CheckToken) Generate(params map[string]interface{}) (token string, err error) {
+	token, err = check.uJWT.Token(params)
+	return
+}
+
+//Verify 校验token
+func (check CheckToken) Verify(token string) (res map[string]interface{}, expired bool, err error) {
 	if len(token) == 0 {
 		log.Info().Msg("miss param `sign` or `sign` is empty")
 		res = nil

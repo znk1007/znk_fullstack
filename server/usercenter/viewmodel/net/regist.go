@@ -22,7 +22,7 @@ func init() {
 	rs = &registService{
 		resChan: make(chan registResponse),
 	}
-	check = usermiddleware.Create(1000 * 60 * 5)
+	check = usermiddleware.Initialize(1000 * 60 * 5)
 }
 
 //registResponse 注册响应
@@ -58,13 +58,13 @@ func (s registService) handleRegist() {
 	//redis 第一波防止，防止频繁操作数据库
 	exists := userredis.Exists(acc)
 	if exists {
-		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, acc+"has registed")
+		tk, e := s.makeToken(acc, http.StatusBadRequest, acc+"has registed")
 		genRes(acc, tk, e)
 		return
 	}
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
-		tk, e := s.generateRegistToken("", http.StatusBadRequest, "account cannot be empty")
+		tk, e := s.makeToken("", http.StatusBadRequest, "account cannot be empty")
 		if e != nil {
 			genRes("", tk, e)
 			return
@@ -72,10 +72,10 @@ func (s registService) handleRegist() {
 		genRes("", tk, errors.New("account cannot be empty"))
 		return
 	}
-	res, expired, e := check.Do(req.GetToken())
+	res, expired, e := check.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
-		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
+		tk, e := s.makeToken(acc, http.StatusBadRequest, e.Error())
 		genRes(acc, tk, e)
 		return
 	}
@@ -87,12 +87,12 @@ func (s registService) handleRegist() {
 	_, e = s.checkRegistToken(res)
 	if e != nil {
 		log.Info().Msg(e.Error())
-		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
+		tk, e := s.makeToken(acc, http.StatusBadRequest, e.Error())
 		genRes(acc, tk, e)
 		return
 	}
 
-	tsstr := acc + "_" + string(time.Now().Unix())
+	tsstr := acc + "_" + string(time.Now().UTC().Nanosecond())
 	userredis.HSet(acc, tsstr)
 }
 
@@ -112,30 +112,23 @@ func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk strin
 	deviceID = dID.(string)
 	if !ok || len(deviceID) == 0 {
 		log.Info().Msg("deviceID cannot be empty")
-		tk, err = s.generateRegistToken("", http.StatusBadRequest, "deviceID cannot be empty")
+		tk, err = s.makeToken("", http.StatusBadRequest, "deviceID cannot be empty")
 		return
 	}
 	plf, ok := reqMap["platform"]
 	platform = plf.(string)
 	if !ok || len(platform) == 0 {
 		log.Info().Msg("platform cannot be empty")
-		tk, err = s.generateRegistToken("", http.StatusBadRequest, "platform cannot be empty")
+		tk, err = s.makeToken("", http.StatusBadRequest, "platform cannot be empty")
 		return
 	}
 	psd, ok := reqMap["password"]
 	password = psd.(string)
 	if !ok || len(password) == 0 {
 		log.Info().Msg("password cannot be empty")
-		tk, err = s.generateRegistToken("", http.StatusBadRequest, "password cannot be empty")
+		tk, err = s.makeToken("", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
-	// _, e := usercrypto.CBCEncrypt(password)
-	// if e != nil {
-	// 	log.Info().Msg("encrypt password err: " + e.Error())
-	// 	tk, err = s.generateRegistToken("", http.StatusInternalServerError, "interval server error")
-	// 	return
-	// }
-
 	return
 }
 
@@ -145,7 +138,7 @@ func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk strin
 状态码：code，
 反馈消息：message
 */
-func (s registService) generateRegistToken(userID string, code int, msg string) (tk string, err error) {
+func (s registService) makeToken(userID string, code int, msg string) (tk string, err error) {
 	ts := time.Now().Unix()
 	resMap := map[string]interface{}{
 		"timestamp": ts,
@@ -155,7 +148,7 @@ func (s registService) generateRegistToken(userID string, code int, msg string) 
 	if code == http.StatusOK {
 		resMap["userID"] = userID
 	}
-	tk, err = check.UJWT.Token(resMap)
+	tk, err = check.Generate(resMap)
 	return
 }
 
