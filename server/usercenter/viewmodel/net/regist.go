@@ -80,7 +80,11 @@ func (s registService) handleRegist() {
 		return
 	}
 
-	_, e = s.checkRegistToken(tkMap)
+	if !expired {
+
+	}
+
+	_, e = s.checkRegistToken(res)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
