@@ -11,34 +11,30 @@ import (
 
 //CheckToken token校验
 type CheckToken struct {
-	UJWT userjwt.UserJWT
+	uJWT userjwt.UserJWT
 }
 
 //Create 创建校验对象
 func Create(expiredinterval int64) CheckToken {
 	return CheckToken{
-		UJWT: userjwt.CreateUserJWT(expiredinterval),
+		uJWT: userjwt.CreateUserJWT(expiredinterval),
 	}
 }
 
 //Do 校验token
-func (check CheckToken) Do(md map[string]interface{}, expiredinterval int64) (expired bool, ts string, err error) {
-	var token string
-	if val, ok := md["token"]; ok {
-		token = val.(string)
-	}
+func (check CheckToken) Do(token string) (res map[string]interface{}, expired bool, err error) {
 	if len(token) == 0 {
 		log.Info().Msg("miss param `sign` or `sign` is empty")
-		expired = true
+		res = nil
 		err = errors.New("miss param `sign` or `sign` is empty")
 		return
 	}
-	check.UJWT.Parse(token)
-	tk, exp, e := check.UJWT.Result()
+	check.uJWT.Parse(token)
+	tk, exp, e := check.uJWT.Result()
 	expired = exp
 	if e != nil {
 		log.Info().Msg(err.Error())
-		exp = true
+		res = nil
 		err = e
 		return
 	}
@@ -47,25 +43,20 @@ func (check CheckToken) Do(md map[string]interface{}, expiredinterval int64) (ex
 	if !ok {
 		log.Info().Msg("miss param `appkey`")
 		err = errors.New("miss param `appkey`")
+		res = nil
 		return
 	}
 	if len(appkey) == 0 {
 		log.Info().Msg("appkey is empty")
 		err = errors.New("appkey is empty")
+		res = nil
 		return
 	}
 	if appkey != usercrypto.GetSecurityKeyString() {
 		log.Info().Msg("appkey is bad")
 		err = errors.New("appkey is bad")
+		res = nil
 		return
 	}
-	var tsVal interface{}
-	tsVal, ok = tk["timestamp"]
-	if !ok {
-		log.Info().Msg("miss param `timestamp`")
-		err = errors.New("miss param `timestamp`")
-		return
-	}
-	ts = tsVal.(string)
 	return
 }

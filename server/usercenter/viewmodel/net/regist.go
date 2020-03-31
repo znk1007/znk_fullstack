@@ -55,7 +55,7 @@ func (s registService) handleRegist() {
 		}
 		s.resChan <- res
 	}
-	//第一层redis，防止频繁操作数据库
+	//redis 第一波防止，防止频繁操作数据库
 	exists := userredis.Exists(acc)
 	if exists {
 		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, acc+"has registed")
@@ -72,8 +72,7 @@ func (s registService) handleRegist() {
 		genRes("", tk, errors.New("account cannot be empty"))
 		return
 	}
-	check.UJWT.Parse(s.req.GetToken())
-	tkMap, _, e := check.UJWT.Result()
+	res, expired, e := check.Do(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		tk, e := s.generateRegistToken(acc, http.StatusBadRequest, e.Error())
