@@ -58,12 +58,11 @@ func readRedisConfig() *redisConf {
 	bs, err := ioutil.ReadFile(fp)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		return nil
+		panic(err.Error())
 	}
 	err = json.Unmarshal(bs, rc)
 	if err != nil {
-		log.Info().Msg(err.Error())
-		return nil
+		panic(err.Error())
 	}
 	return rc
 }
