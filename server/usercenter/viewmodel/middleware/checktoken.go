@@ -2,6 +2,7 @@ package usermiddleware
 
 import (
 	"errors"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
@@ -15,7 +16,7 @@ type CheckToken struct {
 }
 
 //Initialize 初始化校验对象
-func Initialize(expiredinterval int64) CheckToken {
+func Initialize(expiredinterval time.Duration) CheckToken {
 	return CheckToken{
 		uJWT: userjwt.CreateUserJWT(expiredinterval),
 	}

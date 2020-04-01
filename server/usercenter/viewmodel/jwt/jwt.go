@@ -14,7 +14,7 @@ import (
 
 //UserJWT 用户jwt验证对象
 type UserJWT struct {
-	expiredinterval int64
+	expiredinterval time.Duration
 	isExp           bool
 	parseSucc       bool
 	err             error
@@ -22,12 +22,12 @@ type UserJWT struct {
 }
 
 //DefaultInterval 默认时间间隔
-func DefaultInterval() int64 {
-	return 1000 * 60 * 5
+func DefaultInterval() time.Duration {
+	return time.Second * 2
 }
 
 //CreateUserJWT 创建用户jwt验证 expired 纳秒级别
-func CreateUserJWT(expiredinterval int64) UserJWT {
+func CreateUserJWT(expiredinterval time.Duration) UserJWT {
 	return UserJWT{
 		expiredinterval: expiredinterval,
 	}
@@ -37,10 +37,10 @@ func CreateUserJWT(expiredinterval int64) UserJWT {
 func (userJWT UserJWT) Token(params map[string]interface{}) (token string, err error) {
 	tmpExp := userJWT.expiredinterval
 	if tmpExp == 0 {
-		tmpExp = 1000 * 60 * 5
+		tmpExp = DefaultInterval()
 	}
 	mclms := jwt.MapClaims{
-		"timestamp": time.Now().Add(time.Duration(tmpExp)).UnixNano(),
+		"timestamp": time.Now().Add(time.Duration(tmpExp)).Unix(),
 	}
 	for idx, val := range params {
 		mclms[idx] = val
@@ -76,9 +76,9 @@ func (userJWT UserJWT) Parse(token string) {
 			userJWT.err = err
 			return
 		}
-		nTS := time.Now().UTC().UnixNano()
-		diss := nTS - oldTS
-		if diss < userJWT.expiredinterval {
+		nTS := time.Now().Unix()
+		diff := nTS - oldTS
+		if diff < int64(userJWT.expiredinterval) {
 			userJWT.isExp = false
 		}
 		v := reflect.ValueOf(clms)
