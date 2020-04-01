@@ -26,23 +26,24 @@ type redisInfo struct {
 	Port string `json:"port"`
 }
 
-var use bool
-
-var rds *redis.Client
-
-func init() {
-	readRedisConfig()
-}
+var rds *redis.ClusterClient
 
 //ConnectRedis 连接Redis
-func ConnectRedis(envir userconf.Env, useCluster bool) {
-	use = useCluster
-	readRedisConfig()
-	if useCluster {
-		ops := redis.ClusterOptions{}
-		rds = redis.NewClusterClient()
-		return
+func ConnectRedis(envir userconf.Env) {
+	conf := readRedisConfig()
+	switch envir {
+	case userconf.Dev:
+
 	}
+
+}
+
+//initCluster 初始化集群对象
+func initCluster(addrs []string) {
+	ops := &redis.ClusterOptions{
+		Addrs: addrs,
+	}
+	rds = redis.NewClusterClient(ops)
 }
 
 func readRedisConfig() *redisConf {
@@ -51,12 +52,12 @@ func readRedisConfig() *redisConf {
 	bs, err := ioutil.ReadFile(fp)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		return
+		return nil
 	}
 	err = json.Unmarshal(bs, rc)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		return
+		return nil
 	}
 	fmt.Println("config redis succ", rc)
 	// rds = redis.NewClient(&redis.Options{
