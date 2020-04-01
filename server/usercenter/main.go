@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	userredis.ConnectRedis(userconf.Dev)
 
 }
