@@ -74,9 +74,6 @@ func (s registService) handleRegist() {
 			s.makeToken(acc, http.StatusAccepted, "please regist later on")
 			return
 		}
-		// tk, e := s.makeToken(acc, http.StatusBadRequest, acc+"has registed")
-		// genRes(acc, tk, e)
-		return
 	}
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
@@ -91,7 +88,8 @@ func (s registService) handleRegist() {
 	}
 
 	if !expired {
-
+		s.makeToken(acc, http.StatusAccepted, "please regist later on")
+		return
 	}
 
 	_, e = s.checkRegistToken(res)

@@ -16,23 +16,37 @@ import (
 
 //https://blog.csdn.net/itcats_cn/article/details/82391719
 type redisConf struct {
-	Env  userconf.Env `json:"env"`
-	Host string       `json:"host"`
-	Port string       `json:"port"`
+	Test redisInfo `json:"test"`
+	Dev  redisInfo `json:"dev"`
+	Prod redisInfo `json:"prod"`
 }
+
+type redisInfo struct {
+	Host string `json:"host"`
+	Port string `json:"port"`
+}
+
+var use bool
 
 var rds *redis.Client
 
 func init() {
-	readConf()
+	readRedisConfig()
 }
 
-func readConf() {
-	rc := &redisConf{
-		Env:  userconf.Dev,
-		Host: "localhost",
-		Port: "6379",
+//ConnectRedis 连接Redis
+func ConnectRedis(envir userconf.Env, useCluster bool) {
+	use = useCluster
+	readRedisConfig()
+	if useCluster {
+		ops := redis.ClusterOptions{}
+		rds = redis.NewClusterClient()
+		return
 	}
+}
+
+func readRedisConfig() *redisConf {
+	rc := &redisConf{}
 	fp := readFile("redis.json")
 	bs, err := ioutil.ReadFile(fp)
 	if err != nil {
@@ -44,10 +58,10 @@ func readConf() {
 		log.Info().Msg(err.Error())
 		return
 	}
-	fmt.Println("config redis succ")
-	rds = redis.NewClient(&redis.Options{
-		Addr: rc.Host + ":" + rc.Port,
-	})
+	fmt.Println("config redis succ", rc)
+	// rds = redis.NewClient(&redis.Options{
+	// 	Addr: rc.Host + ":" + rc.Port,
+	// })
 }
 
 //Exists key是否存在
