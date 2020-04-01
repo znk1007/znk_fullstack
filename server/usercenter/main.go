@@ -8,6 +8,6 @@ import (
 
 func main() {
 
-	userredis.ConnectRedis(userconf.Dev, false)
+	userredis.ConnectRedis(userconf.Dev)
 
 }

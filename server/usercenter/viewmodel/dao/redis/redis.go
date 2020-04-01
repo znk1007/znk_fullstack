@@ -22,8 +22,9 @@ type redisConf struct {
 }
 
 type redisInfo struct {
-	Host string `json:"host"`
-	Port string `json:"port"`
+	Host     string   `json:"host"`
+	Port     string   `json:"port"`
+	Clusters []string `json:"cluster"`
 }
 
 var rds *redis.ClusterClient
@@ -33,7 +34,11 @@ func ConnectRedis(envir userconf.Env) {
 	conf := readRedisConfig()
 	switch envir {
 	case userconf.Dev:
-
+		initCluster(conf.Dev.Clusters)
+	case userconf.Prod:
+		initCluster(conf.Prod.Clusters)
+	case userconf.Test:
+		initCluster(conf.Test.Clusters)
 	}
 
 }
@@ -44,6 +49,7 @@ func initCluster(addrs []string) {
 		Addrs: addrs,
 	}
 	rds = redis.NewClusterClient(ops)
+	fmt.Println("redis: ", rds)
 }
 
 func readRedisConfig() *redisConf {
@@ -59,10 +65,7 @@ func readRedisConfig() *redisConf {
 		log.Info().Msg(err.Error())
 		return nil
 	}
-	fmt.Println("config redis succ", rc)
-	// rds = redis.NewClient(&redis.Options{
-	// 	Addr: rc.Host + ":" + rc.Port,
-	// })
+	return rc
 }
 
 //Exists key是否存在
