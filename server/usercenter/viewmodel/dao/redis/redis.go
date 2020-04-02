@@ -25,6 +25,7 @@ type redisInfo struct {
 	Host     string   `json:"host"`
 	Port     string   `json:"port"`
 	Clusters []string `json:"cluster"`
+	Password string   `json:"password"`
 }
 
 var rds *redis.ClusterClient
@@ -34,22 +35,26 @@ func ConnectRedis(envir userconf.Env) {
 	conf := readRedisConfig()
 	switch envir {
 	case userconf.Dev:
-		initCluster(conf.Dev.Clusters)
+		initCluster(conf.Dev.Clusters, conf.Dev.Password)
 	case userconf.Prod:
-		initCluster(conf.Prod.Clusters)
+		initCluster(conf.Prod.Clusters, conf.Dev.Password)
 	case userconf.Test:
-		initCluster(conf.Test.Clusters)
+		initCluster(conf.Test.Clusters, conf.Dev.Password)
 	}
 
 }
 
 //initCluster 初始化集群对象
-func initCluster(addrs []string) {
+func initCluster(addrs []string, password string) {
 	ops := &redis.ClusterOptions{
-		Addrs: addrs,
+		Addrs:    addrs,
+		Password: password,
 	}
 	rds = redis.NewClusterClient(ops)
 	fmt.Println("redis: ", rds)
+	str, err := rds.Set("test", "test_value", time.Duration(time.Second)*2).Result()
+	fmt.Println("str: ", str)
+	fmt.Println("err: ", err.Error())
 }
 
 func readRedisConfig() *redisConf {
