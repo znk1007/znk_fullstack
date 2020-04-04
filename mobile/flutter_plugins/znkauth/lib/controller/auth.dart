@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:znkauth/viewmodel/network/grpc/client.dart';
 import '../viewmodel/db/usertbl.dart';
 import '../model/delegate/auth.dart';
 /* 回调 */
@@ -17,6 +18,7 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
+    ZnkAuthRpc.shared.setRpc(useTls: true, useTlsCA: true, host: 'localhost', port: 8080, ctx: context);
     if (widget.config == null) {
       return GestureDetector(
         child: Container(
