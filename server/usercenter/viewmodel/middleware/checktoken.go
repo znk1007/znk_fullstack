@@ -12,7 +12,7 @@ import (
 
 //CheckToken token校验
 type CheckToken struct {
-	uJWT userjwt.UserJWT
+	uJWT *userjwt.UserJWT
 }
 
 //Initialize 初始化校验对象
