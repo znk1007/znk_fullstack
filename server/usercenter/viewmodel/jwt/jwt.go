@@ -27,20 +27,22 @@ func DefaultInterval() time.Duration {
 }
 
 //CreateUserJWT 创建用户jwt验证 expired 纳秒级别
-func CreateUserJWT(expiredinterval time.Duration) UserJWT {
-	return UserJWT{
+func CreateUserJWT(expiredinterval time.Duration) *UserJWT {
+	return &UserJWT{
 		expiredinterval: expiredinterval,
 	}
 }
 
-//Token token令牌 纳秒级别
-func (userJWT UserJWT) Token(params map[string]interface{}) (token string, err error) {
+//Token token令牌
+func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err error) {
 	tmpExp := userJWT.expiredinterval
 	if tmpExp == 0 {
 		tmpExp = DefaultInterval()
 	}
+	ts := time.Now().Add(time.Duration(tmpExp)).Unix()
+	tsstr := strconv.FormatInt(ts, 10)
 	mclms := jwt.MapClaims{
-		"timestamp": time.Now().Add(time.Duration(tmpExp)).Unix(),
+		"timestamp": tsstr,
 	}
 	for idx, val := range params {
 		mclms[idx] = val
@@ -51,7 +53,7 @@ func (userJWT UserJWT) Token(params map[string]interface{}) (token string, err e
 }
 
 //Parse 解析jwt
-func (userJWT UserJWT) Parse(token string) {
+func (userJWT *UserJWT) Parse(token string) {
 	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected login method %v", t.Header["alg"])
@@ -99,7 +101,7 @@ func (userJWT UserJWT) Parse(token string) {
 	} else {
 		userJWT.err = errors.New("parse error")
 	}
-
+	fmt.Println("user jwt res 2: ", userJWT.res)
 }
 
 //Result 结果
