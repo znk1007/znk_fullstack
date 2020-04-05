@@ -7,22 +7,8 @@ import 'package:x509/x509.dart';
 class ZnkAuthJWT {
   /* 解析jwt */
   static Future<Map<String, dynamic>>parse(String token) async {
-    var key = _readPrivateKeyFromFile('lib/viewmodel/network/sec/keys/jwt.rsa');
-    var keyStore = JsonWebKeyStore()
-      ..addKey(key);
     var jwt = JsonWebToken.unverified(token);
-    print('jwt ${jwt.claims.toJson()}');
-    
-    try {
-      jwt = await JsonWebToken.decodeAndVerify(token, keyStore);
-      var verified = await jwt.verify(keyStore);
-      if (!verified) {
-        return null;
-      }
-      return jwt.claims.toJson();
-    } catch (e) {
-      return null;
-    }
+    return jwt.claims.toJson();
   }
   /* 生成token */
   static String token(Map<String, dynamic> params, String timestamp) {
@@ -51,7 +37,6 @@ JsonWebKey _readPrivateKeyFromFile(String path) {
   var v = parsePem(File(path).readAsStringSync()).first;
   var keyPair = (v is PrivateKeyInfo) ? v.keyPair : v as KeyPair;
   var pKey = keyPair.privateKey as RsaPrivateKey;
-
   String _bytesToBase64(List<int> bytes) {
     return base64Url.encode(bytes).replaceAll('=', '');
   }
@@ -65,7 +50,6 @@ JsonWebKey _readPrivateKeyFromFile(String path) {
         .map((v) => int.parse(v, radix: 16))
         .toList());
   }
-
   return JsonWebKey.fromJson({
     'kty': 'RSA',
     'n': _intToBase64(pKey.modulus),
@@ -78,7 +62,7 @@ JsonWebKey _readPrivateKeyFromFile(String path) {
 }
 
 void main(List<String> args) async {
-  var testStr = "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDc3NjEzNzQ0NTg4In0.e0jolPsTuIrR5e02M_873P6mo4qeq2v02Xhyip7idYumLiSi8pJtx04yc8QgRlpBAilqeZcsUDselM04lXswDUUQm5TDpRZDbmTbzfl20h1LGTl61iOXtgLukb-zd2HKrsJPtX2jO6e3NYD3_uuSuJZqzcX9Am0Hl8vIJyEFyrs";
+  var testStr = "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDc4NTU0NzQwNTE2In0.A-dtBbUN3SPTSgyC4j7u6F-LRz6Wc3AKnVR1i8hEL--NdgKflxc6AtmGReo3fO2K5miy9OKhm5i5MoGPpu_OEC57WmRE8IqL1A4_R4PUmY_PduQGbJShU8qKGsPc-vL4kTNiUK0hEI1wrxmf6d_I1mpUWhHtCWVxZb3Dgn3Dj-c";
   Map<String, dynamic> res = await ZnkAuthJWT.parse(testStr);
   print('res: $res');
   var params = Map<String, dynamic>();

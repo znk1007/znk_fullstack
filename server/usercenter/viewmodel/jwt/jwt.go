@@ -63,6 +63,7 @@ func (userJWT *UserJWT) Parse(token string) {
 	userJWT.isExp = true
 	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
 		t.Header["kid"] = usercrypto.GetSecurityKeyString()
+		t.Header["alg"] = "RS512"
 		return key, nil
 	})
 
