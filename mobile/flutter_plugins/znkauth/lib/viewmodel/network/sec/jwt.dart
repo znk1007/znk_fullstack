@@ -34,7 +34,7 @@ class ZnkAuthJWT {
     return jws.toCompactSerialization();
   }
 }
-
+/* 读取私钥 */
 JsonWebKey _readPrivateKeyFromFile(String path) {
   var v = parsePem(File(path).readAsStringSync()).first;
   var keyPair = (v is PrivateKeyInfo) ? v.keyPair : v as KeyPair;
@@ -61,7 +61,7 @@ JsonWebKey _readPrivateKeyFromFile(String path) {
     'p': _intToBase64(pKey.firstPrimeFactor),
     'q': _intToBase64(pKey.secondPrimeFactor),
     'alg': 'RS512',
-    'kid': 'some_id'
+    'kid': 'fullstack-manznk'
   });
 }
 

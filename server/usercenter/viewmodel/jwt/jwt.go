@@ -12,6 +12,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
+	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
 //UserJWT 用户jwt验证对象
@@ -61,7 +62,7 @@ func (userJWT *UserJWT) Parse(token string) {
 	userJWT.res = nil
 	userJWT.isExp = true
 	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
-		t.Header["kid"] = "some_id"
+		t.Header["kid"] = usercrypto.GetSecurityKeyString()
 		return key, nil
 	})
 
