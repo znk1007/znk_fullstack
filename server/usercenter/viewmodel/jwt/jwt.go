@@ -2,7 +2,6 @@ package userjwt
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -44,7 +43,6 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 	mclms := jwt.MapClaims{
 		"timestamp": tsstr,
 	}
-	fmt.Println("ts str: ", tsstr)
 	for idx, val := range params {
 		mclms[idx] = val
 	}
@@ -56,9 +54,6 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 //Parse 解析jwt
 func (userJWT *UserJWT) Parse(token string) {
 	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected login method %v", t.Header["alg"])
-		}
 		return usercrypto.GetSecurityKeyByte(), nil
 	})
 	userJWT.parseSucc = false
@@ -102,7 +97,6 @@ func (userJWT *UserJWT) Parse(token string) {
 	} else {
 		userJWT.err = errors.New("parse error")
 	}
-	fmt.Println("user jwt res 2: ", userJWT.res)
 }
 
 //Result 结果

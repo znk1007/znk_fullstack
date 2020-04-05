@@ -3,7 +3,7 @@ import 'package:jose/jose.dart';
 
 import 'crypt.dart';
 
-const testStr = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJ0aW1lc3RhbXAiOiIxNTg2MDAzNzk4In0.hjnQEQ4K95bWp_AI4y5hoSlpVZ-W5Bmp5OdnutlRxmw";
+const testStr = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDYxMzM5NjMyMzg0In0.trm2f0n1CztebCk3NuajIISoZ_oX2W9luAMygx6NeFo";
 
 class ZnkAuthJWT {
   /* 解析jwt */
@@ -22,7 +22,6 @@ class ZnkAuthJWT {
     params['timestamp'] = ts;
     
     var clms = JsonWebTokenClaims.fromJson(params);
-    print('params: $_builder');
     var buidler = JsonWebSignatureBuilder();
     buidler.jsonContent = clms.toJson();
     buidler.addRecipient(
@@ -33,7 +32,7 @@ class ZnkAuthJWT {
       algorithm: 'HS256',
     );
     var jws = buidler.build();
-    print('jwt compact serialization: ${jws.toCompactSerialization()}');
+    return jws.toCompactSerialization();
   }
 }
 
@@ -44,4 +43,7 @@ void main(List<String> args) {
   params['key1'] = 'test1';
   params['key2'] = 'test2';
   var tk = ZnkAuthJWT.token(params, null);
+  print('jwt compact serialization: $tk');
+  Map<String, dynamic> res1 =ZnkAuthJWT.parse(testStr);
+  print('res1: $res1');
 }

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	key = "fullstack-manznk"
+	key = "fullstack-manznk1007"
 )
 
 //CBCEncrypt CBC模式加密
