@@ -42,7 +42,7 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 	if tmpExp == 0 {
 		tmpExp = DefaultInterval()
 	}
-	ts := time.Now().Add(time.Duration(tmpExp)).UnixNano() / 1000
+	ts := time.Now().Add(time.Duration(tmpExp)).Unix()
 	tsstr := strconv.FormatInt(ts, 10)
 	mclms := jwt.MapClaims{
 		"timestamp": tsstr,

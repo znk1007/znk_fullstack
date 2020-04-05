@@ -34,7 +34,7 @@ func main() {
 	fmt.Println("expired 1: ", expired)
 	fmt.Println("res 1: ", res)
 
-	testtk := "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZ1bGxzdGFjay1tYW56bmsifQ.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJ0aW1lc3RhbXAiOiIxNTg2MDc3NTgxMTY0In0.CXu-vPtXDr1WjFEAgmSkIWx7OaWf-5inq44fE4rDB4R_gs_Srr1Ynu5KJ6OKLNVyM_lxE58s6VmzpdXWDgV3AkU6gKlUHKLql9il48FMKGqh5bDGT1NhOMMHaHRCJ_J9_GrwvsvDSzJJy7OjeYVnGlvkrv1cgPNDJOhcxUAcR8w"
+	testtk := "eyJhbGciOiJSUzUxMiIsImtpZCI6ImZ1bGxzdGFjay1tYW56bmsifQ.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJ0aW1lc3RhbXAiOiIxNTg2MDg1MjE5In0.TVSUYHjHyWTr2IaPNUBPi3D5N_g5CRSfVKUc1pTYxgzEXuahwGZdGX4Mu0Fl8d7VZaTJSg7pLczGhwXpAxBntC4cDjShUgqaCk7TdApypHHS4yB_h4UaSb6E14_HYBO5raORDm9KvKnyeXIXNDPl1YlydYmFIGkYyp9GhKRArl4"
 	jwt.Parse(testtk)
 	res, expired, err = jwt.Result()
 	if err != nil {

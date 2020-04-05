@@ -14,7 +14,8 @@ class ZnkAuthJWT {
   static String token(Map<String, dynamic> params, String timestamp) {
     var ts = timestamp;
     if (ts == null || ts.length == 0) {
-      ts = (DateTime.now().millisecondsSinceEpoch).toString();
+      var mse = DateTime.now().millisecondsSinceEpoch / 1000;
+      ts = (mse.toInt()).toString();
     }
     if (params == null) {
       params = Map<String, dynamic>();
@@ -62,7 +63,7 @@ JsonWebKey _readPrivateKeyFromFile(String path) {
 }
 
 void main(List<String> args) async {
-  var testStr = "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDc4NTU0NzQwNTE2In0.A-dtBbUN3SPTSgyC4j7u6F-LRz6Wc3AKnVR1i8hEL--NdgKflxc6AtmGReo3fO2K5miy9OKhm5i5MoGPpu_OEC57WmRE8IqL1A4_R4PUmY_PduQGbJShU8qKGsPc-vL4kTNiUK0hEI1wrxmf6d_I1mpUWhHtCWVxZb3Dgn3Dj-c";
+  var testStr = "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDg0OTIxIn0.fmVr591aBbnP6gkyedBu1bgCI2ZbadmzRXNjLY1XLB4-eVO1qOS1U9xEJgCBhyof5J_dc5Mmmq-aNb0YfCMPHIYw0C8PHKT5NYLGz1A80U-1-vp-bSDPwoitjJbGk7QsUbhmdCgYam5z92_gFm1aHXi1nI9mtXRYJVufgVg5nmo";
   Map<String, dynamic> res = await ZnkAuthJWT.parse(testStr);
   print('res: $res');
   var params = Map<String, dynamic>();
