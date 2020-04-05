@@ -4,12 +4,25 @@ import 'dart:io';
 import 'package:jose/jose.dart';
 import 'package:x509/x509.dart';
 
-const testStr = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDcyOTQxMjY5MDk5In0.f17Aas6tw6Ou0gz2urw4R-BSQ_ZcGF1QsRMPzGW4Xv8JN2FbhTOiE1r33yc7919mp0Z5TjWDMWJX_-Ul1Qy2xwXyU0BgVMWCKY0SO1AkiXsavQXkw8rnNzvuvsv2ZN7mH-R4M2A4dm2wuZ_Y7xvyCGTuEltijDuiTZ_MO0ybJQc";
-
 class ZnkAuthJWT {
   /* 解析jwt */
-  static Map<String, dynamic> parse(String token) {
-    return JsonWebToken.unverified(token).claims.toJson();
+  static Future<Map<String, dynamic>>parse(String token) async {
+    var key = _readPrivateKeyFromFile('lib/viewmodel/network/sec/keys/jwt.rsa');
+    var keyStore = JsonWebKeyStore()
+      ..addKey(key);
+    var jwt = JsonWebToken.unverified(token);
+    print('jwt ${jwt.claims.toJson()}');
+    
+    try {
+      jwt = await JsonWebToken.decodeAndVerify(token, keyStore);
+      var verified = await jwt.verify(keyStore);
+      if (!verified) {
+        return null;
+      }
+      return jwt.claims.toJson();
+    } catch (e) {
+      return null;
+    }
   }
   /* 生成token */
   static String token(Map<String, dynamic> params, String timestamp) {
@@ -21,7 +34,6 @@ class ZnkAuthJWT {
       params = Map<String, dynamic>();
     }
     params['timestamp'] = ts;
-    
     var clms = JsonWebTokenClaims.fromJson(params);
     var buidler = JsonWebSignatureBuilder();
     buidler.jsonContent = clms.toJson();
@@ -65,15 +77,16 @@ JsonWebKey _readPrivateKeyFromFile(String path) {
   });
 }
 
-void main(List<String> args) {
-  Map<String, dynamic> res =ZnkAuthJWT.parse(testStr);
+void main(List<String> args) async {
+  var testStr = "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJrZXkxIjoidGVzdDEiLCJrZXkyIjoidGVzdDIiLCJrZXkzIjoidGVzdDMiLCJ0aW1lc3RhbXAiOiIxNTg2MDc3NjEzNzQ0NTg4In0.e0jolPsTuIrR5e02M_873P6mo4qeq2v02Xhyip7idYumLiSi8pJtx04yc8QgRlpBAilqeZcsUDselM04lXswDUUQm5TDpRZDbmTbzfl20h1LGTl61iOXtgLukb-zd2HKrsJPtX2jO6e3NYD3_uuSuJZqzcX9Am0Hl8vIJyEFyrs";
+  Map<String, dynamic> res = await ZnkAuthJWT.parse(testStr);
   print('res: $res');
   var params = Map<String, dynamic>();
   params['key1'] = 'test1';
   params['key2'] = 'test2';
   var tk = ZnkAuthJWT.token(params, null);
   print('jwt compact serialization: $tk');
-  Map<String, dynamic> res1 =ZnkAuthJWT.parse(tk);
+  Map<String, dynamic> res1 = await ZnkAuthJWT.parse(tk);
   print('res1: $res1');
 }
 
