@@ -1,0 +1,14 @@
+{
+    "dev": {
+        "address":"localhost",
+        "port":"50051"
+    },
+    "test": {
+        "address":"localhost",
+        "port":"50051"
+    },
+    "prod": {
+        "address":"localhost",
+        "port":"50051"
+    }
+}

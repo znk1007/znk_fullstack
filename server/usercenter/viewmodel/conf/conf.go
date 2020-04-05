@@ -1,4 +1,5 @@
 package userconf
+
 //Env 环境
 type Env string
 
@@ -9,21 +10,37 @@ const (
 	Test Env = "test"
 	//Prod 生产环境
 	Prod Env = "prod"
+	//Custom 自定义
+	Custom Env = "custom"
 )
 
 var e Env
 
-func init()  {
+func init() {
 	e = Dev
 }
 
 //SetEnv 配置环境
-func SetEnv(env Env)  {
+func SetEnv(env Env) {
 	e = env
 }
-//GetEnv 获取环境
-func GetEnv() Env {
-	return e
+
+//RedisSrvConf Redis服务配置
+func RedisSrvConf() RedisConf {
+	return getRedisConf(e)
 }
 
+//SetRedisSrvConf 设置Redis服务配置
+func SetRedisSrvConf(env Env, host string, port string, clusters []string, password string) {
+	setRedisConf(env, host, port, clusters, password)
+}
 
+//GormSrvConf gorm服务配置
+func GormSrvConf() GormConf {
+	return getGormConf(e)
+}
+
+//SetGormSrvConf 设置gorm配置
+func SetGormSrvConf(env Env, host string, port string, username string, password string, dialect string, db string) {
+	SetGormSrvConf(env, host, port, username, password, dialect, db)
+}

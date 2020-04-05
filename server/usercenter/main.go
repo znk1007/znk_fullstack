@@ -23,7 +23,6 @@ func main() {
 		fmt.Println("jwt err: ", err.Error())
 		return
 	}
-	fmt.Println("token = ", tk)
 
 	jwt.Parse(tk)
 	res, expired, err := jwt.Result()
