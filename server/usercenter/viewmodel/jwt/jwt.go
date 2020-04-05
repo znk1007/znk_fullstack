@@ -1,14 +1,17 @@
 package userjwt
 
 import (
+	"crypto/rsa"
 	"errors"
+	"io/ioutil"
+	"path"
 	"reflect"
+	"runtime"
 	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
-	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
 //UserJWT 用户jwt验证对象
@@ -46,20 +49,22 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 	for idx, val := range params {
 		mclms[idx] = val
 	}
-	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, mclms)
-	token, err = tk.SignedString(usercrypto.GetSecurityKeyByte())
+	token, err = makeToken(mclms)
 	return
 }
 
 //Parse 解析jwt
 func (userJWT *UserJWT) Parse(token string) {
-	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return usercrypto.GetSecurityKeyByte(), nil
-	})
+
+	key := loadRSAPublicKeyFromDisk("key/jwt.rsa.pub")
 	userJWT.parseSucc = false
-	userJWT.err = err
 	userJWT.res = nil
 	userJWT.isExp = true
+	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
+		t.Header["kid"] = "some_id"
+		return key, nil
+	})
+
 	if err != nil {
 		log.Info().Msg(err.Error())
 		userJWT.err = err
@@ -105,4 +110,46 @@ func (userJWT UserJWT) Result() (res map[string]interface{}, expired bool, err e
 	res = userJWT.res
 	err = userJWT.err
 	return
+}
+
+//loadRSAPrivateKeyFromDisk 加载私钥
+func loadRSAPrivateKeyFromDisk(location string) *rsa.PrivateKey {
+	fp := readFile(location)
+	keyData, e := ioutil.ReadFile(fp)
+	if e != nil {
+		panic(e.Error())
+	}
+	key, e := jwt.ParseRSAPrivateKeyFromPEM(keyData)
+	if e != nil {
+		panic(e.Error())
+	}
+	return key
+}
+
+//loadRSAPublicKeyFromDisk 加载公钥
+func loadRSAPublicKeyFromDisk(location string) *rsa.PublicKey {
+	fp := readFile(location)
+	keyData, e := ioutil.ReadFile(fp)
+	if e != nil {
+		panic(e.Error())
+	}
+	key, e := jwt.ParseRSAPublicKeyFromPEM(keyData)
+	if e != nil {
+		panic(e.Error())
+	}
+	return key
+}
+
+//makeToken 生成token
+func makeToken(c jwt.Claims) (tk string, err error) {
+	privateKey := loadRSAPrivateKeyFromDisk("key/jwt.rsa")
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, c)
+	tk, err = token.SignedString(privateKey)
+	return
+}
+
+//readFile 获取指定文件地址
+func readFile(relativePath string) string {
+	_, curPath, _, _ := runtime.Caller(1)
+	return path.Join(path.Dir(curPath) + "/" + relativePath)
 }
