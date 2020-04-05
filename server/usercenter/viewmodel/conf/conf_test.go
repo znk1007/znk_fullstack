@@ -2,8 +2,12 @@ package userconf
 
 import "testing"
 
-func TestEnv(t *testing.T)  {
+func TestEnv(t *testing.T) {
 	SetEnv(Dev)
-	e := GetEnv()
-	t.Log("env: "+ e)
+	rds := RedisSrvConf()
+	t.Log("redis srv: " + rds)
+	gm := GormSrvConf()
+	t.Log("gorm srv: " + gm)
+	rpc := RPCSrvConf()
+	t.Log("rpc srv: " + rpc)
 }

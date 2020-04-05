@@ -44,3 +44,13 @@ func GormSrvConf() GormConf {
 func SetGormSrvConf(env Env, host string, port string, username string, password string, dialect string, db string) {
 	SetGormSrvConf(env, host, port, username, password, dialect, db)
 }
+
+//RPCSrvConf 获取当前rpc服务配置
+func RPCSrvConf() RPCConf {
+	return getRPCConf(e)
+}
+
+//SetRPCSrvConf 设置rpc服务配置
+func SetRPCSrvConf(env Env, host string, port int) {
+	setRPCConf(env, host, port)
+}
