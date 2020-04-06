@@ -16,9 +16,9 @@ func ConnectMariaDB() {
 	initMariaDB()
 }
 
-//Table 指定表
-func Table(name string) *gorm.DB {
-	return gdb.Table(name)
+//DB 数据库句柄
+func DB() *gorm.DB {
+	return gdb
 }
 
 //Close 关闭数据库
