@@ -2,6 +2,7 @@ package usernet
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -47,19 +48,30 @@ func (s registService) Do() {
 func (s registService) handleRegist() {
 	req := s.req
 	acc := req.GetAccount()
+	if len(acc) == 0 {
+		log.Info().Msg("account cannot be empty")
+		s.makeToken("", http.StatusAccepted, "account cannot be empty")
+		return
+	}
 	//redis 第一波墙，防止频繁操作数据库
 	exists := userredis.Exists(acc)
+	fmt.Println("exists: ", exists)
 	if exists {
-		regS, _ := userredis.HMGet(acc, "ts", "registed")
-		rgd, err := strconv.ParseBool(regS[1].(string))
+		regS, err := userredis.HMGet(acc, "ts", "registed")
 		if err != nil {
 			log.Info().Msg(err.Error())
-			s.makeToken(acc, http.StatusAccepted, "param `timestamp` is error type`")
+			s.makeToken(acc, http.StatusAccepted, "set params failed:"+err.Error())
+			return
+		}
+		rgd := regS[1].(bool)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			s.makeToken(acc, http.StatusAccepted, "param `registed` is error type: `"+err.Error())
 			return
 		}
 		//已注册
 		if rgd {
-			s.makeToken(acc, http.StatusAccepted, "user has registed`")
+			s.makeToken(acc, http.StatusAccepted, "user has registed: `"+err.Error())
 			return
 		}
 		//对比时间戳
@@ -75,11 +87,7 @@ func (s registService) handleRegist() {
 			return
 		}
 	}
-	if len(acc) == 0 {
-		log.Info().Msg("account cannot be empty")
-		s.makeToken("", http.StatusAccepted, "account cannot be empty")
-		return
-	}
+
 	res, expired, e := check.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
@@ -92,6 +100,14 @@ func (s registService) handleRegist() {
 		return
 	}
 
+	psd, ok := res["password"]
+	if !ok || psd == nil {
+		log.Info().Msg("password cannot be empty")
+		s.makeToken("", http.StatusBadRequest, "password cannot be empty")
+		return
+	}
+	password := psd.(string)
+
 	_, e = s.checkRegistToken(res)
 	if e != nil {
 		log.Info().Msg(e.Error())
@@ -99,8 +115,8 @@ func (s registService) handleRegist() {
 		return
 	}
 
-	tsstr := acc + "_" + string(time.Now().Unix())
-	userredis.HSet(acc, tsstr)
+	var rgd int
+	userredis.HSet(acc, "ts", string(time.Now().Unix()), "registed", rgd)
 }
 
 /*
@@ -113,29 +129,23 @@ func (s registService) handleRegist() {
 
 func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
 	var deviceID string
-	var password string
 	var platform string
 	dID, ok := reqMap["deviceID"]
-	deviceID = dID.(string)
-	if !ok || len(deviceID) == 0 {
+	if !ok || dID == nil {
 		log.Info().Msg("deviceID cannot be empty")
 		s.makeToken("", http.StatusBadRequest, "deviceID cannot be empty")
 		return
 	}
+	deviceID = dID.(string)
+
 	plf, ok := reqMap["platform"]
-	platform = plf.(string)
-	if !ok || len(platform) == 0 {
+	if !ok || plf == nil {
 		log.Info().Msg("platform cannot be empty")
 		s.makeToken("", http.StatusBadRequest, "platform cannot be empty")
 		return
 	}
-	psd, ok := reqMap["password"]
-	password = psd.(string)
-	if !ok || len(password) == 0 {
-		log.Info().Msg("password cannot be empty")
-		s.makeToken("", http.StatusBadRequest, "password cannot be empty")
-		return
-	}
+	platform = plf.(string)
+
 	return
 }
 

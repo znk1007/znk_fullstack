@@ -39,7 +39,7 @@ func initRedis() {
 		}
 		nclstrRds = redis.NewClient(ops)
 	}
-
+	log.Info().Msg("connect redis success")
 }
 
 //Exists key是否存在

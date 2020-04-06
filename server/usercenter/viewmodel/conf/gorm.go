@@ -19,7 +19,7 @@ func init() {
 		Dev: GormConf{
 			Host:     "47.105.85.107",
 			Port:     "3308",
-			Username: "root",
+			Username: "znk",
 			Password: "man_znk-1007",
 			Dialect:  "mysql",
 			DB:       "znk",
@@ -27,7 +27,7 @@ func init() {
 		Test: GormConf{
 			Host:     "47.105.85.107",
 			Port:     "3308",
-			Username: "root",
+			Username: "znk",
 			Password: "man_znk-1007",
 			Dialect:  "mysql",
 			DB:       "znk",
@@ -35,7 +35,7 @@ func init() {
 		Prod: GormConf{
 			Host:     "47.105.85.107",
 			Port:     "3308",
-			Username: "root",
+			Username: "znk",
 			Password: "man_znk-1007",
 			Dialect:  "mysql",
 			DB:       "znk",

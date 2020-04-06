@@ -50,7 +50,7 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 	for idx, val := range params {
 		mclms[idx] = val
 	}
-	token, err = makeToken(mclms)
+	token, err = createToken(mclms)
 	return
 }
 
@@ -142,8 +142,8 @@ func loadRSAPublicKeyFromDisk(location string) *rsa.PublicKey {
 	return key
 }
 
-//makeToken 生成token
-func makeToken(c jwt.Claims) (tk string, err error) {
+//createToken 生成token
+func createToken(c jwt.Claims) (tk string, err error) {
 	privateKey := loadRSAPrivateKeyFromDisk("key/jwt.rsa")
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, c)
 	tk, err = token.SignedString(privateKey)

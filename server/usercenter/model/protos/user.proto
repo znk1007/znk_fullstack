@@ -19,5 +19,6 @@ message User {
     string createdAt = 7;
     string updatedAt = 8;
     int32 online = 9;
-    Permission permission = 10;
+    int32 frozen = 10;//是否冻结
+    Permission permission = 11;
 }

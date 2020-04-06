@@ -32,12 +32,13 @@ func Close() {
 func initMariaDB() {
 	gc := userconf.GormSrvConf()
 	var err error
-	//"user:password@/dbname?charset=utf8&parseTime=True&loc=Local"
-	url := gc.Username + ":" + gc.Password + "@/" + gc.DB + "?charset=utf8&parseTime=True&loc=Local"
+	//"user:password@tcp(addr)/dbname?charset=utf8&parseTime=True&loc=Local"
+	url := gc.Username + ":" + gc.Password + "@tcp(" + gc.Host + ":" + gc.Port + ")/" + gc.DB + "?charset=utf8&parseTime=True&loc=Local"
 	gdb, err = gorm.Open(gc.Dialect, url)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
+	log.Info().Msg("connect redis success")
 }
 
 //checkDB 校验db句柄
