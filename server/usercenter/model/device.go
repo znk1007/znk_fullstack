@@ -1,6 +1,6 @@
 package model
 
-import "github.com/jinzhu/gorm"
+import gorm "github.com/jinzhu/gorm"
 
 //Device 设备信息
 type Device struct {
