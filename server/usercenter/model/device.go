@@ -9,4 +9,5 @@ type Device struct {
 	Platform string
 	DeviceID string
 	Trust    bool
+	Online   bool
 }
