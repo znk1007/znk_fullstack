@@ -18,7 +18,7 @@ var clstrRds *redis.ClusterClient
 var nclstrRds *redis.Client
 
 //ConnectRedis 连接Redis
-func ConnectRedis(envir userconf.Env) {
+func ConnectRedis() {
 	initRedis()
 }
 

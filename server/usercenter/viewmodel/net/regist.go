@@ -169,8 +169,8 @@ func (s registService) makeToken(userID string, code int, msg string) {
 	return
 }
 
-//RegisterRegistServer 注册到注册请求服务
-func RegisterRegistServer(srv *grpc.Server) {
+//registerRegistServer 注册到注册请求服务
+func registerRegistServer(srv *grpc.Server) {
 	userproto.RegisterRegistSrvServer(srv, rs)
 }
 

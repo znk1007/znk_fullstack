@@ -51,6 +51,6 @@ func RPCSrvConf() RPCConf {
 }
 
 //SetRPCSrvConf 设置rpc服务配置
-func SetRPCSrvConf(env Env, host string, port int) {
+func SetRPCSrvConf(env Env, host string, port string) {
 	setRPCConf(env, host, port)
 }

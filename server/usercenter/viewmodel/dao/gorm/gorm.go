@@ -12,7 +12,7 @@ import (
 var gdb *gorm.DB
 
 //ConnectMariaDB 连接MariaDB
-func ConnectMariaDB(envir userconf.Env) {
+func ConnectMariaDB() {
 	initMariaDB()
 }
 
@@ -36,8 +36,7 @@ func initMariaDB() {
 	url := gc.Username + ":" + gc.Password + "@/" + gc.DB + "?charset=utf8&parseTime=True&loc=Local"
 	gdb, err = gorm.Open(gc.Dialect, url)
 	if err != nil {
-		log.Info().Msg(err.Error())
-		panic(err)
+		log.Fatal().Msg(err.Error())
 	}
 }
 
