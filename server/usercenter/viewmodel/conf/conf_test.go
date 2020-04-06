@@ -5,9 +5,9 @@ import "testing"
 func TestEnv(t *testing.T) {
 	SetEnv(Dev)
 	rds := RedisSrvConf()
-	t.Log("redis srv: " + rds)
+	t.Log(rds)
 	gm := GormSrvConf()
-	t.Log("gorm srv: " + gm)
+	t.Log(gm)
 	rpc := RPCSrvConf()
-	t.Log("rpc srv: " + rpc)
+	t.Log(rpc)
 }

@@ -15,6 +15,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+var testregist = false
+
 var rs *registService
 var check usermiddleware.CheckToken
 
@@ -107,9 +109,9 @@ func (s registService) handleRegist() {
 		return
 	}
 	password := psd.(string)
-
-	_, e = s.checkRegistToken(res)
-	if e != nil {
+	fmt.Println(password)
+	succ := s.checkRegistToken(res)
+	if !succ {
 		log.Info().Msg(e.Error())
 		s.makeToken(acc, http.StatusAccepted, e.Error())
 		return
@@ -127,26 +129,35 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk string, err error) {
+func (s registService) checkRegistToken(reqMap map[string]interface{}) bool {
 	var deviceID string
 	var platform string
 	dID, ok := reqMap["deviceID"]
 	if !ok || dID == nil {
 		log.Info().Msg("deviceID cannot be empty")
 		s.makeToken("", http.StatusBadRequest, "deviceID cannot be empty")
-		return
+		return false
 	}
 	deviceID = dID.(string)
+	if len(deviceID) == 0 {
+		log.Info().Msg("deviceID cannot be empty")
+		s.makeToken("", http.StatusBadRequest, "deviceID cannot be empty")
+		return false
+	}
 
 	plf, ok := reqMap["platform"]
 	if !ok || plf == nil {
 		log.Info().Msg("platform cannot be empty")
 		s.makeToken("", http.StatusBadRequest, "platform cannot be empty")
-		return
+		return false
 	}
 	platform = plf.(string)
-
-	return
+	if len(platform) == 0 {
+		log.Info().Msg("platform cannot be empty")
+		s.makeToken("", http.StatusBadRequest, "platform cannot be empty")
+		return false
+	}
+	return true
 }
 
 /*
@@ -156,6 +167,9 @@ func (s registService) checkRegistToken(reqMap map[string]interface{}) (tk strin
 反馈消息：message
 */
 func (s registService) makeToken(userID string, code int, msg string) {
+	if testregist {
+		return
+	}
 	ts := time.Now().Unix()
 	resMap := map[string]interface{}{
 		"timestamp": ts,

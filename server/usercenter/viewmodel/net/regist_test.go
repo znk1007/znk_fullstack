@@ -3,10 +3,12 @@ package usernet
 import "testing"
 
 func TestCheckRegistTokenEmptyParams(t *testing.T) {
+	testregist = true
 	resmap := map[string]interface{}{}
-	tk, err := rs.checkRegistToken(resmap)
-	if err != nil {
-		t.Error("CheckRegistTokenEmptyParams: ", err.Error())
+	succ := rs.checkRegistToken(resmap)
+	if !succ {
+		t.Error("CheckRegistTokenEmptyParams failed ")
+		return
 	}
-	t.Log("TestCheckRegistTokenEmptyParams: ", tk)
+	t.Log("TestCheckRegistTokenEmptyParams succ")
 }
