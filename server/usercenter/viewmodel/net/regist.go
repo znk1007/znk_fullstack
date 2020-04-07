@@ -10,6 +10,7 @@ import (
 	"github.com/znk_fullstack/server/usercenter/model"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
+	userGenID "github.com/znk_fullstack/server/usercenter/viewmodel/generatedId"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	"google.golang.org/grpc"
@@ -92,8 +93,14 @@ func (s registService) handleRegist() {
 		return
 	}
 	password := psd.(string)
+	if len(password) == 0 {
+		log.Info().Msg("password cannot be empty")
+		s.makeToken("", http.StatusBadRequest, "password cannot be empty")
+		return
+	}
 	fmt.Println(password)
-	succ := s.checkRegistToken(res)
+	userID := userGenID.GenerateID()
+	succ := s.checkRegistToken(res, userID)
 	if !succ {
 		log.Info().Msg(e.Error())
 		s.makeToken(acc, http.StatusAccepted, e.Error())
@@ -112,7 +119,7 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func (s registService) checkRegistToken(reqMap map[string]interface{}) bool {
+func (s registService) checkRegistToken(reqMap map[string]interface{}, userID string) bool {
 	var deviceID string
 	var platform string
 	dID, ok := reqMap["deviceID"]
@@ -140,6 +147,7 @@ func (s registService) checkRegistToken(reqMap map[string]interface{}) bool {
 		s.makeToken("", http.StatusBadRequest, "platform cannot be empty")
 		return false
 	}
+	dvs := &model.Device{}
 	return true
 }
 

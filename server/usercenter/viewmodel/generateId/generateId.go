@@ -1,4 +1,4 @@
-package generate
+package userGenID
 
 import (
 	"math/rand"
