@@ -52,7 +52,7 @@ func TotalUserCount() int {
 	return count
 }
 
-//UpdateUserFrozen 更新冻结状态
-func UpdateUserFrozen(userID string, frozen int32) {
-
+//UpdateUserActive 更新激活状态
+func UpdateUserActive(userID string, active int32) error {
+	return usergorm.DB().Model(&UserDB{Identifier: userID}).Update("user.active", active).Error
 }
