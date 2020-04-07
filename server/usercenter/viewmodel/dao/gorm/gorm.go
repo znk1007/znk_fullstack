@@ -38,7 +38,7 @@ func initMariaDB() {
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
-	log.Info().Msg("connect redis success")
+	log.Info().Msg("connect mariadb success")
 }
 
 //checkDB 校验db句柄
