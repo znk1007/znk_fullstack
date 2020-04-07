@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/znk_fullstack/server/usercenter/model"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
@@ -56,31 +56,14 @@ func (s registService) handleRegist() {
 		return
 	}
 	//redis 第一波墙，防止频繁操作数据库
-	exists := userredis.Exists(acc)
-	fmt.Println("exists: ", exists)
-	if exists {
-		regS, err := userredis.HMGet(acc, "ts", "registed")
-		if err != nil {
-			log.Info().Msg(err.Error())
-			s.makeToken(acc, http.StatusAccepted, "set params failed:"+err.Error())
+	exs, oldTS, registed := model.AccRegisted(acc)
+	if exs {
+		if registed == 1 {
+			s.makeToken(acc, http.StatusAccepted, "user has registed:")
 			return
 		}
-		rgd := regS[1].(bool)
-		if err != nil {
-			log.Info().Msg(err.Error())
-			s.makeToken(acc, http.StatusAccepted, "param `registed` is error type: `"+err.Error())
-			return
-		}
-		//已注册
-		if rgd {
-			s.makeToken(acc, http.StatusAccepted, "user has registed: `"+err.Error())
-			return
-		}
-		//对比时间戳
-		oldTS, err := strconv.ParseInt(regS[0].(string), 10, 64)
-		if err != nil {
-			log.Info().Msg(err.Error())
-			s.makeToken(acc, http.StatusAccepted, "param `timestamp` is error type`")
+		if oldTS < 0 {
+			s.makeToken(acc, http.StatusAccepted, "param `timestamp` is error type")
 			return
 		}
 		ts := time.Now().Unix()
