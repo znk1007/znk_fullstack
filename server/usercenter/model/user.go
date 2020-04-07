@@ -9,10 +9,7 @@ import (
 
 //UserDB 用户数据库模型
 type UserDB struct {
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  *time.Time `sql:"index"`
-	Identifier string     `gorm:"primary_key"`
+	Identifier string `gorm:"primary_key"`
 	User       userproto.User
 }
 
@@ -23,11 +20,8 @@ func CreateUser(user *userproto.User) (exists bool, msg string) {
 	}
 	exists = usergorm.DB().NewRecord(userDB)
 	if !exists {
-		userDB.CreatedAt = time.Now()
-		userDB.UpdatedAt = time.Now()
-		userDB.DeletedAt = nil
-		user.CreatedAt = userDB.CreatedAt.String()
-		user.UpdatedAt = userDB.UpdatedAt.String()
+		user.CreatedAt = time.Now().String()
+		user.UpdatedAt = time.Now().String()
 		usergorm.DB().Create(userDB)
 		exists = usergorm.DB().NewRecord(userDB)
 		msg = "create user success"
