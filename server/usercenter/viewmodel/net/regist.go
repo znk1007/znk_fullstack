@@ -2,7 +2,6 @@ package usernet
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -98,7 +97,6 @@ func (s registService) handleRegist() {
 		s.makeToken("", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
-	fmt.Println(password)
 	userID := userGenID.GenerateID()
 	if len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
@@ -111,7 +109,11 @@ func (s registService) handleRegist() {
 		s.makeToken(acc, http.StatusAccepted, e.Error())
 		return
 	}
-
+	user := &userproto.User{
+		UserID:  userID,
+		Account: acc,
+	}
+	model.CreateUser(user)
 	var rgd int
 	userredis.HSet(acc, "ts", string(time.Now().Unix()), "registed", rgd)
 }
