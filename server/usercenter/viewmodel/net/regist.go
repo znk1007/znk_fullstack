@@ -100,6 +100,11 @@ func (s registService) handleRegist() {
 	}
 	fmt.Println(password)
 	userID := userGenID.GenerateID()
+	if len(userID) == 0 {
+		log.Info().Msg("userID cannot be empty")
+		s.makeToken("", http.StatusBadRequest, "userID cannot be empty")
+		return
+	}
 	succ := s.checkRegistToken(res, userID)
 	if !succ {
 		log.Info().Msg(e.Error())
@@ -147,7 +152,15 @@ func (s registService) checkRegistToken(reqMap map[string]interface{}, userID st
 		s.makeToken("", http.StatusBadRequest, "platform cannot be empty")
 		return false
 	}
-	dvs := &model.Device{}
+	dvs := &model.Device{
+		DeviceID: deviceID,
+		Platform: platform,
+		Trust:    1,
+		Online:   0,
+		UserID:   userID,
+	}
+	model.CreateDevice(dvs)
+	model.SetCurrentDeivce(userID, deviceID, 1, 0)
 	return true
 }
 
