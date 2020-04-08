@@ -74,7 +74,7 @@ func (userJWT *UserJWT) Parse(token string) {
 	}
 	clms, ok := tk.Claims.(jwt.MapClaims)
 	if !ok || !tk.Valid {
-		userJWT.err = errors.New("parse error")
+		userJWT.err = errors.New("internal error")
 		return
 	}
 	if ok && tk.Valid {

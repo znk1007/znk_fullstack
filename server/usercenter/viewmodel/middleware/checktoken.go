@@ -29,10 +29,10 @@ func (check CheckToken) Generate(params map[string]interface{}) (token string, e
 }
 
 //Verify 校验token
-func (check CheckToken) Verify(token string) (res map[string]interface{}, expired bool, err error) {
+func (check CheckToken) Verify(token string) (res map[string]interface{}, deviceID string, platform string, expired bool, err error) {
+	expired = true
 	if len(token) == 0 {
 		log.Info().Msg("miss param `sign` or `sign` is empty")
-		res = nil
 		err = errors.New("miss param `sign` or `sign` is empty")
 		return
 	}
@@ -41,22 +41,36 @@ func (check CheckToken) Verify(token string) (res map[string]interface{}, expire
 	expired = exp
 	if e != nil {
 		log.Info().Msg(err.Error())
-		res = nil
 		err = e
 		return
 	}
+	var ok bool
+	//设备ID
+	deviceID, ok = tk["deviceID"].(string)
+	if !ok || len(deviceID) == 0 {
+		log.Info().Msg("deviceID cannot be empty")
+		err = errors.New("deviceID cannot be empty")
+		return
+	}
+	//平台类型
+	platform, ok = tk["platform"].(string)
+	if !ok || len(platform) == 0 {
+		log.Info().Msg("platform cannot be empty")
+		err = errors.New("platform cannot be empty")
+		return
+	}
+	//秘钥
 	key, ok := tk["appkey"].(string)
 	if !ok || len(key) == 0 {
 		log.Info().Msg("miss param `appkey`")
 		err = errors.New("miss param `appkey`")
-		res = nil
 		return
 	}
 	if key != usercrypto.GetSecurityKeyString() {
 		log.Info().Msg("appkey is error")
 		err = errors.New("appkey is error")
-		res = nil
 		return
 	}
+	res = tk
 	return
 }

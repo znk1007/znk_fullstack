@@ -57,48 +57,44 @@ func (s registService) handleRegist() {
 	}
 	//redis 第一波墙，防止频繁操作数据库
 	exs, oldTS, registed := model.AccRegisted(acc)
-
-	res, expired, e := check.Verify(req.GetToken())
+	//解析校验token
+	res, dID, plf, expired, e := check.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeToken(acc, "", http.StatusAccepted, e.Error())
 		return
 	}
-
-	if !expired {
-		s.makeToken(acc, "", http.StatusAccepted, "please regist later on")
-		return
-	}
+	//如果存在redis中，曾调过注册方法
 	if exs {
+		//如果已注册
 		if registed == 1 {
 			s.makeToken(acc, "", http.StatusAccepted, "user has registed:")
 			return
 		}
+		if !expired {
+			s.makeToken(acc, "", http.StatusAccepted, "please regist later on")
+			return
+		}
+
 		if oldTS < 0 {
-			s.makeToken(acc, "", http.StatusAccepted, "param `timestamp` is error type")
+			s.makeToken(acc, "", http.StatusAccepted, "miss param `timestamp`")
 			return
 		}
 		ts := time.Now().Unix()
-		if ts-oldTS > int64(expiredInterval) {
+		if ts-oldTS < int64(expiredInterval) {
 			s.makeToken(acc, "", http.StatusAccepted, "please regist later on")
 			return
 		}
 	}
 
-	psd, ok := res["password"]
-	if !ok || psd == nil {
-		log.Info().Msg("password cannot be empty")
-		s.makeToken("", "", http.StatusBadRequest, "password cannot be empty")
-		return
-	}
-	password := psd.(string)
-	if len(password) == 0 {
+	psd, ok := res["password"].(string)
+	if !ok || len(psd) == 0 {
 		log.Info().Msg("password cannot be empty")
 		s.makeToken("", "", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
 
-	succ, userID := s.makeDevice(res)
+	succ, userID := s.makeDevice(dID, plf)
 	if !succ {
 		log.Info().Msg(e.Error())
 		s.makeToken(acc, "", http.StatusAccepted, e.Error())
@@ -120,20 +116,15 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func (s registService) makeDevice(reqMap map[string]interface{}) (succ bool, userID string) {
-	var deviceID string
-	var platform string
+func (s registService) makeDevice(deviceID string, platform string) (succ bool, userID string) {
 	var ok bool
 	succ = false
 	userID = ""
-	deviceID, ok = reqMap["deviceID"].(string)
 	if !ok || len(deviceID) == 0 {
 		log.Info().Msg("deviceID cannot be empty")
 		s.makeToken("", "", http.StatusBadRequest, "deviceID cannot be empty")
 		return
 	}
-
-	platform, ok = reqMap["platform"].(string)
 	if !ok || len(platform) == 0 {
 		log.Info().Msg("platform cannot be empty")
 		s.makeToken("", "", http.StatusBadRequest, "platform cannot be empty")
@@ -168,7 +159,6 @@ func (s registService) makeToken(acc string, userID string, code int, msg string
 	if testregist {
 		return
 	}
-
 	ts := time.Now().Unix()
 	var rgd int
 	if code == http.StatusOK {
@@ -178,7 +168,9 @@ func (s registService) makeToken(acc string, userID string, code int, msg string
 		log.Info().Msg(msg)
 	}
 	//保存用户注册状态
-	model.SetAccRegisted(acc, string(ts), rgd)
+	if len(acc) > 0 {
+		model.SetAccRegisted(acc, string(ts), rgd)
+	}
 	//生成响应数据
 	resMap := map[string]interface{}{
 		"timestamp": ts,
