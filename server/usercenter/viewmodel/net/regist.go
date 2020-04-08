@@ -94,19 +94,13 @@ func (s registService) handleRegist() {
 		return
 	}
 
-	succ, userID := s.makeDevice(dID, plf)
+	succ, userID := s.makeDevice(acc, dID, plf)
 	if !succ {
 		log.Info().Msg(e.Error())
 		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
-	e = s.saveUser(acc, userID)
-	if e != nil {
-		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
-		return
-	}
-	s.makeToken(acc, userID, http.StatusOK, "operation success")
+	s.saveUser(acc, userID, psd)
 }
 
 /*
@@ -116,25 +110,25 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func (s registService) makeDevice(deviceID string, platform string) (succ bool, userID string) {
+func (s registService) makeDevice(acc string, deviceID string, platform string) (succ bool, userID string) {
 	var ok bool
 	succ = false
 	userID = ""
 	if !ok || len(deviceID) == 0 {
 		log.Info().Msg("deviceID cannot be empty")
-		s.makeToken("", "", http.StatusBadRequest, "deviceID cannot be empty")
+		s.makeToken(acc, "", http.StatusBadRequest, "deviceID cannot be empty")
 		return
 	}
 	if !ok || len(platform) == 0 {
 		log.Info().Msg("platform cannot be empty")
-		s.makeToken("", "", http.StatusBadRequest, "platform cannot be empty")
+		s.makeToken(acc, "", http.StatusBadRequest, "platform cannot be empty")
 		return
 	}
 
 	userID = userGenID.GenerateID()
 	if len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
-		s.makeToken("", "", http.StatusBadRequest, "userID cannot be empty")
+		s.makeToken(acc, "", http.StatusBadRequest, "userID cannot be empty")
 		return
 	}
 	dvs := &model.Device{
@@ -144,13 +138,18 @@ func (s registService) makeDevice(deviceID string, platform string) (succ bool, 
 		Online:   0,
 		UserID:   userID,
 	}
-	model.CreateDevice(dvs)
+	_, err := model.CreateDevice(dvs)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		s.makeToken(acc, "", http.StatusBadRequest, err.Error())
+		return
+	}
 	model.SetCurrentDeivce(userID, deviceID, 1, 0)
 	return
 }
 
 //saveUser 保存用户信息
-func (s registService) saveUser(acc string, userID string) (err error) {
+func (s registService) saveUser(acc string, userID string, password string) {
 	phone := ""
 	if tools.VerifyPhone(acc) {
 		phone = acc
@@ -167,7 +166,13 @@ func (s registService) saveUser(acc string, userID string) (err error) {
 		Nickname: acc,
 		Photo:    "",
 	}
-	_, err = model.CreateUser(user)
+	_, e := model.CreateUser(user)
+	if e != nil {
+		log.Info().Msg(e.Error())
+		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		return
+	}
+	s.makeToken(acc, userID, http.StatusOK, "operation success")
 	return
 }
 

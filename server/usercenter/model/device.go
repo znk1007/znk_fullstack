@@ -15,15 +15,11 @@ type Device struct {
 }
 
 //CreateDevice 创建设备信息数据
-func CreateDevice(device *Device) (exs bool, msg string) {
+func CreateDevice(device *Device) (exs bool, err error) {
 	exs = usergorm.DB().NewRecord(device)
 	if !exs {
-		usergorm.DB().Create(device)
+		err = usergorm.DB().Create(device).Error
 		exs = usergorm.DB().NewRecord(device)
-		msg = "create deivce info success"
-	} else {
-		exs = true
-		msg = "device info exists"
 	}
 	return
 }
