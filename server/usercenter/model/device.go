@@ -55,7 +55,8 @@ func CurrentDevice(userID string) (deviceID string, trust int, online int) {
 }
 
 //SetCurrentDeivce 设置当前设备信息
-func SetCurrentDeivce(userID string, deviceID string, trust int, online int) {
+func SetCurrentDeivce(userID string, deviceID string, trust int, online int) (e error) {
 	k := userID + "_device"
-	userredis.HSet(k, "devicedID", deviceID, "trust", trust, "online", online)
+	e = userredis.HSet(k, "devicedID", deviceID, "trust", trust, "online", online)
+	return
 }

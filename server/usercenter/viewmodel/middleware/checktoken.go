@@ -45,23 +45,16 @@ func (check CheckToken) Verify(token string) (res map[string]interface{}, expire
 		err = e
 		return
 	}
-	key, ok := tk["appkey"]
-	appkey := key.(string)
-	if !ok {
+	key, ok := tk["appkey"].(string)
+	if !ok || len(key) == 0 {
 		log.Info().Msg("miss param `appkey`")
 		err = errors.New("miss param `appkey`")
 		res = nil
 		return
 	}
-	if len(appkey) == 0 {
-		log.Info().Msg("appkey is empty")
-		err = errors.New("appkey is empty")
-		res = nil
-		return
-	}
-	if appkey != usercrypto.GetSecurityKeyString() {
-		log.Info().Msg("appkey is bad")
-		err = errors.New("appkey is bad")
+	if key != usercrypto.GetSecurityKeyString() {
+		log.Info().Msg("appkey is error")
+		err = errors.New("appkey is error")
 		res = nil
 		return
 	}

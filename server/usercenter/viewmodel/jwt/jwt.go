@@ -73,11 +73,18 @@ func (userJWT *UserJWT) Parse(token string) {
 		return
 	}
 	clms, ok := tk.Claims.(jwt.MapClaims)
+	if !ok || !tk.Valid {
+		userJWT.err = errors.New("parse error")
+		return
+	}
 	if ok && tk.Valid {
-		exp := clms["timestamp"].(string)
+		exp, ok := clms["timestamp"].(string)
+		if !ok || len(exp) == 0 {
+			userJWT.err = errors.New("miss param `timestamp`")
+			return
+		}
 		oldTS, err := strconv.ParseInt(exp, 10, 64)
 		if err != nil {
-			log.Info().Msg(err.Error())
 			userJWT.err = err
 			return
 		}
@@ -87,6 +94,10 @@ func (userJWT *UserJWT) Parse(token string) {
 			userJWT.isExp = false
 		}
 		v := reflect.ValueOf(clms)
+		if v.Kind() != reflect.Map {
+			userJWT.err = errors.New("type error")
+			return
+		}
 		if v.Kind() == reflect.Map {
 			kMap := make(map[string]interface{})
 			for _, k := range v.MapKeys() {
@@ -98,11 +109,7 @@ func (userJWT *UserJWT) Parse(token string) {
 			userJWT.err = nil
 			userJWT.res = kMap
 			userJWT.parseSucc = true
-		} else {
-			userJWT.err = errors.New("type error")
 		}
-	} else {
-		userJWT.err = errors.New("parse error")
 	}
 }
 

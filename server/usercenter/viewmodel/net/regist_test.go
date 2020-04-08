@@ -2,13 +2,13 @@ package usernet
 
 import "testing"
 
-func TestCheckRegistTokenEmptyParams(t *testing.T) {
+func TestMakeDeviceEmptyParams(t *testing.T) {
 	testregist = true
 	resmap := map[string]interface{}{}
-	succ := rs.checkRegistToken(resmap)
+	succ, _ := rs.makeDevice(resmap)
 	if !succ {
-		t.Error("CheckRegistTokenEmptyParams failed ")
+		t.Error("makeDevice failed ")
 		return
 	}
-	t.Log("TestCheckRegistTokenEmptyParams succ")
+	t.Log("makeDevice succ")
 }
