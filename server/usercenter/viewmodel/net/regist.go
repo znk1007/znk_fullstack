@@ -8,10 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/znk_fullstack/server/usercenter/model"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
-	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 	userGenID "github.com/znk_fullstack/server/usercenter/viewmodel/generateId"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
+	"github.com/znk_fullstack/server/usercenter/viewmodel/tools"
 	"google.golang.org/grpc"
 )
 
@@ -97,16 +97,16 @@ func (s registService) handleRegist() {
 	succ, userID := s.makeDevice(dID, plf)
 	if !succ {
 		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusAccepted, e.Error())
+		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
-	user := &userproto.User{
-		UserID:  userID,
-		Account: acc,
+	e = s.saveUser(acc, userID)
+	if e != nil {
+		log.Info().Msg(e.Error())
+		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		return
 	}
-	model.CreateUser(user)
-	var rgd int
-	userredis.HSet(acc, "ts", string(time.Now().Unix()), "registed", rgd)
+	s.makeToken(acc, userID, http.StatusOK, "operation success")
 }
 
 /*
@@ -146,6 +146,28 @@ func (s registService) makeDevice(deviceID string, platform string) (succ bool, 
 	}
 	model.CreateDevice(dvs)
 	model.SetCurrentDeivce(userID, deviceID, 1, 0)
+	return
+}
+
+//saveUser 保存用户信息
+func (s registService) saveUser(acc string, userID string) (err error) {
+	phone := ""
+	if tools.VerifyPhone(acc) {
+		phone = acc
+	}
+	email := ""
+	if tools.VerifyEmail(acc) {
+		email = acc
+	}
+	user := &userproto.User{
+		UserID:   userID,
+		Account:  acc,
+		Phone:    phone,
+		Email:    email,
+		Nickname: acc,
+		Photo:    "",
+	}
+	_, err = model.CreateUser(user)
 	return
 }
 

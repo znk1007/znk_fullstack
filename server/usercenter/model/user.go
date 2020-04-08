@@ -16,7 +16,7 @@ type UserDB struct {
 }
 
 //CreateUser 创建用户模型
-func CreateUser(user *userproto.User) (exists bool, msg string) {
+func CreateUser(user *userproto.User) (exists bool, err error) {
 	userDB := &UserDB{
 		Identifier: user.UserID,
 	}
@@ -24,11 +24,10 @@ func CreateUser(user *userproto.User) (exists bool, msg string) {
 	if !exists {
 		user.CreatedAt = time.Now().String()
 		user.UpdatedAt = time.Now().String()
-		usergorm.DB().Create(userDB)
+		user.Online = 0
+		user.Active = 1
+		err = usergorm.DB().Create(userDB).Error
 		exists = usergorm.DB().NewRecord(userDB)
-		msg = "create user success"
-	} else {
-		msg = "user exists"
 	}
 	return
 }
