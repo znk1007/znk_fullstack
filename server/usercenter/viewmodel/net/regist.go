@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/znk_fullstack/server/usercenter/model"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	userGenID "github.com/znk_fullstack/server/usercenter/viewmodel/generateId"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
@@ -158,6 +159,12 @@ func (s registService) saveUser(acc string, userID string, password string) {
 	if tools.VerifyEmail(acc) {
 		email = acc
 	}
+	psd, e := usercrypto.CBCEncrypt(password)
+	if e != nil {
+		log.Info().Msg(e.Error())
+		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		return
+	}
 	user := &userproto.User{
 		UserID:   userID,
 		Account:  acc,
@@ -166,7 +173,7 @@ func (s registService) saveUser(acc string, userID string, password string) {
 		Nickname: acc,
 		Photo:    "",
 	}
-	_, e := model.CreateUser(user)
+	_, e = model.CreateUser(user, psd)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeToken(acc, "", http.StatusBadRequest, e.Error())

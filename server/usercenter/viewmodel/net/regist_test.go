@@ -4,7 +4,7 @@ import "testing"
 
 func TestMakeDeviceEmptyParams(t *testing.T) {
 	testregist = true
-	succ, _ := rs.makeDevice("", "")
+	succ, _ := rs.makeDevice("", "", "")
 	if !succ {
 		t.Error("makeDevice failed ")
 		return
