@@ -173,16 +173,16 @@ func SetAccOnline(acc string, online int) {
 }
 
 //SetAccUserInfo 保存用户基本信息
-func SetAccUserInfo(acc, phone, email, nickname string) {
+func SetAccUserInfo(acc, userID, phone, email, nickname string) {
 	key := "user_info" + acc
-	userredis.HSet(key, "phone", phone, "email", email, "nickname", nickname)
+	userredis.HSet(key, "userID", userID, "phone", phone, "email", email, "nickname", nickname)
 }
 
 //AccUserInfo 获取用户基本信息
 func AccUserInfo(acc string) (phone, email, nickname string) {
 	key := "user_info" + acc
 	vals, err := userredis.HMGet(key, "phone", "email", "nickname")
-	if err == nil && len(vals) >= 3 {
+	if err == nil && len(vals) >= 4 {
 		phone, _ = vals[0].(string)
 		email, _ = vals[1].(string)
 		nickname, _ = vals[2].(string)
