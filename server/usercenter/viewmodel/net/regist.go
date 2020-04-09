@@ -29,7 +29,7 @@ func init() {
 	rs = &registService{
 		resChan: make(chan registResponse),
 	}
-	check = usermiddleware.Initialize(expiredInterval)
+	check = usermiddleware.New(expiredInterval)
 }
 
 //registResponse 注册响应

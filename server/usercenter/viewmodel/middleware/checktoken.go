@@ -15,8 +15,8 @@ type CheckToken struct {
 	uJWT *userjwt.UserJWT
 }
 
-//Initialize 初始化校验对象
-func Initialize(expiredinterval time.Duration) CheckToken {
+//New 初始化校验对象
+func New(expiredinterval time.Duration) CheckToken {
 	return CheckToken{
 		uJWT: userjwt.CreateUserJWT(expiredinterval),
 	}

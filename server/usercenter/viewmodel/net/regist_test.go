@@ -11,3 +11,7 @@ func TestMakeDeviceEmptyParams(t *testing.T) {
 	}
 	t.Log("makeDevice succ")
 }
+
+func TestRegist() {
+
+}
