@@ -13,9 +13,9 @@ import (
 
 //UserDB 用户数据库模型
 type UserDB struct {
-	Identifier string `gorm:"primary_key"`
-	Password   string
-	User       *userproto.User
+	ID       string `gorm:"primary_key"`
+	Password string
+	User     *userproto.User
 }
 
 // =======================mariadb===================================//
@@ -23,9 +23,8 @@ type UserDB struct {
 //CreateUser 创建用户模型
 func CreateUser(user *userproto.User, password string) (exists bool, err error) {
 	userDB := &UserDB{
-		Identifier: user.UserID,
-		Password:   password,
-		User:       user,
+		ID:       user.UserID,
+		Password: password,
 	}
 	//用户是否已存在
 	exists = usergorm.DB().NewRecord(userDB)
@@ -44,6 +43,7 @@ func CreateUser(user *userproto.User, password string) (exists bool, err error) 
 		user.CreatedAt = time.Now().String()
 		user.UpdatedAt = time.Now().String()
 		user.Active = 1
+		userDB.User = user
 		err = usergorm.DB().Create(userDB).Error
 		exists = usergorm.DB().NewRecord(userDB)
 	}
@@ -55,7 +55,7 @@ func FindUser(userID string) (user *userproto.User, err error) {
 	userDB := &UserDB{}
 	err = usergorm.DB().Model(
 		&UserDB{
-			Identifier: userID,
+			ID: userID,
 			User: &userproto.User{
 				Active: 1,
 			},
@@ -77,14 +77,14 @@ func TotalUserCount() int {
 
 //UpdateUserActive 更新激活状态
 func UpdateUserActive(userID string, active int32) error {
-	return usergorm.DB().Model(&UserDB{Identifier: userID}).Update("user.active", active).Error
+	return usergorm.DB().Model(&UserDB{ID: userID}).Update("user.active", active).Error
 }
 
 //UpdateUserOnline 更新用户在线状态
 func UpdateUserOnline(userID string, online int32) error {
 	return usergorm.DB().Model(
 		&UserDB{
-			Identifier: userID,
+			ID: userID,
 			User: &userproto.User{
 				Active: 1,
 			},
@@ -96,7 +96,7 @@ func UpdateUserOnline(userID string, online int32) error {
 func UpdateUserPhone(userID string, phone string) error {
 	return usergorm.DB().Model(
 		&UserDB{
-			Identifier: userID,
+			ID: userID,
 			User: &userproto.User{
 				Active: 1,
 			},
@@ -108,7 +108,7 @@ func UpdateUserPhone(userID string, phone string) error {
 func UpdateUserPassword(userID string, password string) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			Identifier: userID,
+			ID: userID,
 			User: &userproto.User{
 				Active: 1,
 			},
@@ -121,7 +121,7 @@ func UpdateUserPassword(userID string, password string) (err error) {
 func UpdateUserNickname(userID string, nickname string) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			Identifier: userID,
+			ID: userID,
 			User: &userproto.User{
 				Active: 1,
 			},
@@ -130,11 +130,24 @@ func UpdateUserNickname(userID string, nickname string) (err error) {
 	return
 }
 
+//UpdateUserPhoto 更新头像
+func UpdateUserPhoto(userID string, photo string) (err error) {
+	err = usergorm.DB().Model(
+		&UserDB{
+			ID: userID,
+			User: &userproto.User{
+				Active: 1,
+			},
+		},
+	).Update("user.photo", photo).Error
+	return
+}
+
 // ================================================redis===========================================//
 
 //AccOnline 用户是否在线
-func AccOnline(userID string) (on int) {
-	key := "user_online_" + userID
+func AccOnline(acc string) (on int) {
+	key := "user_online_" + acc
 	val, e := userredis.Get(key)
 	if e != nil {
 		on = 0
@@ -150,13 +163,24 @@ func AccOnline(userID string) (on int) {
 }
 
 //SetAccOnline 设置用户在线状态
-func SetAccOnline(userID string, online int) {
-	key := "user_online_" + userID
+func SetAccOnline(acc string, online int) {
+	key := "user_online_" + acc
 	if online == 0 {
 		userredis.Del(key)
 		return
 	}
 	userredis.Set(key, 1, time.Duration(time.Hour*24*7))
+}
+
+//SetAccUserInfo 保存用户基本信息
+func SetAccUserInfo(acc string, phone, email, nickname string) {
+	key := "user_info" + acc
+	userredis.HSet(key, "phone", phone, "email", email, "nickname", nickname)
+}
+
+//AccUserInfo 获取用户基本信息
+func AccUserInfo(acc string) (phone, email, nickname string) {
+	key := "user_info" + acc
 }
 
 //AccRegisted 账号信息是否已注册
