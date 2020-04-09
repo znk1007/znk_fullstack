@@ -100,14 +100,38 @@ func UpdateUserPhone(userID string, phone string) error {
 				Active: 1,
 			},
 		},
-	).Update("user.online", phone).Error
+	).Update("user.phone", phone).Error
+}
+
+//UpdateUserPassword 更新用户密码
+func UpdateUserPassword(userID string, password string) (err error) {
+	err = usergorm.DB().Model(
+		&UserDB{
+			Identifier: userID,
+			User: &userproto.User{
+				Active: 1,
+			},
+		},
+	).Update("password", password).Error
+	return
+}
+
+//UpdateUserNickname 更新昵称
+func UpdateUserNickname(userID string, nickname string) (err error) {
+	err = usergorm.DB().Model(
+		&UserDB{
+			Identifier: userID,
+			User: &userproto.User{
+				Active: 1,
+			},
+		},
+	).Update("user.nickname", nickname).Error
+	return
 }
 
 //AccRegisted 账号信息是否已注册
 func AccRegisted(acc string) (exs bool, ts int64, registed int) {
 	exs = userredis.Exists(acc)
-	ts = -1
-	registed = 0
 	if exs {
 		infos, err := userredis.HMGet(acc, "ts", "registed")
 		if err != nil || (infos != nil && len(infos) < 2) {
@@ -116,14 +140,8 @@ func AccRegisted(acc string) (exs bool, ts int64, registed int) {
 		tsstr, ok := infos[0].(string)
 		if ok {
 			ts, err = strconv.ParseInt(tsstr, 10, 64)
-			if err != nil {
-				ts = -1
-			}
 		}
-		rgd, ok := infos[1].(int)
-		if ok {
-			registed = rgd
-		}
+		registed, _ = infos[1].(int)
 	}
 	return
 }
