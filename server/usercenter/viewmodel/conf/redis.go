@@ -13,8 +13,8 @@ var redismap map[Env]RedisConf
 func init() {
 	redismap = map[Env]RedisConf{
 		Dev: RedisConf{
-			Host:     "47.105.85.107",
-			Port:     "6378",
+			Host:     "localhost",
+			Port:     "6379",
 			Clusters: nil,
 			Password: "man_znk-1007",
 		},

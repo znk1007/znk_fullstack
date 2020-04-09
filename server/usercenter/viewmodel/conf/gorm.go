@@ -17,8 +17,8 @@ var gormmap map[Env]GormConf
 func init() {
 	gormmap = map[Env]GormConf{
 		Dev: GormConf{
-			Host:     "47.105.85.107",
-			Port:     "3308",
+			Host:     "localhost",
+			Port:     "3306",
 			Username: "znk",
 			Password: "man_znk-1007",
 			Dialect:  "mysql",
