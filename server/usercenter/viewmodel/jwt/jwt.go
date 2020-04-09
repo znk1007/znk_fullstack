@@ -56,7 +56,6 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 
 //Parse 解析jwt
 func (userJWT *UserJWT) Parse(token string) {
-
 	key := loadRSAPublicKeyFromDisk("key/jwt.rsa.pub")
 	userJWT.parseSucc = false
 	userJWT.res = nil

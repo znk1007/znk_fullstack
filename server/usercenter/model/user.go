@@ -18,6 +18,8 @@ type UserDB struct {
 	User       *userproto.User
 }
 
+// =======================mariadb===================================//
+
 //CreateUser 创建用户模型
 func CreateUser(user *userproto.User, password string) (exists bool, err error) {
 	userDB := &UserDB{
@@ -41,7 +43,6 @@ func CreateUser(user *userproto.User, password string) (exists bool, err error) 
 	if !exists {
 		user.CreatedAt = time.Now().String()
 		user.UpdatedAt = time.Now().String()
-		user.Online = 0
 		user.Active = 1
 		err = usergorm.DB().Create(userDB).Error
 		exists = usergorm.DB().NewRecord(userDB)
@@ -129,9 +130,39 @@ func UpdateUserNickname(userID string, nickname string) (err error) {
 	return
 }
 
+// ================================================redis===========================================//
+
+//AccOnline 用户是否在线
+func AccOnline(userID string) (on int) {
+	key := "user_online_" + userID
+	val, e := userredis.Get(key)
+	if e != nil {
+		on = 0
+		return
+	}
+	online, e := strconv.Atoi(val)
+	if e != nil {
+		on = 0
+		return
+	}
+	on = online
+	return
+}
+
+//SetAccOnline 设置用户在线状态
+func SetAccOnline(userID string, online int) {
+	key := "user_online_" + userID
+	if online == 0 {
+		userredis.Del(key)
+		return
+	}
+	userredis.Set(key, 1, time.Duration(time.Hour*24*7))
+}
+
 //AccRegisted 账号信息是否已注册
 func AccRegisted(acc string) (exs bool, ts int64, registed int) {
-	exs = userredis.Exists(acc)
+	key := "user_regist_" + acc
+	exs = userredis.Exists(key)
 	if exs {
 		infos, err := userredis.HMGet(acc, "ts", "registed")
 		if err != nil || (infos != nil && len(infos) < 2) {
@@ -148,6 +179,7 @@ func AccRegisted(acc string) (exs bool, ts int64, registed int) {
 
 //SetAccRegisted 保存注册信息
 func SetAccRegisted(acc string, ts string, registed int) (e error) {
-	e = userredis.HSet(acc, "ts", ts, "registed", registed)
+	key := "user_regist_" + acc
+	e = userredis.HSet(key, "ts", ts, "registed", registed)
 	return
 }
