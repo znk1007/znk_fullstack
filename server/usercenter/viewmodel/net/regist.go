@@ -28,6 +28,7 @@ const (
 func init() {
 	rs = &registService{
 		resChan: make(chan registResponse),
+		doing:   make(map[string]bool),
 	}
 	check = usermiddleware.New(expiredInterval)
 }
@@ -42,7 +43,7 @@ type registResponse struct {
 type registService struct {
 	req     *userproto.RegistReq
 	resChan chan registResponse
-	doing   bool
+	doing   map[string]bool
 }
 
 func (s registService) Do() {
@@ -57,12 +58,13 @@ func (s registService) handleRegist() {
 		s.makeToken("", "", http.StatusBadRequest, "account cannot be empty")
 		return
 	}
-	if s.doing {
+	//当前账号正在注册中
+	if s.doing[acc] {
 		log.Info().Msg("account is registing")
 		s.makeToken(acc, "", http.StatusBadRequest, "account is registing")
 		return
 	}
-	s.doing = true
+	s.doing[acc] = true
 	//redis 第一波墙，防止频繁操作数据库
 	exs, oldTS, registed := model.AccRegisted(acc)
 	//解析校验token
@@ -227,7 +229,7 @@ func (s registService) makeToken(acc string, userID string, code int, msg string
 		},
 		err: err,
 	}
-	s.doing = false
+	delete(s.doing, acc)
 	s.resChan <- res
 	return
 }
