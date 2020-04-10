@@ -2,6 +2,9 @@ package client
 
 import (
 	_ "fmt"
+	"time"
+
+	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 )
 
 //JSON字符串，参数密码：password，设备ID：deviceID，平台：platform
@@ -22,4 +25,5 @@ func (rc *registClient) Token() map[string]interface{} {
 		"timestamp": rc.timestamp,
 		"appkey":    rc.appkey,
 	}
+	userjwt.CreateUserJWT(time.Duration(time.Minute * 10))
 }

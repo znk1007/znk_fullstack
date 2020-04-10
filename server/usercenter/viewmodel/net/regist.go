@@ -42,6 +42,7 @@ type registResponse struct {
 type registService struct {
 	req     *userproto.RegistReq
 	resChan chan registResponse
+	doing   bool
 }
 
 func (s registService) Do() {
@@ -53,37 +54,43 @@ func (s registService) handleRegist() {
 	acc := req.GetAccount()
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
-		s.makeToken("", "", http.StatusAccepted, "account cannot be empty")
+		s.makeToken("", "", http.StatusBadRequest, "account cannot be empty")
 		return
 	}
+	if s.doing {
+		log.Info().Msg("account is registing")
+		s.makeToken(acc, "", http.StatusBadRequest, "account is registing")
+		return
+	}
+	s.doing = true
 	//redis 第一波墙，防止频繁操作数据库
 	exs, oldTS, registed := model.AccRegisted(acc)
 	//解析校验token
 	res, dID, plf, expired, e := check.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusAccepted, e.Error())
+		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
 	//如果存在redis中，曾调过注册方法
 	if exs {
 		//如果已注册
 		if registed == 1 {
-			s.makeToken(acc, "", http.StatusAccepted, "user has registed:")
+			s.makeToken(acc, "", http.StatusBadRequest, "user has registed:")
 			return
 		}
 		if !expired {
-			s.makeToken(acc, "", http.StatusAccepted, "please regist later on")
+			s.makeToken(acc, "", http.StatusBadRequest, "please regist later on")
 			return
 		}
 
 		if oldTS < 0 {
-			s.makeToken(acc, "", http.StatusAccepted, "miss param `timestamp`")
+			s.makeToken(acc, "", http.StatusBadRequest, "miss param `timestamp`")
 			return
 		}
 		ts := time.Now().Unix()
 		if ts-oldTS < int64(expiredInterval) {
-			s.makeToken(acc, "", http.StatusAccepted, "please regist later on")
+			s.makeToken(acc, "", http.StatusBadRequest, "please regist later on")
 			return
 		}
 	}
@@ -220,6 +227,7 @@ func (s registService) makeToken(acc string, userID string, code int, msg string
 		},
 		err: err,
 	}
+	s.doing = false
 	s.resChan <- res
 	return
 }
