@@ -10,34 +10,34 @@ import (
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
-//CheckToken token校验
-type CheckToken struct {
+//VerifyToken token校验
+type VerifyToken struct {
 	uJWT *userjwt.UserJWT
 }
 
-//New 初始化校验对象
-func New(expiredinterval time.Duration) CheckToken {
-	return CheckToken{
+//NewVerifyToken 初始化校验对象
+func NewVerifyToken(expiredinterval time.Duration) VerifyToken {
+	return VerifyToken{
 		uJWT: userjwt.CreateUserJWT(expiredinterval),
 	}
 }
 
 //Generate 生成token
-func (check CheckToken) Generate(params map[string]interface{}) (token string, err error) {
-	token, err = check.uJWT.Token(params)
+func (verify VerifyToken) Generate(params map[string]interface{}) (token string, err error) {
+	token, err = verify.uJWT.Token(params)
 	return
 }
 
 //Verify 校验token
-func (check CheckToken) Verify(token string) (res map[string]interface{}, deviceID string, platform string, expired bool, err error) {
+func (verify VerifyToken) Verify(token string) (res map[string]interface{}, deviceID string, platform string, expired bool, err error) {
 	expired = true
 	if len(token) == 0 {
 		log.Info().Msg("miss param `sign` or `sign` is empty")
 		err = errors.New("miss param `sign` or `sign` is empty")
 		return
 	}
-	check.uJWT.Parse(token)
-	tk, exp, e := check.uJWT.Result()
+	verify.uJWT.Parse(token)
+	tk, exp, e := verify.uJWT.Result()
 	expired = exp
 	if e != nil {
 		log.Info().Msg(err.Error())

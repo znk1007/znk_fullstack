@@ -15,6 +15,7 @@ import (
 type UserDB struct {
 	ID       string `gorm:"primary_key"`
 	Password string
+	Abnormal int //账号是否异常
 	User     *userproto.User
 }
 

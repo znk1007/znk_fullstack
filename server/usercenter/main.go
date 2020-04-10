@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	userconf.SetEnv(userconf.Dev)
 	userredis.ConnectRedis()
 	usergorm.ConnectMariaDB()

@@ -26,4 +26,5 @@ func (rc *registClient) Token() map[string]interface{} {
 		"appkey":    rc.appkey,
 	}
 	userjwt.CreateUserJWT(time.Duration(time.Minute * 10))
+	return nil
 }

@@ -19,7 +19,7 @@ import (
 var testregist = false
 
 var rs *registService
-var check usermiddleware.CheckToken
+var check usermiddleware.VerifyToken
 
 const (
 	expiredInterval = time.Minute * 2
@@ -30,7 +30,7 @@ func init() {
 		resChan: make(chan registResponse),
 		doing:   make(map[string]bool),
 	}
-	check = usermiddleware.New(expiredInterval)
+	check = usermiddleware.NewVerifyToken(expiredInterval)
 }
 
 //registResponse 注册响应
