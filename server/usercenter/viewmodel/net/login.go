@@ -28,7 +28,7 @@ func (l *loginService) handleLogin() {
 
 //Do 执行任务
 func (l *loginService) Do() {
-
+	go l.handleLogin()
 }
 
 //UserLogin 登录接口
