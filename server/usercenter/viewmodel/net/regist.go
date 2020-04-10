@@ -46,11 +46,11 @@ type registService struct {
 	doing   map[string]bool
 }
 
-func (s registService) Do() {
+func (s *registService) Do() {
 	go s.handleRegist()
 }
 
-func (s registService) handleRegist() {
+func (s *registService) handleRegist() {
 	req := s.req
 	acc := req.GetAccount()
 	if len(acc) == 0 {
@@ -120,7 +120,7 @@ func (s registService) handleRegist() {
 应用标识：appkey
 */
 
-func (s registService) makeDevice(acc string, deviceID string, platform string) (succ bool, userID string) {
+func (s *registService) makeDevice(acc string, deviceID string, platform string) (succ bool, userID string) {
 	var ok bool
 	succ = false
 	userID = ""
@@ -159,7 +159,7 @@ func (s registService) makeDevice(acc string, deviceID string, platform string) 
 }
 
 //saveUser 保存用户信息
-func (s registService) saveUser(acc string, userID string, password string) {
+func (s *registService) saveUser(acc string, userID string, password string) {
 	phone := ""
 	if tools.VerifyPhone(acc) {
 		phone = acc
@@ -198,7 +198,7 @@ func (s registService) saveUser(acc string, userID string, password string) {
 状态码：code，
 反馈消息：message
 */
-func (s registService) makeToken(acc string, userID string, code int, msg string) {
+func (s *registService) makeToken(acc string, userID string, code int, msg string) {
 	if testregist {
 		return
 	}
@@ -240,7 +240,7 @@ func registerRegistServer(srv *grpc.Server) {
 }
 
 //UserReigst 注册
-func (s registService) UserReigst(ctx context.Context, req *userproto.RegistReq) (*userproto.RegistRes, error) {
+func (s *registService) UserReigst(ctx context.Context, req *userproto.RegistReq) (*userproto.RegistRes, error) {
 	userpayload.Pool.WriteHandler(func(jq chan userpayload.Job) {
 		s.req = req
 		jq <- s
