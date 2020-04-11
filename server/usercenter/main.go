@@ -9,11 +9,33 @@ import (
 
 func main() {
 
+	return
 	userconf.SetEnv(userconf.Dev)
 	userredis.ConnectRedis()
 	usergorm.ConnectMariaDB()
 	usernet.RunRPC()
 }
+
+/*
+userDB := &model.UserDB{
+	ID:       "test",
+	Password: "123",
+	Abnormal: 1,
+	User: &userproto.User{
+		UserID:  "test",
+		Account: "acc",
+	},
+}
+userMap := map[string]interface{}{
+	"user": userDB,
+}
+userJWT := userjwt.CreateUserJWT(1)
+tk, err := userJWT.Token(userMap)
+if err != nil {
+	fmt.Println("user jwt err: ", err)
+}
+fmt.Printf("user token = %v", tk)
+*/
 
 /*
 	res := map[string]interface{}{

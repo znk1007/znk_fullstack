@@ -55,13 +55,19 @@ func (s *registService) handleRegist() {
 	acc := req.GetAccount()
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
-		s.makeToken("", "", http.StatusBadRequest, "account cannot be empty")
+		s.makeRegistToken("", "", http.StatusBadRequest, "account cannot be empty")
+		return
+	}
+	tk := req.GetToken()
+	if len(tk) == 0 {
+		log.Info().Msg("token cannot be empty")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, "token cannot be empty")
 		return
 	}
 	//当前账号正在注册中
 	if s.doing[acc] {
 		log.Info().Msg("account is registing")
-		s.makeToken(acc, "", http.StatusBadRequest, "account is registing")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, "account is registing")
 		return
 	}
 	s.doing[acc] = true
@@ -71,28 +77,28 @@ func (s *registService) handleRegist() {
 	res, dID, plf, expired, e := check.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
 	//如果存在redis中，曾调过注册方法
 	if exs {
 		//如果已注册
 		if registed == 1 {
-			s.makeToken(acc, "", http.StatusBadRequest, "user has registed:")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, "user has registed:")
 			return
 		}
 		if !expired {
-			s.makeToken(acc, "", http.StatusBadRequest, "please regist later on")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
 			return
 		}
 
 		if oldTS < 0 {
-			s.makeToken(acc, "", http.StatusBadRequest, "miss param `timestamp`")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, "miss param `timestamp`")
 			return
 		}
 		ts := time.Now().Unix()
 		if ts-oldTS < int64(expiredInterval) {
-			s.makeToken(acc, "", http.StatusBadRequest, "please regist later on")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
 			return
 		}
 	}
@@ -100,14 +106,14 @@ func (s *registService) handleRegist() {
 	psd, ok := res["password"].(string)
 	if !ok || len(psd) == 0 {
 		log.Info().Msg("password cannot be empty")
-		s.makeToken("", "", http.StatusBadRequest, "password cannot be empty")
+		s.makeRegistToken("", "", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
 
 	succ, userID := s.makeDevice(acc, dID, plf)
 	if !succ {
 		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
 	s.saveUser(acc, userID, psd)
@@ -126,19 +132,19 @@ func (s *registService) makeDevice(acc string, deviceID string, platform string)
 	userID = ""
 	if !ok || len(deviceID) == 0 {
 		log.Info().Msg("deviceID cannot be empty")
-		s.makeToken(acc, "", http.StatusBadRequest, "deviceID cannot be empty")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, "deviceID cannot be empty")
 		return
 	}
 	if !ok || len(platform) == 0 {
 		log.Info().Msg("platform cannot be empty")
-		s.makeToken(acc, "", http.StatusBadRequest, "platform cannot be empty")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, "platform cannot be empty")
 		return
 	}
 
 	userID = userGenID.GenerateID()
 	if len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
-		s.makeToken(acc, "", http.StatusBadRequest, "userID cannot be empty")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, "userID cannot be empty")
 		return
 	}
 	dvs := &model.Device{
@@ -151,7 +157,7 @@ func (s *registService) makeDevice(acc string, deviceID string, platform string)
 	_, err := model.CreateDevice(dvs)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		s.makeToken(acc, "", http.StatusBadRequest, err.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, err.Error())
 		return
 	}
 	model.SetCurrentDeivce(userID, deviceID, 1, 0)
@@ -171,7 +177,7 @@ func (s *registService) saveUser(acc string, userID string, password string) {
 	psd, e := usercrypto.CBCEncrypt(password)
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
 	user := &userproto.User{
@@ -185,10 +191,10 @@ func (s *registService) saveUser(acc string, userID string, password string) {
 	_, e = model.CreateUser(user, psd)
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
-	s.makeToken(acc, userID, http.StatusOK, "operation success")
+	s.makeRegistToken(acc, userID, http.StatusOK, "operation success")
 	return
 }
 
@@ -198,7 +204,7 @@ func (s *registService) saveUser(acc string, userID string, password string) {
 状态码：code，
 反馈消息：message
 */
-func (s *registService) makeToken(acc string, userID string, code int, msg string) {
+func (s *registService) makeRegistToken(acc string, userID string, code int, msg string) {
 	if testregist {
 		return
 	}

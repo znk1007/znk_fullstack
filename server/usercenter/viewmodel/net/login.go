@@ -2,6 +2,7 @@ package usernet
 
 import (
 	"context"
+	"net/http"
 
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
@@ -23,7 +24,23 @@ type loginService struct {
 
 //handleLogin 处理登录请求
 func (l *loginService) handleLogin() {
+	acc := l.req.GetAccount()
+	if len(acc) == 0 {
+		return
+	}
+}
 
+/*
+状态码：code，
+反馈消息：message，
+时间戳：timestamp，
+用户信息：user
+*/
+func (l *loginService) makeLoginToken(code int, err error) {
+	switch code {
+	case http.StatusOK:
+
+	}
 }
 
 //Do 执行任务
