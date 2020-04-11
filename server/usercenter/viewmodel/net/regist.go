@@ -9,7 +9,6 @@ import (
 	"github.com/znk_fullstack/server/usercenter/model"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
-	userGenID "github.com/znk_fullstack/server/usercenter/viewmodel/generateId"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	usertools "github.com/znk_fullstack/server/usercenter/viewmodel/tools"
@@ -58,12 +57,8 @@ func (s *registService) handleRegist() {
 		s.makeRegistToken("", "", http.StatusBadRequest, "account cannot be empty")
 		return
 	}
-	tk := req.GetToken()
-	if len(tk) == 0 {
-		log.Info().Msg("token cannot be empty")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, "token cannot be empty")
-		return
-	}
+	//解析校验token
+	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
 	//当前账号正在注册中
 	if s.doing[acc] {
 		log.Info().Msg("account is registing")
@@ -71,10 +66,9 @@ func (s *registService) handleRegist() {
 		return
 	}
 	s.doing[acc] = true
-	//redis 第一波墙，防止频繁操作数据库
+	//redis 校验
 	exs, oldTS, registed := model.AccRegisted(acc)
-	//解析校验token
-	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
+
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
@@ -103,6 +97,11 @@ func (s *registService) handleRegist() {
 		}
 	}
 
+	pt, ok := res["photo"].(string)
+	if !ok || len(pt) == 0 {
+		pt = ""
+	}
+
 	psd, ok := res["password"].(string)
 	if !ok || len(psd) == 0 {
 		log.Info().Msg("password cannot be empty")
@@ -110,62 +109,18 @@ func (s *registService) handleRegist() {
 		return
 	}
 
-	succ, userID := s.makeDevice(acc, dID, plf)
-	if !succ {
+	userID := makeID()
+	e = saveCurrentDevice(userID, dID, plf)
+	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
 		return
 	}
-	s.saveUser(acc, userID, psd)
-}
-
-/*
-设备ID：deviceID，
-平台：platform[web,iOS,Android]，
-用户ID：userID，
-应用标识：appkey
-*/
-
-func (s *registService) makeDevice(acc string, deviceID string, platform string) (succ bool, userID string) {
-	var ok bool
-	succ = false
-	userID = ""
-	if !ok || len(deviceID) == 0 {
-		log.Info().Msg("deviceID cannot be empty")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, "deviceID cannot be empty")
-		return
-	}
-	if !ok || len(platform) == 0 {
-		log.Info().Msg("platform cannot be empty")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, "platform cannot be empty")
-		return
-	}
-
-	userID = userGenID.GenerateID()
-	if len(userID) == 0 {
-		log.Info().Msg("userID cannot be empty")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, "userID cannot be empty")
-		return
-	}
-	dvs := &model.Device{
-		DeviceID: deviceID,
-		Platform: platform,
-		Trust:    1,
-		Online:   0,
-		UserID:   userID,
-	}
-	_, err := model.CreateDevice(dvs)
-	if err != nil {
-		log.Info().Msg(err.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, err.Error())
-		return
-	}
-	model.SetCurrentDeivce(userID, deviceID, 1, 0)
-	return
+	s.saveUser(acc, pt, userID, psd)
 }
 
 //saveUser 保存用户信息
-func (s *registService) saveUser(acc string, userID string, password string) {
+func (s *registService) saveUser(acc string, photo string, userID string, password string) {
 	phone := ""
 	if usertools.VerifyPhone(acc) {
 		phone = acc
@@ -186,7 +141,7 @@ func (s *registService) saveUser(acc string, userID string, password string) {
 		Phone:    phone,
 		Email:    email,
 		Nickname: acc,
-		Photo:    "",
+		Photo:    photo,
 	}
 	_, e = model.CreateUser(user, psd)
 	if e != nil {

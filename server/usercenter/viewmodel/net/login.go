@@ -51,7 +51,7 @@ func (l *loginService) handleLogin() {
 时间戳：timestamp，
 用户信息：user
 */
-func (l *loginService) makeLoginToken(code int, err error, user *userproto.User) {
+func (l *loginService) makeLoginToken(acc string, code int, err error, user *userproto.User) {
 	switch code {
 	case http.StatusOK:
 		ts := time.Now().Unix()
@@ -63,7 +63,13 @@ func (l *loginService) makeLoginToken(code int, err error, user *userproto.User)
 			"user":      user,
 		}
 		tk, err := lvt.Generate(resmap)
-
+		l.resChan <- loginResponse{
+			err: err,
+			res: &userproto.LoginRes{
+				Account: acc,
+				Token:   tk,
+			},
+		}
 	}
 }
 

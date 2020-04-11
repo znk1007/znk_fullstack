@@ -31,15 +31,15 @@ func (verify VerifyToken) Generate(params map[string]interface{}) (token string,
 func (verify VerifyToken) Verify(token string) (res map[string]interface{}, deviceID string, platform string, expired bool, err error) {
 	expired = true
 	if len(token) == 0 {
-		log.Info().Msg("miss param `sign` or `sign` is empty")
-		err = errors.New("miss param `sign` or `sign` is empty")
+		log.Info().Msg("miss param `token` or `token` is empty")
+		err = errors.New("miss param `token` or `token` is empty")
 		return
 	}
 	verify.uJWT.Parse(token)
 	tk, exp, e := verify.uJWT.Result()
 	expired = exp
 	if e != nil {
-		log.Info().Msg(err.Error())
+		log.Info().Msg(e.Error())
 		err = e
 		return
 	}

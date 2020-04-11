@@ -2,14 +2,14 @@ package usernet
 
 import "testing"
 
-func TestMakeDeviceEmptyParams(t *testing.T) {
+func TestverifyDeviceEmptyParams(t *testing.T) {
 	testregist = true
-	succ, _ := rs.makeDevice("", "", "")
-	if !succ {
-		t.Error("makeDevice failed ")
+	e := saveCurrentDevice("", "", "")
+	if e != nil {
+		t.Error("verifyDevice failed ")
 		return
 	}
-	t.Log("makeDevice succ")
+	t.Log("verifyDevice succ")
 }
 
 func TestRegist(t *testing.T) {
