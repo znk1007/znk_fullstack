@@ -2,7 +2,6 @@ package usermiddleware
 
 import (
 	"errors"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
@@ -16,7 +15,7 @@ type VerifyToken struct {
 }
 
 //NewVerifyToken 初始化校验对象
-func NewVerifyToken(expiredinterval time.Duration) VerifyToken {
+func NewVerifyToken(expiredinterval int) VerifyToken {
 	return VerifyToken{
 		uJWT: userjwt.CreateUserJWT(expiredinterval),
 	}

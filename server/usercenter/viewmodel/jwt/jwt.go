@@ -17,7 +17,7 @@ import (
 
 //UserJWT 用户jwt验证对象
 type UserJWT struct {
-	expiredinterval time.Duration
+	expiredinterval int
 	isExp           bool
 	parseSucc       bool
 	err             error
@@ -25,12 +25,12 @@ type UserJWT struct {
 }
 
 //DefaultInterval 默认时间间隔
-func DefaultInterval() time.Duration {
-	return time.Second * 2
+func DefaultInterval() int {
+	return 60 * 2
 }
 
 //CreateUserJWT 创建用户jwt验证 expired 纳秒级别
-func CreateUserJWT(expiredinterval time.Duration) *UserJWT {
+func CreateUserJWT(expiredinterval int) *UserJWT {
 	return &UserJWT{
 		expiredinterval: expiredinterval,
 	}

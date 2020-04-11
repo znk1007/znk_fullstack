@@ -12,17 +12,17 @@ import (
 	userGenID "github.com/znk_fullstack/server/usercenter/viewmodel/generateId"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
-	"github.com/znk_fullstack/server/usercenter/viewmodel/tools"
+	usertools "github.com/znk_fullstack/server/usercenter/viewmodel/tools"
 	"google.golang.org/grpc"
 )
 
 var testregist = false
 
 var rs *registService
-var check usermiddleware.VerifyToken
+var rvt usermiddleware.VerifyToken
 
 const (
-	expiredInterval = time.Minute * 2
+	registExpired = 60 * 2
 )
 
 func init() {
@@ -30,7 +30,7 @@ func init() {
 		resChan: make(chan registResponse),
 		doing:   make(map[string]bool),
 	}
-	check = usermiddleware.NewVerifyToken(expiredInterval)
+	rvt = usermiddleware.NewVerifyToken(registExpired)
 }
 
 //registResponse 注册响应
@@ -74,7 +74,7 @@ func (s *registService) handleRegist() {
 	//redis 第一波墙，防止频繁操作数据库
 	exs, oldTS, registed := model.AccRegisted(acc)
 	//解析校验token
-	res, dID, plf, expired, e := check.Verify(req.GetToken())
+	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
@@ -97,7 +97,7 @@ func (s *registService) handleRegist() {
 			return
 		}
 		ts := time.Now().Unix()
-		if ts-oldTS < int64(expiredInterval) {
+		if ts-oldTS < int64(registExpired) {
 			s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
 			return
 		}
@@ -167,11 +167,11 @@ func (s *registService) makeDevice(acc string, deviceID string, platform string)
 //saveUser 保存用户信息
 func (s *registService) saveUser(acc string, userID string, password string) {
 	phone := ""
-	if tools.VerifyPhone(acc) {
+	if usertools.VerifyPhone(acc) {
 		phone = acc
 	}
 	email := ""
-	if tools.VerifyEmail(acc) {
+	if usertools.VerifyEmail(acc) {
 		email = acc
 	}
 	psd, e := usercrypto.CBCEncrypt(password)
@@ -221,13 +221,13 @@ func (s *registService) makeRegistToken(acc string, userID string, code int, msg
 		model.SetAccRegisted(acc, string(ts), rgd)
 	}
 	//生成响应数据
-	resMap := map[string]interface{}{
+	resmap := map[string]interface{}{
 		"timestamp": ts,
 		"code":      code,
 		"message":   msg,
 		"userID":    userID,
 	}
-	tk, err := check.Generate(resMap)
+	tk, err := rvt.Generate(resmap)
 	res := registResponse{
 		res: &userproto.RegistRes{
 			Account: acc,

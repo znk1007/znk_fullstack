@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	return
 	userconf.SetEnv(userconf.Dev)
 	userredis.ConnectRedis()
