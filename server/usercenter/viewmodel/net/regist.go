@@ -19,6 +19,7 @@ var testregist = false
 
 var rs *registService
 var rvt usermiddleware.VerifyToken
+var registPool userpayload.WorkerPool
 
 const (
 	registExpired = 60 * 2
@@ -30,6 +31,8 @@ func init() {
 		doing:   make(map[string]bool),
 	}
 	rvt = usermiddleware.NewVerifyToken(registExpired)
+	registPool = userpayload.CreateWorkerPool(100)
+	registPool.Run()
 }
 
 //registResponse 注册响应
@@ -159,6 +162,8 @@ func (s *registService) saveUser(acc string, photo string, userID string, passwo
 状态码：code，
 反馈消息：message
 */
+
+//makeRegistToken 注册token
 func (s *registService) makeRegistToken(acc string, userID string, code int, msg string) {
 	if testregist {
 		return
@@ -202,7 +207,7 @@ func registerRegistServer(srv *grpc.Server) {
 
 //UserReigst 注册
 func (s *registService) UserReigst(ctx context.Context, req *userproto.RegistReq) (*userproto.RegistRes, error) {
-	userpayload.Pool.WriteHandler(func(jq chan userpayload.Job) {
+	registPool.WriteHandler(func(jq chan userpayload.Job) {
 		s.req = req
 		jq <- s
 	})

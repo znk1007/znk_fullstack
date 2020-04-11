@@ -15,7 +15,7 @@ func makeID() string {
 设备ID：deviceID，
 平台：platform[web,iOS,Android]，
 用户ID：userID，
-应用标识：appkey
+应用标识：appkey，
 */
 
 //saveCurrentDevice 保存当前设备信息
@@ -32,6 +32,6 @@ func saveCurrentDevice(userID string, deviceID string, platform string) (err err
 		log.Info().Msg(err.Error())
 		return
 	}
-	model.SetCurrentDeivce(userID, deviceID, 1, 0)
+	err = model.SetCurrentDeivce(userID, deviceID, 1, 0)
 	return
 }

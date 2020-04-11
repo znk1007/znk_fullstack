@@ -2,13 +2,13 @@ package userpayload
 
 //https://blog.51cto.com/11140372/2342953?source=dra
 //Pool 事务池
-var Pool WorkerPool
+// var Pool WorkerPool
 
-func init() {
-	workLen := 100
-	Pool = CreateWorkerPool(workLen)
-	Pool.Run()
-}
+// func init() {
+// 	workLen := 100
+// 	Pool = CreateWorkerPool(workLen)
+// 	Pool.Run()
+// }
 
 //Job 执行事务接口
 type Job interface {

@@ -2,7 +2,6 @@ package usernet
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
@@ -12,6 +11,7 @@ import (
 
 var ls *loginService
 var lvt usermiddleware.VerifyToken
+var loginPool userpayload.WorkerPool
 
 const (
 	loginExpired = 60 * 5
@@ -35,6 +35,8 @@ func init() {
 		doing:   make(map[string]bool),
 	}
 	lvt = usermiddleware.NewVerifyToken(loginExpired)
+	loginPool = userpayload.CreateWorkerPool(100)
+	loginPool.Run()
 }
 
 //handleLogin 处理登录请求
@@ -51,25 +53,24 @@ func (l *loginService) handleLogin() {
 时间戳：timestamp，
 用户信息：user
 */
+
+//makeLoginToken 登录token
 func (l *loginService) makeLoginToken(acc string, code int, err error, user *userproto.User) {
-	switch code {
-	case http.StatusOK:
-		ts := time.Now().Unix()
-		msg := "login success"
-		resmap := map[string]interface{}{
-			"code":      code,
-			"message":   msg,
-			"timestamp": ts,
-			"user":      user,
-		}
-		tk, err := lvt.Generate(resmap)
-		l.resChan <- loginResponse{
-			err: err,
-			res: &userproto.LoginRes{
-				Account: acc,
-				Token:   tk,
-			},
-		}
+	ts := time.Now().Unix()
+	msg := "login success"
+	resmap := map[string]interface{}{
+		"code":      code,
+		"message":   msg,
+		"timestamp": ts,
+		"user":      user,
+	}
+	tk, err := lvt.Generate(resmap)
+	l.resChan <- loginResponse{
+		err: err,
+		res: &userproto.LoginRes{
+			Account: acc,
+			Token:   tk,
+		},
 	}
 }
 
@@ -80,7 +81,7 @@ func (l *loginService) Do() {
 
 //UserLogin 登录接口
 func (l *loginService) UserLogin(ctx context.Context, req *userproto.LoginReq) (*userproto.LoginRes, error) {
-	userpayload.Pool.WriteHandler(func(j chan userpayload.Job) {
+	loginPool.WriteHandler(func(j chan userpayload.Job) {
 		l.req = req
 		j <- l
 	})
