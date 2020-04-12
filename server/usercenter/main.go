@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
 	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
@@ -12,11 +14,11 @@ func main() {
 	cnt := 900000
 	fa := usermiddleware.NewFreqAccess(1, cnt/2)
 	for idx := 0; idx < cnt; idx++ {
-		freq := fa.AccessCtrl("test", func() {
-
+		freq := fa.AccessCtrl("test", func() bool {
+			return true
 		})
 		if freq {
-			break
+			fmt.Println("access too frequence")
 		}
 	}
 	return

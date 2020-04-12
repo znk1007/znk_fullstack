@@ -9,8 +9,8 @@ import (
 
 // ================================================redis===========================================//
 
-//AccOnline 用户是否在线
-func AccOnline(acc string) (on int) {
+//accOnline 用户是否在线
+func accOnline(acc string) (on int) {
 	key := "user_online_" + acc
 	val, e := userredis.Get(key)
 	if e != nil {
@@ -26,8 +26,8 @@ func AccOnline(acc string) (on int) {
 	return
 }
 
-//SetAccOnline 设置用户在线状态
-func SetAccOnline(acc string, online int) {
+//setAccOnline 设置用户在线状态
+func setAccOnline(acc string, online int) {
 	key := "user_online_" + acc
 	if online == 0 {
 		userredis.Del(key)
@@ -36,14 +36,18 @@ func SetAccOnline(acc string, online int) {
 	userredis.Set(key, 1, time.Duration(time.Hour*24*7))
 }
 
-//SetAccUserInfo 保存用户基本信息
-func SetAccUserInfo(acc, userID, phone, email, nickname, photo string) {
+func setUserActive() {
+
+}
+
+//setAccUserInfo 保存用户基本信息
+func setAccUserInfo(acc, userID, phone, email, nickname, photo string) {
 	key := "user_info_" + acc
 	userredis.HSet(key, "userID", userID, "phone", phone, "email", email, "nickname", nickname, "photo", photo)
 }
 
-//AccUserID 获取用户ID
-func AccUserID(acc string) (userID string) {
+//accUserID 获取用户ID
+func accUserID(acc string) (userID string) {
 	key := "user_info_" + acc
 	val, err := userredis.HGet(key, "userID")
 	if err == nil {
@@ -53,10 +57,11 @@ func AccUserID(acc string) (userID string) {
 }
 
 //AccUserInfo 获取用户基本信息
-func AccUserInfo(acc string) (phone, email, nickname, photo string) {
+func accUserInfo(acc string) (phone, email, nickname, photo string, err error) {
 	key := "user_info_" + acc
-	vals, err := userredis.HMGet(key, "phone", "email", "nickname", "photo")
-	if err == nil && len(vals) >= 4 {
+	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo")
+	err = e
+	if e == nil && len(vals) >= 4 {
 		phone, _ = vals[0].(string)
 		email, _ = vals[1].(string)
 		nickname, _ = vals[2].(string)

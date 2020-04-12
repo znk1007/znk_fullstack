@@ -50,6 +50,7 @@ func (s *registService) Do() {
 	go s.handleRegist()
 }
 
+//handleRegist 处理注册
 func (s *registService) handleRegist() {
 	req := s.req
 	acc := req.GetAccount()
@@ -68,6 +69,10 @@ func (s *registService) handleRegist() {
 	s.doing[acc] = true
 	//解析校验token
 	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
+	if !expired { //是否频繁请求
+		s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
+		return
+	}
 	//redis 校验
 	exs, oldTS, registed := usermodel.AccRegisted(acc)
 	if e != nil {
@@ -80,10 +85,6 @@ func (s *registService) handleRegist() {
 		//如果已注册
 		if registed == 1 {
 			s.makeRegistToken(acc, "", http.StatusBadRequest, "user has registed:")
-			return
-		}
-		if !expired {
-			s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
 			return
 		}
 

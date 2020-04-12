@@ -8,6 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
@@ -50,13 +51,37 @@ func (l *loginService) handleLogin() {
 		l.makeLoginToken("", http.StatusBadRequest, errors.New("account cannot be empty"), nil)
 		return
 	}
-	// res, dID, plf, exp, e := lvt.Verify(l.req.GetToken())
-	// if e != nil {
-	// 	log.Info().Msg(e.Error())
-	// 	l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
-	// 	return
-	// }
+	//正在处理登陆操作
+	if l.doing[acc] {
+		return
+	}
+	l.doing[acc] = true
 
+	//校验token
+	res, dID, plf, exp, e := lvt.Verify(l.req.GetToken())
+	if e != nil {
+		log.Info().Msg(e.Error())
+		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
+		return
+	}
+	if !exp {
+		log.Info().Msg("login request too frequence")
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("login request too frequence"), nil)
+		return
+	}
+	//是否已注册
+	exs, _, rgd := usermodel.AccRegisted(acc)
+	if !exs || rgd == 0 {
+		log.Info().Msg("account not registed")
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("account not registed"), nil)
+		return
+	}
+
+	//查redis用户数据
+	phone, email, nickname, photo, err := usermodel.AccUserInfo(acc)
+	if err != nil {
+
+	}
 }
 
 /*

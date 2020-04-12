@@ -130,7 +130,21 @@ func HSet(key string, values ...interface{}) (e error) {
 	} else {
 		e = nclstrRds.HSet(key, values...).Err()
 	}
-	return redis.Nil
+	return
+}
+
+//HSetNX 设置不存在的field，如果 key 不存在，一个新哈希表被创建并执行 HSETNX 命令。
+func HSetNX(key string, field string, value interface{}) (succ bool, e error) {
+	if err := checkRds(); err != nil {
+		succ = false
+		e = err
+		return
+	}
+	if clstrRds != nil {
+		succ, e = clstrRds.HSetNX(key, field, value).Result()
+	} else {
+		succ, e = nclstrRds.HSetNX(key, field, value).Result()
+	}
 }
 
 //HGet hash读取
