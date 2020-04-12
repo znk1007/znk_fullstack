@@ -4,10 +4,21 @@ import (
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
 	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
+	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	usernet "github.com/znk_fullstack/server/usercenter/viewmodel/net"
 )
 
 func main() {
+	cnt := 900000
+	fa := usermiddleware.NewFreqAccess(1, cnt/2)
+	for idx := 0; idx < cnt; idx++ {
+		freq := fa.AccessCtrl("test", func() {
+
+		})
+		if freq {
+			break
+		}
+	}
 	return
 	userconf.SetEnv(userconf.Dev)
 	userredis.ConnectRedis()

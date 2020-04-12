@@ -2,8 +2,11 @@ package usernet
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
@@ -43,8 +46,17 @@ func init() {
 func (l *loginService) handleLogin() {
 	acc := l.req.GetAccount()
 	if len(acc) == 0 {
+		log.Info().Msg("account cannot be empty")
+		l.makeLoginToken("", http.StatusBadRequest, errors.New("account cannot be empty"), nil)
 		return
 	}
+	// res, dID, plf, exp, e := lvt.Verify(l.req.GetToken())
+	// if e != nil {
+	// 	log.Info().Msg(e.Error())
+	// 	l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
+	// 	return
+	// }
+
 }
 
 /*
@@ -57,11 +69,10 @@ func (l *loginService) handleLogin() {
 //makeLoginToken 登录token
 func (l *loginService) makeLoginToken(acc string, code int, err error, user *userproto.User) {
 	ts := time.Now().Unix()
-	msg := "login success"
 	resmap := map[string]interface{}{
 		"code":      code,
-		"message":   msg,
-		"timestamp": ts,
+		"message":   err.Error(),
+		"timestamp": string(ts),
 		"user":      user,
 	}
 	tk, err := lvt.Generate(resmap)

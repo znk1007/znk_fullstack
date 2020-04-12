@@ -3,7 +3,6 @@ package usernet
 import "testing"
 
 func TestverifyDeviceEmptyParams(t *testing.T) {
-	testregist = true
 	e := saveCurrentDevice("", "", "")
 	if e != nil {
 		t.Error("verifyDevice failed ")

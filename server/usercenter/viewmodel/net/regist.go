@@ -6,16 +6,14 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/znk_fullstack/server/usercenter/model"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 	usertools "github.com/znk_fullstack/server/usercenter/viewmodel/tools"
 	"google.golang.org/grpc"
 )
-
-var testregist = false
 
 var rs *registService
 var rvt usermiddleware.VerifyToken
@@ -60,8 +58,7 @@ func (s *registService) handleRegist() {
 		s.makeRegistToken("", "", http.StatusBadRequest, "account cannot be empty")
 		return
 	}
-	//解析校验token
-	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
+
 	//当前账号正在注册中
 	if s.doing[acc] {
 		log.Info().Msg("account is registing")
@@ -69,9 +66,10 @@ func (s *registService) handleRegist() {
 		return
 	}
 	s.doing[acc] = true
+	//解析校验token
+	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
 	//redis 校验
-	exs, oldTS, registed := model.AccRegisted(acc)
-
+	exs, oldTS, registed := usermodel.AccRegisted(acc)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
@@ -146,7 +144,7 @@ func (s *registService) saveUser(acc string, photo string, userID string, passwo
 		Nickname: acc,
 		Photo:    photo,
 	}
-	_, e = model.CreateUser(user, psd)
+	_, e = usermodel.CreateUser(user, psd)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
@@ -165,9 +163,6 @@ func (s *registService) saveUser(acc string, photo string, userID string, passwo
 
 //makeRegistToken 注册token
 func (s *registService) makeRegistToken(acc string, userID string, code int, msg string) {
-	if testregist {
-		return
-	}
 	ts := time.Now().Unix()
 	var rgd int
 	if code == http.StatusOK {
@@ -178,7 +173,7 @@ func (s *registService) makeRegistToken(acc string, userID string, code int, msg
 	}
 	//保存用户注册状态
 	if len(acc) > 0 {
-		model.SetAccRegisted(acc, string(ts), rgd)
+		usermodel.SetAccRegisted(acc, string(ts), rgd)
 	}
 	//生成响应数据
 	resmap := map[string]interface{}{
