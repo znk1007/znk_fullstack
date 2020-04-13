@@ -8,10 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
-	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
-	usertools "github.com/znk_fullstack/server/usercenter/viewmodel/tools"
 	"google.golang.org/grpc"
 )
 
@@ -74,7 +72,7 @@ func (s *registService) handleRegist() {
 		return
 	}
 	//redis 校验
-	exs, oldTS, registed := usermodel.AccRegisted(acc)
+	exs, oldTS, registed := usermodel.UserRegisted(acc)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
@@ -123,29 +121,8 @@ func (s *registService) handleRegist() {
 
 //saveUser 保存用户信息
 func (s *registService) saveUser(acc string, photo string, userID string, password string) {
-	phone := ""
-	if usertools.VerifyPhone(acc) {
-		phone = acc
-	}
-	email := ""
-	if usertools.VerifyEmail(acc) {
-		email = acc
-	}
-	psd, e := usercrypto.CBCEncrypt(password)
-	if e != nil {
-		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
-		return
-	}
-	user := &userproto.User{
-		UserID:   userID,
-		Account:  acc,
-		Phone:    phone,
-		Email:    email,
-		Nickname: acc,
-		Photo:    photo,
-	}
-	_, e = usermodel.CreateUser(user, psd)
+
+	e := usermodel.CreateUser(acc, photo, userID, password)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
@@ -174,7 +151,7 @@ func (s *registService) makeRegistToken(acc string, userID string, code int, msg
 	}
 	//保存用户注册状态
 	if len(acc) > 0 {
-		usermodel.SetAccRegisted(acc, string(ts), rgd)
+		usermodel.SetUserRegisted(acc, string(ts), rgd)
 	}
 	//生成响应数据
 	resmap := map[string]interface{}{

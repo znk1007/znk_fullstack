@@ -70,7 +70,7 @@ func (l *loginService) handleLogin() {
 		return
 	}
 	//是否已注册
-	exs, _, rgd := usermodel.AccRegisted(acc)
+	exs, _, rgd := usermodel.UserRegisted(acc)
 	if !exs || rgd == 0 {
 		log.Info().Msg("account not registed")
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("account not registed"), nil)

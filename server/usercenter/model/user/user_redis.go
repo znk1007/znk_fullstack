@@ -10,42 +10,58 @@ import (
 const (
 	userInfoPrefix   = "user_info_"   //保存用户信息key前缀
 	userOnlinePrefix = "user_online_" //用户在线状态
-
+	userRegistPrefix = "user_regist_" //用户注册
 )
 
 //redisCreateUser redis保存用户数据
-func redisCreateUser(acc, userID, phone, email, nickname, photo string) {
+func redisCreateUser(acc, userID, password, phone, email, nickname, photo, updatedAt string) (err error) {
 	key := userInfoPrefix + acc
-	userredis.HSet(
+	err = userredis.HSet(
 		key,
 		"userID", userID,
+		"password", password,
 		"phone", phone,
 		"email", email,
 		"nickname", nickname,
 		"photo", phone,
+		"updatedAt", updatedAt,
 	)
+	return
 }
 
 //redisGetUser 获取用户基本信息
-func redisGetUser(acc string) (phone, email, nickname, photo string, err error) {
-	key := "user_info_" + acc
-	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo")
+func redisGetUser(acc string) (phone, email, nickname, photo, updatedAt string, err error) {
+	key := userInfoPrefix + acc
+	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo", "updatedAt")
 	err = e
-	if e == nil && len(vals) >= 4 {
+	if e == nil && len(vals) > 4 {
 		phone, _ = vals[0].(string)
 		email, _ = vals[1].(string)
 		nickname, _ = vals[2].(string)
 		photo, _ = vals[3].(string)
+		updatedAt, _ = vals[4].(string)
 	}
 	return
 }
 
 //redisGetUserID 获取用户ID
-func redisGetUserID(acc string) (userID string) {
+func redisGetUserID(acc string) (userID string, err error) {
 	key := userInfoPrefix + acc
-	val, err := userredis.HGet(key, "userID")
+	var val string
+	val, err = userredis.HGet(key, "userID")
 	if err == nil {
 		userID = val
+	}
+	return
+}
+
+//redisGetUserPassword 获取密码
+func redisGetUserPassword(acc string) (password string, err error) {
+	key := userInfoPrefix + acc
+	var val string
+	val, err = userredis.HGet(key, "password")
+	if err == nil {
+		password = val
 	}
 	return
 }
@@ -72,9 +88,9 @@ func redisSetUserOnline(acc string, online int) {
 	userredis.Set(key, "1", time.Duration(time.Hour*24*7))
 }
 
-//AccRegisted 账号信息是否已注册
-func AccRegisted(acc string) (exs bool, ts int64, registed int) {
-	key := "user_regist_" + acc
+//redisUserRegisted 账号信息是否已注册
+func redisUserRegisted(acc string) (exs bool, ts int64, registed int) {
+	key := userRegistPrefix + acc
 	exs = userredis.Exists(key)
 	if exs {
 		infos, err := userredis.HMGet(acc, "ts", "registed")
@@ -90,9 +106,9 @@ func AccRegisted(acc string) (exs bool, ts int64, registed int) {
 	return
 }
 
-//SetAccRegisted 保存注册信息
-func SetAccRegisted(acc string, ts string, registed int) (e error) {
-	key := "user_regist_" + acc
+//redisSetUserRegisted 保存注册信息
+func redisSetUserRegisted(acc string, ts string, registed int) (e error) {
+	key := userRegistPrefix + acc
 	e = userredis.HSet(key, "ts", ts, "registed", registed)
 	return
 }
