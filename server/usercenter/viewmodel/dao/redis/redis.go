@@ -145,6 +145,7 @@ func HSetNX(key string, field string, value interface{}) (succ bool, e error) {
 	} else {
 		succ, e = nclstrRds.HSetNX(key, field, value).Result()
 	}
+	return
 }
 
 //HGet hash读取

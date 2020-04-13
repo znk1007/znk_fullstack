@@ -11,11 +11,12 @@ import (
 
 // =======================mariadb===================================//
 
-//CreateUser 创建用户模型
-func CreateUser(user *userproto.User, password string) (exists bool, err error) {
+//gormCreateUser 创建用户模型
+func gormCreateUser(user *userproto.User, password string) (exists bool, err error) {
 	userDB := &UserDB{
 		ID:       user.UserID,
 		Password: password,
+		Online:   0,
 	}
 	//用户是否已存在
 	exists = usergorm.DB().NewRecord(userDB)
@@ -80,7 +81,7 @@ func UpdateUserOnline(userID string, online int32) error {
 				Active: 1,
 			},
 		},
-	).Update("user.online", online).Error
+	).Update("online", online).Error
 }
 
 //UpdateUserPhone 更新手机号

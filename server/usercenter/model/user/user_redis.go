@@ -7,57 +7,27 @@ import (
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 )
 
-// ================================================redis===========================================//
+const (
+	userInfoPrefix   = "user_info_"   //保存用户信息key前缀
+	userOnlinePrefix = "user_online_" //用户在线状态
 
-//accOnline 用户是否在线
-func accOnline(acc string) (on int) {
-	key := "user_online_" + acc
-	val, e := userredis.Get(key)
-	if e != nil {
-		on = 0
-		return
-	}
-	online, e := strconv.Atoi(val)
-	if e != nil {
-		on = 0
-		return
-	}
-	on = online
-	return
+)
+
+//redisCreateUser redis保存用户数据
+func redisCreateUser(acc, userID, phone, email, nickname, photo string) {
+	key := userInfoPrefix + acc
+	userredis.HSet(
+		key,
+		"userID", userID,
+		"phone", phone,
+		"email", email,
+		"nickname", nickname,
+		"photo", phone,
+	)
 }
 
-//setAccOnline 设置用户在线状态
-func setAccOnline(acc string, online int) {
-	key := "user_online_" + acc
-	if online == 0 {
-		userredis.Del(key)
-		return
-	}
-	userredis.Set(key, 1, time.Duration(time.Hour*24*7))
-}
-
-func setUserActive() {
-
-}
-
-//setAccUserInfo 保存用户基本信息
-func setAccUserInfo(acc, userID, phone, email, nickname, photo string) {
-	key := "user_info_" + acc
-	userredis.HSet(key, "userID", userID, "phone", phone, "email", email, "nickname", nickname, "photo", photo)
-}
-
-//accUserID 获取用户ID
-func accUserID(acc string) (userID string) {
-	key := "user_info_" + acc
-	val, err := userredis.HGet(key, "userID")
-	if err == nil {
-		userID = val
-	}
-	return
-}
-
-//AccUserInfo 获取用户基本信息
-func accUserInfo(acc string) (phone, email, nickname, photo string, err error) {
+//redisGetUser 获取用户基本信息
+func redisGetUser(acc string) (phone, email, nickname, photo string, err error) {
 	key := "user_info_" + acc
 	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo")
 	err = e
@@ -68,6 +38,38 @@ func accUserInfo(acc string) (phone, email, nickname, photo string, err error) {
 		photo, _ = vals[3].(string)
 	}
 	return
+}
+
+//redisGetUserID 获取用户ID
+func redisGetUserID(acc string) (userID string) {
+	key := userInfoPrefix + acc
+	val, err := userredis.HGet(key, "userID")
+	if err == nil {
+		userID = val
+	}
+	return
+}
+
+//redisUserOnline 用户是否在线
+func redisUserOnline(acc string) (on int) {
+	key := userOnlinePrefix + acc
+	val, e := userredis.Get(key)
+	if e != nil {
+		on = 0
+		return
+	}
+	on, _ = strconv.Atoi(val)
+	return
+}
+
+//redisSetUserOnline 设置用户在线状态
+func redisSetUserOnline(acc string, online int) {
+	key := userOnlinePrefix + acc
+	if online == 0 {
+		userredis.Del(key)
+		return
+	}
+	userredis.Set(key, "1", time.Duration(time.Hour*24*7))
 }
 
 //AccRegisted 账号信息是否已注册

@@ -80,7 +80,9 @@ func (l *loginService) handleLogin() {
 	//查redis用户数据
 	phone, email, nickname, photo, err := usermodel.AccUserInfo(acc)
 	if err != nil {
+		log.Info().Msg(err.Error())
 
+		return
 	}
 }
 
