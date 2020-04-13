@@ -15,6 +15,7 @@ type UserDB struct {
 	Password string
 	Abnormal int //账号是否异常
 	Online   int //是否已登录
+	Active   int //是否激活状态
 	User     *userproto.User
 }
 
@@ -34,23 +35,28 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 		err = e
 		return
 	}
+	createdAt := time.Now().String()
 	user := &userproto.User{
-		UserID:   userID,
-		Account:  acc,
-		Phone:    phone,
-		Email:    email,
-		Nickname: acc,
-		Photo:    photo,
+		UserID:    userID,
+		Account:   acc,
+		Phone:     phone,
+		Email:     email,
+		Nickname:  acc,
+		Photo:     photo,
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
 	}
+
 	err = redisCreateUser(
 		acc,
 		userID,
 		psd,
 		phone,
 		email,
-		user.Nickname,
+		user.GetNickname(),
 		photo,
-		time.Now().String(),
+		createdAt,
+		createdAt,
 	)
 	if err != nil {
 		return
@@ -59,20 +65,55 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 		user,
 		password,
 	)
+	if err == nil {
+		redisSetUserActive(acc, 1)
+	}
+	return
+}
+
+//UserActive 用户是否激活状态
+func UserActive(acc, userID string) (active int, err error) {
+	active, err = redisUserActive(acc)
+
 	return
 }
 
 //FindUser 查询用户信息
 func FindUser(acc, userID string) (user *userproto.User, err error) {
-	phone, email, nickname, photo, updatedAt, e := redisGetUser(acc)
+
+	per, e := redisUserPermission(acc)
 	if e != nil {
-		err = e
-		user = nil
+		per = userproto.Permission_user
+	}
+	phone, email, nickname, photo, createdAt, updatedAt, e := redisGetUser(acc)
+
+	if e != nil {
+		u, e := gormFindUser(userID)
+		if e != nil {
+			err = e
+			return
+		}
+		phone = u.GetPhone()
+		email = u.GetEmail()
+		nickname = u.GetNickname()
+		photo = u.GetPhoto()
+		createdAt = u.GetCreatedAt()
+		updatedAt = u.GetUpdatedAt()
+	}
+
+	if err != nil {
 		return
 	}
 
 	user = &userproto.User{
-		UserID: userID,
+		Phone:      phone,
+		Email:      email,
+		Nickname:   nickname,
+		Photo:      photo,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
+		UserID:     userID,
+		Permission: per,
 	}
 	return
 }

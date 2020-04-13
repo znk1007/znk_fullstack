@@ -4,17 +4,20 @@ import (
 	"strconv"
 	"time"
 
+	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 )
 
 const (
-	userInfoPrefix   = "user_info_"   //保存用户信息key前缀
-	userOnlinePrefix = "user_online_" //用户在线状态
-	userRegistPrefix = "user_regist_" //用户注册
+	userInfoPrefix       = "user_info_"       //保存用户信息key前缀
+	userOnlinePrefix     = "user_online_"     //用户在线状态
+	userRegistPrefix     = "user_regist_"     //用户注册
+	userActivePrefix     = "user_active_"     //用户是否激活
+	userPermissionPrefix = "user_permission_" //用户权限
 )
 
 //redisCreateUser redis保存用户数据
-func redisCreateUser(acc, userID, password, phone, email, nickname, photo, updatedAt string) (err error) {
+func redisCreateUser(acc, userID, password, phone, email, nickname, photo, createdAt, updatedAt string) (err error) {
 	key := userInfoPrefix + acc
 	err = userredis.HSet(
 		key,
@@ -25,21 +28,23 @@ func redisCreateUser(acc, userID, password, phone, email, nickname, photo, updat
 		"nickname", nickname,
 		"photo", phone,
 		"updatedAt", updatedAt,
+		"createdAt", createdAt,
 	)
 	return
 }
 
 //redisGetUser 获取用户基本信息
-func redisGetUser(acc string) (phone, email, nickname, photo, updatedAt string, err error) {
+func redisGetUser(acc string) (phone, email, nickname, photo, createdAt, updatedAt string, err error) {
 	key := userInfoPrefix + acc
-	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo", "updatedAt")
+	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo", "updatedAt", "createdAt")
 	err = e
-	if e == nil && len(vals) > 4 {
+	if e == nil && len(vals) > 5 {
 		phone, _ = vals[0].(string)
 		email, _ = vals[1].(string)
 		nickname, _ = vals[2].(string)
 		photo, _ = vals[3].(string)
 		updatedAt, _ = vals[4].(string)
+		createdAt, _ = vals[5].(string)
 	}
 	return
 }
@@ -86,6 +91,43 @@ func redisSetUserOnline(acc string, online int) {
 		return
 	}
 	userredis.Set(key, "1", time.Duration(time.Hour*24*7))
+}
+
+//redisSetUserActive 用户是否激活状态
+func redisSetUserActive(acc string, active int) {
+	key := userActivePrefix + acc
+	userredis.HSet(key, "active", string(active))
+}
+
+//redisUserActive 用户是否激活状态
+func redisUserActive(acc string) (active int, err error) {
+	key := userActivePrefix + acc
+	val, e := userredis.HGet(key, "active")
+	if e != nil {
+		err = e
+		return
+	}
+	active, _ = strconv.Atoi(val)
+	return
+}
+
+//redisSetUserPermission 设置用户权限
+func redisSetUserPermission(acc string, per userproto.Permission) {
+	key := userPermissionPrefix + acc
+	userredis.HSet(key, "permission", string(per))
+}
+
+//redisUserPermission 获取用户权限
+func redisUserPermission(acc string) (permission userproto.Permission, err error) {
+	key := userPermissionPrefix + acc
+	val, e := userredis.HGet(key, "permission")
+	if e != nil {
+		err = e
+		return
+	}
+	per, e := strconv.Atoi(val)
+	permission = userproto.Permission(per)
+	return
 }
 
 //redisUserRegisted 账号信息是否已注册

@@ -18,6 +18,5 @@ message User {
     string photo = 6;
     string createdAt = 7;
     string updatedAt = 8;
-    int32 active = 9;//是否激活状态
-    Permission permission = 11;
+    Permission permission = 9;
 }

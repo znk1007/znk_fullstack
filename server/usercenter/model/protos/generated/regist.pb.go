@@ -27,7 +27,7 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 type RegistReq struct {
 	//注册账号
 	Account string `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	//注册签名 (JSON字符串，参数密码：password，设备ID：deviceID，平台：platform[web,iOS,Android]，时间戳：timestamp，应用标识：appkey)
+	//注册签名 (JSON字符串，参数 头像：photo 密码：password，设备ID：deviceID，平台：platform[web,iOS,Android]，时间戳：timestamp，应用标识：appkey)
 	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

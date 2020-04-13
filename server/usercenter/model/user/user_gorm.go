@@ -2,7 +2,6 @@ package usermodel
 
 import (
 	"errors"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
@@ -17,6 +16,7 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 		ID:       user.UserID,
 		Password: password,
 		Online:   0,
+		Active:   1,
 	}
 	//用户是否已存在
 	exists = usergorm.DB().NewRecord(userDB)
@@ -31,10 +31,8 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 		err = errors.New("password cannot be empty")
 		return
 	}
+
 	if !exists {
-		user.CreatedAt = time.Now().String()
-		user.UpdatedAt = time.Now().String()
-		user.Active = 1
 		userDB.User = user
 		err = usergorm.DB().Create(userDB).Error
 		exists = usergorm.DB().NewRecord(userDB)
@@ -43,15 +41,13 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 }
 
 //gormFindUser 查询用户信息
-func gormFindUser(userID string) (user *userproto.User, err error) {
+func gormFindUser(userID string, online int) (user *userproto.User, err error) {
 	userDB := &UserDB{}
 	err = usergorm.DB().Model(
 		&UserDB{
 			ID:     userID,
-			Online: 1,
-			User: &userproto.User{
-				Active: 1,
-			},
+			Online: online,
+			Active: 1,
 		},
 	).First(&userDB).Error
 	if err != nil {
@@ -76,10 +72,8 @@ func gormUpdateUserActive(userID string, active int32) error {
 func gormUpdateUserOnline(userID string, online int32) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			ID: userID,
-			User: &userproto.User{
-				Active: 1,
-			},
+			ID:     userID,
+			Active: 1,
 		},
 	).Update("online", online).Error
 	return
@@ -89,10 +83,8 @@ func gormUpdateUserOnline(userID string, online int32) (err error) {
 func gormUpdateUserPhone(userID string, phone string) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			ID: userID,
-			User: &userproto.User{
-				Active: 1,
-			},
+			ID:     userID,
+			Active: 1,
 		},
 	).Update("user.phone", phone).Error
 	return
@@ -102,10 +94,8 @@ func gormUpdateUserPhone(userID string, phone string) (err error) {
 func gormUpdateUserPassword(userID string, password string) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			ID: userID,
-			User: &userproto.User{
-				Active: 1,
-			},
+			ID:     userID,
+			Active: 1,
 		},
 	).Update("password", password).Error
 	return
@@ -115,10 +105,8 @@ func gormUpdateUserPassword(userID string, password string) (err error) {
 func gormUpdateUserNickname(userID string, nickname string) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			ID: userID,
-			User: &userproto.User{
-				Active: 1,
-			},
+			ID:     userID,
+			Active: 1,
 		},
 	).Update("user.nickname", nickname).Error
 	return
@@ -128,11 +116,24 @@ func gormUpdateUserNickname(userID string, nickname string) (err error) {
 func gormUpdateUserPhoto(userID string, photo string) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
-			ID: userID,
-			User: &userproto.User{
-				Active: 1,
-			},
+			ID:     userID,
+			Active: 1,
 		},
 	).Update("user.photo", photo).Error
+	return
+}
+
+//gormUserActive 用户是否激活
+func gormUserActive(userID string) (userDB *UserDB, err error) {
+	u := &UserDB{}
+	err = usergorm.DB().Model(
+		&UserDB{
+			ID: userID,
+		},
+	).First(u).Error
+	if err != nil {
+		return
+	}
+	userDB = u
 	return
 }

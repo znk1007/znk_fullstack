@@ -77,8 +77,14 @@ func (l *loginService) handleLogin() {
 		return
 	}
 
+	userID, ok := res["userID"].(string)
+	if !ok || len(userID) == 0 {
+		log.Info().Msg("userID cannot be empty")
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"), nil)
+		return
+	}
 	//查redis用户数据
-	phone, email, nickname, photo, err := usermodel.AccUserInfo(acc)
+	phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
 	if err != nil {
 		log.Info().Msg(err.Error())
 
