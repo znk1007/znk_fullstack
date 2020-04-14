@@ -57,11 +57,7 @@ func gormFindUser(userID string) (uDB UserDB, err error) {
 //gormUserActive 用户是否激活中
 func gormUserActive(userID string) (active int, err error) {
 	var userDB UserDB
-	err = usergorm.DB().Model(
-		&UserDB{
-			ID: userID,
-		},
-	).First(&userDB).Error
+	userDB, err = gormFindUser(userID)
 	if err != nil {
 		return
 	}
@@ -92,13 +88,13 @@ func gormTotalUserCnt() (count int) {
 }
 
 //gormUpdateUserActive 更新激活状态
-func gormUpdateUserActive(userID string, active int32) (e error) {
+func gormUpdateUserActive(userID string, active int) (e error) {
 	e = usergorm.DB().Model(&UserDB{ID: userID}).Update("active", active).Error
 	return
 }
 
 //gormUpdateUserOnline 更新用户在线状态
-func gormUpdateUserOnline(userID string, online int32) (err error) {
+func gormUpdateUserOnline(userID string, online int) (err error) {
 	err = usergorm.DB().Model(
 		&UserDB{
 			ID:     userID,

@@ -34,17 +34,25 @@ func redisCreateUser(acc, userID, password, phone, email, nickname, photo, creat
 }
 
 //redisGetUser 获取用户基本信息
-func redisGetUser(acc string) (phone, email, nickname, photo, createdAt, updatedAt string, err error) {
+func redisGetUser(acc string) (user *userproto.User, err error) {
 	key := userInfoPrefix + acc
 	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo", "updatedAt", "createdAt")
 	err = e
 	if e == nil && len(vals) > 5 {
-		phone, _ = vals[0].(string)
-		email, _ = vals[1].(string)
-		nickname, _ = vals[2].(string)
-		photo, _ = vals[3].(string)
-		updatedAt, _ = vals[4].(string)
-		createdAt, _ = vals[5].(string)
+		phone, _ := vals[0].(string)
+		email, _ := vals[1].(string)
+		nickname, _ := vals[2].(string)
+		photo, _ := vals[3].(string)
+		updatedAt, _ := vals[4].(string)
+		createdAt, _ := vals[5].(string)
+		user = &userproto.User{
+			Phone:     phone,
+			Email:     email,
+			Nickname:  nickname,
+			Photo:     photo,
+			UpdatedAt: updatedAt,
+			CreatedAt: createdAt,
+		}
 	}
 	return
 }
@@ -132,7 +140,7 @@ func redisUserPermission(acc string) (permission userproto.Permission, err error
 }
 
 //redisUserRegisted 账号信息是否已注册
-func redisUserRegisted(acc string) (exs bool, ts int64, registed int, err error) {
+func redisUserRegisted(acc string) (exs bool, ts int64, registed int) {
 	key := userRegistPrefix + acc
 	exs = userredis.Exists(key)
 	if exs {

@@ -78,9 +78,13 @@ func UserActive(acc, userID string) (active int, err error) {
 	return
 }
 
-//SetUserActive
+//SetUserActive 更新用户激活状态
 func SetUserActive(acc, userID string, active int) (err error) {
 	err = redisSetUserActive(acc, active)
+	if err != nil {
+		err = gormUpdateUserActive(userID, active)
+	}
+	return
 }
 
 //FindUser 查询用户信息
@@ -90,46 +94,23 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 		per = userproto.Permission_user
 	}
 	//redis 中的数据
-	phone, email, nickname, photo, createdAt, updatedAt, e := redisGetUser(acc)
+	user, e = redisGetUser(acc)
 	if e != nil {
 		//mariadb中的数据
-		u, e := gormFindActiveUser(userID)
+		user, e = gormFindActiveUser(userID)
 		if e != nil {
 			err = e
 			return
 		}
-		phone = u.GetPhone()
-		email = u.GetEmail()
-		nickname = u.GetNickname()
-		photo = u.GetPhoto()
-		createdAt = u.GetCreatedAt()
-		updatedAt = u.GetUpdatedAt()
-		per = u.GetPermission()
+		user.Permission = per
 	}
-
-	if err != nil {
-		return
-	}
-
-	user = &userproto.User{
-		Phone:      phone,
-		Email:      email,
-		Nickname:   nickname,
-		Photo:      photo,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
-		UserID:     userID,
-		Permission: per,
-	}
+	user.Permission = per
 	return
 }
 
 //UserRegisted 用户是否走注册流程
-func UserRegisted(acc string) (exs bool, ts int64, registed int) {
-	exs, ts, registed, err = redisUserRegisted(acc)
-	if err != nil {
-		gormUserActive()
-	}
+func UserRegisted(acc string, userID string) (exs bool, ts int64, registed int) {
+	exs, ts, registed = redisUserRegisted(acc)
 	return
 }
 
