@@ -39,9 +39,24 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 	return
 }
 
+//gormFindUser 查询用户
+func gormFindUser(userID string) (uDB UserDB, err error) {
+	var userDB UserDB
+	err = usergorm.DB().Model(
+		&UserDB{
+			ID: userID,
+		},
+	).First(&userDB).Error
+	if err != nil {
+		return
+	}
+	uDB = userDB
+	return
+}
+
 //gormUserActive 用户是否激活中
 func gormUserActive(userID string) (active int, err error) {
-	userDB := &UserDB{}
+	var userDB UserDB
 	err = usergorm.DB().Model(
 		&UserDB{
 			ID: userID,
@@ -56,7 +71,7 @@ func gormUserActive(userID string) (active int, err error) {
 
 //gormFindActiveUser 查询激活状态用户信息
 func gormFindActiveUser(userID string) (user *userproto.User, err error) {
-	userDB := &UserDB{}
+	var userDB UserDB
 	err = usergorm.DB().Model(
 		&UserDB{
 			ID:     userID,

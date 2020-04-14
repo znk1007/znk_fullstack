@@ -78,8 +78,9 @@ func UserActive(acc, userID string) (active int, err error) {
 	return
 }
 
-func SetUserActive(acc, userID string, active int) {
-	redisSetUserActive(acc, active)
+//SetUserActive
+func SetUserActive(acc, userID string, active int) (err error) {
+	err = redisSetUserActive(acc, active)
 }
 
 //FindUser 查询用户信息
@@ -125,7 +126,10 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 
 //UserRegisted 用户是否走注册流程
 func UserRegisted(acc string) (exs bool, ts int64, registed int) {
-	exs, ts, registed = redisUserRegisted(acc)
+	exs, ts, registed, err = redisUserRegisted(acc)
+	if err != nil {
+		gormUserActive()
+	}
 	return
 }
 

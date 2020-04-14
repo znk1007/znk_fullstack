@@ -132,7 +132,7 @@ func redisUserPermission(acc string) (permission userproto.Permission, err error
 }
 
 //redisUserRegisted 账号信息是否已注册
-func redisUserRegisted(acc string) (exs bool, ts int64, registed int) {
+func redisUserRegisted(acc string) (exs bool, ts int64, registed int, err error) {
 	key := userRegistPrefix + acc
 	exs = userredis.Exists(key)
 	if exs {
