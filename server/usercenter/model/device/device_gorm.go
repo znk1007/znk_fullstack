@@ -35,3 +35,18 @@ func gormUpdateOnline(userID string, deviceID string, online int) (err error) {
 	).Update("online", online).Error
 	return
 }
+
+//gormAllDevice 获取所有设备
+func gormAllDevice(userID string) (devices []Device, err error) {
+	var dvs []Device
+	err = usergorm.DB().Model(
+		&Device{
+			UserID: userID,
+		},
+	).Find(&dvs).Error
+	if err != nil {
+		return
+	}
+	devices = dvs
+	return
+}

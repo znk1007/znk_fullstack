@@ -1,7 +1,9 @@
 package devicemodel
+
 import (
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 )
+
 const (
 	devicePrefix = "current_device"
 )
@@ -26,5 +28,19 @@ func redisCurrentDevice(userID string) (deviceID string, trust int, online int) 
 func redisSetCurrentDeivce(userID string, deviceID string, trust int, online int) (e error) {
 	key := devicePrefix + userID
 	e = userredis.HSet(key, "devicedID", deviceID, "trust", trust, "online", online)
+	return
+}
+
+//redisUpdateDeviceTrust 更新信任设备
+func redisUpdateDeviceTrust(userID, deviceID string, trust int) (e error) {
+	key := devicePrefix + userID
+	e = userredis.HSet(key, "trust", trust)
+	return
+}
+
+//redisUpdateDeviceOnline 更新设备在线状态
+func redisUpdateDeviceOnline(userID, deviceID string, online int) (e error) {
+	key := devicePrefix + userID
+	e = userredis.HSet(key, "online", online)
 	return
 }
