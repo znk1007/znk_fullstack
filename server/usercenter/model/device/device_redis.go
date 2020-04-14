@@ -1,12 +1,16 @@
 package devicemodel
 
-//CurrentDevice 当前设备信息
-func CurrentDevice(userID string) (deviceID string, trust int, online int) {
+const (
+	devicePrefix = "current_device"
+)
+
+//redisCurrentDevice redis中当前设备信息
+func redisCurrentDevice(userID string) (deviceID string, trust int, online int) {
 	deviceID = ""
 	trust = 0
 	online = 0
-	k := userID + "_device"
-	dvs, err := userredis.HMGet(k, "devicedID", "trust", "online")
+	key := devicePrefix + userID
+	dvs, err := userredis.HMGet(key, "devicedID", "trust", "online")
 	if err != nil || len(dvs) < 2 {
 		return
 	}
@@ -16,9 +20,9 @@ func CurrentDevice(userID string) (deviceID string, trust int, online int) {
 	return
 }
 
-//SetCurrentDeivce 设置当前设备信息
-func SetCurrentDeivce(userID string, deviceID string, trust int, online int) (e error) {
-	k := userID + "_device"
-	e = userredis.HSet(k, "devicedID", deviceID, "trust", trust, "online", online)
+//redisSetCurrentDeivce redis设置当前设备信息
+func redisSetCurrentDeivce(userID string, deviceID string, trust int, online int) (e error) {
+	key := devicePrefix + userID
+	e = userredis.HSet(key, "devicedID", deviceID, "trust", trust, "online", online)
 	return
 }
