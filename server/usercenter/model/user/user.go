@@ -14,7 +14,6 @@ type UserDB struct {
 	ID       string `gorm:"primary_key"`
 	Password string
 	Abnormal int //账号是否异常
-	Online   int //是否已登录
 	Active   int //是否激活状态
 	User     *userproto.User
 }
@@ -74,21 +73,23 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 //UserActive 用户是否激活状态
 func UserActive(acc, userID string) (active int, err error) {
 	active, err = redisUserActive(acc)
-
+	if err != nil {
+		active, err = gormUserActive(userID)
+	}
 	return
 }
 
 //FindUser 查询用户信息
 func FindUser(acc, userID string) (user *userproto.User, err error) {
-
 	per, e := redisUserPermission(acc)
 	if e != nil {
 		per = userproto.Permission_user
 	}
+	//redis 中的数据
 	phone, email, nickname, photo, createdAt, updatedAt, e := redisGetUser(acc)
-
 	if e != nil {
-		u, e := gormFindUser(userID)
+		//mariadb中的数据
+		u, e := gormFindActiveUser(userID)
 		if e != nil {
 			err = e
 			return
@@ -99,6 +100,7 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 		photo = u.GetPhoto()
 		createdAt = u.GetCreatedAt()
 		updatedAt = u.GetUpdatedAt()
+		per = u.GetPermission()
 	}
 
 	if err != nil {

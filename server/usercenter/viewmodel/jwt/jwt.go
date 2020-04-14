@@ -29,6 +29,17 @@ func DefaultInterval() int {
 	return 60 * 2
 }
 
+//私钥
+var privateKey *rsa.PrivateKey
+
+//公钥
+var publicKey *rsa.PublicKey
+
+func init() {
+	publicKey = loadRSAPublicKeyFromDisk("key/jwt.rsa.pub")
+	privateKey = loadRSAPrivateKeyFromDisk("key/jwt.rsa")
+}
+
 //CreateUserJWT 创建用户jwt验证 expired 纳秒级别
 func CreateUserJWT(expiredinterval int) *UserJWT {
 	return &UserJWT{
@@ -55,15 +66,15 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 }
 
 //Parse 解析jwt
-func (userJWT *UserJWT) Parse(token string) {
-	key := loadRSAPublicKeyFromDisk("key/jwt.rsa.pub")
+func (userJWT *UserJWT) Parse(token string, build bool) {
+
 	userJWT.parseSucc = false
 	userJWT.res = nil
 	userJWT.isExp = true
 	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
 		t.Header["kid"] = usercrypto.GetSecurityKeyString()
 		t.Header["alg"] = "RS512"
-		return key, nil
+		return publicKey, nil
 	})
 
 	if err != nil {
@@ -92,28 +103,31 @@ func (userJWT *UserJWT) Parse(token string) {
 		if diff < int64(userJWT.expiredinterval) {
 			userJWT.isExp = false
 		}
-		v := reflect.ValueOf(clms)
-		if v.Kind() != reflect.Map {
-			userJWT.err = errors.New("type error")
-			return
-		}
-		if v.Kind() == reflect.Map {
-			kMap := make(map[string]interface{})
-			for _, k := range v.MapKeys() {
-				val := v.MapIndex(k)
-				if val.CanInterface() {
-					kMap[k.String()] = val.Interface()
-				}
+		//是否生成map
+		if build {
+			v := reflect.ValueOf(clms)
+			if v.Kind() != reflect.Map {
+				userJWT.err = errors.New("type error")
+				return
 			}
-			userJWT.err = nil
-			userJWT.res = kMap
-			userJWT.parseSucc = true
+			if v.Kind() == reflect.Map {
+				kMap := make(map[string]interface{})
+				for _, k := range v.MapKeys() {
+					val := v.MapIndex(k)
+					if val.CanInterface() {
+						kMap[k.String()] = val.Interface()
+					}
+				}
+				userJWT.err = nil
+				userJWT.res = kMap
+				userJWT.parseSucc = true
+			}
 		}
 	}
 }
 
 //Result 结果
-func (userJWT UserJWT) Result() (res map[string]interface{}, expired bool, err error) {
+func (userJWT *UserJWT) Result() (res map[string]interface{}, expired bool, err error) {
 	expired = userJWT.isExp
 	res = userJWT.res
 	err = userJWT.err
@@ -150,7 +164,6 @@ func loadRSAPublicKeyFromDisk(location string) *rsa.PublicKey {
 
 //createToken 生成token
 func createToken(c jwt.Claims) (tk string, err error) {
-	privateKey := loadRSAPrivateKeyFromDisk("key/jwt.rsa")
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, c)
 	tk, err = token.SignedString(privateKey)
 	return

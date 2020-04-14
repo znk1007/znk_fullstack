@@ -20,7 +20,7 @@ func TestCreateToken(t *testing.T) {
 	}
 	t.Log("token string: ", tkStr)
 
-	uJWT.Parse(tkStr)
+	uJWT.Parse(tkStr, true)
 	res, _, e := uJWT.Result()
 	if e != nil {
 		t.Error("parse token failed: ", e)

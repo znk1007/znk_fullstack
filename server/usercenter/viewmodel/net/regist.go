@@ -65,6 +65,7 @@ func (s *registService) handleRegist() {
 		return
 	}
 	s.doing[acc] = true
+
 	//解析校验token
 	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
 	if !expired { //是否频繁请求

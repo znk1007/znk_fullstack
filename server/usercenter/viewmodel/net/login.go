@@ -58,7 +58,7 @@ func (l *loginService) handleLogin() {
 	l.doing[acc] = true
 
 	//校验token
-	res, dID, plf, exp, e := lvt.Verify(l.req.GetToken())
+	res, _, _, exp, e := lvt.Verify(l.req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
@@ -84,12 +84,12 @@ func (l *loginService) handleLogin() {
 		return
 	}
 	//查redis用户数据
-	phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
-	if err != nil {
-		log.Info().Msg(err.Error())
+	// phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
+	// if err != nil {
+	// 	log.Info().Msg(err.Error())
 
-		return
-	}
+	// 	return
+	// }
 }
 
 /*

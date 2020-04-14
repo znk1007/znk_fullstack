@@ -15,7 +15,6 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 	userDB := &UserDB{
 		ID:       user.UserID,
 		Password: password,
-		Online:   0,
 		Active:   1,
 	}
 	//用户是否已存在
@@ -40,13 +39,27 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 	return
 }
 
-//gormFindUser 查询用户信息
-func gormFindUser(userID string, online int) (user *userproto.User, err error) {
+//gormUserActive 用户是否激活中
+func gormUserActive(userID string) (active int, err error) {
+	userDB := &UserDB{}
+	err = usergorm.DB().Model(
+		&UserDB{
+			ID: userID,
+		},
+	).First(&userDB).Error
+	if err != nil {
+		return
+	}
+	active = userDB.Active
+	return
+}
+
+//gormFindActiveUser 查询激活状态用户信息
+func gormFindActiveUser(userID string) (user *userproto.User, err error) {
 	userDB := &UserDB{}
 	err = usergorm.DB().Model(
 		&UserDB{
 			ID:     userID,
-			Online: online,
 			Active: 1,
 		},
 	).First(&userDB).Error
@@ -120,20 +133,5 @@ func gormUpdateUserPhoto(userID string, photo string) (err error) {
 			Active: 1,
 		},
 	).Update("user.photo", photo).Error
-	return
-}
-
-//gormUserActive 用户是否激活
-func gormUserActive(userID string) (userDB *UserDB, err error) {
-	u := &UserDB{}
-	err = usergorm.DB().Model(
-		&UserDB{
-			ID: userID,
-		},
-	).First(u).Error
-	if err != nil {
-		return
-	}
-	userDB = u
 	return
 }

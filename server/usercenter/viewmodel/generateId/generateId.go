@@ -1,4 +1,4 @@
-package userGenID
+package usergenid
 
 import (
 	"math/rand"

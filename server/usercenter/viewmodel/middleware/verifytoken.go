@@ -35,7 +35,7 @@ func (verify VerifyToken) Verify(token string) (res map[string]interface{}, devi
 		err = errors.New("miss param `token` or `token` is empty")
 		return
 	}
-	verify.uJWT.Parse(token)
+	verify.uJWT.Parse(token, true)
 	tk, exp, e := verify.uJWT.Result()
 	expired = exp
 	if e != nil {

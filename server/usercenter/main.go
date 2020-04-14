@@ -1,32 +1,50 @@
 package main
 
 import (
-	"fmt"
-
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
 	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
-	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	usernet "github.com/znk_fullstack/server/usercenter/viewmodel/net"
 )
 
 func main() {
-	cnt := 900000
-	fa := usermiddleware.NewFreqAccess(1, cnt/2)
-	for idx := 0; idx < cnt; idx++ {
-		freq := fa.AccessCtrl("test", func() bool {
-			return true
-		})
-		if freq {
-			fmt.Println("access too frequence")
-		}
-	}
+
 	return
 	userconf.SetEnv(userconf.Dev)
 	userredis.ConnectRedis()
 	usergorm.ConnectMariaDB()
 	usernet.RunRPC()
 }
+
+/*
+sess, err := usermiddleware.SessionID()
+if err != nil {
+	fmt.Println("get sessionID err: ", err.Error())
+	return
+}
+fmt.Println("sessionID: ", sess)
+time.Sleep(time.Duration(time.Second * 2))
+expired, err := usermiddleware.ParseSessionID(sess)
+if err != nil {
+	fmt.Println("parse sessionID err: ", err.Error())
+	return
+}
+fmt.Println("expired: ", expired)
+*/
+
+/*
+
+cnt := 900000
+fa := usermiddleware.NewFreqAccess(1, cnt/2)
+for idx := 0; idx < cnt; idx++ {
+	freq := fa.AccessCtrl("test", func() bool {
+		return true
+	})
+	if freq {
+		fmt.Println("access too frequence")
+	}
+}
+*/
 
 /*
 userDB := &model.UserDB{
