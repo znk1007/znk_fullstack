@@ -1,5 +1,7 @@
 package devicemodel
-
+import (
+	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
+)
 const (
 	devicePrefix = "current_device"
 )
