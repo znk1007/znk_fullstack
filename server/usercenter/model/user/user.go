@@ -13,7 +13,6 @@ import (
 type UserDB struct {
 	ID       string `gorm:"primary_key"`
 	Password string
-	Abnormal int //账号是否异常
 	Active   int //是否激活状态
 	User     *userproto.User
 }
@@ -77,6 +76,10 @@ func UserActive(acc, userID string) (active int, err error) {
 		active, err = gormUserActive(userID)
 	}
 	return
+}
+
+func SetUserActive(acc, userID string, active int) {
+	redisSetUserActive(acc, active)
 }
 
 //FindUser 查询用户信息

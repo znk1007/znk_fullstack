@@ -94,9 +94,10 @@ func redisSetUserOnline(acc string, online int) {
 }
 
 //redisSetUserActive 用户是否激活状态
-func redisSetUserActive(acc string, active int) {
+func redisSetUserActive(acc string, active int) (e error) {
 	key := userActivePrefix + acc
-	userredis.HSet(key, "active", string(active))
+	e = userredis.HSet(key, "active", string(active))
+	return
 }
 
 //redisUserActive 用户是否激活状态

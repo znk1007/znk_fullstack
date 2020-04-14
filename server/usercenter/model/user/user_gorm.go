@@ -77,8 +77,9 @@ func gormTotalUserCnt() (count int) {
 }
 
 //gormUpdateUserActive 更新激活状态
-func gormUpdateUserActive(userID string, active int32) error {
-	return usergorm.DB().Model(&UserDB{ID: userID}).Update("user.active", active).Error
+func gormUpdateUserActive(userID string, active int32) (e error) {
+	e = usergorm.DB().Model(&UserDB{ID: userID}).Update("active", active).Error
+	return
 }
 
 //gormUpdateUserOnline 更新用户在线状态
