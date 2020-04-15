@@ -14,13 +14,13 @@ func redisCurrentDevice(userID string) (deviceID string, trust int, online int) 
 	trust = 0
 	online = 0
 	key := devicePrefix + userID
-	dvs, err := userredis.HMGet(key, "devicedID", "trust", "online")
+	dvs, err := userredis.HMGet(key, "deviceID", "trust", "online")
 	if err != nil || len(dvs) < 2 {
 		return
 	}
-	deviceID = dvs[0].(string)
-	trust = dvs[1].(int)
-	online = dvs[2].(int)
+	deviceID, _ = dvs[0].(string)
+	trust, _ = dvs[1].(int)
+	online, _ = dvs[2].(int)
 	return
 }
 
@@ -29,12 +29,13 @@ func redisSetCurrentDeivce(device Device) (e error) {
 	key := devicePrefix + device.UserID
 	e = userredis.HSet(
 		key,
-		"devicedID", device.DeviceID,
+		"deviceID", device.DeviceID,
 		"trust", device.Trust,
 		"online", device.Online,
 		"platform", device.Platform,
 		"name", device.Name,
 		"userId", device.UserID,
+		"updatedAt", device.UpdatedAt,
 	)
 	return
 }
@@ -47,7 +48,7 @@ func redisUpdateDeviceTrust(userID, deviceID string, trust int) (e error) {
 }
 
 //redisUpdateDeviceOnline 更新设备在线状态
-func redisUpdateDeviceOnline(userID, deviceID string, online int) (e error) {
+func redisUpdateDeviceOnline(userID string, online int) (e error) {
 	key := devicePrefix + userID
 	e = userredis.HSet(key, "online", online)
 	return
