@@ -42,6 +42,32 @@ func initRedis() {
 	log.Info().Msg("connect redis success")
 }
 
+//HExists 是否存在hash表中
+func HExists(key string, field string) (exs bool, err error) {
+	if nclstrRds != nil {
+		if err = checkRds(); err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		exs, err = nclstrRds.HExists(key, field).Result()
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+	} else {
+		if err = checkRds(); err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+		exs, err = clstrRds.HExists(key, field).Result()
+		if err != nil {
+			log.Info().Msg(err.Error())
+			return
+		}
+	}
+	return
+}
+
 //Exists key是否存在
 func Exists(key ...string) bool {
 	var idx int64

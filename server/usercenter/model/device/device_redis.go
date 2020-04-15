@@ -25,9 +25,17 @@ func redisCurrentDevice(userID string) (deviceID string, trust int, online int) 
 }
 
 //redisSetCurrentDeivce redis设置当前设备信息
-func redisSetCurrentDeivce(userID string, deviceID string, trust int, online int) (e error) {
-	key := devicePrefix + userID
-	e = userredis.HSet(key, "devicedID", deviceID, "trust", trust, "online", online)
+func redisSetCurrentDeivce(device Device) (e error) {
+	key := devicePrefix + device.UserID
+	e = userredis.HSet(
+		key,
+		"devicedID", device.DeviceID,
+		"trust", device.Trust,
+		"online", device.Online,
+		"platform", device.Platform,
+		"name", device.Name,
+		"userId", device.UserID,
+	)
 	return
 }
 

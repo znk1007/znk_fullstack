@@ -5,7 +5,7 @@ import (
 )
 
 //gormCreateDevice 创建设备信息数据
-func gormCreateDevice(device *Device) (exs bool, err error) {
+func gormCreateDevice(device Device) (exs bool, err error) {
 	exs = usergorm.DB().NewRecord(device)
 	if !exs {
 		err = usergorm.DB().Create(device).Error
