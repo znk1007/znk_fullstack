@@ -11,9 +11,16 @@ const (
 	devicePrefix = "current_device"
 )
 
+//redisDeviceExists 用户是否存在关联设备
+func redisDeviceExists(userID string) (exists bool) {
+	key := devicePrefix + userID
+	exists = userredis.Exists(key)
+	return
+}
+
 //redisCurrentDevice 获取当前设备信息
 func redisCurrentDevice(userID string) (device Device, err error) {
-	key := devicePrefix + device.UserID
+	key := devicePrefix + userID
 	var vals []interface{}
 	vals, err = userredis.HMGet(
 		key,
