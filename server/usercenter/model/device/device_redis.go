@@ -22,7 +22,7 @@ func redisCurrentDevice(userID string) (device Device, err error) {
 		"online",
 		"platform",
 		"name",
-		"userId",
+		"userID",
 		"updatedAt",
 	)
 	deviceID, _ := vals[0].(string)
@@ -30,8 +30,12 @@ func redisCurrentDevice(userID string) (device Device, err error) {
 	online, _ := vals[2].(int)
 	platform, _ := vals[3].(string)
 	name, _ := vals[4].(string)
-	userID, _ := vals[5].(string)
+	orgUserID, _ := vals[5].(string)
 	updatedAt, _ := vals[6].(string)
+	if orgUserID != userID {
+		err = errors.New("user not match")
+		return
+	}
 	device = Device{
 		DeviceID:  deviceID,
 		UserID:    userID,
@@ -70,7 +74,7 @@ func redisSetCurrentDeivce(device Device) (e error) {
 		"online", device.Online,
 		"platform", device.Platform,
 		"name", device.Name,
-		"userId", device.UserID,
+		"userID", device.UserID,
 		"updatedAt", device.UpdatedAt,
 	)
 	return

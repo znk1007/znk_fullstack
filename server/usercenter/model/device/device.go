@@ -30,6 +30,9 @@ func SetCurrentDevice(userID, deviceID, name, platform string, trust int) (err e
 
 //CurrentDevice 当前设备信息
 func CurrentDevice(userID string) (device Device, err error) {
-	redisCurrentDevice(userID)
+	device, err = redisCurrentDevice(userID)
+	if err != nil {
+		device, err = gormCurrentDevice(userID)
+	}
 	return
 }
