@@ -44,9 +44,22 @@ func gormAllDevice(userID string) (devices []Device, err error) {
 			UserID: userID,
 		},
 	).Find(&dvs).Error
-	if err != nil {
-		return
+	if err == nil {
+		devices = dvs
 	}
-	devices = dvs
+	return
+}
+
+//最近登录设备
+func gormCurrentDevice(userID string) (device Device, err error) {
+	var dvc Device
+	err = usergorm.DB().Model(
+		&Device{
+			UserID: userID,
+		},
+	).Order("updatedAt DESC").First(&dvc).Error
+	if err == nil {
+		device = dvc
+	}
 	return
 }
