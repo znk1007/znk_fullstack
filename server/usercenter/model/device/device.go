@@ -11,6 +11,15 @@ type Device struct {
 	Online    int    //是否在线
 }
 
+//DeviceExists 设备是否存在
+func DeviceExists(userID string) (exists bool) {
+	exists = redisDeviceExists(userID)
+	if !exists {
+		exists = gormDeviceExists(userID)
+	}
+	return
+}
+
 //SetCurrentDevice 设置当前设备
 func SetCurrentDevice(userID, deviceID, name, platform string, trust int) (err error) {
 	dvs := Device{

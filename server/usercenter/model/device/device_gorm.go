@@ -4,6 +4,16 @@ import (
 	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
 )
 
+//gormDeviceExists 设备是否存在
+func gormDeviceExists(userID string) (exists bool) {
+	var cnt int
+	usergorm.DB().Model(&Device{
+		UserID: userID,
+	}).Count(&cnt)
+	exists = cnt > 0
+	return
+}
+
 //gormCreateDevice 创建设备信息数据
 func gormCreateDevice(device Device) (exs bool, err error) {
 	exs = usergorm.DB().NewRecord(device)

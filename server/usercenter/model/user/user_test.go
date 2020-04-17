@@ -11,7 +11,6 @@ func TestUserJWT(t *testing.T) {
 	userDB := &UserDB{
 		ID:       "test",
 		Password: "123",
-		Abnormal: 1,
 		User: &userproto.User{
 			UserID:  "test",
 			Account: "acc",

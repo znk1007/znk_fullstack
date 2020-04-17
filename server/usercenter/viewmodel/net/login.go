@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	devicemodel "github.com/znk_fullstack/server/usercenter/model/device"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
@@ -58,25 +59,33 @@ func (l *loginService) handleLogin() {
 	l.doing[acc] = true
 
 	//校验token
-	res, _, _, exp, e := lvt.Verify(l.req.GetToken())
+	res, device, platform, exp, e := lvt.Verify(l.req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
 		return
 	}
+	//超时检测
 	if !exp {
 		log.Info().Msg("login request too frequence")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("login request too frequence"), nil)
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
 	}
 	//是否已注册
-	exs, _, rgd := usermodel.UserRegisted(acc)
+	exs, ts, rgd := usermodel.UserRegisted(acc)
 	if !exs || rgd == 0 {
 		log.Info().Msg("account not registed")
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("account not registed"), nil)
 		return
 	}
-
+	//请求频繁度检测
+	now := time.Now().Unix()
+	if now-ts < loginExpired {
+		log.Info().Msg("login request too frequence")
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
+		return
+	}
+	//用户ID检测
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
@@ -84,6 +93,22 @@ func (l *loginService) handleLogin() {
 		return
 	}
 	//查redis用户数据
+	user, err := usermodel.FindUser(acc, userID)
+	if err != nil {
+		log.Info().Msg("user not exists")
+		l.makeLoginToken(acc, http.StatusBadRequest, err, nil)
+		return
+	}
+
+	dvcexs := devicemodel.DeviceExists(userID)
+	if !dvcexs {
+		devicemodel.SetCurrentDevice()
+	} else {
+
+	}
+
+	device, err := devicemodel.CurrentDevice(userID)
+
 	// phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
 	// if err != nil {
 	// 	log.Info().Msg(err.Error())

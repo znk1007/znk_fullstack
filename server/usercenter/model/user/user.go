@@ -95,7 +95,7 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 	}
 	//redis 中的数据
 	user, e = redisGetUser(acc)
-	if e != nil {
+	if e != nil || user == nil {
 		//mariadb中的数据
 		user, e = gormFindActiveUser(userID)
 		if e != nil {
@@ -109,7 +109,7 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 }
 
 //UserRegisted 用户是否走注册流程
-func UserRegisted(acc string, userID string) (exs bool, ts int64, registed int) {
+func UserRegisted(acc string) (exs bool, ts int64, registed int) {
 	exs, ts, registed = redisUserRegisted(acc)
 	return
 }
