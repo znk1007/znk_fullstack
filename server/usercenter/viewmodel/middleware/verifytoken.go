@@ -11,7 +11,12 @@ import (
 
 //VerifyToken token校验
 type VerifyToken struct {
-	uJWT *userjwt.UserJWT
+	uJWT       *userjwt.UserJWT
+	Expired    bool
+	DeviceID   string
+	DeviceName string
+	Platform   string
+	Result     map[string]interface{}
 }
 
 //NewVerifyToken 初始化校验对象
@@ -28,8 +33,7 @@ func (verify VerifyToken) Generate(params map[string]interface{}) (token string,
 }
 
 //Verify 校验token
-func (verify VerifyToken) Verify(token string) (res map[string]interface{}, deviceID string, platform string, expired bool, err error) {
-	expired = true
+func (verify *VerifyToken) Verify(token string) (err error) {
 	if len(token) == 0 {
 		log.Info().Msg("miss param `token` or `token` is empty")
 		err = errors.New("miss param `token` or `token` is empty")
@@ -37,22 +41,27 @@ func (verify VerifyToken) Verify(token string) (res map[string]interface{}, devi
 	}
 	verify.uJWT.Parse(token, true)
 	tk, exp, e := verify.uJWT.Result()
-	expired = exp
 	if e != nil {
 		log.Info().Msg(e.Error())
 		err = e
 		return
 	}
-	var ok bool
 	//设备ID
-	deviceID, ok = tk["deviceID"].(string)
+	deviceID, ok := tk["deviceID"].(string)
 	if !ok || len(deviceID) == 0 {
 		log.Info().Msg("deviceID cannot be empty")
 		err = errors.New("deviceID cannot be empty")
 		return
 	}
+	//设备名
+	deviceName, ok := tk["deviceName"].(string)
+	if !ok || len(deviceName) == 0 {
+		log.Info().Msg("deviceName cannot be empty")
+		err = errors.New("deviceName cannot be empty")
+		return
+	}
 	//平台类型
-	platform, ok = tk["platform"].(string)
+	platform, ok := tk["platform"].(string)
 	if !ok || len(platform) == 0 {
 		log.Info().Msg("platform cannot be empty")
 		err = errors.New("platform cannot be empty")
@@ -70,6 +79,10 @@ func (verify VerifyToken) Verify(token string) (res map[string]interface{}, devi
 		err = errors.New("appkey is error")
 		return
 	}
-	res = tk
+	verify.Result = tk
+	verify.DeviceID = deviceID
+	verify.DeviceName = deviceName
+	verify.Platform = platform
+	verify.Expired = exp
 	return
 }
