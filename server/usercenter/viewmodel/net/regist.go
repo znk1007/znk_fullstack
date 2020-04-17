@@ -67,8 +67,14 @@ func (s *registService) handleRegist() {
 	s.doing[acc] = true
 
 	//解析校验token
-	res, dID, plf, expired, e := rvt.Verify(req.GetToken())
-	if !expired { //是否频繁请求
+	e := rvt.Verify(req.GetToken())
+	if e != nil {
+		log.Info().Msg(e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
+		return
+	}
+
+	if !rvt.Expired { //是否频繁请求
 		s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
 		return
 	}
@@ -97,7 +103,7 @@ func (s *registService) handleRegist() {
 			return
 		}
 	}
-
+	res := rvt.Result
 	pt, ok := res["photo"].(string)
 	if !ok || len(pt) == 0 {
 		pt = ""
@@ -109,14 +115,7 @@ func (s *registService) handleRegist() {
 		s.makeRegistToken("", "", http.StatusBadRequest, "password cannot be empty")
 		return
 	}
-
 	userID := makeID()
-	e = saveCurrentDevice(userID, dID, plf)
-	if e != nil {
-		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
-		return
-	}
 	s.saveUser(acc, pt, userID, psd)
 }
 

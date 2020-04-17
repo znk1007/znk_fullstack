@@ -59,14 +59,14 @@ func (l *loginService) handleLogin() {
 	l.doing[acc] = true
 
 	//校验token
-	res, device, platform, exp, e := lvt.Verify(l.req.GetToken())
+	e := lvt.Verify(l.req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
 		return
 	}
 	//超时检测
-	if !exp {
+	if !lvt.Expired {
 		log.Info().Msg("login request too frequence")
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
@@ -85,6 +85,7 @@ func (l *loginService) handleLogin() {
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
 	}
+	res := lvt.Result
 	//用户ID检测
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
@@ -94,20 +95,26 @@ func (l *loginService) handleLogin() {
 	}
 	//查redis用户数据
 	user, err := usermodel.FindUser(acc, userID)
-	if err != nil {
+	if err != nil || user == nil {
 		log.Info().Msg("user not exists")
 		l.makeLoginToken(acc, http.StatusBadRequest, err, nil)
 		return
 	}
-
+	//是否有相关设备
 	dvcexs := devicemodel.DeviceExists(userID)
 	if !dvcexs {
-		devicemodel.SetCurrentDevice()
+		err := devicemodel.SetCurrentDevice(userID, lvt.DeviceID, lvt.DeviceName, lvt.Platform, 1)
+		if err != nil {
+			log.Info().Msg(err.Error())
+			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
+			return
+		}
 	} else {
+		device, err := devicemodel.CurrentDevice(userID)
+		if err != nil {
 
+		}
 	}
-
-	device, err := devicemodel.CurrentDevice(userID)
 
 	// phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
 	// if err != nil {

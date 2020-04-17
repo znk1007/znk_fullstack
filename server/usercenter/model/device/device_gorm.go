@@ -25,13 +25,13 @@ func gormCreateDevice(device Device) (exs bool, err error) {
 }
 
 //gormUpdateTrust 更新设备信任状态
-func gormUpdateTrust(userID string, deviceID string, trust int) (err error) {
+func gormUpdateTrust(userID string, deviceID string, state DeviceState) (err error) {
 	err = usergorm.DB().Model(
 		&Device{
 			UserID:   userID,
 			DeviceID: deviceID,
 		},
-	).Update("trust", trust).Error
+	).Update("state", state).Error
 	return
 }
 
