@@ -5,7 +5,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
-	userGenID "github.com/znk_fullstack/server/usercenter/viewmodel/generateId"
 	"google.golang.org/grpc"
 )
 
@@ -26,9 +25,4 @@ func RunRPC() {
 //connectSrv 连接服务
 func connectSrv(s *grpc.Server) {
 	registerRegistServer(s)
-}
-
-//makeID 生成唯一ID
-func makeID() string {
-	return userGenID.GenerateID()
 }

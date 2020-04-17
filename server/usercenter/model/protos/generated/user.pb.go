@@ -4,8 +4,12 @@
 package userproto
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -154,9 +158,205 @@ func (m *User) GetPermission() Permission {
 	return Permission_super
 }
 
+//注册请求
+type UserRgstReq struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserRgstReq) Reset()         { *m = UserRgstReq{} }
+func (m *UserRgstReq) String() string { return proto.CompactTextString(m) }
+func (*UserRgstReq) ProtoMessage()    {}
+func (*UserRgstReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_116e343673f7ffaf, []int{1}
+}
+
+func (m *UserRgstReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserRgstReq.Unmarshal(m, b)
+}
+func (m *UserRgstReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserRgstReq.Marshal(b, m, deterministic)
+}
+func (m *UserRgstReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserRgstReq.Merge(m, src)
+}
+func (m *UserRgstReq) XXX_Size() int {
+	return xxx_messageInfo_UserRgstReq.Size(m)
+}
+func (m *UserRgstReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserRgstReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserRgstReq proto.InternalMessageInfo
+
+func (m *UserRgstReq) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *UserRgstReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+//注册响应
+type UserRgstRes struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserRgstRes) Reset()         { *m = UserRgstRes{} }
+func (m *UserRgstRes) String() string { return proto.CompactTextString(m) }
+func (*UserRgstRes) ProtoMessage()    {}
+func (*UserRgstRes) Descriptor() ([]byte, []int) {
+	return fileDescriptor_116e343673f7ffaf, []int{2}
+}
+
+func (m *UserRgstRes) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserRgstRes.Unmarshal(m, b)
+}
+func (m *UserRgstRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserRgstRes.Marshal(b, m, deterministic)
+}
+func (m *UserRgstRes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserRgstRes.Merge(m, src)
+}
+func (m *UserRgstRes) XXX_Size() int {
+	return xxx_messageInfo_UserRgstRes.Size(m)
+}
+func (m *UserRgstRes) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserRgstRes.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserRgstRes proto.InternalMessageInfo
+
+func (m *UserRgstRes) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *UserRgstRes) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+//登录请求
+type UserLgnReq struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserLgnReq) Reset()         { *m = UserLgnReq{} }
+func (m *UserLgnReq) String() string { return proto.CompactTextString(m) }
+func (*UserLgnReq) ProtoMessage()    {}
+func (*UserLgnReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_116e343673f7ffaf, []int{3}
+}
+
+func (m *UserLgnReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserLgnReq.Unmarshal(m, b)
+}
+func (m *UserLgnReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserLgnReq.Marshal(b, m, deterministic)
+}
+func (m *UserLgnReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserLgnReq.Merge(m, src)
+}
+func (m *UserLgnReq) XXX_Size() int {
+	return xxx_messageInfo_UserLgnReq.Size(m)
+}
+func (m *UserLgnReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserLgnReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserLgnReq proto.InternalMessageInfo
+
+func (m *UserLgnReq) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *UserLgnReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+//登录响应
+type UserLgnRes struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserLgnRes) Reset()         { *m = UserLgnRes{} }
+func (m *UserLgnRes) String() string { return proto.CompactTextString(m) }
+func (*UserLgnRes) ProtoMessage()    {}
+func (*UserLgnRes) Descriptor() ([]byte, []int) {
+	return fileDescriptor_116e343673f7ffaf, []int{4}
+}
+
+func (m *UserLgnRes) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserLgnRes.Unmarshal(m, b)
+}
+func (m *UserLgnRes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserLgnRes.Marshal(b, m, deterministic)
+}
+func (m *UserLgnRes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserLgnRes.Merge(m, src)
+}
+func (m *UserLgnRes) XXX_Size() int {
+	return xxx_messageInfo_UserLgnRes.Size(m)
+}
+func (m *UserLgnRes) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserLgnRes.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserLgnRes proto.InternalMessageInfo
+
+func (m *UserLgnRes) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *UserLgnRes) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterEnum("user.Permission", Permission_name, Permission_value)
 	proto.RegisterType((*User)(nil), "user.User")
+	proto.RegisterType((*UserRgstReq)(nil), "user.UserRgstReq")
+	proto.RegisterType((*UserRgstRes)(nil), "user.UserRgstRes")
+	proto.RegisterType((*UserLgnReq)(nil), "user.UserLgnReq")
+	proto.RegisterType((*UserLgnRes)(nil), "user.UserLgnRes")
 }
 
 func init() {
@@ -164,21 +364,142 @@ func init() {
 }
 
 var fileDescriptor_116e343673f7ffaf = []byte{
-	// 241 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x90, 0x3d, 0x4b, 0x04, 0x31,
-	0x10, 0x40, 0xdd, 0xbb, 0xfd, 0xca, 0x1c, 0x48, 0x18, 0x44, 0x82, 0x58, 0x1c, 0x56, 0x87, 0xc5,
-	0x21, 0x5a, 0x59, 0x2a, 0x36, 0x76, 0x72, 0x60, 0x63, 0x17, 0x77, 0x07, 0x0c, 0xba, 0x49, 0x48,
-	0xb2, 0xfe, 0x02, 0x7f, 0xb8, 0x64, 0x76, 0xdd, 0xb3, 0xca, 0xbc, 0xf7, 0xa6, 0xc9, 0x00, 0x8c,
-	0x91, 0xc2, 0xde, 0x07, 0x97, 0x1c, 0x96, 0x79, 0xbe, 0xfa, 0x59, 0x41, 0xf9, 0x1a, 0x29, 0xe0,
-	0x39, 0xd4, 0x59, 0x3c, 0x3f, 0xa9, 0x62, 0x5b, 0xec, 0xc4, 0x61, 0x26, 0x54, 0xd0, 0xe8, 0xae,
-	0x73, 0xa3, 0x4d, 0x6a, 0xc5, 0xe1, 0x0f, 0xf1, 0x02, 0x5a, 0x6b, 0xba, 0x4f, 0xab, 0x07, 0x52,
-	0x6b, 0x4e, 0x0b, 0xe3, 0x19, 0x54, 0xfe, 0xc3, 0x59, 0x52, 0x25, 0x87, 0x09, 0xb2, 0xa5, 0x41,
-	0x9b, 0x2f, 0x55, 0x4d, 0x96, 0x61, 0xde, 0x4d, 0x4e, 0xd5, 0xcb, 0x6e, 0x72, 0x78, 0x09, 0xa2,
-	0x0b, 0xa4, 0x13, 0xf5, 0x0f, 0x49, 0x35, 0x5c, 0x8e, 0x22, 0xd7, 0xd1, 0xf7, 0x73, 0x6d, 0xa7,
-	0xba, 0x08, 0xbc, 0x01, 0xf0, 0x14, 0x06, 0x13, 0xa3, 0x71, 0x56, 0x89, 0x6d, 0xb1, 0x3b, 0xbd,
-	0x95, 0x7b, 0xfe, 0xfb, 0xcb, 0xe2, 0x0f, 0xff, 0x76, 0xae, 0xef, 0x01, 0x8e, 0x05, 0x05, 0x54,
-	0x71, 0xf4, 0x14, 0xe4, 0x49, 0x1e, 0x75, 0x3f, 0x18, 0x2b, 0x0b, 0x6c, 0x81, 0x4f, 0x26, 0x57,
-	0xb8, 0x81, 0xe6, 0xdb, 0x44, 0x93, 0x5c, 0x90, 0xeb, 0xc7, 0xcd, 0x9b, 0xc8, 0x9a, 0x8f, 0xfa,
-	0x5e, 0xf3, 0x73, 0xf7, 0x1b, 0x00, 0x00, 0xff, 0xff, 0xeb, 0x11, 0x32, 0x31, 0x69, 0x01, 0x00,
-	0x00,
+	// 335 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x92, 0x41, 0x4b, 0xfb, 0x40,
+	0x10, 0xc5, 0xff, 0x69, 0x9b, 0xa4, 0x99, 0xc2, 0x9f, 0x38, 0x14, 0x59, 0x8a, 0x87, 0xd2, 0x53,
+	0x51, 0x28, 0x52, 0x4f, 0x82, 0x1e, 0x14, 0x2f, 0x42, 0x0f, 0x12, 0xf1, 0xe2, 0x2d, 0xa6, 0x63,
+	0x5c, 0x6a, 0x76, 0xe3, 0xee, 0xa6, 0x9f, 0xc0, 0x0f, 0x2e, 0xbb, 0x89, 0x69, 0xaa, 0xa7, 0x7a,
+	0xda, 0x7d, 0xbf, 0x37, 0xc3, 0x30, 0x8f, 0x01, 0xa8, 0x34, 0xa9, 0x45, 0xa9, 0xa4, 0x91, 0x38,
+	0xb0, 0xff, 0xd9, 0x67, 0x0f, 0x06, 0x4f, 0x9a, 0x14, 0x1e, 0x43, 0x60, 0xc1, 0xfd, 0x1d, 0xf3,
+	0xa6, 0xde, 0x3c, 0x4a, 0x1a, 0x85, 0x0c, 0xc2, 0x34, 0xcb, 0x64, 0x25, 0x0c, 0xeb, 0x39, 0xe3,
+	0x5b, 0xe2, 0x04, 0x86, 0x82, 0x67, 0x1b, 0x91, 0x16, 0xc4, 0xfa, 0xce, 0x6a, 0x35, 0x8e, 0xc1,
+	0x2f, 0xdf, 0xa4, 0x20, 0x36, 0x70, 0x46, 0x2d, 0x2c, 0xa5, 0x22, 0xe5, 0xef, 0xcc, 0xaf, 0xa9,
+	0x13, 0x4d, 0xad, 0x91, 0x2c, 0x68, 0x6b, 0x8d, 0xc4, 0x13, 0x88, 0x32, 0x45, 0xa9, 0xa1, 0xf5,
+	0x8d, 0x61, 0xa1, 0x73, 0x76, 0xc0, 0xba, 0x55, 0xb9, 0x6e, 0xdc, 0x61, 0xed, 0xb6, 0x00, 0xcf,
+	0x01, 0x4a, 0x52, 0x05, 0xd7, 0x9a, 0x4b, 0xc1, 0xa2, 0xa9, 0x37, 0xff, 0xbf, 0x8c, 0x17, 0x6e,
+	0xf7, 0x87, 0x96, 0x27, 0x9d, 0x9a, 0xd9, 0x35, 0x8c, 0x6c, 0x0a, 0x49, 0xae, 0x4d, 0x42, 0x1f,
+	0xdd, 0xa5, 0xbd, 0xfd, 0xa5, 0xc7, 0xe0, 0x1b, 0xb9, 0x21, 0xd1, 0x84, 0x51, 0x8b, 0xfd, 0x76,
+	0x7d, 0x70, 0xfb, 0x15, 0x80, 0x6d, 0x5f, 0xe5, 0xe2, 0x2f, 0xc3, 0xbb, 0xdd, 0x07, 0xcf, 0x3e,
+	0xbd, 0x04, 0xd8, 0x65, 0x82, 0x11, 0xf8, 0xba, 0x2a, 0x49, 0xc5, 0xff, 0xec, 0x37, 0x5d, 0x17,
+	0x5c, 0xc4, 0x1e, 0x0e, 0xc1, 0x1d, 0x4b, 0xdc, 0xc3, 0x11, 0x84, 0x5b, 0xae, 0xb9, 0x91, 0x2a,
+	0xee, 0x2f, 0x5f, 0x21, 0xb4, 0x83, 0x1f, 0xd5, 0x16, 0x17, 0x10, 0x24, 0x94, 0x73, 0x6d, 0xf0,
+	0xa8, 0xce, 0xb9, 0x93, 0xe6, 0xe4, 0x17, 0xd2, 0x78, 0x06, 0xfe, 0x4a, 0xe6, 0x5c, 0x60, 0xbc,
+	0xf3, 0xea, 0xf5, 0x27, 0x3f, 0x89, 0xbe, 0x1d, 0x3d, 0x47, 0x16, 0xb9, 0xb3, 0x7d, 0x09, 0xdc,
+	0x73, 0xf1, 0x15, 0x00, 0x00, 0xff, 0xff, 0xa6, 0xa9, 0xfa, 0x4a, 0xcb, 0x02, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// UserSrvClient is the client API for UserSrv service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type UserSrvClient interface {
+	Regist(ctx context.Context, in *UserRgstReq, opts ...grpc.CallOption) (*UserRgstRes, error)
+	Login(ctx context.Context, in *UserLgnReq, opts ...grpc.CallOption) (*UserLgnRes, error)
+}
+
+type userSrvClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewUserSrvClient(cc grpc.ClientConnInterface) UserSrvClient {
+	return &userSrvClient{cc}
+}
+
+func (c *userSrvClient) Regist(ctx context.Context, in *UserRgstReq, opts ...grpc.CallOption) (*UserRgstRes, error) {
+	out := new(UserRgstRes)
+	err := c.cc.Invoke(ctx, "/user.UserSrv/Regist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvClient) Login(ctx context.Context, in *UserLgnReq, opts ...grpc.CallOption) (*UserLgnRes, error) {
+	out := new(UserLgnRes)
+	err := c.cc.Invoke(ctx, "/user.UserSrv/Login", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UserSrvServer is the server API for UserSrv service.
+type UserSrvServer interface {
+	Regist(context.Context, *UserRgstReq) (*UserRgstRes, error)
+	Login(context.Context, *UserLgnReq) (*UserLgnRes, error)
+}
+
+// UnimplementedUserSrvServer can be embedded to have forward compatible implementations.
+type UnimplementedUserSrvServer struct {
+}
+
+func (*UnimplementedUserSrvServer) Regist(ctx context.Context, req *UserRgstReq) (*UserRgstRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Regist not implemented")
+}
+func (*UnimplementedUserSrvServer) Login(ctx context.Context, req *UserLgnReq) (*UserLgnRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+
+func RegisterUserSrvServer(s *grpc.Server, srv UserSrvServer) {
+	s.RegisterService(&_UserSrv_serviceDesc, srv)
+}
+
+func _UserSrv_Regist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRgstReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserSrvServer).Regist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/user.UserSrv/Regist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserSrvServer).Regist(ctx, req.(*UserRgstReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserSrv_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserLgnReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserSrvServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/user.UserSrv/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserSrvServer).Login(ctx, req.(*UserLgnReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _UserSrv_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "user.UserSrv",
+	HandlerType: (*UserSrvServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Regist",
+			Handler:    _UserSrv_Regist_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _UserSrv_Login_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "user.proto",
 }

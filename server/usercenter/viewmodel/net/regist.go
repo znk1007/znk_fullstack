@@ -1,7 +1,6 @@
 package usernet
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -10,10 +9,9 @@ import (
 	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
-	"google.golang.org/grpc"
 )
 
-var rs *registService
+var rs *rgstSrv
 var rvt usermiddleware.VerifyToken
 var registPool userpayload.WorkerPool
 
@@ -21,35 +19,54 @@ const (
 	registExpired = 60 * 2
 )
 
-func init() {
-	rs = &registService{
-		resChan: make(chan registResponse),
-		doing:   make(map[string]bool),
-	}
-	rvt = usermiddleware.NewVerifyToken(registExpired)
-	registPool = userpayload.CreateWorkerPool(100)
-	registPool.Run()
-}
-
-//registResponse 注册响应
-type registResponse struct {
-	res *userproto.RegistRes
+//rgstRes 注册响应
+type rgstRes struct {
+	res *userproto.UserRgstRes
 	err error
 }
 
-//RegistService 注册
-type registService struct {
-	req     *userproto.RegistReq
-	resChan chan registResponse
+//rgstSrv 注册
+type rgstSrv struct {
+	req     *userproto.UserRgstReq
+	resChan chan rgstRes
 	doing   map[string]bool
 }
 
-func (s *registService) Do() {
+//newRgstSrv 初始化注册服务
+func newRgstSrv() *rgstSrv {
+	rvt = usermiddleware.NewVerifyToken(registExpired)
+	registPool = userpayload.CreateWorkerPool(100)
+	registPool.Run()
+	return &rgstSrv{
+		resChan: make(chan rgstRes),
+		doing:   make(map[string]bool),
+	}
+}
+
+//write 写入数据
+func (s *rgstSrv) write(req *userproto.UserRgstReq) {
+	registPool.WriteHandler(func(jq chan userpayload.Job) {
+		s.req = req
+		jq <- s
+	})
+}
+
+// 读取数据
+func (s *rgstSrv) read() (*userproto.UserRgstRes, error) {
+	for {
+		select {
+		case res := <-s.resChan:
+			return res.res, res.err
+		}
+	}
+}
+
+func (s *rgstSrv) Do() {
 	go s.handleRegist()
 }
 
 //handleRegist 处理注册
-func (s *registService) handleRegist() {
+func (s *rgstSrv) handleRegist() {
 	req := s.req
 	acc := req.GetAccount()
 	if len(acc) == 0 {
@@ -120,7 +137,7 @@ func (s *registService) handleRegist() {
 }
 
 //saveUser 保存用户信息
-func (s *registService) saveUser(acc string, photo string, userID string, password string) {
+func (s *rgstSrv) saveUser(acc string, photo string, userID string, password string) {
 
 	e := usermodel.CreateUser(acc, photo, userID, password)
 	if e != nil {
@@ -140,7 +157,7 @@ func (s *registService) saveUser(acc string, photo string, userID string, passwo
 */
 
 //makeRegistToken 注册token
-func (s *registService) makeRegistToken(acc string, userID string, code int, msg string) {
+func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, msg string) {
 	ts := time.Now().Unix()
 	var rgd int
 	if code == http.StatusOK {
@@ -161,8 +178,8 @@ func (s *registService) makeRegistToken(acc string, userID string, code int, msg
 		"userID":    userID,
 	}
 	tk, err := rvt.Generate(resmap)
-	res := registResponse{
-		res: &userproto.RegistRes{
+	res := rgstRes{
+		res: &userproto.UserRgstRes{
 			Account: acc,
 			Token:   tk,
 		},
@@ -171,23 +188,4 @@ func (s *registService) makeRegistToken(acc string, userID string, code int, msg
 	delete(s.doing, acc)
 	s.resChan <- res
 	return
-}
-
-//registerRegistServer 注册到注册请求服务
-func registerRegistServer(srv *grpc.Server) {
-	userproto.RegisterRegistSrvServer(srv, rs)
-}
-
-//UserReigst 注册
-func (s *registService) UserReigst(ctx context.Context, req *userproto.RegistReq) (*userproto.RegistRes, error) {
-	registPool.WriteHandler(func(jq chan userpayload.Job) {
-		s.req = req
-		jq <- s
-	})
-	for {
-		select {
-		case res := <-s.resChan:
-			return res.res, res.err
-		}
-	}
 }

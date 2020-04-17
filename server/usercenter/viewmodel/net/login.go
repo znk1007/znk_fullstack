@@ -1,7 +1,6 @@
 package usernet
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -14,7 +13,6 @@ import (
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
-var ls *loginService
 var lvt usermiddleware.VerifyToken
 var loginPool userpayload.WorkerPool
 
@@ -22,30 +20,49 @@ const (
 	loginExpired = 60 * 5
 )
 
-type loginResponse struct {
-	res *userproto.LoginRes
+type lgnRes struct {
+	res *userproto.UserLgnRes
 	err error
 }
 
-//loginService 登录服务
-type loginService struct {
-	req     *userproto.LoginReq
-	resChan chan loginResponse
+//lgnSrv 登录服务
+type lgnSrv struct {
+	req     *userproto.UserLgnReq
+	resChan chan lgnRes
 	doing   map[string]bool
 }
 
-func init() {
-	ls = &loginService{
-		resChan: make(chan loginResponse),
-		doing:   make(map[string]bool),
-	}
+//newRgstSrv 初始化注册服务
+func newLgnSrv() *lgnSrv {
 	lvt = usermiddleware.NewVerifyToken(loginExpired)
 	loginPool = userpayload.CreateWorkerPool(100)
 	loginPool.Run()
+	return &lgnSrv{
+		resChan: make(chan lgnRes),
+		doing:   make(map[string]bool),
+	}
+}
+
+//write 写入数据
+func (l *lgnSrv) write(req *userproto.UserLgnReq) {
+	registPool.WriteHandler(func(jq chan userpayload.Job) {
+		l.req = req
+		jq <- l
+	})
+}
+
+// 读取数据
+func (l *lgnSrv) read() (*userproto.UserLgnRes, error) {
+	for {
+		select {
+		case res := <-l.resChan:
+			return res.res, res.err
+		}
+	}
 }
 
 //handleLogin 处理登录请求
-func (l *loginService) handleLogin() {
+func (l *lgnSrv) handleLogin() {
 	acc := l.req.GetAccount()
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
@@ -112,6 +129,11 @@ func (l *loginService) handleLogin() {
 	} else {
 		device, err := devicemodel.CurrentDevice(userID)
 		if err != nil {
+			log.Info().Msg(err.Error())
+			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
+			return
+		}
+		if device.DeviceID != lvt.DeviceID {
 
 		}
 	}
@@ -132,7 +154,7 @@ func (l *loginService) handleLogin() {
 */
 
 //makeLoginToken 登录token
-func (l *loginService) makeLoginToken(acc string, code int, err error, user *userproto.User) {
+func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto.User) {
 	ts := time.Now().Unix()
 	resmap := map[string]interface{}{
 		"code":      code,
@@ -141,9 +163,9 @@ func (l *loginService) makeLoginToken(acc string, code int, err error, user *use
 		"user":      user,
 	}
 	tk, err := lvt.Generate(resmap)
-	l.resChan <- loginResponse{
+	l.resChan <- lgnRes{
 		err: err,
-		res: &userproto.LoginRes{
+		res: &userproto.UserLgnRes{
 			Account: acc,
 			Token:   tk,
 		},
@@ -151,20 +173,6 @@ func (l *loginService) makeLoginToken(acc string, code int, err error, user *use
 }
 
 //Do 执行任务
-func (l *loginService) Do() {
+func (l *lgnSrv) Do() {
 	go l.handleLogin()
-}
-
-//UserLogin 登录接口
-func (l *loginService) UserLogin(ctx context.Context, req *userproto.LoginReq) (*userproto.LoginRes, error) {
-	loginPool.WriteHandler(func(j chan userpayload.Job) {
-		l.req = req
-		j <- l
-	})
-	for {
-		select {
-		case res := <-l.resChan:
-			return res.res, res.err
-		}
-	}
 }

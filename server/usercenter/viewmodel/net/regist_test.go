@@ -2,15 +2,6 @@ package usernet
 
 import "testing"
 
-func TestverifyDeviceEmptyParams(t *testing.T) {
-	e := saveCurrentDevice("", "", "")
-	if e != nil {
-		t.Error("verifyDevice failed ")
-		return
-	}
-	t.Log("verifyDevice succ")
-}
-
 func TestRegist(t *testing.T) {
 	test := map[string]interface{}{
 		"key1": "test1",
