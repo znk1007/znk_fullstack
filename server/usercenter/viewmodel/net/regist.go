@@ -185,6 +185,7 @@ func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, msg strin
 		},
 		err: err,
 	}
+	//删除正在操作状态
 	delete(s.doing, acc)
 	s.resChan <- res
 	return

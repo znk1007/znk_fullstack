@@ -67,7 +67,6 @@ func (userJWT *UserJWT) Token(params map[string]interface{}) (token string, err 
 
 //Parse 解析jwt
 func (userJWT *UserJWT) Parse(token string, build bool) {
-
 	userJWT.parseSucc = false
 	userJWT.res = nil
 	userJWT.isExp = true
@@ -76,7 +75,6 @@ func (userJWT *UserJWT) Parse(token string, build bool) {
 		t.Header["alg"] = "RS512"
 		return publicKey, nil
 	})
-
 	if err != nil {
 		log.Info().Msg(err.Error())
 		userJWT.err = err

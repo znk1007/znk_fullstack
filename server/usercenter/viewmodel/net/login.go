@@ -110,14 +110,8 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"), nil)
 		return
 	}
-	//查redis用户数据
-	user, err := usermodel.FindUser(acc, userID)
-	if err != nil || user == nil {
-		log.Info().Msg("user not exists")
-		l.makeLoginToken(acc, http.StatusBadRequest, err, nil)
-		return
-	}
-	//是否有相关设备
+
+	//查相关设备
 	dvcexs := devicemodel.DeviceExists(userID)
 	if !dvcexs {
 		err := devicemodel.SetCurrentDevice(userID, lvt.DeviceID, lvt.DeviceName, lvt.Platform, 1)
@@ -133,9 +127,19 @@ func (l *lgnSrv) handleLogin() {
 			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
 			return
 		}
-		if device.DeviceID != lvt.DeviceID {
-
+		if device.State == devicemodel.Reject {
+			log.Info().Msg("device has been reject use")
+			l.makeLoginToken(acc, 1001, errors.New("device has been reject use"), nil)
+			return
 		}
+	}
+
+	//查用户数据
+	user, err := usermodel.FindUser(acc, userID)
+	if err != nil || user == nil {
+		log.Info().Msg("user not exists")
+		l.makeLoginToken(acc, http.StatusBadRequest, err, nil)
+		return
 	}
 
 	// phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
@@ -156,20 +160,28 @@ func (l *lgnSrv) handleLogin() {
 //makeLoginToken 登录token
 func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto.User) {
 	ts := time.Now().Unix()
+	sess, e := usermiddleware.SessionID(user.UserID)
+	if e != nil {
+		err = errors.New("internal server error")
+	}
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   err.Error(),
 		"timestamp": string(ts),
 		"user":      user,
+		"sessionID": sess,
 	}
 	tk, err := lvt.Generate(resmap)
-	l.resChan <- lgnRes{
+	res := lgnRes{
 		err: err,
 		res: &userproto.UserLgnRes{
 			Account: acc,
 			Token:   tk,
 		},
 	}
+	//删除正在操作状态
+	delete(l.doing, acc)
+	l.resChan <- res
 }
 
 //Do 执行任务
