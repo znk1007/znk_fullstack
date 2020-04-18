@@ -45,7 +45,7 @@ func newLgnSrv() *lgnSrv {
 
 //write 写入数据
 func (l *lgnSrv) write(req *userproto.UserLgnReq) {
-	registPool.WriteHandler(func(jq chan userpayload.Job) {
+	loginPool.WriteHandler(func(jq chan userpayload.Job) {
 		l.req = req
 		jq <- l
 	})
@@ -161,7 +161,7 @@ func (l *lgnSrv) handleLogin() {
 func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto.User) {
 	ts := time.Now().Unix()
 	sess, e := usermiddleware.SessionID(user.UserID)
-	if e != nil {
+	if e != nil || len(sess) == 0 {
 		err = errors.New("internal server error")
 	}
 	resmap := map[string]interface{}{
