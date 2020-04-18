@@ -34,6 +34,16 @@ func (us *updateSrv) write(req *userproto.DvsUpdateReq) {
 	})
 }
 
+//read 读取数据
+func (us *updateSrv) read() (res *userproto.DvsUpdateRes, err error) {
+	for {
+		select {
+		case res := <-us.resChan:
+			return res.res, res.err
+		}
+	}
+}
+
 //handleUpdateDevice 处理设备更新
 func (us *updateSrv) handleUpdateDevice() {
 

@@ -14,9 +14,17 @@ type deviceSrv struct {
 	dSrv *deleteSrv
 }
 
+func init() {
+	dsrv = &deviceSrv{
+		uSrv: newUpdateSrv(),
+		dSrv: newDeleteSrv(),
+	}
+}
+
 //UpdateDevice 更新设备信息
 func (ds *deviceSrv) UpdateDevice(ctx context.Context, req *userproto.DvsUpdateReq) (res *userproto.DvsUpdateRes, err error) {
-	return
+	ds.uSrv.write(req)
+	return ds.uSrv
 }
 
 //DeleteDevice 删除设备
