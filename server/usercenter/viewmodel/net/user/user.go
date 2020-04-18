@@ -28,8 +28,8 @@ func makeID() string {
 	return userGenID.GenerateID()
 }
 
-//registerRegistServer 注册到注册请求服务
-func registerRegistServer(srv *grpc.Server) {
+//RegisterRegistServer 注册到注册请求服务
+func RegisterRegistServer(srv *grpc.Server) {
 	userproto.RegisterUserSrvServer(srv, usrv)
 }
 

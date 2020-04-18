@@ -160,9 +160,13 @@ func (l *lgnSrv) handleLogin() {
 //makeLoginToken 登录token
 func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto.User) {
 	ts := time.Now().Unix()
-	sess, e := usermiddleware.SessionID(user.UserID)
-	if e != nil || len(sess) == 0 {
-		err = errors.New("internal server error")
+	var sess string
+	//无错，用户数据不为空才生成session
+	if err == nil && user != nil {
+		sess, err = usermiddleware.SessionID(user.UserID)
+		if err != nil || len(sess) == 0 {
+			err = errors.New("internal server error")
+		}
 	}
 	resmap := map[string]interface{}{
 		"code":      code,

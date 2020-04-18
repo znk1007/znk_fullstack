@@ -1,4 +1,4 @@
-package usernet
+package devicenet
 
 import (
 	"context"
@@ -6,7 +6,12 @@ import (
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 )
 
+var dsrv *deviceSrv
+
+//deviceSrv 设备相关服务
 type deviceSrv struct {
+	uSrv *updateSrv
+	dSrv *deleteSrv
 }
 
 //UpdateDevice 更新设备信息

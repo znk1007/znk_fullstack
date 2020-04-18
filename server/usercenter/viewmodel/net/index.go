@@ -1,10 +1,11 @@
-package usernet
+package indexnet
 
 import (
 	"net"
 
 	"github.com/rs/zerolog/log"
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
+	usernet "github.com/znk_fullstack/server/usercenter/viewmodel/net/user"
 	"google.golang.org/grpc"
 )
 
@@ -24,5 +25,5 @@ func RunRPC() {
 
 //connectSrv 连接服务
 func connectSrv(s *grpc.Server) {
-	registerRegistServer(s)
+	usernet.RegisterRegistServer(s)
 }

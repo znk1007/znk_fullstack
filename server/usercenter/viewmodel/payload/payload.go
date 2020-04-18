@@ -94,11 +94,11 @@ func (p WorkerPool) Stop() {
 
 //WriteHandler 写入事务池handler
 func (p WorkerPool) WriteHandler(handler func(j chan Job)) {
-	go func() {
+	go func(queue chan Job) {
 		if handler != nil {
-			handler(p.JobQueue)
+			handler(queue)
 		}
-	}()
+	}(p.JobQueue)
 }
 
 //dispatch 事务分发
