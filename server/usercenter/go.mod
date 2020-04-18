@@ -7,7 +7,7 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0
 	github.com/golang/protobuf v1.3.5
 	github.com/jinzhu/gorm v1.9.12
-	github.com/micro/go-micro v1.18.0 // indirect
+	github.com/micro/go-micro v1.18.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/rs/zerolog v1.18.0
 	github.com/segmentio/ksuid v1.0.2

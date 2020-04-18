@@ -15,7 +15,7 @@ func (j simpleJob) Do() {
 
 func BenchmarkSimpleWorkerPool(t *testing.B) {
 	workerLen := 100 * 100 * 10
-	p := CreateWorkerPool(workerLen)
+	p := NewWorkerPool(workerLen)
 	p.Run()
 	p.WriteHandler(func(jq chan Job) {
 		for i := 0; i < t.N; i++ {
@@ -30,7 +30,7 @@ func BenchmarkSimpleWorkerPool(t *testing.B) {
 
 func TestSimpleWorkerPoolHandler(t *testing.T) {
 	workerLen := 100 * 10
-	p := CreateWorkerPool(workerLen)
+	p := NewWorkerPool(workerLen)
 	p.Run()
 	num := 100 * 500
 	p.WriteHandler(func(jq chan Job) {
@@ -46,7 +46,7 @@ func TestSimpleWorkerPoolHandler(t *testing.T) {
 
 func BenchmarkSimpleWorkerPoolHandler(t *testing.B) {
 	workerLen := 100 * 10
-	p := CreateWorkerPool(workerLen)
+	p := NewWorkerPool(workerLen)
 	p.Run()
 	// num := 100 * 500
 	p.WriteHandler(func(jq chan Job) {
@@ -79,7 +79,7 @@ func TestChannelWorkerPool(t *testing.T) {
 	}
 
 	workerLen := 1000
-	p := CreateWorkerPool(workerLen)
+	p := NewWorkerPool(workerLen)
 	p.Run()
 	p.WriteHandler(func(jq chan Job) {
 		for i := 0; i < 100; i++ {
@@ -101,7 +101,7 @@ func BenchmarkChannelWorkerPool(t *testing.B) {
 	}
 
 	workerLen := 100
-	p := CreateWorkerPool(workerLen)
+	p := NewWorkerPool(workerLen)
 	p.Run()
 	p.WriteHandler(func(jq chan Job) {
 		for i := 0; i < 2; i++ {

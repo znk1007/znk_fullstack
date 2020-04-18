@@ -2,10 +2,13 @@ package devicenet
 
 import (
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
-var deletePool userpayload.WorkerPool
+const (
+	deleteExpired = 60 * 2
+)
 
 //deleteRes 删除设备响应
 type deleteRes struct {
@@ -18,20 +21,25 @@ type deleteSrv struct {
 	req     *userproto.DvsDeleteReq
 	resChan chan deleteRes
 	doing   map[string]bool
+	pool    userpayload.WorkerPool
+	token   usermiddleware.Token
 }
 
 //newDeleteSrv 初始化删除服务
 func newDeleteSrv() *deleteSrv {
-	deletePool = userpayload.CreateWorkerPool(100)
-	return &deleteSrv{
+	srv := &deleteSrv{
 		resChan: make(chan deleteRes),
 		doing:   make(map[string]bool),
+		pool:    userpayload.NewWorkerPool(100),
+		token:   usermiddleware.NewToken(deleteExpired),
 	}
+	srv.pool.Run()
+	return srv
 }
 
 //write 写入数据
 func (ds *deleteSrv) write(req *userproto.DvsDeleteReq) {
-	deletePool.WriteHandler(func(j chan userpayload.Job) {
+	ds.pool.WriteHandler(func(j chan userpayload.Job) {
 		ds.req = req
 		j <- ds
 	})

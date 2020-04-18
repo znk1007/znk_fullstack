@@ -1,6 +1,7 @@
 package usernet
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -12,8 +13,6 @@ import (
 )
 
 var rs *rgstSrv
-var rvt usermiddleware.VerifyToken
-var registPool userpayload.WorkerPool
 
 const (
 	registExpired = 60 * 2
@@ -30,22 +29,25 @@ type rgstSrv struct {
 	req     *userproto.UserRgstReq
 	resChan chan rgstRes
 	doing   map[string]bool
+	token   usermiddleware.Token
+	pool    userpayload.WorkerPool
 }
 
 //newRgstSrv 初始化注册服务
 func newRgstSrv() *rgstSrv {
-	rvt = usermiddleware.NewVerifyToken(registExpired)
-	registPool = userpayload.CreateWorkerPool(100)
-	registPool.Run()
-	return &rgstSrv{
+	srv := &rgstSrv{
 		resChan: make(chan rgstRes),
 		doing:   make(map[string]bool),
+		token:   usermiddleware.NewToken(registExpired),
+		pool:    userpayload.NewWorkerPool(100),
 	}
+	srv.pool.Run()
+	return srv
 }
 
 //write 写入数据
 func (s *rgstSrv) write(req *userproto.UserRgstReq) {
-	registPool.WriteHandler(func(jq chan userpayload.Job) {
+	s.pool.WriteHandler(func(jq chan userpayload.Job) {
 		s.req = req
 		jq <- s
 	})
@@ -71,56 +73,57 @@ func (s *rgstSrv) handleRegist() {
 	acc := req.GetAccount()
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
-		s.makeRegistToken("", "", http.StatusBadRequest, "account cannot be empty")
+		s.makeRegistToken("", "", http.StatusBadRequest, errors.New("account cannot be empty"))
 		return
 	}
 
 	//当前账号正在注册中
 	if s.doing[acc] {
-		log.Info().Msg("account is registing")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, "account is registing")
+		log.Info().Msg("account is operating, please do it later")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("account is operating, please do it later"))
 		return
 	}
 	s.doing[acc] = true
 
 	//解析校验token
-	e := rvt.Verify(req.GetToken())
+	e := s.token.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
 		return
 	}
 
-	if !rvt.Expired { //是否频繁请求
-		s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
+	if !s.token.Expired { //是否频繁请求
+		log.Info().Msg("request too frequence")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("please regist later on"))
 		return
 	}
 	//redis 校验
 	exs, oldTS, registed := usermodel.UserRegisted(acc)
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
 		return
 	}
 	//如果存在redis中，曾调过注册方法
 	if exs {
 		//如果已注册
 		if registed == 1 {
-			s.makeRegistToken(acc, "", http.StatusBadRequest, "user has registed:")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("user has registed"))
 			return
 		}
 
 		if oldTS < 0 {
-			s.makeRegistToken(acc, "", http.StatusBadRequest, "miss param `timestamp`")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("miss param `timestamp`"))
 			return
 		}
 		ts := time.Now().Unix()
 		if ts-oldTS < int64(registExpired) {
-			s.makeRegistToken(acc, "", http.StatusBadRequest, "please regist later on")
+			s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("please regist later on"))
 			return
 		}
 	}
-	res := rvt.Result
+	res := s.token.Result
 	pt, ok := res["photo"].(string)
 	if !ok || len(pt) == 0 {
 		pt = ""
@@ -129,7 +132,7 @@ func (s *rgstSrv) handleRegist() {
 	psd, ok := res["password"].(string)
 	if !ok || len(psd) == 0 {
 		log.Info().Msg("password cannot be empty")
-		s.makeRegistToken("", "", http.StatusBadRequest, "password cannot be empty")
+		s.makeRegistToken("", "", http.StatusBadRequest, errors.New("password cannot be empty"))
 		return
 	}
 	userID := makeID()
@@ -142,10 +145,10 @@ func (s *rgstSrv) saveUser(acc string, photo string, userID string, password str
 	e := usermodel.CreateUser(acc, photo, userID, password)
 	if e != nil {
 		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e.Error())
+		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
 		return
 	}
-	s.makeRegistToken(acc, userID, http.StatusOK, "operation success")
+	s.makeRegistToken(acc, userID, http.StatusOK, errors.New("operation success"))
 	return
 }
 
@@ -157,27 +160,27 @@ func (s *rgstSrv) saveUser(acc string, photo string, userID string, password str
 */
 
 //makeRegistToken 注册token
-func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, msg string) {
-	ts := time.Now().Unix()
+func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, err error) {
 	var rgd int
 	if code == http.StatusOK {
 		rgd = 1
 	} else {
 		rgd = 0
-		log.Info().Msg(msg)
+		log.Info().Msg(err.Error())
 	}
 	//保存用户注册状态
 	if len(acc) > 0 {
+		ts := time.Now().Unix()
 		usermodel.SetUserRegisted(acc, string(ts), rgd)
 	}
 	//生成响应数据
 	resmap := map[string]interface{}{
-		"timestamp": ts,
-		"code":      code,
-		"message":   msg,
-		"userID":    userID,
+		"code":    code,
+		"message": err.Error(),
+		"userID":  userID,
 	}
-	tk, err := rvt.Generate(resmap)
+	var tk string
+	tk, err = s.token.Generate(resmap)
 	res := rgstRes{
 		res: &userproto.UserRgstRes{
 			Account: acc,

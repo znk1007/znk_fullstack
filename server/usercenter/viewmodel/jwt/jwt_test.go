@@ -12,7 +12,7 @@ func TestCreateToken(t *testing.T) {
 		"email":    "xxxx@xxx.com",
 		"phone":    "123456",
 	}
-	uJWT := CreateUserJWT(0)
+	uJWT := NewUserJWT(0)
 	tkStr, e := uJWT.Token(auth)
 	if e != nil {
 		t.Error("create token failed: ", e)

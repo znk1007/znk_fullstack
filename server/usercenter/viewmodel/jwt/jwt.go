@@ -40,8 +40,8 @@ func init() {
 	privateKey = loadRSAPrivateKeyFromDisk("key/jwt.rsa")
 }
 
-//CreateUserJWT 创建用户jwt验证 expired 纳秒级别
-func CreateUserJWT(expiredinterval int) *UserJWT {
+//NewUserJWT 创建用户jwt验证 expired 纳秒级别
+func NewUserJWT(expiredinterval int) *UserJWT {
 	return &UserJWT{
 		expiredinterval: expiredinterval,
 	}

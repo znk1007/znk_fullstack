@@ -9,8 +9,8 @@ import (
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
-//VerifyToken token校验
-type VerifyToken struct {
+//Token token校验
+type Token struct {
 	uJWT       *userjwt.UserJWT
 	Expired    bool
 	DeviceID   string
@@ -19,21 +19,21 @@ type VerifyToken struct {
 	Result     map[string]interface{}
 }
 
-//NewVerifyToken 初始化校验对象
-func NewVerifyToken(expiredinterval int) VerifyToken {
-	return VerifyToken{
-		uJWT: userjwt.CreateUserJWT(expiredinterval),
+//NewToken 初始化校验对象
+func NewToken(expiredinterval int) Token {
+	return Token{
+		uJWT: userjwt.NewUserJWT(expiredinterval),
 	}
 }
 
 //Generate 生成token
-func (verify VerifyToken) Generate(params map[string]interface{}) (token string, err error) {
+func (verify Token) Generate(params map[string]interface{}) (token string, err error) {
 	token, err = verify.uJWT.Token(params)
 	return
 }
 
 //Verify 校验token
-func (verify *VerifyToken) Verify(token string) (err error) {
+func (verify *Token) Verify(token string) (err error) {
 	if len(token) == 0 {
 		log.Info().Msg("miss param `token` or `token` is empty")
 		err = errors.New("miss param `token` or `token` is empty")

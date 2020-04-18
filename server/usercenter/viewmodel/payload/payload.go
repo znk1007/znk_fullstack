@@ -6,7 +6,7 @@ package userpayload
 
 // func init() {
 // 	workLen := 100
-// 	Pool = CreateWorkerPool(workLen)
+// 	Pool = NewWorkerPool(workLen)
 // 	Pool.Run()
 // }
 
@@ -21,8 +21,8 @@ type Worker struct {
 	quit     chan bool
 }
 
-//CreateWorker 创建事务
-func CreateWorker() Worker {
+//NewWorker 创建事务
+func NewWorker() Worker {
 	return Worker{
 		jobQueue: make(chan Job),
 		quit:     make(chan bool),
@@ -66,8 +66,8 @@ type WorkerPool struct {
 	quit        chan bool
 }
 
-//CreateWorkerPool 创建事务池
-func CreateWorkerPool(maxWorker int) WorkerPool {
+//NewWorkerPool 创建事务池
+func NewWorkerPool(maxWorker int) WorkerPool {
 	return WorkerPool{
 		maxWorker:   maxWorker,
 		WorkerQueue: make(chan chan Job),
@@ -79,7 +79,7 @@ func CreateWorkerPool(maxWorker int) WorkerPool {
 //Run 执行事务
 func (p WorkerPool) Run() {
 	for i := 0; i < p.maxWorker; i++ {
-		wk := CreateWorker()
+		wk := NewWorker()
 		wk.Run(p.WorkerQueue)
 	}
 	go p.dispatch()

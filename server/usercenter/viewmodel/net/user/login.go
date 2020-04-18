@@ -13,9 +13,6 @@ import (
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
-var lvt usermiddleware.VerifyToken
-var loginPool userpayload.WorkerPool
-
 const (
 	loginExpired = 60 * 5
 )
@@ -30,22 +27,25 @@ type lgnSrv struct {
 	req     *userproto.UserLgnReq
 	resChan chan lgnRes
 	doing   map[string]bool
+	token   usermiddleware.Token
+	pool    userpayload.WorkerPool
 }
 
 //newRgstSrv 初始化注册服务
 func newLgnSrv() *lgnSrv {
-	lvt = usermiddleware.NewVerifyToken(loginExpired)
-	loginPool = userpayload.CreateWorkerPool(100)
-	loginPool.Run()
-	return &lgnSrv{
+	srv := &lgnSrv{
 		resChan: make(chan lgnRes),
 		doing:   make(map[string]bool),
+		token:   usermiddleware.NewToken(loginExpired),
+		pool:    userpayload.NewWorkerPool(100),
 	}
+	srv.pool.Run()
+	return srv
 }
 
 //write 写入数据
 func (l *lgnSrv) write(req *userproto.UserLgnReq) {
-	loginPool.WriteHandler(func(jq chan userpayload.Job) {
+	l.pool.WriteHandler(func(jq chan userpayload.Job) {
 		l.req = req
 		jq <- l
 	})
@@ -71,19 +71,21 @@ func (l *lgnSrv) handleLogin() {
 	}
 	//正在处理登陆操作
 	if l.doing[acc] {
+		log.Info().Msg("account is operating, please do it later")
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"), nil)
 		return
 	}
 	l.doing[acc] = true
 
 	//校验token
-	e := lvt.Verify(l.req.GetToken())
+	e := l.token.Verify(l.req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
 		return
 	}
 	//超时检测
-	if !lvt.Expired {
+	if !l.token.Expired {
 		log.Info().Msg("login request too frequence")
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
@@ -102,7 +104,8 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
 	}
-	res := lvt.Result
+	tk := l.token
+	res := tk.Result
 	//用户ID检测
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
@@ -114,7 +117,7 @@ func (l *lgnSrv) handleLogin() {
 	//查相关设备
 	dvcexs := devicemodel.DeviceExists(userID)
 	if !dvcexs {
-		err := devicemodel.SetCurrentDevice(userID, lvt.DeviceID, lvt.DeviceName, lvt.Platform, 1)
+		err := devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, 1)
 		if err != nil {
 			log.Info().Msg(err.Error())
 			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
@@ -141,13 +144,8 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, http.StatusBadRequest, err, nil)
 		return
 	}
-
-	// phone, email, nickname, photo, err := usermodel.FindUser(acc, userID)
-	// if err != nil {
-	// 	log.Info().Msg(err.Error())
-
-	// 	return
-	// }
+	l.makeLoginToken(acc, http.StatusOK, nil, user)
+	return
 }
 
 /*
@@ -159,11 +157,10 @@ func (l *lgnSrv) handleLogin() {
 
 //makeLoginToken 登录token
 func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto.User) {
-	ts := time.Now().Unix()
 	var sess string
 	//无错，用户数据不为空才生成session
 	if err == nil && user != nil {
-		sess, err = usermiddleware.SessionID(user.UserID)
+		sess, err = usermiddleware.DefaultSess.SessionID(user.UserID)
 		if err != nil || len(sess) == 0 {
 			err = errors.New("internal server error")
 		}
@@ -171,11 +168,11 @@ func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   err.Error(),
-		"timestamp": string(ts),
 		"user":      user,
 		"sessionID": sess,
 	}
-	tk, err := lvt.Generate(resmap)
+	var tk string
+	tk, err = l.token.Generate(resmap)
 	res := lgnRes{
 		err: err,
 		res: &userproto.UserLgnRes{
@@ -186,6 +183,7 @@ func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto
 	//删除正在操作状态
 	delete(l.doing, acc)
 	l.resChan <- res
+	return
 }
 
 //Do 执行任务
