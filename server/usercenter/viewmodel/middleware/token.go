@@ -18,6 +18,8 @@ type Token struct {
 	DeviceName string
 	Platform   string
 	Result     map[string]interface{}
+	Password   string
+	SessionID  string
 }
 
 //NewToken 初始化校验对象
@@ -58,7 +60,9 @@ func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
 	if expired {
 		code = netstatus.SessionInvalidate
 		err = errors.New("session invalidate, please login again")
+		return
 	}
+	verify.SessionID = sessionID
 	return
 }
 
@@ -78,7 +82,9 @@ func (verify *Token) VerifyByPsw(token string) (err error) {
 	old, err = usercrypto.CBCDecrypt(psw)
 	if old != psw {
 		err = errors.New("password is error")
+		return
 	}
+	verify.Password = psw
 	return
 }
 

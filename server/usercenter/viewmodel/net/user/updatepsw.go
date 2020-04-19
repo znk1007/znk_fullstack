@@ -41,7 +41,10 @@ func newUpdatePswSrv() *updatePswSrv {
 
 //write 写入数据
 func (up *updatePswSrv) write(req *userproto.UserUpdatePswReq) {
-	
+	up.pool.WriteHandler(func(j chan userpayload.Job) {
+		up.req = req
+		j <- up
+	})
 }
 
 //read 读取数据
