@@ -14,6 +14,16 @@ func gormDeviceExists(userID string) (exists bool) {
 	return
 }
 
+//gormDelDevice 删除设备
+func gormDelDevice(userID, deviceID string) (err error) {
+	dvc := &Device{
+		UserID:   userID,
+		DeviceID: deviceID,
+	}
+	err = usergorm.DB().Delete(dvc).Error
+	return
+}
+
 //gormCreateDevice 创建设备信息数据
 func gormCreateDevice(device Device) (exs bool, err error) {
 	exs = usergorm.DB().NewRecord(device)

@@ -1,6 +1,8 @@
 package devicenet
 
 import (
+	"time"
+
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
@@ -55,8 +57,33 @@ func (ds *deleteSrv) read() (res *userproto.DvsDeleteRes, err error) {
 	}
 }
 
+//handlDeleteDevice 处理删除设备操作
 func (ds *deleteSrv) handlDeleteDevice() {
 
+}
+
+/*
+状态码：code，
+反馈消息：message，
+时间戳：timestamp
+*/
+//makeDeleteDeviceToken 删除设备响应token
+func (ds *deleteSrv) makeDeleteDeviceToken(acc string, code int, err error) {
+	resmap := map[string]interface{}{
+		"code":      code,
+		"message":   err.Error(),
+		"timestamp": time.Now().String(),
+	}
+	var tk string
+	tk, err = ds.token.Generate(resmap)
+	res := deleteRes{
+		err: err,
+		res: &userproto.DvsDeleteRes{
+			Account: acc,
+			Token:   tk,
+		},
+	}
+	ds.resChan <- res
 }
 
 func (ds *deleteSrv) Do() {

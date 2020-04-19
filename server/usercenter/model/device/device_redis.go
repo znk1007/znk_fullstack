@@ -11,6 +11,17 @@ const (
 	devicePrefix = "current_device"
 )
 
+//redisDelDevice 删除设备
+func redisDelDevice(userID, deviceID string) {
+	dID, _, _ := redisCurrentDeviceID(userID)
+	if dID == deviceID {
+		key := devicePrefix + userID
+		userredis.Del(key)
+		gormDelDevice(userID, deviceID)
+	}
+	return
+}
+
 //redisDeviceExists 用户是否存在关联设备
 func redisDeviceExists(userID string) (exists bool) {
 	key := devicePrefix + userID
