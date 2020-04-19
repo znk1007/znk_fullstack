@@ -36,6 +36,8 @@ message UserRgstRes {
     string account = 1;//[账号]
     string token = 2;//[参数-用户ID：userID，时间戳：timestamp，状态码：code，反馈消息：message]
 }
+
+
 //登录请求
 message UserLgnReq {
     string account = 1;//[账号]
@@ -46,3 +48,15 @@ message UserLgnRes {
     string account = 1;//[账号]
     string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，用户信息：user/(jwt)]
 }
+
+//更新密码请求
+message UserUpdatePswReq {
+    string account = 1;//[账号]
+    string token = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，旧密码：oldPsw，新密码：newPsw]
+}
+//更新密码响应
+message UserUpdatePswRes {
+    string account = 1;//[账号]
+    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
+}
+

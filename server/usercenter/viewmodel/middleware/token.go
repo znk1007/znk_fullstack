@@ -32,6 +32,26 @@ func (verify Token) Generate(params map[string]interface{}) (token string, err e
 	return
 }
 
+//VerifyByPsw 校验token，包含password
+func (verify *Token) VerifyByPsw(token string) (err error) {
+	err = verify.Verify(token)
+	if err != nil {
+		return
+	}
+	res := verify.Result
+	psw, ok := res["password"].(string)
+	if !ok || len(psw) == 0 {
+		err = errors.New("password cannot be empty")
+		return
+	}
+	var old string
+	old, err = usercrypto.CBCDecrypt(psw)
+	if old != psw {
+		err = errors.New("password is error")
+	}
+	return
+}
+
 //Verify 校验token
 func (verify *Token) Verify(token string) (err error) {
 	if len(token) == 0 {

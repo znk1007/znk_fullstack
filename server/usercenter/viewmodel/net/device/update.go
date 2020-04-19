@@ -98,7 +98,7 @@ func (us *updateSrv) handleUpdateDevice() {
 	us.doing[acc] = true
 	//校验token
 	tk := us.token
-	err := tk.Verify(tkstr)
+	err := tk.VerifyByPsw(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)

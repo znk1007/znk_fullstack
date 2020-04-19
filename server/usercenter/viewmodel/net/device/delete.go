@@ -100,7 +100,7 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	ds.doing[acc] = true
 	//校验token
 	tk := ds.token
-	err := tk.Verify(tkstr)
+	err := tk.VerifyByPsw(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, err)
