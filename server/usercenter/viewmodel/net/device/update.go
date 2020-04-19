@@ -3,10 +3,14 @@ package devicenet
 import (
 	"errors"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/rs/zerolog/log"
+	devicemodel "github.com/znk_fullstack/server/usercenter/model/device"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
+	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -58,7 +62,6 @@ func (us *updateSrv) read() (res *userproto.DvsUpdateRes, err error) {
 
 /*
 用户ID：userID，
-密码：password，
 时间戳：timestamp，
 设备ID：deviceID，
 设备名：deviceName，
@@ -68,18 +71,84 @@ func (us *updateSrv) read() (res *userproto.DvsUpdateRes, err error) {
 
 //handleUpdateDevice 处理设备更新
 func (us *updateSrv) handleUpdateDevice() {
-	acc := us.req.GetAccount()
+	req := us.req
+	acc := req.GetAccount()
+	//校验账号是否为空
 	if len(acc) == 0 {
 		log.Info().Msg("miss `account` or account cannot be empty")
 		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New("miss `account` or account cannot be empty"))
 		return
 	}
+	//校验token是否为空
+	tkstr := req.GetToken()
+	if len(tkstr) == 0 {
+		log.Info().Msg("token cannot be empty")
+		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New("token cannot be empty"))
+		return
+	}
+	//是否正在请求
 	if us.doing[acc] {
 		log.Info().Msg("account is operating, please do it later")
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
 		return
 	}
 	us.doing[acc] = true
+	//校验token
+	tk := us.token
+	err := tk.Verify(tkstr)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
+		return
+	}
+	res := tk.Result
+	//校验userID
+	userID, ok := res["userID"].(string)
+	if !ok || len(userID) == 0 {
+		log.Info().Msg("userID cannot be empty")
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"))
+		return
+	}
+	//校验sessionID
+	sessionID, ok := res["sessionID"].(string)
+	if !ok || len(sessionID) == 0 {
+		log.Info().Msg("sessionID cannot be empty")
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("sessionID cannot be empty"))
+		return
+	}
+	expired, err := usermiddleware.DefaultSess.Parse(sessionID, userID)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
+		return
+	}
+	if expired {
+		log.Info().Msg(err.Error())
+		us.makeUpdateDeviceToken(acc, netstatus.SessionInvalidate, err)
+		return
+	}
+	//校验state
+	statestr, ok := res["state"].(string)
+	if !ok || len(statestr) == 0 {
+		log.Info().Msg("state cannot be empty")
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("state cannot be empty"))
+		return
+	}
+	state, err := strconv.Atoi(statestr)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
+		return
+	}
+
+	err = devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, devicemodel.DeviceState(state), true)
+	if err != nil {
+		log.Info().Msg("internal server error")
+		us.makeUpdateDeviceToken(acc, http.StatusInternalServerError, errors.New("internal server error"))
+		return
+	}
+	us.makeUpdateDeviceToken(acc, http.StatusOK, nil)
+	return
 }
 
 /*
@@ -90,8 +159,9 @@ func (us *updateSrv) handleUpdateDevice() {
 //makeUpdateDeviceToken 生成token
 func (us *updateSrv) makeUpdateDeviceToken(acc string, code int, err error) {
 	resmap := map[string]interface{}{
-		"code":    code,
-		"message": err.Error(),
+		"code":      code,
+		"message":   err.Error(),
+		"timestamp": time.Now().String(),
 	}
 	var tk string
 	tk, err = us.token.Generate(resmap)

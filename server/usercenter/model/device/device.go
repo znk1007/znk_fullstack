@@ -33,7 +33,7 @@ func DeviceExists(userID string) (exists bool) {
 }
 
 //SetCurrentDevice 设置当前设备
-func SetCurrentDevice(userID, deviceID, name, platform string, state DeviceState) (err error) {
+func SetCurrentDevice(userID, deviceID, name, platform string, state DeviceState, update bool) (err error) {
 	dvs := Device{
 		DeviceID: deviceID,
 		UserID:   userID,
@@ -44,7 +44,14 @@ func SetCurrentDevice(userID, deviceID, name, platform string, state DeviceState
 	}
 	err = redisSetCurrentDeivce(dvs)
 	if err == nil {
-		_, err = gormCreateDevice(dvs)
+		if update {
+			if len(name) != 0 {
+				err = gormUpdateName(userID, deviceID, name)
+			}
+			err = gormUpdateState(userID, deviceID, state)
+		} else {
+			_, err = gormCreateDevice(dvs)
+		}
 	}
 	return
 }

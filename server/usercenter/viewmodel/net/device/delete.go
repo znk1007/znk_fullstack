@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	deleteExpired = 60 * 2
+	deleteExpired = 60 * 5
 )
 
 //deleteRes 删除设备响应
@@ -55,6 +55,10 @@ func (ds *deleteSrv) read() (res *userproto.DvsDeleteRes, err error) {
 	}
 }
 
-func (ds *deleteSrv) Do() {
+func (ds *deleteSrv) handlDeleteDevice() {
 
+}
+
+func (ds *deleteSrv) Do() {
+	go ds.handlDeleteDevice()
 }

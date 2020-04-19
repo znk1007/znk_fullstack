@@ -76,6 +76,13 @@ func (s *rgstSrv) handleRegist() {
 		s.makeRegistToken("", "", http.StatusBadRequest, errors.New("account cannot be empty"))
 		return
 	}
+	//判断是否有token
+	tkstr := req.GetToken()
+	if len(tkstr) == 0 {
+		log.Info().Msg("token cannot be empty")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("token cannot be empty"))
+		return
+	}
 
 	//当前账号正在注册中
 	if s.doing[acc] {

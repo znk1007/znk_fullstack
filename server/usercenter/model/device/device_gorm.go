@@ -24,8 +24,8 @@ func gormCreateDevice(device Device) (exs bool, err error) {
 	return
 }
 
-//gormUpdateTrust 更新设备信任状态
-func gormUpdateTrust(userID string, deviceID string, state DeviceState) (err error) {
+//gormUpdateState 更新设备信任状态
+func gormUpdateState(userID, deviceID string, state DeviceState) (err error) {
 	err = usergorm.DB().Model(
 		&Device{
 			UserID:   userID,
@@ -35,8 +35,19 @@ func gormUpdateTrust(userID string, deviceID string, state DeviceState) (err err
 	return
 }
 
+//gormUpdateName 更新设备名
+func gormUpdateName(userID, deviceID, deviceName string) (err error) {
+	err = usergorm.DB().Model(
+		&Device{
+			UserID:   userID,
+			DeviceID: deviceID,
+		},
+	).Update("name", deviceName).Error
+	return
+}
+
 //gormUpdateOnline 更新设备在线状态
-func gormUpdateOnline(userID string, deviceID string, online int) (err error) {
+func gormUpdateOnline(userID, deviceID string, online int) (err error) {
 	err = usergorm.DB().Model(
 		&Device{
 			UserID:   userID,

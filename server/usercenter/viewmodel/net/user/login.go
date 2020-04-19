@@ -10,6 +10,7 @@ import (
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
+	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -63,10 +64,18 @@ func (l *lgnSrv) read() (*userproto.UserLgnRes, error) {
 
 //handleLogin 处理登录请求
 func (l *lgnSrv) handleLogin() {
-	acc := l.req.GetAccount()
+	req := l.req
+	acc := req.GetAccount()
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
 		l.makeLoginToken("", http.StatusBadRequest, errors.New("account cannot be empty"), nil)
+		return
+	}
+	//判断是否有token
+	tkstr := req.GetToken()
+	if len(tkstr) == 0 {
+		log.Info().Msg("token cannot be empty")
+		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"), nil)
 		return
 	}
 	//正在处理登陆操作
@@ -78,14 +87,15 @@ func (l *lgnSrv) handleLogin() {
 	l.doing[acc] = true
 
 	//校验token
-	e := l.token.Verify(l.req.GetToken())
+	tk := l.token
+	e := tk.Verify(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
 		return
 	}
 	//超时检测
-	if !l.token.Expired {
+	if !tk.Expired {
 		log.Info().Msg("login request too frequence")
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
@@ -104,7 +114,7 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
 	}
-	tk := l.token
+
 	res := tk.Result
 	//用户ID检测
 	userID, ok := res["userID"].(string)
@@ -117,7 +127,7 @@ func (l *lgnSrv) handleLogin() {
 	//查相关设备
 	dvcexs := devicemodel.DeviceExists(userID)
 	if !dvcexs {
-		err := devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, 1)
+		err := devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, 1, false)
 		if err != nil {
 			log.Info().Msg(err.Error())
 			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
@@ -132,7 +142,7 @@ func (l *lgnSrv) handleLogin() {
 		}
 		if device.State == devicemodel.Reject {
 			log.Info().Msg("device has been reject use")
-			l.makeLoginToken(acc, 1001, errors.New("device has been reject use"), nil)
+			l.makeLoginToken(acc, netstatus.RejectDevice, errors.New("device has been reject use"), nil)
 			return
 		}
 	}
