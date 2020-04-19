@@ -7,7 +7,6 @@ import (
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
-	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 )
 
@@ -52,7 +51,7 @@ func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
 		return
 	}
 	var expired bool
-	expired, err = usermiddleware.DefaultSess.Parse(sessionID, userID)
+	expired, err = DefaultSess.Parse(sessionID, userID)
 	if err != nil {
 		return
 	}
