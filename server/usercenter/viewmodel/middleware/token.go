@@ -20,6 +20,7 @@ type Token struct {
 	Result     map[string]interface{}
 	Password   string
 	SessionID  string
+	UserID     string
 }
 
 //NewToken 初始化校验对象
@@ -40,12 +41,6 @@ func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
 	code = -1
 	err = verify.VerifyByPsw(token)
 	res := verify.Result
-	//校验userID
-	userID, ok := res["userID"].(string)
-	if !ok || len(userID) == 0 {
-		err = errors.New("userID cannot be empty")
-		return
-	}
 	//校验sessionID
 	sessionID, ok := res["sessionID"].(string)
 	if !ok || len(sessionID) == 0 {
@@ -53,7 +48,7 @@ func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
 		return
 	}
 	var expired bool
-	expired, err = DefaultSess.Parse(sessionID, userID)
+	expired, err = DefaultSess.Parse(sessionID, verify.UserID)
 	if err != nil {
 		return
 	}
@@ -73,6 +68,12 @@ func (verify *Token) VerifyByPsw(token string) (err error) {
 		return
 	}
 	res := verify.Result
+	//校验userID
+	userID, ok := res["userID"].(string)
+	if !ok || len(userID) == 0 {
+		err = errors.New("userID cannot be empty")
+		return
+	}
 	psw, ok := res["password"].(string)
 	if !ok || len(psw) == 0 {
 		err = errors.New("password cannot be empty")
@@ -84,6 +85,7 @@ func (verify *Token) VerifyByPsw(token string) (err error) {
 		err = errors.New("password is error")
 		return
 	}
+	verify.UserID = userID
 	verify.Password = psw
 	return
 }
