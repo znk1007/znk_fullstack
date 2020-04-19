@@ -91,7 +91,7 @@ func (l *lgnSrv) handleLogin() {
 
 	//校验token
 	tk := l.token
-	e := tk.Verify(req.GetToken())
+	e := tk.VerifyByPsw(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)

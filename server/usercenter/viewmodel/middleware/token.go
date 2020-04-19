@@ -7,6 +7,8 @@ import (
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
+	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
+	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 )
 
 //Token token校验
@@ -29,6 +31,35 @@ func NewToken(expiredinterval int) Token {
 //Generate 生成token
 func (verify Token) Generate(params map[string]interface{}) (token string, err error) {
 	token, err = verify.uJWT.Token(params)
+	return
+}
+
+//VerifyByPswAndSess 校验token，包含password&sessionID
+func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
+	code = -1
+	err = verify.VerifyByPsw(token)
+	res := verify.Result
+	//校验userID
+	userID, ok := res["userID"].(string)
+	if !ok || len(userID) == 0 {
+		err = errors.New("userID cannot be empty")
+		return
+	}
+	//校验sessionID
+	sessionID, ok := res["sessionID"].(string)
+	if !ok || len(sessionID) == 0 {
+		err = errors.New("sessionID cannot be empty")
+		return
+	}
+	var expired bool
+	expired, err = usermiddleware.DefaultSess.Parse(sessionID, userID)
+	if err != nil {
+		return
+	}
+	if expired {
+		code = netstatus.SessionInvalidate
+		err = errors.New("session invalidate, please login again")
+	}
 	return
 }
 

@@ -13,14 +13,16 @@ var usrv *userSrv
 
 func init() {
 	usrv = &userSrv{
-		rsrv: newRgstSrv(),
-		lsrv: newLgnSrv(),
+		rsrv:  newRgstSrv(),
+		lsrv:  newLgnSrv(),
+		upSrv: newUpdatePswSrv(),
 	}
 }
 
 type userSrv struct {
-	rsrv *rgstSrv
-	lsrv *lgnSrv
+	rsrv  *rgstSrv
+	lsrv  *lgnSrv
+	upSrv *updatePswSrv
 }
 
 //makeID 生成唯一ID
@@ -43,4 +45,9 @@ func (u *userSrv) Regist(ctx context.Context, req *userproto.UserRgstReq) (res *
 func (u *userSrv) Login(ctx context.Context, req *userproto.UserLgnReq) (res *userproto.UserLgnRes, err error) {
 	u.lsrv.write(req)
 	return u.lsrv.read(ctx)
+}
+
+func (u *userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePswReq) (res *userproto.UserUpdatePswRes, err error) {
+	u.upSrv.write(req)
+	return u.upSrv.read(ctx)
 }

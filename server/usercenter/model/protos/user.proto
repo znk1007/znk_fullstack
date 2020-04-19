@@ -24,6 +24,7 @@ message User {
 service UserSrv {
     rpc Regist (UserRgstReq) returns (UserRgstRes);
     rpc Login (UserLgnReq) returns (UserLgnRes);
+    rpc UpdatePassword (UserUpdatePswReq) returns (UserUpdatePswRes);
 }
 
 //注册请求

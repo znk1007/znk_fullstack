@@ -11,7 +11,6 @@ import (
 	devicemodel "github.com/znk_fullstack/server/usercenter/model/device"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
-	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -98,10 +97,10 @@ func (us *updateSrv) handleUpdateDevice() {
 	us.doing[acc] = true
 	//校验token
 	tk := us.token
-	err := tk.VerifyByPsw(tkstr)
+	code, err := tk.VerifyByPswAndSess(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
+		us.makeUpdateDeviceToken(acc, code, err)
 		return
 	}
 	res := tk.Result
@@ -110,24 +109,6 @@ func (us *updateSrv) handleUpdateDevice() {
 	if !ok || len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"))
-		return
-	}
-	//校验sessionID
-	sessionID, ok := res["sessionID"].(string)
-	if !ok || len(sessionID) == 0 {
-		log.Info().Msg("sessionID cannot be empty")
-		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("sessionID cannot be empty"))
-		return
-	}
-	expired, err := usermiddleware.DefaultSess.Parse(sessionID, userID)
-	if err != nil {
-		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
-		return
-	}
-	if expired {
-		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, netstatus.SessionInvalidate, err)
 		return
 	}
 	//校验state
