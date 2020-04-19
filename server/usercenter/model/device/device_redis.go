@@ -12,12 +12,11 @@ const (
 )
 
 //redisDelDevice 删除设备
-func redisDelDevice(userID, deviceID string) {
+func redisDelDevice(userID, deviceID string) (err error) {
 	dID, _, _ := redisCurrentDeviceID(userID)
 	if dID == deviceID {
 		key := devicePrefix + userID
-		userredis.Del(key)
-		gormDelDevice(userID, deviceID)
+		err = userredis.Del(key)
 	}
 	return
 }

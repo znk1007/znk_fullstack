@@ -143,7 +143,7 @@ func (us *updateSrv) handleUpdateDevice() {
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
 		return
 	}
-
+	//更新数据
 	err = devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, devicemodel.DeviceState(state), true)
 	if err != nil {
 		log.Info().Msg("internal server error")

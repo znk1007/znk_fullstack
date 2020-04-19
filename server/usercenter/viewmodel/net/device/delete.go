@@ -2,8 +2,12 @@ package devicenet
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"time"
 
+	"github.com/rs/zerolog/log"
+	devicemodel "github.com/znk_fullstack/server/usercenter/model/device"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
@@ -71,7 +75,52 @@ func (ds *deleteSrv) read(ctx context.Context) (res *userproto.DvsDeleteRes, err
 */
 //handlDeleteDevice 处理删除设备操作
 func (ds *deleteSrv) handlDeleteDevice() {
-
+	req := ds.req
+	//账号
+	acc := req.GetAccount()
+	//校验账号是否为空
+	if len(acc) == 0 {
+		log.Info().Msg("miss `account` or account cannot be empty")
+		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New("miss `account` or account cannot be empty"))
+		return
+	}
+	//校验token是否为空
+	tkstr := req.GetToken()
+	if len(tkstr) == 0 {
+		log.Info().Msg("token cannot be empty")
+		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New("token cannot be empty"))
+		return
+	}
+	//是否正在请求
+	if ds.doing[acc] {
+		log.Info().Msg("account is operating, please do it later")
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		return
+	}
+	ds.doing[acc] = true
+	//校验token
+	tk := ds.token
+	err := tk.Verify(tkstr)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, err)
+		return
+	}
+	res := tk.Result
+	userID, ok := res["userID"].(string)
+	if !ok || len(userID) == 0 {
+		log.Info().Msg("userID cannot be empty")
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"))
+		return
+	}
+	//删除设备
+	err = devicemodel.DelDevice(userID, tk.DeviceID)
+	if err != nil {
+		log.Info().Msg("internal server error")
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("internal server error"))
+		return
+	}
+	ds.makeDeleteDeviceToken(acc, http.StatusOK, nil)
 }
 
 /*

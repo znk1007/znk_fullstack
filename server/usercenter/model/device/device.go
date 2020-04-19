@@ -23,6 +23,15 @@ type Device struct {
 	Online    int         //是否在线
 }
 
+//DelDevice 删除设备信息
+func DelDevice(userID, deviceID string) (err error) {
+	err = redisDelDevice(userID, deviceID)
+	if err == nil {
+		err = gormDelDevice(userID, deviceID)
+	}
+	return
+}
+
 //DeviceExists 设备是否存在
 func DeviceExists(userID string) (exists bool) {
 	exists = redisDeviceExists(userID)
