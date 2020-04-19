@@ -1,6 +1,7 @@
 package usernet
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -53,9 +54,11 @@ func (l *lgnSrv) write(req *userproto.UserLgnReq) {
 }
 
 // 读取数据
-func (l *lgnSrv) read() (*userproto.UserLgnRes, error) {
+func (l *lgnSrv) read(ctx context.Context) (*userproto.UserLgnRes, error) {
 	for {
 		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
 		case res := <-l.resChan:
 			return res.res, res.err
 		}

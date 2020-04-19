@@ -1,6 +1,7 @@
 package devicenet
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -51,9 +52,11 @@ func (us *updateSrv) write(req *userproto.DvsUpdateReq) {
 }
 
 //read 读取数据
-func (us *updateSrv) read() (res *userproto.DvsUpdateRes, err error) {
+func (us *updateSrv) read(ctx context.Context) (res *userproto.DvsUpdateRes, err error) {
 	for {
 		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
 		case res := <-us.resChan:
 			return res.res, res.err
 		}

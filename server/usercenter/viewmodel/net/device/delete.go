@@ -1,6 +1,7 @@
 package devicenet
 
 import (
+	"context"
 	"time"
 
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
@@ -48,15 +49,26 @@ func (ds *deleteSrv) write(req *userproto.DvsDeleteReq) {
 }
 
 //read 读取数据
-func (ds *deleteSrv) read() (res *userproto.DvsDeleteRes, err error) {
+func (ds *deleteSrv) read(ctx context.Context) (res *userproto.DvsDeleteRes, err error) {
 	for {
 		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
 		case res := <-ds.resChan:
 			return res.res, res.err
 		}
 	}
 }
 
+/*
+用户ID：userID，
+会话ID：sessionID，
+时间戳：timestamp，
+设备ID：deviceID，
+设备名：deviceName，
+平台类型：platform，
+应用标识：appkey
+*/
 //handlDeleteDevice 处理删除设备操作
 func (ds *deleteSrv) handlDeleteDevice() {
 

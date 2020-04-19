@@ -36,11 +36,11 @@ func RegisterRegistServer(srv *grpc.Server) {
 //注册
 func (u *userSrv) Regist(ctx context.Context, req *userproto.UserRgstReq) (res *userproto.UserRgstRes, err error) {
 	u.rsrv.write(req)
-	return u.rsrv.read()
+	return u.rsrv.read(ctx)
 }
 
 //登录
 func (u *userSrv) Login(ctx context.Context, req *userproto.UserLgnReq) (res *userproto.UserLgnRes, err error) {
 	u.lsrv.write(req)
-	return u.lsrv.read()
+	return u.lsrv.read(ctx)
 }

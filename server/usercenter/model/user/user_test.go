@@ -19,7 +19,7 @@ func TestUserJWT(t *testing.T) {
 	userMap := map[string]interface{}{
 		"user": userDB,
 	}
-	userJWT := userjwt.CreateUserJWT(1)
+	userJWT := userjwt.NewUserJWT(1)
 	tk, err := userJWT.Token(userMap)
 	if err != nil {
 		t.Fatal("user jwt err")
