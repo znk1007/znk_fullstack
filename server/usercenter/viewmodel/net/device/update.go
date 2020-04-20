@@ -103,8 +103,8 @@ func (us *updateSrv) handleUpdateDevice() {
 		us.makeUpdateDeviceToken(acc, code, err)
 		return
 	}
-	//用户是否被禁用
-	code, err = usermiddleware.UserFrozen(acc, tk.UserID)
+	//通用校验
+	code, err = usermiddleware.CommonVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		us.makeUpdateDeviceToken(acc, code, err)

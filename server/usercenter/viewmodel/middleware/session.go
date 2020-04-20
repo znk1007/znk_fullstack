@@ -40,7 +40,7 @@ func (us UserSession) SessionID(userID string, deviceID string) (sess string, er
 }
 
 //Parse 解析sessionID
-func (us UserSession) Parse(sess string, userID string) (expired bool, err error) {
+func (us UserSession) Parse(sess, userID, deviceID string) (expired bool, err error) {
 	us.uJWT.Parse(sess, false)
 	res, exp, e := us.uJWT.Result()
 	if e != nil {
@@ -56,6 +56,17 @@ func (us UserSession) Parse(sess string, userID string) (expired bool, err error
 	}
 	if orgUID != userID {
 		err = errors.New("user invalidate")
+		expired = true
+		return
+	}
+	dID, ok := res["deviceID"].(string)
+	if len(dID) == 0 {
+		err = errors.New("miss param `deviceID` or deviceID is empty")
+		expired = true
+		return
+	}
+	if dID != deviceID {
+		err = errors.New("device has been logout")
 		expired = true
 		return
 	}

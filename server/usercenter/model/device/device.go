@@ -73,3 +73,18 @@ func CurrentDevice(userID string) (device Device, err error) {
 	}
 	return
 }
+
+//CurrentDeviceID 当前使用设备
+func CurrentDeviceID(userID string) (deviceID string, err error) {
+	dID, _ := redisCurrentDeviceID(userID)
+	if len(dID) == 0 {
+		d, e := gormCurrentDevice(userID)
+		if e != nil {
+			err = e
+			deviceID = ""
+			return
+		}
+		deviceID = d.DeviceID
+	}
+	return
+}

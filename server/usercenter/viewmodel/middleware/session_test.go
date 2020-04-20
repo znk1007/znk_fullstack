@@ -9,7 +9,7 @@ func TestSession(t *testing.T) {
 		return
 	}
 	t.Logf("sessionID: %v", sess)
-	expired, err := DefaultSess.Parse(sess, "test")
+	expired, err := DefaultSess.Parse(sess, "test", "deviceID")
 	if err != nil {
 		t.Fatal("parse sessionID err: ", err.Error())
 		return

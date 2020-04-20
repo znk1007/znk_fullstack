@@ -13,7 +13,7 @@ const (
 
 //redisDelDevice 删除设备
 func redisDelDevice(userID, deviceID string) (err error) {
-	dID, _, _ := redisCurrentDeviceID(userID)
+	dID, _ := redisCurrentDeviceID(userID)
 	if dID == deviceID {
 		key := devicePrefix + userID
 		err = userredis.Del(key)
@@ -36,7 +36,6 @@ func redisCurrentDevice(userID string) (device Device, err error) {
 		key,
 		"deviceID",
 		"state",
-		"online",
 		"platform",
 		"name",
 		"userID",
@@ -44,11 +43,10 @@ func redisCurrentDevice(userID string) (device Device, err error) {
 	)
 	deviceID, _ := vals[0].(string)
 	state, _ := vals[1].(DeviceState)
-	online, _ := vals[2].(int)
-	platform, _ := vals[3].(string)
-	name, _ := vals[4].(string)
-	orgUserID, _ := vals[5].(string)
-	updatedAt, _ := vals[6].(string)
+	platform, _ := vals[2].(string)
+	name, _ := vals[3].(string)
+	orgUserID, _ := vals[4].(string)
+	updatedAt, _ := vals[5].(string)
 	if orgUserID != userID {
 		err = errors.New("user not match")
 		return
@@ -60,24 +58,22 @@ func redisCurrentDevice(userID string) (device Device, err error) {
 		Platform:  platform,
 		UpdatedAt: updatedAt,
 		State:     state,
-		Online:    online,
+		Online:    1,
 	}
 	return
 }
 
 //redisCurrentDeviceID redis中当前设备部分信息
-func redisCurrentDeviceID(userID string) (deviceID string, trust int, online int) {
+func redisCurrentDeviceID(userID string) (deviceID string, state int) {
 	deviceID = ""
-	trust = 0
-	online = 0
+	state = 0
 	key := devicePrefix + userID
-	dvs, err := userredis.HMGet(key, "deviceID", "trust", "online")
+	dvs, err := userredis.HMGet(key, "deviceID", "state")
 	if err != nil || len(dvs) < 2 {
 		return
 	}
 	deviceID, _ = dvs[0].(string)
-	trust, _ = dvs[1].(int)
-	online, _ = dvs[2].(int)
+	state, _ = dvs[1].(int)
 	return
 }
 
@@ -97,10 +93,10 @@ func redisSetCurrentDeivce(device Device) (e error) {
 	return
 }
 
-//redisUpdateDeviceTrust 更新信任设备
-func redisUpdateDeviceTrust(userID, deviceID string, state DeviceState) (e error) {
+//redisUpdateDeviceState 更新信任设备
+func redisUpdateDeviceState(userID, deviceID string, state DeviceState) (e error) {
 	key := devicePrefix + userID
-	orgDID, _, _ := redisCurrentDeviceID(userID)
+	orgDID, _ := redisCurrentDeviceID(userID)
 	if orgDID != deviceID {
 		log.Info().Msg("not the same device")
 		return errors.New("not the same device")
@@ -112,7 +108,7 @@ func redisUpdateDeviceTrust(userID, deviceID string, state DeviceState) (e error
 //redisUpdateDeviceOnline 更新设备在线状态
 func redisUpdateDeviceOnline(userID, deviceID string, online int) (e error) {
 	key := devicePrefix + userID
-	orgDID, _, _ := redisCurrentDeviceID(userID)
+	orgDID, _ := redisCurrentDeviceID(userID)
 	if orgDID != deviceID {
 		log.Info().Msg("not the same device")
 		return errors.New("not the same device")

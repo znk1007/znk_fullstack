@@ -98,7 +98,7 @@ func (l *lgnSrv) handleLogin() {
 		return
 	}
 	//用户是否被禁用
-	code, err := usermiddleware.UserFrozen(acc, tk.UserID)
+	code, err := usermiddleware.CommonVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		l.makeLoginToken(acc, "", code, err, nil)
