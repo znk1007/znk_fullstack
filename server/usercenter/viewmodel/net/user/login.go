@@ -97,6 +97,13 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
 		return
 	}
+	//用户是否被禁用
+	code, err := usermiddleware.UserFrozen(acc, tk.UserID)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		l.makeLoginToken(acc, code, err, nil)
+		return
+	}
 	//超时检测
 	if !tk.Expired {
 		log.Info().Msg("login request too frequence")

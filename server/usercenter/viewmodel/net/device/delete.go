@@ -100,10 +100,17 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	ds.doing[acc] = true
 	//校验token
 	tk := ds.token
-	err := tk.VerifyByPsw(tkstr)
+	code, err := tk.VerifyByPswAndSess(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, err)
+		ds.makeDeleteDeviceToken(acc, code, err)
+		return
+	}
+	//用户是否被禁用
+	code, err = usermiddleware.UserFrozen(acc, tk.UserID)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ds.makeDeleteDeviceToken(acc, code, err)
 		return
 	}
 	res := tk.Result

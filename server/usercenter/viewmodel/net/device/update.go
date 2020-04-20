@@ -10,9 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	devicemodel "github.com/znk_fullstack/server/usercenter/model/device"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
-	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
-	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -106,17 +104,13 @@ func (us *updateSrv) handleUpdateDevice() {
 		return
 	}
 	//用户是否被禁用
-	active, e := usermodel.UserActive(acc, tk.UserID)
-	if e != nil {
+	code, err = usermiddleware.UserFrozen(acc, tk.UserID)
+	if err != nil {
 		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, http.StatusInternalServerError, err)
+		us.makeUpdateDeviceToken(acc, code, err)
 		return
 	}
-	if active == 0 {
-		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, netstatus.UserFrozen, err)
-		return
-	}
+	//请求数据
 	res := tk.Result
 	//校验userID
 	userID, ok := res["userID"].(string)
