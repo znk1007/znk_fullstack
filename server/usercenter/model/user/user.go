@@ -1,6 +1,7 @@
 package usermodel
 
 import (
+	"errors"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -93,6 +94,19 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 	if e != nil {
 		per = userproto.Permission_user
 	}
+	//用户是否被禁用
+	active, e := UserActive(acc, userID)
+	if e != nil {
+		user = nil
+		err = e
+		return
+	}
+	if active == 0 {
+		user = nil
+		err = errors.New("user has been frozen")
+		return
+	}
+
 	//redis 中的数据
 	user, e = redisGetUser(acc)
 	if e != nil || user == nil {

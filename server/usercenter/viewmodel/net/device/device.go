@@ -23,7 +23,6 @@ func init() {
 
 //UpdateDevice 更新设备信息
 func (ds *deviceSrv) UpdateDevice(ctx context.Context, req *userproto.DvsUpdateReq) (res *userproto.DvsUpdateRes, err error) {
-
 	ds.uSrv.write(req)
 	return ds.uSrv.read(ctx)
 }

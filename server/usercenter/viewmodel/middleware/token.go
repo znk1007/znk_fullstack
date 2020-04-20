@@ -2,6 +2,7 @@ package usermiddleware
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
@@ -38,18 +39,20 @@ func (verify Token) Generate(params map[string]interface{}) (token string, err e
 
 //VerifyByPswAndSess 校验token，包含password&sessionID
 func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
-	code = -1
+	code = http.StatusOK
 	err = verify.VerifyByPsw(token)
 	res := verify.Result
 	//校验sessionID
 	sessionID, ok := res["sessionID"].(string)
 	if !ok || len(sessionID) == 0 {
 		err = errors.New("sessionID cannot be empty")
+		code = http.StatusBadRequest
 		return
 	}
 	var expired bool
 	expired, err = DefaultSess.Parse(sessionID, verify.UserID)
 	if err != nil {
+		code = http.StatusBadRequest
 		return
 	}
 	if expired {

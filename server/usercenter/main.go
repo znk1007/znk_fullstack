@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
 	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
@@ -8,11 +10,16 @@ import (
 )
 
 func main() {
-
-	return
+	//日志配置
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.With().Caller().Logger()
+	//环境配置
 	userconf.SetEnv(userconf.Dev)
+	//redis
 	userredis.ConnectRedis()
+	//mariadb
 	usergorm.ConnectMariaDB()
+	//rpc
 	usernet.RunRPC()
 }
 
