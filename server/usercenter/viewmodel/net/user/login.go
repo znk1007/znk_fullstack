@@ -71,20 +71,20 @@ func (l *lgnSrv) handleLogin() {
 	acc := req.GetAccount()
 	if len(acc) == 0 {
 		log.Info().Msg("account cannot be empty")
-		l.makeLoginToken("", http.StatusBadRequest, errors.New("account cannot be empty"), nil)
+		l.makeLoginToken("", "", http.StatusBadRequest, errors.New("account cannot be empty"), nil)
 		return
 	}
 	//判断是否有token
 	tkstr := req.GetToken()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"), nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("token cannot be empty"), nil)
 		return
 	}
 	//正在处理登陆操作
 	if l.doing[acc] {
 		log.Info().Msg("account is operating, please do it later")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"), nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("account is operating, please do it later"), nil)
 		return
 	}
 	l.doing[acc] = true
@@ -94,34 +94,34 @@ func (l *lgnSrv) handleLogin() {
 	e := tk.VerifyByPsw(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
-		l.makeLoginToken(acc, http.StatusBadRequest, e, nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, e, nil)
 		return
 	}
 	//用户是否被禁用
 	code, err := usermiddleware.UserFrozen(acc, tk.UserID)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		l.makeLoginToken(acc, code, err, nil)
+		l.makeLoginToken(acc, "", code, err, nil)
 		return
 	}
 	//超时检测
 	if !tk.Expired {
 		log.Info().Msg("login request too frequence")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
 	}
 	//是否已注册
 	exs, ts, rgd := usermodel.UserRegisted(acc)
 	if !exs || rgd == 0 {
 		log.Info().Msg("account not registed")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("account not registed"), nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("account not registed"), nil)
 		return
 	}
 	//请求频繁度检测
 	now := time.Now().Unix()
 	if now-ts < loginExpired {
 		log.Info().Msg("login request too frequence")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("please try again later"), nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("please try again later"), nil)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (l *lgnSrv) handleLogin() {
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
-		l.makeLoginToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"), nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("userID cannot be empty"), nil)
 		return
 	}
 
@@ -140,19 +140,19 @@ func (l *lgnSrv) handleLogin() {
 		err := devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, 1, false)
 		if err != nil {
 			log.Info().Msg(err.Error())
-			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
+			l.makeLoginToken(acc, "", http.StatusInternalServerError, err, nil)
 			return
 		}
 	} else {
 		device, err := devicemodel.CurrentDevice(userID)
 		if err != nil {
 			log.Info().Msg(err.Error())
-			l.makeLoginToken(acc, http.StatusInternalServerError, err, nil)
+			l.makeLoginToken(acc, "", http.StatusInternalServerError, err, nil)
 			return
 		}
 		if device.State == devicemodel.Reject {
 			log.Info().Msg("device has been reject use")
-			l.makeLoginToken(acc, netstatus.RejectDevice, errors.New("device has been reject use"), nil)
+			l.makeLoginToken(acc, "", netstatus.RejectDevice, errors.New("device has been reject use"), nil)
 			return
 		}
 	}
@@ -161,10 +161,10 @@ func (l *lgnSrv) handleLogin() {
 	user, err := usermodel.FindUser(acc, userID)
 	if err != nil || user == nil {
 		log.Info().Msg("user not exists")
-		l.makeLoginToken(acc, http.StatusBadRequest, err, nil)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, err, nil)
 		return
 	}
-	l.makeLoginToken(acc, http.StatusOK, nil, user)
+	l.makeLoginToken(acc, tk.DeviceID, http.StatusOK, nil, user)
 	return
 }
 
@@ -176,11 +176,11 @@ func (l *lgnSrv) handleLogin() {
 */
 
 //makeLoginToken 登录token
-func (l *lgnSrv) makeLoginToken(acc string, code int, err error, user *userproto.User) {
+func (l *lgnSrv) makeLoginToken(acc, deviceID string, code int, err error, user *userproto.User) {
 	var sess string
 	//无错，用户数据不为空才生成session
 	if err == nil && user != nil {
-		sess, err = usermiddleware.DefaultSess.SessionID(user.UserID)
+		sess, err = usermiddleware.DefaultSess.SessionID(user.UserID, deviceID)
 		if err != nil || len(sess) == 0 {
 			err = errors.New("internal server error")
 		}

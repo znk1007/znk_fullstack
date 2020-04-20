@@ -18,6 +18,18 @@ type UserDB struct {
 	User     *userproto.User
 }
 
+//UserRegisted 用户是否走注册流程
+func UserRegisted(acc string) (exs bool, ts int64, registed int) {
+	exs, ts, registed = redisUserRegisted(acc)
+	return
+}
+
+//SetUserRegisted 保存注册流程信息
+func SetUserRegisted(acc string, ts string, registed int) (e error) {
+	e = redisSetUserRegisted(acc, ts, registed)
+	return
+}
+
 //CreateUser 创建用户
 func CreateUser(acc, photo, userID, password string) (err error) {
 	phone := ""
@@ -119,17 +131,5 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 		user.Permission = per
 	}
 	user.Permission = per
-	return
-}
-
-//UserRegisted 用户是否走注册流程
-func UserRegisted(acc string) (exs bool, ts int64, registed int) {
-	exs, ts, registed = redisUserRegisted(acc)
-	return
-}
-
-//SetUserRegisted 保存注册流程信息
-func SetUserRegisted(acc string, ts string, registed int) (e error) {
-	e = redisSetUserRegisted(acc, ts, registed)
 	return
 }

@@ -31,9 +31,10 @@ func NewSession(expired int) UserSession {
 }
 
 //SessionID 生成sessionID
-func (us UserSession) SessionID(userID string) (sess string, err error) {
+func (us UserSession) SessionID(userID string, deviceID string) (sess string, err error) {
 	sess, err = us.uJWT.Token(map[string]interface{}{
-		"userID": userID,
+		"userID":   userID,
+		"deviceID": deviceID,
 	})
 	return
 }

@@ -87,6 +87,16 @@ func gormTotalUserCnt() (count int) {
 	return
 }
 
+//gormUserExists 用户是否存在
+func gormUserExists(acc string) (exists bool) {
+	var cnt int
+	usergorm.DB().Model(
+		&UserDB{},
+	).Count(&cnt)
+	exists = cnt > 0
+	return
+}
+
 //gormUpdateUserActive 更新激活状态
 func gormUpdateUserActive(userID string, active int) (e error) {
 	e = usergorm.DB().Model(&UserDB{ID: userID}).Update("active", active).Error

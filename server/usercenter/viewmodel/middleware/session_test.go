@@ -3,7 +3,7 @@ package usermiddleware
 import "testing"
 
 func TestSession(t *testing.T) {
-	sess, err := DefaultSess.SessionID("test")
+	sess, err := DefaultSess.SessionID("test", "deviceID")
 	if err != nil {
 		t.Fatal("get sessionID err: ", err.Error())
 		return

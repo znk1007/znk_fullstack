@@ -114,6 +114,8 @@ func (up *updatePswSrv) handlUpdatePsw() {
 		up.makeUpdatePswToken(acc, code, err)
 		return
 	}
+	//更新密码
+
 }
 
 /*
