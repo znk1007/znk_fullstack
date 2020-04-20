@@ -93,13 +93,27 @@ func (up *updatePswSrv) handlUpdatePsw() {
 		up.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"))
 		return
 	}
-	code, err := up.token.VerifyByPswAndSess(tkstr)
+	//正在执行中
+	if up.doing[acc] {
+		log.Info().Msg("account is operating, please do it later")
+		up.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		return
+	}
+	//解析token
+	tk := up.token
+	code, err := tk.VerifyByPswAndSess(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		up.makeUpdatePswToken(acc, code, err)
 		return
 	}
-
+	//用户是否被禁用
+	code, err = usermiddleware.UserFrozen(acc, tk.UserID)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		up.makeUpdatePswToken(acc, code, err)
+		return
+	}
 }
 
 /*
