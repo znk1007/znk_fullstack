@@ -54,6 +54,22 @@ func gormFindUser(userID string) (uDB UserDB, err error) {
 	return
 }
 
+//gormTotalUserCnt 总人数
+func gormTotalUserCnt() (count int) {
+	usergorm.DB().Model(&UserDB{}).Count(&count)
+	return
+}
+
+//gormUserExists 用户是否存在
+func gormUserExists(acc string) (exists bool) {
+	var cnt int
+	usergorm.DB().Model(
+		&UserDB{},
+	).Count(&cnt)
+	exists = cnt > 0
+	return
+}
+
 //gormUserOnline 用户是否在线
 func gormUserOnline(userID string) (online int, err error) {
 	var userDB UserDB
@@ -65,6 +81,17 @@ func gormUserOnline(userID string) (online int, err error) {
 	return
 }
 
+//gormUpdateUserOnline 更新用户在线状态
+func gormUpdateUserOnline(userID string, online int) (err error) {
+	err = usergorm.DB().Model(
+		&UserDB{
+			ID:     userID,
+			Active: 1,
+		},
+	).Update("online", online).Error
+	return
+}
+
 //gormUserActive 用户是否激活中
 func gormUserActive(userID string) (active int, err error) {
 	var userDB UserDB
@@ -73,6 +100,12 @@ func gormUserActive(userID string) (active int, err error) {
 		return
 	}
 	active = userDB.Active
+	return
+}
+
+//gormUpdateUserActive 更新激活状态
+func gormUpdateUserActive(userID string, active int) (e error) {
+	e = usergorm.DB().Model(&UserDB{ID: userID}).Update("active", active).Error
 	return
 }
 
@@ -92,47 +125,14 @@ func gormFindActiveUser(userID string) (user *userproto.User, err error) {
 	return
 }
 
-//gormTotalUserCnt 总人数
-func gormTotalUserCnt() (count int) {
-	usergorm.DB().Model(&UserDB{}).Count(&count)
-	return
-}
-
-//gormUserExists 用户是否存在
-func gormUserExists(acc string) (exists bool) {
-	var cnt int
-	usergorm.DB().Model(
-		&UserDB{},
-	).Count(&cnt)
-	exists = cnt > 0
-	return
-}
-
-//gormUpdateUserActive 更新激活状态
-func gormUpdateUserActive(userID string, active int) (e error) {
-	e = usergorm.DB().Model(&UserDB{ID: userID}).Update("active", active).Error
-	return
-}
-
-//gormUpdateUserOnline 更新用户在线状态
-func gormUpdateUserOnline(userID string, online int) (err error) {
-	err = usergorm.DB().Model(
-		&UserDB{
-			ID:     userID,
-			Active: 1,
-		},
-	).Update("online", online).Error
-	return
-}
-
-//gormUpdateUserPhone 更新手机号
-func gormUpdateUserPhone(userID string, phone string) (err error) {
-	err = usergorm.DB().Model(
-		&UserDB{
-			ID:     userID,
-			Active: 1,
-		},
-	).Update("user.phone", phone).Error
+//gormUserPassword 用户密码
+func gormUserPassword(userID string) (psw string, err error) {
+	var userDB UserDB
+	userDB, err = gormFindUser(userID)
+	if err != nil {
+		return
+	}
+	psw = userDB.Password
 	return
 }
 
@@ -144,6 +144,17 @@ func gormUpdateUserPassword(userID string, password string) (err error) {
 			Active: 1,
 		},
 	).Update("password", password).Error
+	return
+}
+
+//gormUpdateUserPhone 更新手机号
+func gormUpdateUserPhone(userID string, phone string) (err error) {
+	err = usergorm.DB().Model(
+		&UserDB{
+			ID:     userID,
+			Active: 1,
+		},
+	).Update("user.phone", phone).Error
 	return
 }
 

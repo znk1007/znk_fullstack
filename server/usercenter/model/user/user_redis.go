@@ -68,8 +68,15 @@ func redisGetUserID(acc string) (userID string, err error) {
 	return
 }
 
-//redisGetUserPassword 获取密码
-func redisGetUserPassword(acc string) (password string, err error) {
+//redisSetUserPassword 更新用户密码
+func redisSetUserPassword(acc, psw string) (err error) {
+	key := userInfoPrefix + acc
+	err = userredis.HSet(key, psw)
+	return
+}
+
+//redisUserPassword 获取密码
+func redisUserPassword(acc string) (password string, err error) {
 	key := userInfoPrefix + acc
 	var val string
 	val, err = userredis.HGet(key, "password")

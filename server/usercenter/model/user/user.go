@@ -41,7 +41,7 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 	if usertools.VerifyEmail(acc) {
 		email = acc
 	}
-	psd, e := usercrypto.CBCEncrypt(password)
+	psw, e := usercrypto.CBCEncrypt(password)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		err = e
@@ -62,7 +62,7 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 	err = redisCreateUser(
 		acc,
 		userID,
-		psd,
+		psw,
 		phone,
 		email,
 		user.GetNickname(),
@@ -73,10 +73,15 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 	if err != nil {
 		return
 	}
-	_, err = gormCreateUser(
+	var exists bool
+	exists, err = gormCreateUser(
 		user,
 		password,
 	)
+	if !exists {
+		err = errors.New("internal server error")
+		return
+	}
 	if err == nil {
 		redisSetUserActive(acc, 1)
 	}
@@ -115,6 +120,15 @@ func SetUserActive(acc, userID string, active int) (err error) {
 	err = redisSetUserActive(acc, active)
 	if err != nil {
 		err = gormUpdateUserActive(userID, active)
+	}
+	return
+}
+
+//UserPassword 账户密码
+func UserPassword(acc, userID string) (psw string, err error) {
+	psw, err = redisUserPassword(acc)
+	if len(psw) == 0 {
+		psw, err = gormUserPassword(userID)
 	}
 	return
 }

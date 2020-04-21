@@ -70,6 +70,15 @@ func (s *rgstSrv) Do() {
 	go s.handleRegist()
 }
 
+/*
+头像：photo
+密码：password，
+时间戳：timestamp，
+设备ID：deviceID，
+平台：platform[web,iOS,Android]，
+设备名：deviceName，
+应用标识：appkey
+*/
 //handleRegist 处理注册
 func (s *rgstSrv) handleRegist() {
 	req := s.req
@@ -142,7 +151,7 @@ func (s *rgstSrv) handleRegist() {
 	psd, ok := res["password"].(string)
 	if !ok || len(psd) == 0 {
 		log.Info().Msg("password cannot be empty")
-		s.makeRegistToken("", "", http.StatusBadRequest, errors.New("password cannot be empty"))
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("password cannot be empty"))
 		return
 	}
 	userID := makeID()
@@ -151,14 +160,13 @@ func (s *rgstSrv) handleRegist() {
 
 //saveUser 保存用户信息
 func (s *rgstSrv) saveUser(acc string, photo string, userID string, password string) {
-
 	e := usermodel.CreateUser(acc, photo, userID, password)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
 		return
 	}
-	s.makeRegistToken(acc, userID, http.StatusOK, errors.New("operation success"))
+	s.makeRegistToken(acc, userID, http.StatusOK, nil)
 	return
 }
 

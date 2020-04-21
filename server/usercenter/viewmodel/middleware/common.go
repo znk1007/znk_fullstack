@@ -20,17 +20,31 @@ func LoginVerify(acc string, tk *Token) (code int, err error) {
 	//校验userID
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
+		code = http.StatusBadRequest
 		err = errors.New("userID cannot be empty")
 		return
 	}
 	psw, ok := res["password"].(string)
 	if !ok || len(psw) == 0 {
+		code = http.StatusBadRequest
 		err = errors.New("password cannot be empty")
 		return
 	}
+	//校验密码
 	var old string
-	old, err = usercrypto.CBCDecrypt(psw)
+	old, err = usermodel.UserPassword(acc, userID)
+	old, err = usercrypto.CBCDecrypt(old)
+	if err != nil {
+		code = http.StatusInternalServerError
+		return
+	}
+	if len(old) == 0 {
+		err = errors.New("internal server error")
+		code = http.StatusInternalServerError
+		return
+	}
 	if old != psw {
+		code = http.StatusBadRequest
 		err = errors.New("password no match")
 		return
 	}
@@ -77,6 +91,7 @@ func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
 func userFrozen(acc, userID string) (code int, err error) {
 	//用户是否被禁用
 	code = http.StatusOK
+	err = nil
 	active, e := usermodel.UserActive(acc, userID)
 	if e != nil {
 		err = e
@@ -85,7 +100,7 @@ func userFrozen(acc, userID string) (code int, err error) {
 	}
 	if active == 0 {
 		err = errors.New("user has been frozen")
-		code = netstatus.UserActive
+		code = netstatus.UserInactive
 		return
 	}
 	return
