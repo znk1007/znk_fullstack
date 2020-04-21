@@ -29,7 +29,7 @@ type lgnSrv struct {
 	req     *userproto.UserLgnReq
 	resChan chan lgnRes
 	doing   map[string]bool
-	token   usermiddleware.Token
+	token   *usermiddleware.Token
 	pool    userpayload.WorkerPool
 }
 
@@ -91,14 +91,14 @@ func (l *lgnSrv) handleLogin() {
 
 	//校验token
 	tk := l.token
-	e := tk.VerifyByPsw(req.GetToken())
+	e := tk.Parse(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, "", http.StatusBadRequest, e, nil)
 		return
 	}
-	//用户是否被禁用
-	code, err := usermiddleware.CommonVerify(acc, tk)
+	//登录条件校验
+	code, err := usermiddleware.LoginVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		l.makeLoginToken(acc, "", code, err, nil)
@@ -164,6 +164,7 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, "", http.StatusBadRequest, err, nil)
 		return
 	}
+	usermodel.UserOnline(acc, userID)
 	l.makeLoginToken(acc, tk.DeviceID, http.StatusOK, nil, user)
 	return
 }

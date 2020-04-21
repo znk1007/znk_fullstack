@@ -54,6 +54,17 @@ func gormFindUser(userID string) (uDB UserDB, err error) {
 	return
 }
 
+//gormUserOnline 用户是否在线
+func gormUserOnline(userID string) (online int, err error) {
+	var userDB UserDB
+	userDB, err = gormFindUser(userID)
+	if err != nil {
+		return
+	}
+	online = userDB.Online
+	return
+}
+
 //gormUserActive 用户是否激活中
 func gormUserActive(userID string) (active int, err error) {
 	var userDB UserDB

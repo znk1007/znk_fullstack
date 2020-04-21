@@ -7,4 +7,6 @@ const (
 	SessionInvalidate = 1002
 	//UserActive 用户被禁用
 	UserActive = 1003
+	//UserLogout 用户退出登录
+	UserLogout = 1004
 )

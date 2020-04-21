@@ -9,11 +9,9 @@ import (
 )
 
 const (
-	userInfoPrefix       = "user_info_"       //保存用户信息key前缀
-	userOnlinePrefix     = "user_online_"     //用户在线状态
-	userRegistPrefix     = "user_regist_"     //用户注册
-	userActivePrefix     = "user_active_"     //用户是否激活
-	userPermissionPrefix = "user_permission_" //用户权限
+	userInfoPrefix   = "user_info_"     //保存用户信息key前缀
+	userOnlinePrefix = "user_online_"   //保存用户在线状态
+	userRegistPrefix = "user_registed_" //保存用户注册状态
 )
 
 //redisCreateUser redis保存用户数据
@@ -29,6 +27,8 @@ func redisCreateUser(acc, userID, password, phone, email, nickname, photo, creat
 		"photo", phone,
 		"updatedAt", updatedAt,
 		"createdAt", createdAt,
+		"active", "1",
+		"permission", string(userproto.Permission_visitor),
 	)
 	return
 }
@@ -80,55 +80,58 @@ func redisGetUserPassword(acc string) (password string, err error) {
 }
 
 //redisUserOnline 用户是否在线
-func redisUserOnline(acc string) (on int) {
+func redisUserOnline(acc string) (on int, err error) {
 	key := userOnlinePrefix + acc
-	val, e := userredis.Get(key)
-	if e != nil {
+	var val string
+	val, err = userredis.Get(key)
+	if err != nil {
 		on = 0
 		return
 	}
-	on, _ = strconv.Atoi(val)
+	on, err = strconv.Atoi(val)
 	return
 }
 
 //redisSetUserOnline 设置用户在线状态
-func redisSetUserOnline(acc string, online int) {
+func redisSetUserOnline(acc string, online int) (err error) {
 	key := userOnlinePrefix + acc
 	if online == 0 {
-		userredis.Del(key)
+		err = userredis.Del(key)
 		return
 	}
-	userredis.Set(key, "1", time.Duration(time.Hour*24*7))
+	err = userredis.Set(key, "1", time.Duration(time.Hour*24*7))
+	return
 }
 
 //redisSetUserActive 用户是否激活状态
 func redisSetUserActive(acc string, active int) (e error) {
-	key := userActivePrefix + acc
+	key := userInfoPrefix + acc
 	e = userredis.HSet(key, "active", string(active))
 	return
 }
 
 //redisUserActive 用户是否激活状态
 func redisUserActive(acc string) (active int, err error) {
-	key := userActivePrefix + acc
-	val, e := userredis.HGet(key, "active")
-	if e != nil {
-		err = e
+	key := userInfoPrefix + acc
+	var val string
+	val, err = userredis.HGet(key, "active")
+	if err != nil {
+		active = 0
 		return
 	}
-	active, _ = strconv.Atoi(val)
+	active, err = strconv.Atoi(val)
 	return
 }
 
 //redisSetUserPermission 设置用户权限
 func redisSetUserPermission(acc string, per userproto.Permission) {
-	key := userPermissionPrefix + acc
+	key := userInfoPrefix + acc
 	userredis.HSet(key, "permission", string(per))
 }
 
 //redisUserPermission 获取用户权限
 func redisUserPermission(acc string) (permission userproto.Permission, err error) {
-	key := userPermissionPrefix + acc
+	key := userInfoPrefix + acc
 	val, e := userredis.HGet(key, "permission")
 	if e != nil {
 		err = e

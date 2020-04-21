@@ -9,51 +9,14 @@ import (
 	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 )
 
-//CommonVerify 通用校验
-func CommonVerify(acc string, tk Token, sess bool) (code int, err error) {
+//LoginVerify 登录验证
+func LoginVerify(acc string, tk *Token) (code int, err error) {
 	//用户是否被禁用
 	code, err = userFrozen(acc, tk.UserID)
 	if err != nil {
 		return
 	}
-
-	return
-}
-
-//VerifyByPswAndSess 校验token，包含password&sessionID
-func (verify *Token) VerifyByPswAndSess(token string) (code int, err error) {
-	code = http.StatusOK
-	err = verify.VerifyByPsw(token)
-	res := verify.Result
-	//校验sessionID
-	sessionID, ok := res["sessionID"].(string)
-	if !ok || len(sessionID) == 0 {
-		err = errors.New("sessionID cannot be empty")
-		code = http.StatusBadRequest
-		return
-	}
-	var expired bool
-	expired, err = DefaultSess.Parse(sessionID, verify.UserID, sessionID)
-	if err != nil {
-		code = http.StatusBadRequest
-		return
-	}
-	if expired {
-		code = netstatus.SessionInvalidate
-		err = errors.New("session invalidate, please login again")
-		return
-	}
-	verify.SessionID = sessionID
-	return
-}
-
-//VerifyByPsw 校验token，包含password
-func (verify *Token) VerifyByPsw(token string) (err error) {
-	err = verify.Verify(token)
-	if err != nil {
-		return
-	}
-	res := verify.Result
+	res := tk.Result
 	//校验userID
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
@@ -68,11 +31,45 @@ func (verify *Token) VerifyByPsw(token string) (err error) {
 	var old string
 	old, err = usercrypto.CBCDecrypt(psw)
 	if old != psw {
-		err = errors.New("password is error")
+		err = errors.New("password no match")
 		return
 	}
-	verify.UserID = userID
-	verify.Password = psw
+	tk.UserID = userID
+	return
+}
+
+//CommonRequestVerify 通用请求校验
+func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
+	//用户是否被禁用
+	code, err = LoginVerify(acc, tk)
+	//校验用户是否退出登录
+	var online int
+	online, err = usermodel.UserOnline(acc, tk.UserID)
+	if err != nil || online == 0 {
+		err = errors.New("user has been logout")
+		code = netstatus.UserLogout
+		return
+	}
+	//校验sessionID
+	res := tk.Result
+	sessionID, ok := res["sessionID"].(string)
+	if !ok || len(sessionID) == 0 {
+		err = errors.New("sessionID cannot be empty")
+		code = http.StatusBadRequest
+		return
+	}
+	var expired bool
+	expired, err = DefaultSess.Parse(sessionID, tk.UserID, tk.DeviceID)
+	if err != nil {
+		code = http.StatusBadRequest
+		return
+	}
+	if expired {
+		code = netstatus.SessionInvalidate
+		err = errors.New("session invalidate, please login again")
+		return
+	}
+	tk.SessionID = sessionID
 	return
 }
 
@@ -92,9 +89,4 @@ func userFrozen(acc, userID string) (code int, err error) {
 		return
 	}
 	return
-}
-
-//sessionValid 会话是否过期
-func sessionValid(acc, userID string) {
-
 }

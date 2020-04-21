@@ -15,6 +15,7 @@ type UserDB struct {
 	ID       string `gorm:"primary_key"`
 	Password string
 	Active   int //是否激活状态
+	Online   int //用户是否已登录
 	User     *userproto.User
 }
 
@@ -78,6 +79,24 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 	)
 	if err == nil {
 		redisSetUserActive(acc, 1)
+	}
+	return
+}
+
+//UserOnline 用户是否已登录
+func UserOnline(acc, userID string) (online int, err error) {
+	online, err = redisUserOnline(acc)
+	if err != nil {
+		online, err = gormUserOnline(userID)
+	}
+	return
+}
+
+//SetUserOnline 更新用户在线状态
+func SetUserOnline(acc, userID string, online int) (err error) {
+	err = redisSetUserOnline(acc, online)
+	if err == nil {
+		err = gormUpdateUserOnline(userID, online)
 	}
 	return
 }

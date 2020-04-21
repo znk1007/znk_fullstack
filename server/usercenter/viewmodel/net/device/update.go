@@ -27,7 +27,7 @@ type updateSrv struct {
 	resChan chan updateRes
 	doing   map[string]bool
 	pool    userpayload.WorkerPool
-	token   usermiddleware.Token
+	token   *usermiddleware.Token
 }
 
 //newUpdateSrv new更新服务
@@ -97,14 +97,14 @@ func (us *updateSrv) handleUpdateDevice() {
 	us.doing[acc] = true
 	//校验token
 	tk := us.token
-	code, err := tk.VerifyByPswAndSess(tkstr)
+	err := tk.Parse(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, code, err)
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
 		return
 	}
 	//通用校验
-	code, err = usermiddleware.CommonVerify(acc, tk)
+	code, err := usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		us.makeUpdateDeviceToken(acc, code, err)

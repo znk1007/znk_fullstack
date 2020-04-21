@@ -29,7 +29,7 @@ type deleteSrv struct {
 	resChan chan deleteRes
 	doing   map[string]bool
 	pool    userpayload.WorkerPool
-	token   usermiddleware.Token
+	token   *usermiddleware.Token
 }
 
 //newDeleteSrv 初始化删除服务
@@ -100,22 +100,21 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	ds.doing[acc] = true
 	//校验token
 	tk := ds.token
-	code, err := tk.VerifyByPswAndSess(tkstr)
+	err := tk.Parse(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		ds.makeDeleteDeviceToken(acc, code, err)
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, err)
 		return
 	}
 	//通用校验
-	code, err = usermiddleware.CommonVerify(acc, tk)
+	code, err := usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ds.makeDeleteDeviceToken(acc, code, err)
 		return
 	}
-	res := tk.Result
-	userID, ok := res["userID"].(string)
-	if !ok || len(userID) == 0 {
+	userID := tk.UserID
+	if len(userID) == 0 {
 		log.Info().Msg("userID cannot be empty")
 		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"))
 		return

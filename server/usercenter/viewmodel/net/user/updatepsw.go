@@ -27,7 +27,7 @@ type updatePswSrv struct {
 	req     *userproto.UserUpdatePswReq
 	resChan chan updatePswRes
 	doing   map[string]bool
-	token   usermiddleware.Token
+	token   *usermiddleware.Token
 	pool    userpayload.WorkerPool
 }
 
@@ -101,14 +101,14 @@ func (up *updatePswSrv) handlUpdatePsw() {
 	}
 	//解析token
 	tk := up.token
-	code, err := tk.VerifyByPswAndSess(tkstr)
+	err := tk.Parse(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		up.makeUpdatePswToken(acc, code, err)
+		up.makeUpdatePswToken(acc, http.StatusBadRequest, err)
 		return
 	}
-	//用户是否被禁用
-	code, err = usermiddleware.CommonVerify(acc, tk)
+	//通用请求校验
+	code, err := usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		up.makeUpdatePswToken(acc, code, err)

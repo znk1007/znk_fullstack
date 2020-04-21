@@ -30,7 +30,7 @@ type rgstSrv struct {
 	req     *userproto.UserRgstReq
 	resChan chan rgstRes
 	doing   map[string]bool
-	token   usermiddleware.Token
+	token   *usermiddleware.Token
 	pool    userpayload.WorkerPool
 }
 
@@ -96,7 +96,7 @@ func (s *rgstSrv) handleRegist() {
 	s.doing[acc] = true
 
 	//解析校验token
-	e := s.token.Verify(req.GetToken())
+	e := s.token.Parse(req.GetToken())
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
