@@ -18,6 +18,7 @@ type Token struct {
 	Result     map[string]interface{}
 	SessionID  string
 	UserID     string
+	Password   string
 }
 
 //NewToken 初始化校验对象

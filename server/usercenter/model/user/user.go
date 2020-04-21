@@ -133,6 +133,15 @@ func UserPassword(acc, userID string) (psw string, err error) {
 	return
 }
 
+//SetUserPassword 更新密码
+func SetUserPassword(acc, userID, psw string) (err error) {
+	err = redisSetUserPassword(acc, psw)
+	if err == nil {
+		err = gormUpdateUserPassword(userID, psw)
+	}
+	return
+}
+
 //FindUser 查询用户信息
 func FindUser(acc, userID string) (user *userproto.User, err error) {
 	per, e := redisUserPermission(acc)

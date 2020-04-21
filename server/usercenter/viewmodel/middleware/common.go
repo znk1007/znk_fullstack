@@ -49,6 +49,7 @@ func LoginVerify(acc string, tk *Token) (code int, err error) {
 		return
 	}
 	tk.UserID = userID
+	tk.Password = psw
 	return
 }
 

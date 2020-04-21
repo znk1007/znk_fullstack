@@ -8,6 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
@@ -115,7 +116,13 @@ func (up *updatePswSrv) handlUpdatePsw() {
 		return
 	}
 	//更新密码
-
+	err = usermodel.SetUserPassword(acc, tk.UserID, tk.Password)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		up.makeUpdatePswToken(acc, http.StatusBadRequest, err)
+		return
+	}
+	up.makeUpdatePswToken(acc, http.StatusOK, nil)
 }
 
 /*
