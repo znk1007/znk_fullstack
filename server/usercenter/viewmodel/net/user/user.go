@@ -9,6 +9,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+type userSrv struct {
+	rsrv  *rgstSrv
+	lsrv  *lgnSrv
+	upSrv *updatePswSrv
+	loSrv *lgoSrv
+}
+
 var usrv userSrv
 
 func init() {
@@ -16,13 +23,8 @@ func init() {
 		rsrv:  newRgstSrv(),
 		lsrv:  newLgnSrv(),
 		upSrv: newUpdatePswSrv(),
+		loSrv: newLogSrv(),
 	}
-}
-
-type userSrv struct {
-	rsrv  *rgstSrv
-	lsrv  *lgnSrv
-	upSrv *updatePswSrv
 }
 
 //makeID 生成唯一ID
@@ -53,5 +55,6 @@ func (u userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePs
 }
 
 func (u userSrv) Logout(ctx context.Context, req *userproto.UserLgoReq) (res *userproto.UserLgoRes, err error) {
-	return
+	u.loSrv.write(req)
+	return u.loSrv.read(ctx)
 }
