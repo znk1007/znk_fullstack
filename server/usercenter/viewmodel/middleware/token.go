@@ -8,6 +8,9 @@ import (
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 )
 
+type Acc struct {
+}
+
 //Token token校验
 type Token struct {
 	uJWT       *userjwt.UserJWT

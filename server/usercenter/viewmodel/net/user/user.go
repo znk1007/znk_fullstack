@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-var usrv *userSrv
+var usrv userSrv
 
 func init() {
-	usrv = &userSrv{
+	usrv = userSrv{
 		rsrv:  newRgstSrv(),
 		lsrv:  newLgnSrv(),
 		upSrv: newUpdatePswSrv(),
@@ -36,18 +36,18 @@ func RegisterRegistServer(srv *grpc.Server) {
 }
 
 //注册
-func (u *userSrv) Regist(ctx context.Context, req *userproto.UserRgstReq) (res *userproto.UserRgstRes, err error) {
+func (u userSrv) Regist(ctx context.Context, req *userproto.UserRgstReq) (res *userproto.UserRgstRes, err error) {
 	u.rsrv.write(req)
 	return u.rsrv.read(ctx)
 }
 
 //登录
-func (u *userSrv) Login(ctx context.Context, req *userproto.UserLgnReq) (res *userproto.UserLgnRes, err error) {
+func (u userSrv) Login(ctx context.Context, req *userproto.UserLgnReq) (res *userproto.UserLgnRes, err error) {
 	u.lsrv.write(req)
 	return u.lsrv.read(ctx)
 }
 
-func (u *userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePswReq) (res *userproto.UserUpdatePswRes, err error) {
+func (u userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePswReq) (res *userproto.UserUpdatePswRes, err error) {
 	u.upSrv.write(req)
 	return u.upSrv.read(ctx)
 }
