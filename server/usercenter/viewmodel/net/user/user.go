@@ -51,3 +51,7 @@ func (u userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePs
 	u.upSrv.write(req)
 	return u.upSrv.read(ctx)
 }
+
+func (u userSrv) Logout(ctx context.Context, req *userproto.UserLgoReq) (res *userproto.UserLgoRes, err error) {
+	return
+}
