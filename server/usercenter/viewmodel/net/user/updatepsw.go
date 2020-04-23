@@ -132,9 +132,13 @@ func (up *updatePswSrv) handlUpdatePsw() {
 */
 //makeUpdatePswToken 生成更新密码响应token
 func (up *updatePswSrv) makeUpdatePswToken(acc string, code int, err error) {
+	msg := ""
+	if err != nil {
+		msg = err.Error()
+	}
 	resmap := map[string]interface{}{
 		"code":      code,
-		"message":   err.Error(),
+		"message":   msg,
 		"timestamp": time.Now().String(),
 	}
 	var tk string

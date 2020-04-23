@@ -150,9 +150,13 @@ func (us *updateSrv) handleUpdateDevice() {
 */
 //makeUpdateDeviceToken 生成token
 func (us *updateSrv) makeUpdateDeviceToken(acc string, code int, err error) {
+	msg := ""
+	if err != nil {
+		msg = err.Error()
+	}
 	resmap := map[string]interface{}{
 		"code":      code,
-		"message":   err.Error(),
+		"message":   msg,
 		"timestamp": time.Now().String(),
 	}
 	var tk string

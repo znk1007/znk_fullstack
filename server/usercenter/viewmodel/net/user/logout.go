@@ -124,9 +124,13 @@ func (ls *lgoSrv) handleLogout() {
 时间戳：timestamp
 */
 func (ls *lgoSrv) makeLogoutToken(acc string, code int, err error) {
+	msg := ""
+	if err != nil {
+		msg = err.Error()
+	}
 	resmap := map[string]interface{}{
 		"code":      code,
-		"message":   err.Error(),
+		"message":   msg,
 		"timestamp": time.Now().String(),
 	}
 	var tk string

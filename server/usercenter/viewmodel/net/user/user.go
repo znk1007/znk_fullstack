@@ -10,20 +10,22 @@ import (
 )
 
 type userSrv struct {
-	rsrv  *rgstSrv
-	lsrv  *lgnSrv
-	upSrv *updatePswSrv
-	loSrv *lgoSrv
+	rsrv      *rgstSrv
+	lsrv      *lgnSrv
+	upSrv     *updatePswSrv
+	loSrv     *lgoSrv
+	statusSrv *userStatusSrv
 }
 
 var usrv userSrv
 
 func init() {
 	usrv = userSrv{
-		rsrv:  newRgstSrv(),
-		lsrv:  newLgnSrv(),
-		upSrv: newUpdatePswSrv(),
-		loSrv: newLogSrv(),
+		rsrv:      newRgstSrv(),
+		lsrv:      newLgnSrv(),
+		upSrv:     newUpdatePswSrv(),
+		loSrv:     newLogSrv(),
+		statusSrv: newStatusSrv(),
 	}
 }
 
@@ -57,4 +59,9 @@ func (u userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePs
 func (u userSrv) Logout(ctx context.Context, req *userproto.UserLgoReq) (res *userproto.UserLgoRes, err error) {
 	u.loSrv.write(req)
 	return u.loSrv.read(ctx)
+}
+
+func (u userSrv) Status(ctx context.Context, req *userproto.UserStatusReq) (res *userproto.UserStatusRes, err error) {
+	u.statusSrv.write(req)
+	return u.statusSrv.read(ctx)
 }

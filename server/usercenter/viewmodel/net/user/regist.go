@@ -191,10 +191,14 @@ func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, err error
 		ts := time.Now().Unix()
 		usermodel.SetUserRegisted(acc, string(ts), rgd)
 	}
+	msg := ""
+	if err != nil {
+		msg = err.Error()
+	}
 	//生成响应数据
 	resmap := map[string]interface{}{
 		"code":    code,
-		"message": err.Error(),
+		"message": msg,
 		"userID":  userID,
 	}
 	var tk string
