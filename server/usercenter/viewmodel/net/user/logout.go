@@ -14,6 +14,10 @@ import (
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
+const (
+	logoutExpired = 60 * 5
+)
+
 type lgoRes struct {
 	res *userproto.UserLgoRes
 	err error
@@ -34,6 +38,7 @@ func newLogSrv() *lgoSrv {
 		resChan: make(chan lgoRes),
 		doing:   make(map[string]bool),
 		pool:    userpayload.NewWorkerPool(100),
+		token:   usermiddleware.NewToken(logoutExpired),
 	}
 	srv.pool.Run()
 	return srv
