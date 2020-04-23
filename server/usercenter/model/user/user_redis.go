@@ -90,8 +90,8 @@ func redisUserPassword(acc string) (password string, err error) {
 func redisUserOnline(acc string) (on int, err error) {
 	key := userOnlinePrefix + acc
 	var val string
-	val, err = userredis.Get(key)
-	if err != nil {
+	val, _ = userredis.Get(key)
+	if len(val) == 0 {
 		on = 0
 		return
 	}

@@ -8,7 +8,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
+	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -77,13 +79,38 @@ func (ls *lgoSrv) handleLogout() {
 		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New("please request later"))
 		return
 	}
-	err := ls.token.Parse(tkstr)
+	tk := ls.token
+	err := tk.Parse(tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ls.makeLogoutToken(acc, http.StatusBadRequest, err)
 		return
 	}
-	res := ls.token.Result
+	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	if code == netstatus.UserLogout {
+		ls.makeLogoutToken(acc, http.StatusOK, nil)
+		return
+	}
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ls.makeLogoutToken(acc, code, err)
+		return
+	}
+	online, err := usermodel.UserOnline(acc, tk.UserID)
+	if err != nil {
+		log.Info().Msg(err.Error())
+	}
+	if online == 0 {
+		ls.makeLogoutToken(acc, http.StatusOK, nil)
+		return
+	}
+	err = usermodel.SetUserOnline(acc, tk.UserID, 0)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ls.makeLogoutToken(acc, http.StatusInternalServerError, err)
+		return
+	}
+	ls.makeLogoutToken(acc, http.StatusOK, nil)
 }
 
 /*

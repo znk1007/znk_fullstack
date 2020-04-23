@@ -60,7 +60,12 @@ func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
 	//校验用户是否退出登录
 	var online int
 	online, err = usermodel.UserOnline(acc, tk.UserID)
-	if err != nil || online == 0 {
+	if err != nil {
+		err = errors.New(err.Error())
+		code = http.StatusInternalServerError
+		return
+	}
+	if online == 0 {
 		err = errors.New("user has been logout")
 		code = netstatus.UserLogout
 		return
