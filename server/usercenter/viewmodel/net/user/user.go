@@ -36,7 +36,7 @@ func makeID() string {
 
 //RegisterRegistServer 注册到注册请求服务
 func RegisterRegistServer(srv *grpc.Server) {
-	userproto.RegisterUserSrvServer(srv, usrv)
+	// userproto.RegisterUserSrvServer(srv, usrv)
 }
 
 //注册

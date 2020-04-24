@@ -26,7 +26,7 @@ type updateSrv struct {
 	req     *userproto.DvsUpdateReq
 	resChan chan updateRes
 	doing   map[string]bool
-	pool    userpayload.WorkerPool
+	pool    *userpayload.WorkerPool
 	token   *usermiddleware.Token
 }
 

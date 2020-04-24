@@ -14,7 +14,7 @@ func (j simpleJob) Do() {
 }
 
 func BenchmarkSimpleWorkerPool(t *testing.B) {
-	workerLen := 100 * 100 * 10
+	workerLen := 10
 	p := NewWorkerPool(workerLen)
 	p.Run()
 	p.WriteHandler(func(jq chan Job) {

@@ -29,7 +29,7 @@ type lgoSrv struct {
 	resChan chan lgoRes
 	doing   map[string]bool
 	token   *usermiddleware.Token
-	pool    userpayload.WorkerPool
+	pool    *userpayload.WorkerPool
 }
 
 //newLogSrv 初始化

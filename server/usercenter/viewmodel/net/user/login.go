@@ -30,7 +30,7 @@ type lgnSrv struct {
 	resChan chan lgnRes
 	doing   map[string]bool
 	token   *usermiddleware.Token
-	pool    userpayload.WorkerPool
+	pool    *userpayload.WorkerPool
 }
 
 //newRgstSrv 初始化注册服务

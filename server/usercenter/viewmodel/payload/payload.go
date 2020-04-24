@@ -1,5 +1,9 @@
 package userpayload
 
+import (
+	"os"
+)
+
 //https://blog.51cto.com/11140372/2342953?source=dra
 //Pool 事务池
 // var Pool WorkerPool
@@ -10,40 +14,40 @@ package userpayload
 // 	Pool.Run()
 // }
 
+var (
+	//MaxWorker 最多事务数
+	MaxWorker = os.Getenv("MAX_WORKERS")
+	//MaxQueue 最大队列数
+	MaxQueue = os.Getenv("MAX_QUEUE")
+)
+
 //Job 执行事务接口
 type Job interface {
 	Do()
 }
 
-//Worker 事务对象
-type Worker struct {
+//worker 事务对象
+type worker struct {
 	jobQueue chan Job
 	quit     chan bool
 }
 
-//NewWorker 创建事务
-func NewWorker() Worker {
-	return Worker{
+//newWorker 创建事务
+func newWorker() *worker {
+	return &worker{
 		jobQueue: make(chan Job),
 		quit:     make(chan bool),
 	}
 }
 
-//Write 写入事务
-func (w Worker) Write(job Job) {
-	w.jobQueue <- job
-}
-
 //Run 执行事务
-func (w Worker) Run(wp chan chan Job) {
+func (w *worker) run(wp chan chan Job) {
 	go func() {
 		for {
 			wp <- w.jobQueue //regist current job channel to worker pool
 			select {
 			case job := <-w.jobQueue:
-				go func(j Job) {
-					job.Do()
-				}(job)
+				job.Do()
 			case <-w.quit:
 				return
 			}
@@ -52,7 +56,7 @@ func (w Worker) Run(wp chan chan Job) {
 }
 
 //Stop 停止事务
-func (w Worker) Stop() {
+func (w *worker) stop() {
 	go func() {
 		w.quit <- true
 	}()
@@ -61,53 +65,54 @@ func (w Worker) Stop() {
 //WorkerPool 事务池
 type WorkerPool struct {
 	maxWorker   int
-	WorkerQueue chan chan Job
-	JobQueue    chan Job
+	workerQueue chan chan Job
+	jobQueue    chan Job
 	quit        chan bool
 }
 
 //NewWorkerPool 创建事务池
-func NewWorkerPool(maxWorker int) WorkerPool {
-	return WorkerPool{
+func NewWorkerPool(maxWorker int) *WorkerPool {
+	return &WorkerPool{
 		maxWorker:   maxWorker,
-		WorkerQueue: make(chan chan Job),
-		JobQueue:    make(chan Job),
+		workerQueue: make(chan chan Job, maxWorker),
+		jobQueue:    make(chan Job),
 		quit:        make(chan bool),
 	}
 }
 
 //Run 执行事务
-func (p WorkerPool) Run() {
+func (p *WorkerPool) Run() {
+	//初始化worker
 	for i := 0; i < p.maxWorker; i++ {
-		wk := NewWorker()
-		wk.Run(p.WorkerQueue)
+		wk := newWorker()
+		wk.run(p.workerQueue)
 	}
 	go p.dispatch()
 }
 
 //Stop 停止事务池
-func (p WorkerPool) Stop() {
+func (p *WorkerPool) Stop() {
 	go func() {
 		p.quit <- true
 	}()
 }
 
 //WriteHandler 写入事务池handler
-func (p WorkerPool) WriteHandler(handler func(j chan Job)) {
-	go func(queue chan Job) {
+func (p *WorkerPool) WriteHandler(handler func(j chan Job)) {
+	go func(jq chan Job) {
 		if handler != nil {
-			handler(queue)
+			handler(p.jobQueue)
 		}
-	}(p.JobQueue)
+	}(p.jobQueue)
 }
 
 //dispatch 事务分发
-func (p WorkerPool) dispatch() {
+func (p *WorkerPool) dispatch() {
 	for {
 		select {
-		case j := <-p.JobQueue:
+		case j := <-p.jobQueue:
 			go func(job Job) {
-				wk := <-p.WorkerQueue
+				wk := <-p.workerQueue
 				wk <- job
 			}(j)
 		case <-p.quit:
@@ -247,5 +252,101 @@ func main() {
         time.Sleep(2 * time.Second)
     }
 
+}
+*/
+
+/*
+var (
+	MaxWorker = os.Getenv("MAX_WORKERS")
+	MaxQueue  = os.Getenv("MAX_QUEUE")
+)
+
+// Job represents the job to be run
+type Job struct {
+	Payload Payload
+}
+
+// A buffered channel that we can send work requests on.
+var JobQueue chan Job
+
+// Worker represents the worker that executes the job
+type Worker struct {
+	WorkerPool  chan chan Job
+	JobChannel  chan Job
+	quit    	chan bool
+}
+
+func NewWorker(workerPool chan chan Job) Worker {
+	return Worker{
+		WorkerPool: workerPool,
+		JobChannel: make(chan Job),
+		quit:       make(chan bool)}
+}
+
+// Start method starts the run loop for the worker, listening for a quit channel in
+// case we need to stop it
+func (w Worker) Start() {
+	go func() {
+		for {
+			// register the current worker into the worker queue.
+			w.WorkerPool <- w.JobChannel
+
+			select {
+			case job := <-w.JobChannel:
+				// we have received a work request.
+				if err := job.Payload.UploadToS3(); err != nil {
+					log.Errorf("Error uploading to S3: %s", err.Error())
+				}
+
+			case <-w.quit:
+				// we have received a signal to stop
+				return
+			}
+		}
+	}()
+}
+
+// Stop signals the worker to stop listening for work requests.
+func (w Worker) Stop() {
+	go func() {
+		w.quit <- true
+	}()
+}
+
+type Dispatcher struct {
+	// A pool of workers channels that are registered with the dispatcher
+	WorkerPool chan chan Job
+}
+
+func NewDispatcher(maxWorkers int) *Dispatcher {
+	pool := make(chan chan Job, maxWorkers)
+	return &Dispatcher{WorkerPool: pool}
+}
+
+func (d *Dispatcher) Run() {
+    // starting n number of workers
+	for i := 0; i < d.maxWorkers; i++ {
+		worker := NewWorker(d.pool)
+		worker.Start()
+	}
+
+	go d.dispatch()
+}
+
+func (d *Dispatcher) dispatch() {
+	for {
+		select {
+		case job := <-JobQueue:
+			// a job request has been received
+			go func(job Job) {
+				// try to obtain a worker job channel that is available.
+				// this will block until a worker is idle
+				jobChannel := <-d.WorkerPool
+
+				// dispatch the job to the worker job channel
+				jobChannel <- job
+			}(job)
+		}
+	}
 }
 */

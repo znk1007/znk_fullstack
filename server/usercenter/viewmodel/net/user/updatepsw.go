@@ -13,23 +13,13 @@ import (
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
-const (
-	updatePswExpired = 60 * 2
-)
-
-//updatePswRes 更新密码响应
-type updatePswRes struct {
-	res *userproto.UserUpdatePswRes
-	err error
-}
-
 //updatePswSrv 更新密码服务
 type updatePswSrv struct {
 	req     *userproto.UserUpdatePswReq
 	resChan chan updatePswRes
 	doing   map[string]bool
 	token   *usermiddleware.Token
-	pool    userpayload.WorkerPool
+	pool    *userpayload.WorkerPool
 }
 
 //newUpdatePswSrv 初始化更新密码服务
@@ -37,7 +27,7 @@ func newUpdatePswSrv() *updatePswSrv {
 	srv := &updatePswSrv{
 		resChan: make(chan updatePswRes),
 		doing:   make(map[string]bool),
-		token:   usermiddleware.NewToken(updatePswExpired),
+		token:   usermiddleware.NewToken(60 * 5),
 		pool:    userpayload.NewWorkerPool(100),
 	}
 	srv.pool.Run()

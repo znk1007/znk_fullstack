@@ -28,7 +28,7 @@ type deleteSrv struct {
 	req     *userproto.DvsDeleteReq
 	resChan chan deleteRes
 	doing   map[string]bool
-	pool    userpayload.WorkerPool
+	pool    *userpayload.WorkerPool
 	token   *usermiddleware.Token
 }
 
