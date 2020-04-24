@@ -92,9 +92,11 @@ func (ss *userStatusSrv) handleUserStatus() {
 		return
 	}
 	if code == netstatus.SessionInvalidate || code == netstatus.UserLogout {
-
+		log.Info().Msg(err.Error())
+		ss.makeStatusToken(acc, code, 0, 1, err)
+		return
 	}
-
+	ss.makeStatusToken(acc, http.StatusOK, 1, 1, nil)
 }
 
 /*
