@@ -11,4 +11,6 @@ const (
 	UserLogout = 1004
 	//UserNotRegisted 用户未注册
 	UserNotRegisted = 1005
+	//RequestFrequence 请求过于频繁
+	RequestFrequence = 1006
 )

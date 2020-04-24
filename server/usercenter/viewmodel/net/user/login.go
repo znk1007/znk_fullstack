@@ -104,12 +104,6 @@ func (l *lgnSrv) handleLogin() {
 		l.makeLoginToken(acc, "", code, err, nil)
 		return
 	}
-	//超时检测
-	if !tk.Expired {
-		log.Info().Msg("login request too frequence")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("please try again later"), nil)
-		return
-	}
 	//是否已注册
 	exs, ts, rgd := usermodel.UserRegisted(acc)
 	if !exs || rgd == 0 {
