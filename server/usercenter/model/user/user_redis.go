@@ -33,6 +33,13 @@ func redisCreateUser(acc, userID, password, phone, email, nickname, photo, creat
 	return
 }
 
+//redisUserExists 用户是否存在
+func redisUserExists(acc string) (exists bool) {
+	key := userInfoPrefix + acc
+	exists = userredis.Exists(key)
+	return
+}
+
 //redisGetUser 获取用户基本信息
 func redisGetUser(acc string) (user *userproto.User, err error) {
 	key := userInfoPrefix + acc

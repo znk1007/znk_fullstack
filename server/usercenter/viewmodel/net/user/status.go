@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
+	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -83,6 +84,17 @@ func (ss *userStatusSrv) handleUserStatus() {
 		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, err)
 		return
 	}
+	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	//用户是否存在
+	if code == netstatus.UserInactive || code == netstatus.UserNotRegisted {
+		log.Info().Msg(err.Error())
+		ss.makeStatusToken(acc, code, 0, 0, err)
+		return
+	}
+	if code == netstatus.SessionInvalidate || code == netstatus.UserLogout {
+
+	}
+
 }
 
 /*
@@ -94,7 +106,7 @@ func (ss *userStatusSrv) handleUserStatus() {
 是否被禁用 active
 */
 //makeStatusToken 生成响应token
-func (ss *userStatusSrv) makeStatusToken(acc string, code int, status int, active int, err error) {
+func (ss *userStatusSrv) makeStatusToken(acc string, code, online, active int, err error) {
 	msg := ""
 	if err != nil {
 		msg = err.Error()
@@ -103,7 +115,7 @@ func (ss *userStatusSrv) makeStatusToken(acc string, code int, status int, activ
 		"code":      code,
 		"message":   msg,
 		"timestamp": time.Now().String(),
-		"status":    status,
+		"online":    online,
 		"active":    active,
 	}
 	tk, err := ss.token.Generate(resmap)

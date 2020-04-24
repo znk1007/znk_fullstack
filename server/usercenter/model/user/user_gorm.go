@@ -61,10 +61,12 @@ func gormTotalUserCnt() (count int) {
 }
 
 //gormUserExists 用户是否存在
-func gormUserExists(acc string) (exists bool) {
+func gormUserExists(userID string) (exists bool) {
 	var cnt int
 	usergorm.DB().Model(
-		&UserDB{},
+		&UserDB{
+			ID: userID,
+		},
 	).Count(&cnt)
 	exists = cnt > 0
 	return

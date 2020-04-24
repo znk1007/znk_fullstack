@@ -81,5 +81,5 @@ message UserStatusReq {
 
 message UserStatusRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，会话ID状态 status，是否被禁用 active]
+    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，用户在线状态 online，是否被禁用 active]
 }

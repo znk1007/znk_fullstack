@@ -11,7 +11,9 @@ require (
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/rs/zerolog v1.18.0
 	github.com/segmentio/ksuid v1.0.2
-	google.golang.org/grpc v1.25.1
+	google.golang.org/grpc v1.26.0
+	k8s.io/apiserver v0.18.2 // indirect
+	k8s.io/client-go v12.0.0+incompatible // indirect
 )
 
 replace google.golang.org/grpc => github.com/grpc/grpc-go v1.28.0

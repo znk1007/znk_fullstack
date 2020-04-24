@@ -11,6 +11,13 @@ import (
 
 //LoginVerify 登录验证
 func LoginVerify(acc string, tk *Token) (code int, err error) {
+	code = http.StatusOK
+	exists := usermodel.UserExists(acc, tk.UserID)
+	if !exists {
+		err = errors.New("user not registed")
+		code = netstatus.UserNotRegisted
+		return
+	}
 	//用户是否被禁用
 	code, err = userFrozen(acc, tk.UserID)
 	if err != nil {
@@ -61,7 +68,6 @@ func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
 	var online int
 	online, err = usermodel.UserOnline(acc, tk.UserID)
 	if err != nil {
-		err = errors.New(err.Error())
 		code = http.StatusInternalServerError
 		return
 	}

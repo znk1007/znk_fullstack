@@ -9,4 +9,6 @@ const (
 	UserInactive = 1003
 	//UserLogout 用户退出登录
 	UserLogout = 1004
+	//UserNotRegisted 用户未注册
+	UserNotRegisted = 1005
 )

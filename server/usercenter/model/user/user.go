@@ -31,6 +31,15 @@ func SetUserRegisted(acc string, ts string, registed int) (e error) {
 	return
 }
 
+//UserExists 用户是否存在
+func UserExists(acc, userID string) (exists bool) {
+	exists = redisUserExists(acc)
+	if !exists {
+		exists = gormUserExists(userID)
+	}
+	return
+}
+
 //CreateUser 创建用户
 func CreateUser(acc, photo, userID, password string) (err error) {
 	phone := ""
