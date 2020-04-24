@@ -12,7 +12,7 @@ import (
 type userSrv struct {
 	rsrv      *rgstSrv
 	lsrv      *lgnSrv
-	upSrv     *updatePswSrv
+	uiSrv     *updateInfoSrv
 	loSrv     *lgoSrv
 	statusSrv *userStatusSrv
 }
@@ -23,7 +23,7 @@ func init() {
 	usrv = userSrv{
 		rsrv:      newRgstSrv(),
 		lsrv:      newLgnSrv(),
-		upSrv:     newUpdatePswSrv(),
+		uiSrv:     newUpdateInfoSrv(),
 		loSrv:     newLogSrv(),
 		statusSrv: newStatusSrv(),
 	}
@@ -52,8 +52,8 @@ func (u userSrv) Login(ctx context.Context, req *userproto.UserLgnReq) (res *use
 }
 
 func (u userSrv) UpdatePassword(ctx context.Context, req *userproto.UserUpdatePswReq) (res *userproto.UserUpdatePswRes, err error) {
-	u.upSrv.write(req)
-	return u.upSrv.read(ctx)
+	u.uiSrv.writePswReq(req)
+	return u.uiSrv.readPswRes(ctx)
 }
 
 func (u userSrv) Logout(ctx context.Context, req *userproto.UserLgoReq) (res *userproto.UserLgoRes, err error) {

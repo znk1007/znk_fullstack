@@ -41,10 +41,10 @@ func newWorker() *worker {
 }
 
 //Run 执行事务
-func (w *worker) run(wp chan chan Job) {
+func (w *worker) run(wq chan chan Job) {
 	go func() {
 		for {
-			wp <- w.jobQueue //regist current job channel to worker pool
+			wq <- w.jobQueue //regist current job channel to worker pool
 			select {
 			case job := <-w.jobQueue:
 				job.Do()
@@ -52,13 +52,6 @@ func (w *worker) run(wp chan chan Job) {
 				return
 			}
 		}
-	}()
-}
-
-//Stop 停止事务
-func (w *worker) stop() {
-	go func() {
-		w.quit <- true
 	}()
 }
 
