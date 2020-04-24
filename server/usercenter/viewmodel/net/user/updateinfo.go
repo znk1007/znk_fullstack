@@ -23,7 +23,7 @@ const (
 )
 
 const (
-	updateInfoExpired = 60 * 2
+	updateInfoExpired = 60 * 5
 )
 
 //updatePswRes 更新密码响应
@@ -65,7 +65,7 @@ func newUpdateInfoSrv() *updateInfoSrv {
 		nicknameRes: make(chan updateNicknameRes),
 		pswRes:      make(chan updatePswRes),
 		doing:       make(map[string]bool),
-		token:       usermiddleware.NewToken(300),
+		token:       usermiddleware.NewToken(updateInfoExpired),
 	}
 	srv.pool.Run()
 	return srv
