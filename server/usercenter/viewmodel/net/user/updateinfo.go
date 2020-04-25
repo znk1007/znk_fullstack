@@ -75,17 +75,10 @@ func newUpdateInfoSrv() *updateInfoSrv {
 func (ui *updateInfoSrv) handleUpdateInfo() {
 	switch ui.rt {
 	case psw:
-		ui.handlUpdatePsw()
+		ui.handleUpdatePsw()
+	case phone:
+		ui.handleUpdatePhone()
 	}
-}
-
-//writePhoneReq 读入更新手机号数据
-func (ui *updateInfoSrv) writePhoneReq(req *userproto.UserUpdatePhoneReq) {
-	ui.rt = phone
-	ui.pool.WriteHandler(func(j chan userpayload.Job) {
-		ui.phoneReq = req
-		j <- ui
-	})
 }
 
 //------------------------------------update password---------------------------------------
@@ -123,8 +116,8 @@ func (ui *updateInfoSrv) readPswRes(ctx context.Context) (res *userproto.UserUpd
 新密码：newPsw
 */
 
-//handlUpdatePsw 处理更新密码
-func (ui *updateInfoSrv) handlUpdatePsw() {
+//handleUpdatePsw 处理更新密码
+func (ui *updateInfoSrv) handleUpdatePsw() {
 	req := ui.pswReq
 	//账号
 	acc := req.GetAccount()
@@ -199,6 +192,33 @@ func (ui *updateInfoSrv) makeUpdatePswToken(acc string, code int, err error) {
 		err: err,
 	}
 	ui.pswRes <- res
+}
+
+//----------------------update phone-------------------
+
+//writePhoneReq 读入更新手机号数据
+func (ui *updateInfoSrv) writePhoneReq(req *userproto.UserUpdatePhoneReq) {
+	ui.rt = phone
+	ui.pool.WriteHandler(func(j chan userpayload.Job) {
+		ui.phoneReq = req
+		j <- ui
+	})
+}
+
+func (ui *updateInfoSrv) readPhoneRes(ctx context.Context) (*userproto.UserUpdatePhoneRes, error) {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case res := <-ui.phoneRes:
+			return res.res, res.err
+		}
+	}
+}
+
+//handleUpdatePhone 处理更新手机号请求
+func (ui *updateInfoSrv) handleUpdatePhone() {
+
 }
 
 func (ui *updateInfoSrv) Do() {
