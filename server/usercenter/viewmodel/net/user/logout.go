@@ -85,7 +85,7 @@ func (ls *lgoSrv) handleLogout() {
 		return
 	}
 	tk := ls.token
-	err := tk.Parse(tkstr)
+	err := tk.Parse(acc, "logout", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ls.makeLogoutToken(acc, http.StatusBadRequest, err)

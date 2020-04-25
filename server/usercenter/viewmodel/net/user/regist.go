@@ -105,18 +105,13 @@ func (s *rgstSrv) handleRegist() {
 	s.doing[acc] = true
 
 	//解析校验token
-	e := s.token.Parse(req.GetToken())
+	e := s.token.Parse(acc, "regist", tkstr)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
 		return
 	}
 
-	if !s.token.Expired { //是否频繁请求
-		log.Info().Msg("request too frequence")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("please regist later on"))
-		return
-	}
 	//redis 校验
 	exs, oldTS, registed := usermodel.UserRegisted(acc)
 	if e != nil {

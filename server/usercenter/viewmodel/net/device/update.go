@@ -97,7 +97,7 @@ func (us *updateSrv) handleUpdateDevice() {
 	us.doing[acc] = true
 	//校验token
 	tk := us.token
-	err := tk.Parse(tkstr)
+	err := tk.Parse(acc, "update_device", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)

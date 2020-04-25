@@ -78,7 +78,7 @@ func (ss *userStatusSrv) handleUserStatus() {
 		return
 	}
 	tk := ss.token
-	err := tk.Parse(tkstr)
+	err := tk.Parse(acc, "user_status", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, err)

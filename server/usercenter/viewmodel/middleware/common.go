@@ -4,22 +4,14 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rs/zerolog/log"
 	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 )
 
-//LoginVerify 登录验证
-func LoginVerify(acc string, tk *Token) (code int, err error) {
+//BaseVerify 基础验证
+func BaseVerify(acc string, tk *Token) (code int, err error) {
 	code = http.StatusOK
-	//频繁请求检测
-	if !tk.Expired {
-		log.Info().Msg("request too frequence")
-		err = errors.New("request too frequence")
-		code = netstatus.RequestFrequence
-		return
-	}
 	exists := usermodel.UserExists(acc, tk.UserID)
 	if !exists {
 		err = errors.New("user not registed")
@@ -71,7 +63,7 @@ func LoginVerify(acc string, tk *Token) (code int, err error) {
 //CommonRequestVerify 通用请求校验
 func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
 	//用户是否被禁用
-	code, err = LoginVerify(acc, tk)
+	code, err = BaseVerify(acc, tk)
 	//校验用户是否退出登录
 	var online int
 	online, err = usermodel.UserOnline(acc, tk.UserID)

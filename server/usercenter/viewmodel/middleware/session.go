@@ -2,6 +2,8 @@ package usermiddleware
 
 import (
 	"errors"
+	"strconv"
+	"time"
 
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 )
@@ -20,19 +22,19 @@ func init() {
 
 //UserSession session对象
 type UserSession struct {
-	uJWT *userjwt.UserJWT
+	uj *userjwt.UserJWT
 }
 
 //NewSession 创建session实例
-func NewSession(expired int) UserSession {
+func NewSession(expired int64) UserSession {
 	return UserSession{
-		uJWT: userjwt.NewUserJWT(expired),
+		uj: userjwt.NewUserJWT(expired),
 	}
 }
 
 //SessionID 生成sessionID
 func (us UserSession) SessionID(userID string, deviceID string) (sess string, err error) {
-	sess, err = us.uJWT.Token(map[string]interface{}{
+	sess, err = us.uj.Token(map[string]interface{}{
 		"userID":   userID,
 		"deviceID": deviceID,
 	})
@@ -40,14 +42,32 @@ func (us UserSession) SessionID(userID string, deviceID string) (sess string, er
 }
 
 //Parse 解析sessionID
-func (us UserSession) Parse(sess, userID, deviceID string) (expired bool, err error) {
-	us.uJWT.Parse(sess, false)
-	res, exp, e := us.uJWT.Result()
+func (us *UserSession) Parse(sess, userID, deviceID string) (expired bool, err error) {
+	us.uj.Parse(sess, false)
+	res, e := us.uj.Result()
 	if e != nil {
 		err = e
 		expired = true
 		return
 	}
+	ts, ok := res["timestamp"].(string)
+	if !ok || len(ts) == 0 {
+		err = errors.New("miss param `timestamp` or timestamp is empty")
+		expired = true
+		return
+	}
+	oldTS, err := strconv.ParseInt(ts, 10, 64)
+	if err != nil {
+		err = errors.New("internal server error")
+		expired = true
+		return
+	}
+	nTS := time.Now().Unix()
+	diff := nTS - oldTS
+	if diff < int64(us.uj.ExpiredInterval()) {
+		expired = false
+	}
+
 	orgUID, ok := res["userID"].(string)
 	if !ok || len(orgUID) == 0 {
 		err = errors.New("miss param `userID` or userID is empty")
@@ -70,6 +90,5 @@ func (us UserSession) Parse(sess, userID, deviceID string) (expired bool, err er
 		expired = true
 		return
 	}
-	expired = exp
 	return
 }

@@ -149,7 +149,7 @@ func (ui *updateInfoSrv) handlUpdatePsw() {
 	}
 	//解析token
 	tk := ui.token
-	err := tk.Parse(tkstr)
+	err := tk.Parse(acc, "update_password", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ui.makeUpdatePswToken(acc, http.StatusBadRequest, err)

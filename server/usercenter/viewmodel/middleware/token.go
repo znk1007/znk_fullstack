@@ -11,7 +11,6 @@ import (
 //Token token校验
 type Token struct {
 	uJWT       *userjwt.UserJWT
-	Expired    bool
 	DeviceID   string
 	DeviceName string
 	Platform   string
@@ -22,7 +21,7 @@ type Token struct {
 }
 
 //NewToken 初始化校验对象
-func NewToken(expiredinterval int) *Token {
+func NewToken(expiredinterval int64) *Token {
 	return &Token{
 		uJWT: userjwt.NewUserJWT(expiredinterval),
 	}
@@ -35,14 +34,14 @@ func (verify *Token) Generate(params map[string]interface{}) (token string, err 
 }
 
 //Parse 解析校验token
-func (verify *Token) Parse(token string) (err error) {
+func (verify *Token) Parse(acc, method, token string) (err error) {
 	if len(token) == 0 {
 		log.Info().Msg("miss param `token` or `token` is empty")
 		err = errors.New("miss param `token` or `token` is empty")
 		return
 	}
 	verify.uJWT.Parse(token, true)
-	tkmap, exp, e := verify.uJWT.Result()
+	tkmap, e := verify.uJWT.Result()
 	if e != nil {
 		log.Info().Msg(e.Error())
 		err = e
@@ -85,6 +84,5 @@ func (verify *Token) Parse(token string) (err error) {
 	verify.DeviceID = deviceID
 	verify.DeviceName = deviceName
 	verify.Platform = platform
-	verify.Expired = exp
 	return
 }

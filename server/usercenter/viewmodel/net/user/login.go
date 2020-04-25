@@ -91,14 +91,14 @@ func (l *lgnSrv) handleLogin() {
 
 	//校验token
 	tk := l.token
-	e := tk.Parse(req.GetToken())
+	e := tk.Parse(acc, "login", tkstr)
 	if e != nil {
 		log.Info().Msg(e.Error())
 		l.makeLoginToken(acc, "", http.StatusBadRequest, e, nil)
 		return
 	}
 	//登录条件校验
-	code, err := usermiddleware.LoginVerify(acc, tk)
+	code, err := usermiddleware.BaseVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		l.makeLoginToken(acc, "", code, err, nil)
