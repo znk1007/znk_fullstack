@@ -92,8 +92,8 @@ func (s *rgstSrv) handleRegist() {
 	//判断是否有token
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("token cannot be empty"))
+		log.Info().Msg("`data` cannot be empty")
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
 

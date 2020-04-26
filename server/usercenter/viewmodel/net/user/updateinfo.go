@@ -131,8 +131,8 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 	//token
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"))
+		log.Info().Msg("`data` cannot be empty")
+		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
 	//正在执行中
@@ -228,7 +228,12 @@ func (ui *updateInfoSrv) handleUpdatePhone() {
 		ui.makeUpdatePhoneToken("", http.StatusBadRequest, errors.New("`account` cannot be empty"))
 		return
 	}
-	//token
+	//token校验
+	tkstr := req.GetData()
+	if len(tkstr) == 0 {
+		log.Info().Msg("`data` cannot be empty")
+		return
+	}
 
 }
 

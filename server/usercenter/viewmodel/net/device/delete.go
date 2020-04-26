@@ -88,8 +88,8 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	//校验token是否为空
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New("token cannot be empty"))
+		log.Info().Msg("`data` cannot be empty")
+		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
 	//是否正在请求

@@ -78,8 +78,8 @@ func (l *lgnSrv) handleLogin() {
 	//判断是否有token
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("token cannot be empty"), nil)
+		log.Info().Msg("`data` cannot be empty")
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("`data` cannot be empty"), nil)
 		return
 	}
 	//正在处理登陆操作

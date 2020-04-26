@@ -74,8 +74,8 @@ func (ss *userStatusSrv) handleUserStatus() {
 	}
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, errors.New("token cannot be empty"))
+		log.Info().Msg("`data` cannot be empty")
+		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, errors.New("`data` cannot be empty"))
 		return
 	}
 	tk := ss.token

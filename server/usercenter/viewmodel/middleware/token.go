@@ -49,8 +49,8 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 		return
 	}
 	if len(token) == 0 {
-		log.Info().Msg("miss param `token` or `token` is empty")
-		err = errors.New("miss param `token` or `token` is empty")
+		log.Info().Msg("miss param `data` or `data` is empty")
+		err = errors.New("miss param `data` or `data` is empty")
 		code = http.StatusBadRequest
 		return
 	}

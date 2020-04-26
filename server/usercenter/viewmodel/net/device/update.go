@@ -85,8 +85,8 @@ func (us *updateSrv) handleUpdateDevice() {
 	//校验token是否为空
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New("token cannot be empty"))
+		log.Info().Msg("`data` cannot be empty")
+		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
 	//是否正在请求

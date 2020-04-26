@@ -76,8 +76,8 @@ func (ls *lgoSrv) handleLogout() {
 	}
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("token cannot be empty")
-		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"))
+		log.Info().Msg("`data` cannot be empty")
+		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
 	if ls.doing[acc] {
