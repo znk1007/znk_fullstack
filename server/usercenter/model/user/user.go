@@ -10,12 +10,23 @@ import (
 	usertools "github.com/znk_fullstack/server/usercenter/viewmodel/tools"
 )
 
+//Permission 权限
+type Permission int
+
+const (
+	super   Permission = iota
+	admin   Permission = 1
+	user    Permission = 2
+	visitor Permission = 3
+)
+
 //UserDB 用户数据库模型
 type UserDB struct {
 	ID       string `gorm:"primary_key"`
 	Password string
-	Active   int //是否激活状态
-	Online   int //用户是否已登录
+	Active   int        //是否激活状态
+	Online   int        //用户是否已登录
+	Per      Permission //用户权限
 	User     *userproto.User
 }
 
@@ -151,12 +162,26 @@ func SetUserPassword(acc, userID, psw string) (err error) {
 	return
 }
 
+//SetUserPhone 更新手机号
+func SetUserPhone(acc, userID, phone string) (err error) {
+	err = redisSetUserPhone(acc, phone)
+	if err == nil {
+		err = gormUpdateUserPhone(userID, phone)
+	}
+	return
+}
+
+//SetUserNickname 更新昵称
+func SetUserNickname(acc, userID, nickname string) (err error) {
+	err = redisSetUserNickname(acc, nickname)
+	if err == nil {
+		err = gormUpdateUserNickname(userID, nickname)
+	}
+	return
+}
+
 //FindUser 查询用户信息
 func FindUser(acc, userID string) (user *userproto.User, err error) {
-	per, e := redisUserPermission(acc)
-	if e != nil {
-		per = userproto.Permission_user
-	}
 	//用户是否被禁用
 	active, e := UserActive(acc, userID)
 	if e != nil {
@@ -179,8 +204,6 @@ func FindUser(acc, userID string) (user *userproto.User, err error) {
 			err = e
 			return
 		}
-		user.Permission = per
 	}
-	user.Permission = per
 	return
 }

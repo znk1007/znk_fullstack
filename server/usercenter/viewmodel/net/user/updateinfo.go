@@ -20,6 +20,7 @@ const (
 	psw      reqType = iota
 	phone    reqType = 1
 	nickname reqType = 2
+	active   reqType = 3
 )
 
 const (
@@ -79,6 +80,8 @@ func (ui *updateInfoSrv) handleUpdateInfo() {
 		ui.handleUpdatePsw()
 	case phone:
 		ui.handleUpdatePhone()
+	case nickname:
+		ui.handleUpdateNickname()
 	}
 }
 
@@ -141,6 +144,7 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
 		return
 	}
+	ui.doing[acc] = true
 	//解析token
 	tk := ui.token
 	code, err := tk.Parse(acc, "update_password", tkstr)
@@ -157,7 +161,13 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 		return
 	}
 	//更新密码
-	err = usermodel.SetUserPassword(acc, tk.UserID, tk.Password)
+	newPsw, ok := tk.Result["newPsw"].(string)
+	if !ok || len(newPsw) == 0 {
+		log.Info().Msg("`newPsw` cannot be empty")
+		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("`newPsw` cannot be empty"))
+		return
+	}
+	err = usermodel.SetUserPassword(acc, tk.UserID, newPsw)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ui.makeUpdatePswToken(acc, http.StatusBadRequest, err)
@@ -173,14 +183,14 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 */
 //makeUpdatePswToken 生成更新密码响应token
 func (ui *updateInfoSrv) makeUpdatePswToken(acc string, code int, err error) {
-	msg := "opeeration success"
+	msg := "operation success"
 	if err != nil {
 		msg = err.Error()
 	}
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   msg,
-		"timestamp": time.Now().String(),
+		"timestamp": time.Now().Unix(),
 	}
 	var tk string
 	tk, err = ui.token.Generate(resmap)
@@ -198,7 +208,7 @@ func (ui *updateInfoSrv) makeUpdatePswToken(acc string, code int, err error) {
 
 //----------------------update phone-------------------
 
-//writePhoneReq 读入更新手机号数据
+//writePhoneReq 写入更新手机号数据
 func (ui *updateInfoSrv) writePhoneReq(req *userproto.UserUpdatePhoneReq) {
 	ui.rt = phone
 	ui.pool.WriteHandler(func(j chan userpayload.Job) {
@@ -207,6 +217,7 @@ func (ui *updateInfoSrv) writePhoneReq(req *userproto.UserUpdatePhoneReq) {
 	})
 }
 
+//readPhoneRes 读取更新手机号响应数据
 func (ui *updateInfoSrv) readPhoneRes(ctx context.Context) (*userproto.UserUpdatePhoneRes, error) {
 	for {
 		select {
@@ -217,6 +228,17 @@ func (ui *updateInfoSrv) readPhoneRes(ctx context.Context) (*userproto.UserUpdat
 		}
 	}
 }
+
+/*
+用户ID：userID，
+会话ID：sessionID ，
+时间戳：timestamp，
+设备ID：deviceID，
+设备名：deviceName，
+平台类型：platform，
+应用标识：appkey，
+手机号：phone
+*/
 
 //handleUpdatePhone 处理更新手机号请求
 func (ui *updateInfoSrv) handleUpdatePhone() {
@@ -232,21 +254,56 @@ func (ui *updateInfoSrv) handleUpdatePhone() {
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("`data` cannot be empty")
+		ui.makeUpdatePhoneToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
-
+	code, err := ui.token.Parse(req.GetAccount(), "update_phone", req.GetData())
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ui.makeUpdatePhoneToken(acc, code, err)
+		return
+	}
+	tk := ui.token
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ui.makeUpdatePhoneToken(acc, code, err)
+		return
+	}
+	//正在执行中
+	if ui.doing[acc] {
+		log.Info().Msg("account is operating, please do it later")
+		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		return
+	}
+	ui.doing[acc] = true
+	//检验phone字段
+	p, ok := tk.Result["phone"].(string)
+	if !ok || len(p) == 0 {
+		log.Info().Msg("`phone` cannot be empty")
+		ui.makeUpdatePhoneToken(acc, http.StatusBadRequest, errors.New("`phone` cannot be empty"))
+		return
+	}
+	//更新手机号
+	err = usermodel.SetUserPhone(acc, tk.UserID, p)
+	if err != nil {
+		log.Info().Msg("internal server error")
+		ui.makeUpdatePhoneToken(acc, http.StatusInternalServerError, errors.New("internal server error"))
+		return
+	}
+	ui.makeUpdatePhoneToken(acc, http.StatusOK, nil)
 }
 
 //makeUpdatePhoneToken 生成更新手机号响应token
 func (ui *updateInfoSrv) makeUpdatePhoneToken(acc string, code int, err error) {
-	msg := "opeeration success"
+	msg := "operation success"
 	if err != nil {
 		msg = err.Error()
 	}
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   msg,
-		"timestamp": time.Now().String(),
+		"timestamp": time.Now().Unix(),
 	}
 	var tk string
 	tk, err = ui.token.Generate(resmap)
@@ -258,6 +315,104 @@ func (ui *updateInfoSrv) makeUpdatePhoneToken(acc string, code int, err error) {
 		err: err,
 	}
 	ui.phoneRes <- res
+	delete(ui.doing, acc)
+}
+
+//------------------------------------update nickname--------------------------
+//writeNicknameReq 写入更新昵称请求数据
+func (ui *updateInfoSrv) writeNicknameReq(req *userproto.UserUpdateNicknameReq) {
+	ui.pool.WriteHandler(func(j chan userpayload.Job) {
+		ui.nicknameReq = req
+		j <- ui
+	})
+}
+
+//readNicknameRes 读取更新昵称响应数据
+func (ui *updateInfoSrv) readNicknameRes(ctx context.Context) (*userproto.UserUpdateNicknameRes, error) {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case res := <-ui.nicknameRes:
+			return res.res, res.err
+		}
+	}
+}
+
+//handleUpdateNickname 处理更新昵称
+func (ui *updateInfoSrv) handleUpdateNickname() {
+	req := ui.nicknameReq
+	//账号检测
+	acc := req.GetAccount()
+	if len(acc) == 0 {
+		log.Info().Msg("`account` cannot be empty")
+		ui.makeUpdateNicknameToken("", http.StatusBadRequest, errors.New("`account` cannot be empty"))
+		return
+	}
+	//token校验
+	tkstr := req.GetData()
+	if len(tkstr) == 0 {
+		log.Info().Msg("`data` cannot be empty")
+		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
+		return
+	}
+	//正在执行中
+	if ui.doing[acc] {
+		log.Info().Msg("account is operating, please do it later")
+		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		return
+	}
+	ui.doing[acc] = true
+	//解析数据
+	code, err := ui.token.Parse(req.GetAccount(), "update_phone", req.GetData())
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ui.makeUpdateNicknameToken(acc, code, err)
+		return
+	}
+	tk := ui.token
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		ui.makeUpdateNicknameToken(acc, code, err)
+		return
+	}
+	nk, ok := tk.Result["nickname"].(string)
+	if !ok || len(nk) == 0 {
+		log.Info().Msg("`nickname` cannot be empty")
+		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New("`nickname` cannot be empty"))
+		return
+	}
+	err = usermodel.SetUserNickname(acc, tk.UserID, nk)
+	if err != nil {
+		log.Info().Msg("internal server error")
+		ui.makeUpdateNicknameToken(acc, http.StatusInternalServerError, err)
+		return
+	}
+	ui.makeUpdateNicknameToken(acc, http.StatusOK, nil)
+}
+
+//makeUpdateNicknameToken 更新昵称响应token
+func (ui *updateInfoSrv) makeUpdateNicknameToken(acc string, code int, err error) {
+	msg := "operation success"
+	if err != nil {
+		msg = err.Error()
+	}
+	resmap := map[string]interface{}{
+		"code":      code,
+		"message":   msg,
+		"timestamp": time.Now().Unix(),
+	}
+	var tk string
+	tk, err = ui.token.Generate(resmap)
+	res := updateNicknameRes{
+		res: &userproto.UserUpdateNicknameRes{
+			Account: acc,
+			Data:    tk,
+		},
+		err: err,
+	}
+	ui.nicknameRes <- res
 	delete(ui.doing, acc)
 }
 

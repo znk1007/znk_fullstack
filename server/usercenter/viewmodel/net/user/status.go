@@ -110,14 +110,14 @@ func (ss *userStatusSrv) handleUserStatus() {
 */
 //makeStatusToken 生成响应token
 func (ss *userStatusSrv) makeStatusToken(acc string, code, online, active int, err error) {
-	msg := "opeeration success"
+	msg := "operation success"
 	if err != nil {
 		msg = err.Error()
 	}
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   msg,
-		"timestamp": time.Now().String(),
+		"timestamp": time.Now().Unix(),
 		"online":    online,
 		"active":    active,
 	}

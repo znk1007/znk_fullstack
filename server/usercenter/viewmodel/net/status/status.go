@@ -13,4 +13,6 @@ const (
 	UserNotRegisted = 1005
 	//RequestFrequence 请求过于频繁
 	RequestFrequence = 1006
+	//PasswordNoMatch 密码不匹配
+	PasswordNoMatch = 1007
 )

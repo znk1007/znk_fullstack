@@ -51,7 +51,7 @@ func BaseVerify(acc string, tk *Token) (code int, err error) {
 		return
 	}
 	if old != psw {
-		code = http.StatusBadRequest
+		code = netstatus.PasswordNoMatch
 		err = errors.New("password no match")
 		return
 	}
@@ -64,18 +64,6 @@ func BaseVerify(acc string, tk *Token) (code int, err error) {
 func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
 	//用户是否被禁用
 	code, err = BaseVerify(acc, tk)
-	//校验用户是否退出登录
-	var online int
-	online, err = usermodel.UserOnline(acc, tk.UserID)
-	if err != nil {
-		code = http.StatusInternalServerError
-		return
-	}
-	if online == 0 {
-		err = errors.New("user has been logout")
-		code = netstatus.UserLogout
-		return
-	}
 	//校验sessionID
 	res := tk.Result
 	sessionID, ok := res["sessionID"].(string)
@@ -93,6 +81,18 @@ func CommonRequestVerify(acc string, tk *Token) (code int, err error) {
 	if expired {
 		code = netstatus.SessionInvalidate
 		err = errors.New("session invalidate, please login again")
+		return
+	}
+	//校验用户是否退出登录
+	var online int
+	online, err = usermodel.UserOnline(acc, tk.UserID)
+	if err != nil {
+		code = http.StatusInternalServerError
+		return
+	}
+	if online == 0 {
+		err = errors.New("user has been logout")
+		code = netstatus.UserLogout
 		return
 	}
 	tk.SessionID = sessionID

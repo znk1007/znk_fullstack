@@ -137,14 +137,14 @@ func (ds *deleteSrv) handlDeleteDevice() {
 */
 //makeDeleteDeviceToken 删除设备响应token
 func (ds *deleteSrv) makeDeleteDeviceToken(acc string, code int, err error) {
-	msg := "opeeration success"
+	msg := "operation success"
 	if err != nil {
 		msg = err.Error()
 	}
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   msg,
-		"timestamp": time.Now().String(),
+		"timestamp": time.Now().Unix(),
 	}
 	var tk string
 	tk, err = ds.token.Generate(resmap)

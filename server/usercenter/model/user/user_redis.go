@@ -28,7 +28,7 @@ func redisCreateUser(acc, userID, password, phone, email, nickname, photo, creat
 		"updatedAt", updatedAt,
 		"createdAt", createdAt,
 		"active", "1",
-		"permission", string(userproto.Permission_visitor),
+		"permission", string(user),
 	)
 	return
 }
@@ -138,13 +138,14 @@ func redisUserActive(acc string) (active int, err error) {
 }
 
 //redisSetUserPermission 设置用户权限
-func redisSetUserPermission(acc string, per userproto.Permission) {
+func redisSetUserPermission(acc string, per Permission) (err error) {
 	key := userInfoPrefix + acc
-	userredis.HSet(key, "permission", string(per))
+	err = userredis.HSet(key, "permission", string(per))
+	return
 }
 
 //redisUserPermission 获取用户权限
-func redisUserPermission(acc string) (permission userproto.Permission, err error) {
+func redisUserPermission(acc string) (permission Permission, err error) {
 	key := userInfoPrefix + acc
 	val, e := userredis.HGet(key, "permission")
 	if e != nil {
@@ -152,7 +153,21 @@ func redisUserPermission(acc string) (permission userproto.Permission, err error
 		return
 	}
 	per, e := strconv.Atoi(val)
-	permission = userproto.Permission(per)
+	permission = Permission(per)
+	return
+}
+
+//redisSetUserPhone 更新手机号
+func redisSetUserPhone(acc, phone string) (err error) {
+	key := userInfoPrefix + acc
+	err = userredis.HSet(key, "phone", phone)
+	return
+}
+
+//redisSetUserNickname 更新昵称
+func redisSetUserNickname(acc, nickname string) (err error) {
+	key := userInfoPrefix + acc
+	err = userredis.HSet(key, "nickname", nickname)
 	return
 }
 

@@ -125,14 +125,14 @@ func (ls *lgoSrv) handleLogout() {
 时间戳：timestamp
 */
 func (ls *lgoSrv) makeLogoutToken(acc string, code int, err error) {
-	msg := "opeeration success"
+	msg := "operation success"
 	if err != nil {
 		msg = err.Error()
 	}
 	resmap := map[string]interface{}{
 		"code":      code,
 		"message":   msg,
-		"timestamp": time.Now().String(),
+		"timestamp": time.Now().Unix(),
 	}
 	var tk string
 	tk, err = ls.token.Generate(resmap)

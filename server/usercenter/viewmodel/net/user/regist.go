@@ -182,7 +182,7 @@ func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, err error
 		ts := time.Now().Unix()
 		usermodel.SetUserRegisted(acc, string(ts), rgd)
 	}
-	msg := "opeeration success"
+	msg := "operation success"
 	if err != nil {
 		msg = err.Error()
 	}

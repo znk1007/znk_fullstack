@@ -14,7 +14,7 @@ import (
 
 //Token token校验
 type Token struct {
-	uJWT       *userjwt.UserJWT
+	uj         *userjwt.UserJWT
 	freq       *usertools.Freq
 	DeviceID   string
 	DeviceName string
@@ -28,14 +28,14 @@ type Token struct {
 //NewToken 初始化校验对象
 func NewToken(expiredinterval int64, freqexp int64) *Token {
 	return &Token{
-		uJWT: userjwt.NewUserJWT(expiredinterval),
+		uj:   userjwt.NewUserJWT(expiredinterval),
 		freq: usertools.NewFreq(freqexp),
 	}
 }
 
 //Generate 生成token
 func (verify *Token) Generate(params map[string]interface{}) (token string, err error) {
-	token, err = verify.uJWT.Token(params)
+	token, err = verify.uj.Token(params)
 	return
 }
 
@@ -61,8 +61,8 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 		return
 	}
 
-	verify.uJWT.Parse(token, true)
-	tkmap, e := verify.uJWT.Result()
+	verify.uj.Parse(token, true)
+	tkmap, e := verify.uj.Result()
 	if e != nil {
 		log.Info().Msg(e.Error())
 		err = e

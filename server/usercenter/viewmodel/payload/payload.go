@@ -94,7 +94,7 @@ func (p *WorkerPool) Stop() {
 func (p *WorkerPool) WriteHandler(handler func(j chan Job)) {
 	go func(jq chan Job) {
 		if handler != nil {
-			handler(p.jobQueue)
+			handler(jq)
 		}
 	}(p.jobQueue)
 }
