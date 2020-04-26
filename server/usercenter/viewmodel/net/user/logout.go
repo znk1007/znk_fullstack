@@ -16,6 +16,7 @@ import (
 
 const (
 	logoutExpired = 60 * 5
+	logoutExp     = 60 * 10
 )
 
 type lgoRes struct {
@@ -38,7 +39,7 @@ func newLogSrv() *lgoSrv {
 		resChan: make(chan lgoRes),
 		doing:   make(map[string]bool),
 		pool:    userpayload.NewWorkerPool(100),
-		token:   usermiddleware.NewToken(logoutExpired),
+		token:   usermiddleware.NewToken(logoutExpired, logoutExp),
 	}
 	srv.pool.Run()
 	return srv
@@ -85,13 +86,13 @@ func (ls *lgoSrv) handleLogout() {
 		return
 	}
 	tk := ls.token
-	err := tk.Parse(acc, "logout", tkstr)
+	code, err := tk.Parse(acc, "logout", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		ls.makeLogoutToken(acc, http.StatusBadRequest, err)
+		ls.makeLogoutToken(acc, code, err)
 		return
 	}
-	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if code == netstatus.UserLogout {
 		ls.makeLogoutToken(acc, http.StatusOK, nil)
 		return

@@ -15,6 +15,7 @@ import (
 
 const (
 	statusExpired = 60 * 5
+	statusFreqExp = 60 * 10
 )
 
 type userStatusRes struct {
@@ -36,7 +37,7 @@ func newStatusSrv() *userStatusSrv {
 	srv := &userStatusSrv{
 		res:   make(chan userStatusRes),
 		doing: make(map[string]bool),
-		token: usermiddleware.NewToken(100),
+		token: usermiddleware.NewToken(statusExpired, statusFreqExp),
 	}
 	srv.pool.Run()
 	return srv
@@ -78,13 +79,13 @@ func (ss *userStatusSrv) handleUserStatus() {
 		return
 	}
 	tk := ss.token
-	err := tk.Parse(acc, "user_status", tkstr)
+	code, err := tk.Parse(acc, "user_status", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, err)
+		ss.makeStatusToken(acc, code, 0, 0, err)
 		return
 	}
-	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	//用户是否存在
 	if code == netstatus.UserInactive || code == netstatus.UserNotRegisted {
 		log.Info().Msg(err.Error())

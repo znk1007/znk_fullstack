@@ -24,6 +24,7 @@ const (
 
 const (
 	updateInfoExpired = 60 * 5
+	updateInfoFreqExp = 60 * 10
 )
 
 //updatePswRes 更新密码响应
@@ -65,7 +66,7 @@ func newUpdateInfoSrv() *updateInfoSrv {
 		nicknameRes: make(chan updateNicknameRes),
 		pswRes:      make(chan updatePswRes),
 		doing:       make(map[string]bool),
-		token:       usermiddleware.NewToken(updateInfoExpired),
+		token:       usermiddleware.NewToken(updateInfoExpired, updateInfoFreqExp),
 	}
 	srv.pool.Run()
 	return srv
@@ -142,14 +143,14 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 	}
 	//解析token
 	tk := ui.token
-	err := tk.Parse(acc, "update_password", tkstr)
+	code, err := tk.Parse(acc, "update_password", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		ui.makeUpdatePswToken(acc, http.StatusBadRequest, err)
+		ui.makeUpdatePswToken(acc, code, err)
 		return
 	}
 	//通用请求校验
-	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ui.makeUpdatePswToken(acc, code, err)

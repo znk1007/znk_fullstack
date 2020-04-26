@@ -17,6 +17,7 @@ var rs *rgstSrv
 
 const (
 	registExpired = 60 * 2
+	registFreqExp = 60 * 10
 )
 
 //rgstRes 注册响应
@@ -39,7 +40,7 @@ func newRgstSrv() *rgstSrv {
 	srv := &rgstSrv{
 		resChan: make(chan rgstRes),
 		doing:   make(map[string]bool),
-		token:   usermiddleware.NewToken(registExpired),
+		token:   usermiddleware.NewToken(registExpired, registFreqExp),
 		pool:    userpayload.NewWorkerPool(100),
 	}
 	srv.pool.Run()
@@ -105,20 +106,15 @@ func (s *rgstSrv) handleRegist() {
 	s.doing[acc] = true
 
 	//解析校验token
-	e := s.token.Parse(acc, "regist", tkstr)
-	if e != nil {
-		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
+	code, err := s.token.Parse(acc, "regist", tkstr)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		s.makeRegistToken(acc, "", code, err)
 		return
 	}
 
 	//redis 校验
 	exs, oldTS, registed := usermodel.UserRegisted(acc)
-	if e != nil {
-		log.Info().Msg(e.Error())
-		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
-		return
-	}
 	//如果存在redis中，曾调过注册方法
 	if exs {
 		//如果已注册

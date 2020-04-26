@@ -16,6 +16,7 @@ import (
 
 const (
 	updateExpired = 60 * 5
+	updateFreqExp = 60 * 10
 )
 
 type updateRes struct {
@@ -36,7 +37,7 @@ func newUpdateSrv() *updateSrv {
 		resChan: make(chan updateRes),
 		doing:   make(map[string]bool),
 		pool:    userpayload.NewWorkerPool(100),
-		token:   usermiddleware.NewToken(updateExpired),
+		token:   usermiddleware.NewToken(updateExpired, updateFreqExp),
 	}
 	srv.pool.Run()
 	return srv
@@ -97,14 +98,14 @@ func (us *updateSrv) handleUpdateDevice() {
 	us.doing[acc] = true
 	//校验token
 	tk := us.token
-	err := tk.Parse(acc, "update_device", tkstr)
+	code, err := tk.Parse(acc, "update_device", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
+		us.makeUpdateDeviceToken(acc, code, err)
 		return
 	}
 	//通用校验
-	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		us.makeUpdateDeviceToken(acc, code, err)

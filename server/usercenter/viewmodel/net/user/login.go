@@ -17,6 +17,7 @@ import (
 
 const (
 	loginExpired = 60 * 5
+	loginFreqExp = 60 * 10
 )
 
 type lgnRes struct {
@@ -38,7 +39,7 @@ func newLgnSrv() *lgnSrv {
 	srv := &lgnSrv{
 		resChan: make(chan lgnRes),
 		doing:   make(map[string]bool),
-		token:   usermiddleware.NewToken(loginExpired),
+		token:   usermiddleware.NewToken(loginExpired, loginFreqExp),
 		pool:    userpayload.NewWorkerPool(100),
 	}
 	srv.pool.Run()
@@ -91,14 +92,14 @@ func (l *lgnSrv) handleLogin() {
 
 	//校验token
 	tk := l.token
-	e := tk.Parse(acc, "login", tkstr)
-	if e != nil {
-		log.Info().Msg(e.Error())
-		l.makeLoginToken(acc, "", http.StatusBadRequest, e, nil)
+	code, err := tk.Parse(acc, "login", tkstr)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		l.makeLoginToken(acc, "", code, err, nil)
 		return
 	}
 	//登录条件校验
-	code, err := usermiddleware.BaseVerify(acc, tk)
+	code, err = usermiddleware.BaseVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		l.makeLoginToken(acc, "", code, err, nil)

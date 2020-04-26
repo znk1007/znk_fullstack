@@ -15,6 +15,7 @@ import (
 
 const (
 	deleteExpired = 60 * 5
+	delFreqExp    = 60 * 10
 )
 
 //deleteRes 删除设备响应
@@ -38,7 +39,7 @@ func newDeleteSrv() *deleteSrv {
 		resChan: make(chan deleteRes),
 		doing:   make(map[string]bool),
 		pool:    userpayload.NewWorkerPool(100),
-		token:   usermiddleware.NewToken(deleteExpired),
+		token:   usermiddleware.NewToken(deleteExpired, delFreqExp),
 	}
 	srv.pool.Run()
 	return srv
@@ -100,14 +101,14 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	ds.doing[acc] = true
 	//校验token
 	tk := ds.token
-	err := tk.Parse(acc, "delete_device", tkstr)
+	code, err := tk.Parse(acc, "delete_device", tkstr)
 	if err != nil {
 		log.Info().Msg(err.Error())
-		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, err)
+		ds.makeDeleteDeviceToken(acc, code, err)
 		return
 	}
 	//通用校验
-	code, err := usermiddleware.CommonRequestVerify(acc, tk)
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
 		log.Info().Msg(err.Error())
 		ds.makeDeleteDeviceToken(acc, code, err)
