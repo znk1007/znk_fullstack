@@ -99,8 +99,9 @@ func (s *rgstSrv) handleRegist() {
 
 	//当前账号正在注册中
 	if s.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		msg := acc + "is doing regist, please try again later"
+		log.Info().Msg(msg)
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	s.doing[acc] = true

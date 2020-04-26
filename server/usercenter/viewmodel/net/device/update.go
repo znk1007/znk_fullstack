@@ -91,8 +91,9 @@ func (us *updateSrv) handleUpdateDevice() {
 	}
 	//是否正在请求
 	if us.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		msg := acc + "is update device, please try again later"
+		log.Info().Msg(msg)
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	us.doing[acc] = true

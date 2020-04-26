@@ -81,8 +81,9 @@ func (ls *lgoSrv) handleLogout() {
 		return
 	}
 	if ls.doing[acc] {
-		log.Info().Msg("please request later")
-		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New("please request later"))
+		msg := acc + "is doing logout, please try again later"
+		log.Info().Msg(msg)
+		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	tk := ls.token

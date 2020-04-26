@@ -84,8 +84,9 @@ func (l *lgnSrv) handleLogin() {
 	}
 	//正在处理登陆操作
 	if l.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("account is operating, please do it later"), nil)
+		msg := acc + "is doing login, please try again later"
+		log.Info().Msg(msg)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New(msg), nil)
 		return
 	}
 	l.doing[acc] = true

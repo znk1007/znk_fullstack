@@ -140,8 +140,9 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 	}
 	//正在执行中
 	if ui.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		msg := acc + "is doing update password, please try again later"
+		log.Info().Msg(msg)
+		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	ui.doing[acc] = true
@@ -358,8 +359,9 @@ func (ui *updateInfoSrv) handleUpdateNickname() {
 	}
 	//正在执行中
 	if ui.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		msg := acc + "is doing update password, please try again later"
+		log.Info().Msg(msg)
+		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	ui.doing[acc] = true

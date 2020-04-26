@@ -94,8 +94,9 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	}
 	//是否正在请求
 	if ds.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		msg := acc + "is doing delete device, please try again later"
+		log.Info().Msg(msg)
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	ds.doing[acc] = true
