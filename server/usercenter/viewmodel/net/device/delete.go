@@ -86,7 +86,7 @@ func (ds *deleteSrv) handlDeleteDevice() {
 		return
 	}
 	//校验token是否为空
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New("token cannot be empty"))
@@ -137,7 +137,7 @@ func (ds *deleteSrv) handlDeleteDevice() {
 */
 //makeDeleteDeviceToken 删除设备响应token
 func (ds *deleteSrv) makeDeleteDeviceToken(acc string, code int, err error) {
-	msg := ""
+	msg := "opeeration success"
 	if err != nil {
 		msg = err.Error()
 	}
@@ -152,9 +152,10 @@ func (ds *deleteSrv) makeDeleteDeviceToken(acc string, code int, err error) {
 		err: err,
 		res: &userproto.DvsDeleteRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 	}
+	delete(ds.doing, acc)
 	ds.resChan <- res
 }
 

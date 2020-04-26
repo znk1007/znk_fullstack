@@ -72,7 +72,7 @@ func (ss *userStatusSrv) handleUserStatus() {
 		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, errors.New("account cannot be empty"))
 		return
 	}
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, errors.New("token cannot be empty"))
@@ -110,7 +110,7 @@ func (ss *userStatusSrv) handleUserStatus() {
 */
 //makeStatusToken 生成响应token
 func (ss *userStatusSrv) makeStatusToken(acc string, code, online, active int, err error) {
-	msg := ""
+	msg := "opeeration success"
 	if err != nil {
 		msg = err.Error()
 	}
@@ -125,10 +125,11 @@ func (ss *userStatusSrv) makeStatusToken(acc string, code, online, active int, e
 	res := userStatusRes{
 		res: &userproto.UserStatusRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 	}
 	ss.res <- res
+	delete(ss.doing, acc)
 }
 
 func (ss *userStatusSrv) Do() {

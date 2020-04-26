@@ -90,7 +90,7 @@ func (s *rgstSrv) handleRegist() {
 		return
 	}
 	//判断是否有token
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("token cannot be empty"))
@@ -182,7 +182,7 @@ func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, err error
 		ts := time.Now().Unix()
 		usermodel.SetUserRegisted(acc, string(ts), rgd)
 	}
-	msg := ""
+	msg := "opeeration success"
 	if err != nil {
 		msg = err.Error()
 	}
@@ -197,12 +197,12 @@ func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, err error
 	res := rgstRes{
 		res: &userproto.UserRgstRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 		err: err,
 	}
+	s.resChan <- res
 	//删除正在操作状态
 	delete(s.doing, acc)
-	s.resChan <- res
 	return
 }

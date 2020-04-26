@@ -76,7 +76,7 @@ func (l *lgnSrv) handleLogin() {
 		return
 	}
 	//判断是否有token
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("token cannot be empty"), nil)
@@ -193,7 +193,7 @@ func (l *lgnSrv) makeLoginToken(acc, deviceID string, code int, err error, user 
 		err: err,
 		res: &userproto.UserLgnRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 	}
 	//删除正在操作状态

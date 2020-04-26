@@ -34,74 +34,74 @@ service UserSrv {
 //注册请求
 message UserRgstReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-头像：photo 密码：password，时间戳：timestamp，设备ID：deviceID，平台：platform[web,iOS,Android]，设备名：deviceName，应用标识：appkey]
+    string data = 2;//[参数-头像：photo 密码：password，时间戳：timestamp，设备ID：deviceID，平台：platform[web,iOS,Android]，设备名：deviceName，应用标识：appkey]
 }
 //注册响应
 message UserRgstRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，时间戳：timestamp，状态码：code，反馈消息：message]
+    string data = 2;//[参数-用户ID：userID，时间戳：timestamp，状态码：code，反馈消息：message]
 }
 
 
 //登录请求
 message UserLgnReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，密码：password，时间戳：timestamp，设备ID：deviceID，平台：platform[web,iOS,Android]，设备名：deviceName，应用标识：appkey]
+    string data = 2;//[参数-用户ID：userID，密码：password，时间戳：timestamp，设备ID：deviceID，平台：platform[web,iOS,Android]，设备名：deviceName，应用标识：appkey]
 }
 //登录响应
 message UserLgnRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，用户信息：user/(jwt)]
+    string data = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，用户信息：user/(jwt)]
 }
 
 //更新密码请求
 message UserUpdatePswReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，旧密码：password，新密码：newPsw]
+    string data = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，旧密码：password，新密码：newPsw]
 }
 //更新密码响应
 message UserUpdatePswRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
+    string data = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
 }
 
 //退出登录请求
 message UserLgoReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey]
+    string data = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey]
 }
 //退出登录响应
 message UserLgoRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
+    string data = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
 }
 
 message UserStatusReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey]
+    string data = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey]
 }
 
 message UserStatusRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，用户在线状态 online，是否被禁用 active]
+    string data = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp，用户在线状态 online，是否被禁用 active]
 }
 
 message UserUpdatePhoneReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，手机号：phone]
+    string data = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，手机号：phone]
 }
 
 message UserUpdatePhoneRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
+    string data = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
 }
 //更新昵称请求
 message UserUpdateNicknameReq {
     string account = 1;//[账号]
-    string token = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，昵称：nickname]
+    string data = 2;//[参数-用户ID：userID，会话ID：sessionID ，时间戳：timestamp，设备ID：deviceID，设备名：deviceName，平台类型：platform，应用标识：appkey，昵称：nickname]
 }
 //更新昵称响应
 message UserUpdateNicknameRes {
     string account = 1;//[账号]
-    string token = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
+    string data = 2;//[参数-状态码：code，反馈消息：message，时间戳：timestamp]
 }

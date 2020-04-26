@@ -83,7 +83,7 @@ func (us *updateSrv) handleUpdateDevice() {
 		return
 	}
 	//校验token是否为空
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New("token cannot be empty"))
@@ -151,7 +151,7 @@ func (us *updateSrv) handleUpdateDevice() {
 */
 //makeUpdateDeviceToken 生成token
 func (us *updateSrv) makeUpdateDeviceToken(acc string, code int, err error) {
-	msg := ""
+	msg := "opeeration success"
 	if err != nil {
 		msg = err.Error()
 	}
@@ -166,7 +166,7 @@ func (us *updateSrv) makeUpdateDeviceToken(acc string, code int, err error) {
 		err: err,
 		res: &userproto.DvsUpdateRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 	}
 	//删除正在操作状态

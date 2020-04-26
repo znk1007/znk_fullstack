@@ -129,7 +129,7 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 		return
 	}
 	//token
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"))
@@ -173,7 +173,7 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 */
 //makeUpdatePswToken 生成更新密码响应token
 func (ui *updateInfoSrv) makeUpdatePswToken(acc string, code int, err error) {
-	msg := ""
+	msg := "opeeration success"
 	if err != nil {
 		msg = err.Error()
 	}
@@ -188,11 +188,12 @@ func (ui *updateInfoSrv) makeUpdatePswToken(acc string, code int, err error) {
 	res := updatePswRes{
 		res: &userproto.UserUpdatePswRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 		err: err,
 	}
 	ui.pswRes <- res
+	delete(ui.doing, acc)
 }
 
 //----------------------update phone-------------------
@@ -219,7 +220,40 @@ func (ui *updateInfoSrv) readPhoneRes(ctx context.Context) (*userproto.UserUpdat
 
 //handleUpdatePhone 处理更新手机号请求
 func (ui *updateInfoSrv) handleUpdatePhone() {
+	req := ui.phoneReq
+	//账号检测
+	acc := req.GetAccount()
+	if len(acc) == 0 {
+		log.Info().Msg("`account` cannot be empty")
+		ui.makeUpdatePhoneToken("", http.StatusBadRequest, errors.New("`account` cannot be empty"))
+		return
+	}
+	//token
 
+}
+
+//makeUpdatePhoneToken 生成更新手机号响应token
+func (ui *updateInfoSrv) makeUpdatePhoneToken(acc string, code int, err error) {
+	msg := "opeeration success"
+	if err != nil {
+		msg = err.Error()
+	}
+	resmap := map[string]interface{}{
+		"code":      code,
+		"message":   msg,
+		"timestamp": time.Now().String(),
+	}
+	var tk string
+	tk, err = ui.token.Generate(resmap)
+	res := updatePhoneRes{
+		res: &userproto.UserUpdatePhoneRes{
+			Account: acc,
+			Data:    tk,
+		},
+		err: err,
+	}
+	ui.phoneRes <- res
+	delete(ui.doing, acc)
 }
 
 func (ui *updateInfoSrv) Do() {

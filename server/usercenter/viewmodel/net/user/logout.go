@@ -74,7 +74,7 @@ func (ls *lgoSrv) handleLogout() {
 		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New("account cannot be empty"))
 		return
 	}
-	tkstr := req.GetToken()
+	tkstr := req.GetData()
 	if len(tkstr) == 0 {
 		log.Info().Msg("token cannot be empty")
 		ls.makeLogoutToken(acc, http.StatusBadRequest, errors.New("token cannot be empty"))
@@ -125,7 +125,7 @@ func (ls *lgoSrv) handleLogout() {
 时间戳：timestamp
 */
 func (ls *lgoSrv) makeLogoutToken(acc string, code int, err error) {
-	msg := ""
+	msg := "opeeration success"
 	if err != nil {
 		msg = err.Error()
 	}
@@ -140,11 +140,11 @@ func (ls *lgoSrv) makeLogoutToken(acc string, code int, err error) {
 		err: err,
 		res: &userproto.UserLgoRes{
 			Account: acc,
-			Token:   tk,
+			Data:    tk,
 		},
 	}
-	delete(ls.doing, acc)
 	ls.resChan <- res
+	delete(ls.doing, acc)
 	return
 }
 
