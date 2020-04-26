@@ -155,13 +155,13 @@ func (l *lgnSrv) handleLogin() {
 
 	//查用户数据
 	user, err := usermodel.FindUser(acc, userID)
-	if err != nil || user == nil {
+	if err != nil {
 		log.Info().Msg("user not exists")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, err, nil)
+		l.makeLoginToken(acc, "", netstatus.NoMatchUser, err, nil)
 		return
 	}
 	usermodel.UserOnline(acc, userID)
-	l.makeLoginToken(acc, tk.DeviceID, http.StatusOK, nil, user)
+	l.makeLoginToken(acc, tk.DeviceID, http.StatusOK, nil, user.User)
 	return
 }
 

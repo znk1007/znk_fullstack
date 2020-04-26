@@ -8,7 +8,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
+	usermodel "github.com/znk_fullstack/server/usercenter/model/user"
 	usermiddleware "github.com/znk_fullstack/server/usercenter/viewmodel/middleware"
+	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
 	userpayload "github.com/znk_fullstack/server/usercenter/viewmodel/payload"
 )
 
@@ -80,6 +82,7 @@ func (as *activeUserSrv) handleActiveUser() {
 		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
+	//正在执行
 	if as.doing[acc] {
 		msg := acc + "is doing request active user, please try again later"
 		log.Info().Msg(msg)
@@ -87,6 +90,34 @@ func (as *activeUserSrv) handleActiveUser() {
 		return
 	}
 	as.doing[acc] = true
+	//解析数据
+	tk := as.token
+	code, err := tk.Parse(acc, "active_user", tkstr)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		as.makeActiveUserToken(acc, code, err)
+		return
+	}
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		as.makeActiveUserToken(acc, code, err)
+		return
+	}
+	//查当前用户权限
+	var user usermodel.UserDB
+	user, err = usermodel.FindUser(acc, tk.UserID)
+	if err != nil {
+		log.Info().Msg(err.Error())
+		as.makeActiveUserToken(acc, netstatus.NoMatchUser, err)
+		return
+	}
+	if user.Per > usermodel.Super {
+		msg := acc + "has no permiss to active or inactive user"
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, netstatus.NoActivePermision, errors.New(msg))
+		return
+	}
 }
 
 func (as *activeUserSrv) makeActiveUserToken(acc string, code int, err error) {

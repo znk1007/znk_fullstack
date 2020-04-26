@@ -15,4 +15,8 @@ const (
 	RequestFrequence = 1006
 	//PasswordNoMatch 密码不匹配
 	PasswordNoMatch = 1007
+	//NoMatchUser 无相关用户
+	NoMatchUser = 1008
+	//NoActivePermision 无激活/禁用用户权限
+	NoActivePermision = 1009
 )

@@ -112,7 +112,7 @@ func gormUpdateUserActive(userID string, active int) (e error) {
 }
 
 //gormFindActiveUser 查询激活状态用户信息
-func gormFindActiveUser(userID string) (user *userproto.User, err error) {
+func gormFindActiveUser(userID string) (user UserDB, err error) {
 	var userDB UserDB
 	err = usergorm.DB().Model(
 		&UserDB{
@@ -123,7 +123,7 @@ func gormFindActiveUser(userID string) (user *userproto.User, err error) {
 	if err != nil {
 		return
 	}
-	user = userDB.User
+	user = userDB
 	return
 }
 

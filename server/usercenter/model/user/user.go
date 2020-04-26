@@ -14,10 +14,10 @@ import (
 type Permission int
 
 const (
-	super   Permission = iota
-	admin   Permission = 1
-	user    Permission = 2
-	visitor Permission = 3
+	Super   Permission = iota
+	Admin   Permission = 1
+	User    Permission = 2
+	Visitor Permission = 3
 )
 
 //UserDB 用户数据库模型
@@ -181,29 +181,23 @@ func SetUserNickname(acc, userID, nickname string) (err error) {
 }
 
 //FindUser 查询用户信息
-func FindUser(acc, userID string) (user *userproto.User, err error) {
+func FindUser(acc, userID string) (user UserDB, err error) {
 	//用户是否被禁用
-	active, e := UserActive(acc, userID)
-	if e != nil {
-		user = nil
-		err = e
+	var active int
+	active, err = UserActive(acc, userID)
+	if err != nil {
 		return
 	}
 	if active == 0 {
-		user = nil
 		err = errors.New("user has been frozen")
 		return
 	}
 
 	//redis 中的数据
-	user, e = redisGetUser(acc)
-	if e != nil || user == nil {
+	user, err = redisGetUser(acc)
+	if err != nil {
 		//mariadb中的数据
-		user, e = gormFindActiveUser(userID)
-		if e != nil {
-			err = e
-			return
-		}
+		user, err = gormFindActiveUser(userID)
 	}
 	return
 }

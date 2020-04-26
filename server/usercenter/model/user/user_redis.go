@@ -28,7 +28,7 @@ func redisCreateUser(acc, userID, password, phone, email, nickname, photo, creat
 		"updatedAt", updatedAt,
 		"createdAt", createdAt,
 		"active", "1",
-		"permission", string(user),
+		"permission", string(User),
 	)
 	return
 }
@@ -41,9 +41,9 @@ func redisUserExists(acc string) (exists bool) {
 }
 
 //redisGetUser 获取用户基本信息
-func redisGetUser(acc string) (user *userproto.User, err error) {
+func redisGetUser(acc string) (user UserDB, err error) {
 	key := userInfoPrefix + acc
-	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo", "updatedAt", "createdAt")
+	vals, e := userredis.HMGet(key, "phone", "email", "nickname", "photo", "updatedAt", "createdAt", "permission")
 	err = e
 	if e == nil && len(vals) > 5 {
 		phone, _ := vals[0].(string)
@@ -52,13 +52,18 @@ func redisGetUser(acc string) (user *userproto.User, err error) {
 		photo, _ := vals[3].(string)
 		updatedAt, _ := vals[4].(string)
 		createdAt, _ := vals[5].(string)
-		user = &userproto.User{
+		per, _ := vals[6].(Permission)
+		u := &userproto.User{
 			Phone:     phone,
 			Email:     email,
 			Nickname:  nickname,
 			Photo:     photo,
 			UpdatedAt: updatedAt,
 			CreatedAt: createdAt,
+		}
+		user = UserDB{
+			Per:  per,
+			User: u,
 		}
 	}
 	return
