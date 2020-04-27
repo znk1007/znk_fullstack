@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
-	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
-	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
-	usernet "github.com/znk_fullstack/server/usercenter/viewmodel/net"
+	userconf "github.com/znk_fullstack/server/usercenter/source/controller/conf"
+	usergorm "github.com/znk_fullstack/server/usercenter/source/controller/dao/gorm"
+	userredis "github.com/znk_fullstack/server/usercenter/source/controller/dao/redis"
+	usernet "github.com/znk_fullstack/server/usercenter/source/controller/net"
 )
 
 func main() {
