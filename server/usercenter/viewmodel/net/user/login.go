@@ -78,8 +78,9 @@ func (l *lgnSrv) handleLogin() {
 	//判断是否有token
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("`data` cannot be empty"), nil)
+		msg := acc + "- `data` cannot be empty"
+		log.Info().Msg(msg)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New(msg), nil)
 		return
 	}
 	//正在处理登陆操作
@@ -95,29 +96,33 @@ func (l *lgnSrv) handleLogin() {
 	tk := l.token
 	code, err := tk.Parse(acc, "login", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- login error: " + err.Error()
+		log.Info().Msg(msg)
 		l.makeLoginToken(acc, "", code, err, nil)
 		return
 	}
 	//登录条件校验
 	code, err = usermiddleware.BaseVerify(acc, tk)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- login error: " + err.Error()
+		log.Info().Msg(msg)
 		l.makeLoginToken(acc, "", code, err, nil)
 		return
 	}
 	//是否已注册
 	exs, ts, rgd := usermodel.UserRegisted(acc)
 	if !exs || rgd == 0 {
-		log.Info().Msg("account not registed")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("account not registed"), nil)
+		msg := acc + "- `account` not registed"
+		log.Info().Msg(msg)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New(msg), nil)
 		return
 	}
 	//请求频繁度检测
 	now := time.Now().Unix()
 	if now-ts < loginExpired {
-		log.Info().Msg("login request too frequence")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("please try again later"), nil)
+		msg := acc + "- login request too frequence, please try again later"
+		log.Info().Msg(msg)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New(msg), nil)
 		return
 	}
 
@@ -125,8 +130,9 @@ func (l *lgnSrv) handleLogin() {
 	//用户ID检测
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
-		log.Info().Msg("userID cannot be empty")
-		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New("userID cannot be empty"), nil)
+		msg := acc + " - `userID` cannot be empty"
+		log.Info().Msg(msg)
+		l.makeLoginToken(acc, "", http.StatusBadRequest, errors.New(msg), nil)
 		return
 	}
 

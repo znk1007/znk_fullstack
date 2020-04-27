@@ -85,8 +85,9 @@ func (us *updateSrv) handleUpdateDevice() {
 	//校验token是否为空
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
-		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New("`data` cannot be empty"))
+		msg := acc + "- `data` cannot be empty"
+		log.Info().Msg(msg)
+		us.makeUpdateDeviceToken("", http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	//是否正在请求
@@ -101,14 +102,16 @@ func (us *updateSrv) handleUpdateDevice() {
 	tk := us.token
 	code, err := tk.Parse(acc, "update_device", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- update device error: " + err.Error()
+		log.Info().Msg(msg)
 		us.makeUpdateDeviceToken(acc, code, err)
 		return
 	}
 	//通用校验
 	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- update device error: " + err.Error()
+		log.Info().Msg(msg)
 		us.makeUpdateDeviceToken(acc, code, err)
 		return
 	}
@@ -117,28 +120,32 @@ func (us *updateSrv) handleUpdateDevice() {
 	//校验userID
 	userID, ok := res["userID"].(string)
 	if !ok || len(userID) == 0 {
-		log.Info().Msg("userID cannot be empty")
+		msg := acc + "- `userID` cannot be empty"
+		log.Info().Msg(msg)
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"))
 		return
 	}
 	//校验state
 	statestr, ok := res["state"].(string)
 	if !ok || len(statestr) == 0 {
-		log.Info().Msg("state cannot be empty")
-		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New("state cannot be empty"))
+		msg := acc + "- `state` cannot be empty"
+		log.Info().Msg(msg)
+		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	state, err := strconv.Atoi(statestr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- update device error: " + err.Error()
+		log.Info().Msg(msg)
 		us.makeUpdateDeviceToken(acc, http.StatusBadRequest, err)
 		return
 	}
 	//更新数据
 	err = devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, devicemodel.DeviceState(state), true)
 	if err != nil {
-		log.Info().Msg("internal server error")
-		us.makeUpdateDeviceToken(acc, http.StatusInternalServerError, errors.New("internal server error"))
+		msg := acc + "- update device error: " + err.Error()
+		log.Info().Msg(msg)
+		us.makeUpdateDeviceToken(acc, http.StatusInternalServerError, errors.New(msg))
 		return
 	}
 	us.makeUpdateDeviceToken(acc, http.StatusOK, nil)

@@ -88,13 +88,14 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	//校验token是否为空
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
-		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New("`data` cannot be empty"))
+		msg := acc + "- `data` cannot be empty"
+		log.Info().Msg(msg)
+		ds.makeDeleteDeviceToken("", http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	//是否正在请求
 	if ds.doing[acc] {
-		msg := acc + "is doing delete device, please try again later"
+		msg := acc + " is doing delete device, please try again later"
 		log.Info().Msg(msg)
 		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
@@ -104,28 +105,32 @@ func (ds *deleteSrv) handlDeleteDevice() {
 	tk := ds.token
 	code, err := tk.Parse(acc, "delete_device", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- delete device error: " + err.Error()
+		log.Info().Msg(msg)
 		ds.makeDeleteDeviceToken(acc, code, err)
 		return
 	}
 	//通用校验
 	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- delete device error: " + err.Error()
+		log.Info().Msg(msg)
 		ds.makeDeleteDeviceToken(acc, code, err)
 		return
 	}
 	userID := tk.UserID
 	if len(userID) == 0 {
-		log.Info().Msg("userID cannot be empty")
-		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("userID cannot be empty"))
+		msg := acc + "- `userID` cannot be empty"
+		log.Info().Msg(msg)
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	//删除设备
 	err = devicemodel.DelDevice(userID, tk.DeviceID)
 	if err != nil {
-		log.Info().Msg("internal server error")
-		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New("internal server error"))
+		msg := acc + "- internal server error: " + err.Error()
+		log.Info().Msg(msg)
+		ds.makeDeleteDeviceToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	ds.makeDeleteDeviceToken(acc, http.StatusOK, nil)

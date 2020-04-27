@@ -91,8 +91,9 @@ func (as *activeUserSrv) handleActiveUser() {
 	}
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
-		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
+		msg := acc + "- `data` cannot be empty"
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	//正在执行
@@ -107,13 +108,15 @@ func (as *activeUserSrv) handleActiveUser() {
 	tk := as.token
 	code, err := tk.Parse(acc, "active_user", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- active user error: " + err.Error()
+		log.Info().Msg(msg)
 		as.makeActiveUserToken(acc, code, err)
 		return
 	}
 	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- active user error: " + err.Error()
+		log.Info().Msg(msg)
 		as.makeActiveUserToken(acc, code, err)
 		return
 	}
@@ -121,12 +124,13 @@ func (as *activeUserSrv) handleActiveUser() {
 	var user usermodel.UserDB
 	user, err = usermodel.FindUser(acc, tk.UserID)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + "- active user error: " + err.Error()
+		log.Info().Msg(msg)
 		as.makeActiveUserToken(acc, netstatus.NoMatchUser, err)
 		return
 	}
 	if user.Per > usermodel.Super {
-		msg := acc + "has no permiss to active or inactive user"
+		msg := acc + " has no permiss to active or inactive user"
 		log.Info().Msg(msg)
 		as.makeActiveUserToken(acc, netstatus.NoActivePermision, errors.New(msg))
 		return
@@ -135,27 +139,31 @@ func (as *activeUserSrv) handleActiveUser() {
 	res := tk.Result
 	targetAcc, ok := res["targetAcc"].(string)
 	if !ok || len(targetAcc) == 0 {
-		log.Info().Msg("`targetAcc` cannot be empty")
-		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`targetAcc` cannot be empty"))
+		msg := acc + "- `targetAcc` cannot be empty"
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	targetID, ok := res["targetID"].(string)
 	if !ok || len(targetID) == 0 {
-		log.Info().Msg("`targetID` cannot be empty")
-		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`targetID` cannot be empty"))
+		msg := acc + "- `targetID` cannot be empty"
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	atstr, ok := res["active"].(string)
 	if !ok || len(atstr) == 0 {
-		log.Info().Msg("`active` cannot be empty")
-		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`active` cannot be empty"))
+		msg := acc + "- `active` cannot be empty"
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	var active int
 	active, err = strconv.Atoi(atstr)
 	if err != nil {
-		log.Info().Msg("`active` is error type")
-		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`active` is error type"))
+		msg := acc + "- `active` is error type"
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	err = usermodel.SetUserActive(targetAcc, targetID, active)
