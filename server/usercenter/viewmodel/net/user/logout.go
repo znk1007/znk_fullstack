@@ -89,7 +89,8 @@ func (ls *lgoSrv) handleLogout() {
 	tk := ls.token
 	code, err := tk.Parse(acc, "logout", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ls.makeLogoutToken(acc, code, err)
 		return
 	}
@@ -99,13 +100,17 @@ func (ls *lgoSrv) handleLogout() {
 		return
 	}
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ls.makeLogoutToken(acc, code, err)
 		return
 	}
 	online, err := usermodel.UserOnline(acc, tk.UserID)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
+		ls.makeLogoutToken(acc, http.StatusInternalServerError, err)
+		return
 	}
 	if online == 0 {
 		ls.makeLogoutToken(acc, http.StatusOK, nil)
@@ -113,7 +118,8 @@ func (ls *lgoSrv) handleLogout() {
 	}
 	err = usermodel.SetUserOnline(acc, tk.UserID, 0)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ls.makeLogoutToken(acc, http.StatusInternalServerError, err)
 		return
 	}
