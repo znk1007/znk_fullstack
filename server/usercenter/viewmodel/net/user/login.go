@@ -141,7 +141,8 @@ func (l *lgnSrv) handleLogin() {
 	if !dvcexs {
 		err := devicemodel.SetCurrentDevice(userID, tk.DeviceID, tk.DeviceName, tk.Platform, 1, false)
 		if err != nil {
-			log.Info().Msg(err.Error())
+			msg := acc + " - internal server error: " + err.Error()
+			log.Info().Msg(msg)
 			l.makeLoginToken(acc, "", http.StatusInternalServerError, err, nil)
 			return
 		}
@@ -149,11 +150,14 @@ func (l *lgnSrv) handleLogin() {
 		device, err := devicemodel.CurrentDevice(userID)
 		if err != nil {
 			log.Info().Msg(err.Error())
+			msg := acc + " - internal server error: " + err.Error()
+			log.Info().Msg(msg)
 			l.makeLoginToken(acc, "", http.StatusInternalServerError, err, nil)
 			return
 		}
 		if device.State == devicemodel.Reject {
-			log.Info().Msg("device has been reject use")
+			msg := acc + " - device has been reject use"
+			log.Info().Msg(msg)
 			l.makeLoginToken(acc, "", netstatus.RejectDevice, errors.New("device has been reject use"), nil)
 			return
 		}
@@ -162,7 +166,8 @@ func (l *lgnSrv) handleLogin() {
 	//查用户数据
 	user, err := usermodel.FindUser(acc, userID)
 	if err != nil {
-		log.Info().Msg("user not exists")
+		msg := acc + " - user not exists"
+		log.Info().Msg(msg)
 		l.makeLoginToken(acc, "", netstatus.NoMatchUser, err, nil)
 		return
 	}
