@@ -8,7 +8,6 @@ import (
 	"path"
 	"runtime"
 
-	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -24,7 +23,6 @@ func init() {
 	cafile := readFile("key/ca.pem")
 	bs, err := ioutil.ReadFile(cafile)
 	if err != nil {
-		log.Info().Msg(err.Error())
 		panic("must contain a ca file")
 	}
 	tc = tlsConf{
@@ -44,12 +42,10 @@ func readFile(relativePath string) string {
 func CATLSCredentials() (credentials.TransportCredentials, error) {
 	cert, err := tls.LoadX509KeyPair(tc.srvPemfile, tc.srvKeyfile)
 	if err != nil {
-		log.Info().Msg(err.Error())
 		return nil, err
 	}
 	certPool := x509.NewCertPool()
 	if ok := certPool.AppendCertsFromPEM(tc.ca); !ok {
-		log.Info().Msg("set x509 pem failed")
 		return nil, errors.New("set x509 pem failed")
 	}
 	tcl := credentials.NewTLS(
@@ -68,7 +64,6 @@ func CATLSCredentials() (credentials.TransportCredentials, error) {
 func TLSCredentials() (credentials.TransportCredentials, error) {
 	tcl, err := credentials.NewServerTLSFromFile(tc.srvPemfile, tc.srvKeyfile)
 	if err != nil {
-		log.Info().Msg(err.Error())
 		return nil, err
 	}
 	return tcl, nil

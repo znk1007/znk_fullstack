@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	usertools "github.com/znk_fullstack/server/usercenter/viewmodel/tools"
@@ -63,7 +62,6 @@ func CreateUser(acc, photo, userID, password string) (err error) {
 	}
 	psw, e := usercrypto.CBCEncrypt(password)
 	if e != nil {
-		log.Info().Msg(e.Error())
 		err = e
 		return
 	}

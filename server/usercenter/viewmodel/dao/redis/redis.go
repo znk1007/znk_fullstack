@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v7"
-	"github.com/rs/zerolog/log"
 	userconf "github.com/znk_fullstack/server/usercenter/viewmodel/conf"
 )
 
@@ -39,29 +38,24 @@ func initRedis() {
 		}
 		nclstrRds = redis.NewClient(ops)
 	}
-	log.Info().Msg("connect redis success")
 }
 
 //HExists 是否存在hash表中
 func HExists(key string, field string) (exs bool, err error) {
 	if nclstrRds != nil {
 		if err = checkRds(); err != nil {
-			log.Info().Msg(err.Error())
 			return
 		}
 		exs, err = nclstrRds.HExists(key, field).Result()
 		if err != nil {
-			log.Info().Msg(err.Error())
 			return
 		}
 	} else {
 		if err = checkRds(); err != nil {
-			log.Info().Msg(err.Error())
 			return
 		}
 		exs, err = clstrRds.HExists(key, field).Result()
 		if err != nil {
-			log.Info().Msg(err.Error())
 			return
 		}
 	}
@@ -74,22 +68,18 @@ func Exists(key ...string) bool {
 	var err error
 	if nclstrRds != nil {
 		if err := checkRds(); err != nil {
-			log.Info().Msg(err.Error())
 			return false
 		}
 		idx, err = nclstrRds.Exists(key...).Result()
 		if err != nil {
-			log.Info().Msg(err.Error())
 			return false
 		}
 	} else {
 		if err := checkRds(); err != nil {
-			log.Info().Msg(err.Error())
 			return false
 		}
 		idx, err = clstrRds.Exists(key...).Result()
 		if err != nil {
-			log.Info().Msg(err.Error())
 			return false
 		}
 	}
@@ -253,7 +243,6 @@ func HMGet(key string, field ...string) (slc []interface{}, err error) {
 //checkRds 校验rds实例
 func checkRds() error {
 	if clstrRds == nil && nclstrRds == nil {
-		log.Info().Msg("redis client not init")
 		return errors.New("redis client not init")
 	}
 	return nil

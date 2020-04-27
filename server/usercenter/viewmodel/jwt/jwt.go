@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/rs/zerolog/log"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 )
 
@@ -78,7 +77,6 @@ func (uj *UserJWT) Parse(token string, build bool) {
 		return publicKey, nil
 	})
 	if err != nil {
-		log.Info().Msg(err.Error())
 		uj.err = err
 		return
 	}

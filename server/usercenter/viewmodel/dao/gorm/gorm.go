@@ -38,13 +38,11 @@ func initMariaDB() {
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
-	log.Info().Msg("connect mariadb success")
 }
 
 //checkDB 校验db句柄
 func checkDB() error {
 	if gdb == nil {
-		log.Info().Msg("db object can't be nil")
 		return errors.New("db object can't be nil")
 	}
 	return nil

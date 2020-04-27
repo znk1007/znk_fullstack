@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	usercrypto "github.com/znk_fullstack/server/usercenter/viewmodel/crypto"
 	userjwt "github.com/znk_fullstack/server/usercenter/viewmodel/jwt"
 	netstatus "github.com/znk_fullstack/server/usercenter/viewmodel/net/status"
@@ -43,19 +42,16 @@ func (verify *Token) Generate(params map[string]interface{}) (token string, err 
 func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 	code = http.StatusOK
 	if len(acc) == 0 {
-		log.Info().Msg("miss param `account` or `account` is empty")
 		err = errors.New("miss param `account` or `account` is empty")
 		code = http.StatusBadRequest
 		return
 	}
 	if len(token) == 0 {
-		log.Info().Msg("miss param `data` or `data` is empty")
 		err = errors.New("miss param `data` or `data` is empty")
 		code = http.StatusBadRequest
 		return
 	}
 	if !verify.freq.Expired(acc, method, time.Now().Unix()) {
-		log.Info().Msg("request too freqence")
 		err = errors.New("please request later")
 		code = netstatus.RequestFrequence
 		return
@@ -64,7 +60,6 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 	verify.uj.Parse(token, true)
 	tkmap, e := verify.uj.Result()
 	if e != nil {
-		log.Info().Msg(e.Error())
 		err = e
 		code = http.StatusBadRequest
 		return
@@ -72,7 +67,6 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 	//设备ID
 	deviceID, ok := tkmap["deviceID"].(string)
 	if !ok || len(deviceID) == 0 {
-		log.Info().Msg("deviceID cannot be empty")
 		err = errors.New("deviceID cannot be empty")
 		code = http.StatusBadRequest
 		return
@@ -80,7 +74,6 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 	//设备名
 	deviceName, ok := tkmap["deviceName"].(string)
 	if !ok || len(deviceName) == 0 {
-		log.Info().Msg("deviceName cannot be empty")
 		err = errors.New("deviceName cannot be empty")
 		code = http.StatusBadRequest
 		return
@@ -88,7 +81,6 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 	//平台类型
 	platform, ok := tkmap["platform"].(string)
 	if !ok || len(platform) == 0 {
-		log.Info().Msg("platform cannot be empty")
 		err = errors.New("platform cannot be empty")
 		code = http.StatusBadRequest
 		return
@@ -96,13 +88,11 @@ func (verify *Token) Parse(acc, method, token string) (code int, err error) {
 	//秘钥
 	key, ok := tkmap["appkey"].(string)
 	if !ok || len(key) == 0 {
-		log.Info().Msg("miss param `appkey`")
 		err = errors.New("miss param `appkey`")
 		code = http.StatusBadRequest
 		return
 	}
 	if key != usercrypto.GetSecurityKeyString() {
-		log.Info().Msg("appkey is error")
 		err = errors.New("appkey is error")
 		code = http.StatusBadRequest
 		return

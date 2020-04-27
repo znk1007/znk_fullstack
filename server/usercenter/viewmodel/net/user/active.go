@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -66,6 +67,18 @@ func (as *activeUserSrv) readActiveRes(ctx context.Context) (*userproto.UserUpda
 	}
 }
 
+/*
+用户ID：userID，
+会话ID：sessionID ，
+时间戳：timestamp，
+设备ID：deviceID，
+设备名：deviceName，
+平台类型：platform，
+应用标识：appkey，
+目标用户账号：targetAcc，
+目标用户ID：targetID
+*/
+
 //handleActiveUser 处理请求
 func (as *activeUserSrv) handleActiveUser() {
 	req := as.req
@@ -118,8 +131,43 @@ func (as *activeUserSrv) handleActiveUser() {
 		as.makeActiveUserToken(acc, netstatus.NoActivePermision, errors.New(msg))
 		return
 	}
+	//目标账号
+	res := tk.Result
+	targetAcc, ok := res["targetAcc"].(string)
+	if !ok || len(targetAcc) == 0 {
+		log.Info().Msg("`targetAcc` cannot be empty")
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`targetAcc` cannot be empty"))
+		return
+	}
+	targetID, ok := res["targetID"].(string)
+	if !ok || len(targetID) == 0 {
+		log.Info().Msg("`targetID` cannot be empty")
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`targetID` cannot be empty"))
+		return
+	}
+	atstr, ok := res["active"].(string)
+	if !ok || len(atstr) == 0 {
+		log.Info().Msg("`active` cannot be empty")
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`active` cannot be empty"))
+		return
+	}
+	var active int
+	active, err = strconv.Atoi(atstr)
+	if err != nil {
+		log.Info().Msg("`active` is error type")
+		as.makeActiveUserToken(acc, http.StatusBadRequest, errors.New("`active` is error type"))
+		return
+	}
+	err = usermodel.SetUserActive(targetAcc, targetID, active)
+	if err != nil {
+		msg := acc + "internal server error: " + err.Error()
+		log.Info().Msg(msg)
+		as.makeActiveUserToken(acc, http.StatusInternalServerError, err)
+		return
+	}
 }
 
+//makeActiveUserToken 生成激活/禁用用户响应数据
 func (as *activeUserSrv) makeActiveUserToken(acc string, code int, err error) {
 	msg := "operation success"
 	if err != nil {

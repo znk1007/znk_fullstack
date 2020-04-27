@@ -3,7 +3,6 @@ package devicemodel
 import (
 	"errors"
 
-	"github.com/rs/zerolog/log"
 	userredis "github.com/znk_fullstack/server/usercenter/viewmodel/dao/redis"
 )
 
@@ -98,7 +97,6 @@ func redisUpdateDeviceState(userID, deviceID string, state DeviceState) (e error
 	key := devicePrefix + userID
 	orgDID, _ := redisCurrentDeviceID(userID)
 	if orgDID != deviceID {
-		log.Info().Msg("not the same device")
 		return errors.New("not the same device")
 	}
 	e = userredis.HSet(key, "state", state)
@@ -110,7 +108,6 @@ func redisUpdateDeviceOnline(userID, deviceID string, online int) (e error) {
 	key := devicePrefix + userID
 	orgDID, _ := redisCurrentDeviceID(userID)
 	if orgDID != deviceID {
-		log.Info().Msg("not the same device")
 		return errors.New("not the same device")
 	}
 	e = userredis.HSet(key, "online", online)

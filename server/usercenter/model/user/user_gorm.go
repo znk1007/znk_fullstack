@@ -3,7 +3,6 @@ package usermodel
 import (
 	"errors"
 
-	"github.com/rs/zerolog/log"
 	userproto "github.com/znk_fullstack/server/usercenter/model/protos/generated"
 	usergorm "github.com/znk_fullstack/server/usercenter/viewmodel/dao/gorm"
 )
@@ -25,7 +24,6 @@ func gormCreateUser(user *userproto.User, password string) (exists bool, err err
 		return
 	}
 	if len(password) == 0 {
-		log.Info().Msg("password cannot be empty")
 		exists = false
 		err = errors.New("password cannot be empty")
 		return
