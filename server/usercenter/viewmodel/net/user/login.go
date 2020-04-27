@@ -149,7 +149,6 @@ func (l *lgnSrv) handleLogin() {
 	} else {
 		device, err := devicemodel.CurrentDevice(userID)
 		if err != nil {
-			log.Info().Msg(err.Error())
 			msg := acc + " - internal server error: " + err.Error()
 			log.Info().Msg(msg)
 			l.makeLoginToken(acc, "", http.StatusInternalServerError, err, nil)

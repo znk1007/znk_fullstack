@@ -144,8 +144,9 @@ func (s *rgstSrv) handleRegist() {
 
 	psd, ok := res["password"].(string)
 	if !ok || len(psd) == 0 {
-		log.Info().Msg("password cannot be empty")
-		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New("password cannot be empty"))
+		msg := acc + " - `password` cannot be empty"
+		log.Info().Msg(msg)
+		s.makeRegistToken(acc, "", http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	userID := makeID()
@@ -156,7 +157,8 @@ func (s *rgstSrv) handleRegist() {
 func (s *rgstSrv) saveUser(acc string, photo string, userID string, password string) {
 	e := usermodel.CreateUser(acc, photo, userID, password)
 	if e != nil {
-		log.Info().Msg(e.Error())
+		msg := acc + " - internal server error: " + e.Error()
+		log.Info().Msg(msg)
 		s.makeRegistToken(acc, "", http.StatusBadRequest, e)
 		return
 	}
@@ -178,7 +180,6 @@ func (s *rgstSrv) makeRegistToken(acc string, userID string, code int, err error
 		rgd = 1
 	} else {
 		rgd = 0
-		log.Info().Msg(err.Error())
 	}
 	//保存用户注册状态
 	if len(acc) > 0 {

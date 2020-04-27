@@ -134,13 +134,14 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 	//token
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
-		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
+		msg := acc + " - `data` cannot be empty"
+		log.Info().Msg(msg)
+		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	//正在执行中
 	if ui.doing[acc] {
-		msg := acc + "is doing update password, please try again later"
+		msg := acc + " - is doing update password, please try again later"
 		log.Info().Msg(msg)
 		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
@@ -150,27 +151,31 @@ func (ui *updateInfoSrv) handleUpdatePsw() {
 	tk := ui.token
 	code, err := tk.Parse(acc, "update_password", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error:" + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdatePswToken(acc, code, err)
 		return
 	}
 	//通用请求校验
 	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdatePswToken(acc, code, err)
 		return
 	}
 	//更新密码
 	newPsw, ok := tk.Result["newPsw"].(string)
 	if !ok || len(newPsw) == 0 {
-		log.Info().Msg("`newPsw` cannot be empty")
-		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("`newPsw` cannot be empty"))
+		msg := acc + " - `newPsw` cannot be empty"
+		log.Info().Msg(msg)
+		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	err = usermodel.SetUserPassword(acc, tk.UserID, newPsw)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdatePswToken(acc, http.StatusBadRequest, err)
 		return
 	}
@@ -254,41 +259,49 @@ func (ui *updateInfoSrv) handleUpdatePhone() {
 	//token校验
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
+		msg := acc + " - `data` cannot be empty"
+		log.Info().Msg(msg)
 		ui.makeUpdatePhoneToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
 	code, err := ui.token.Parse(req.GetAccount(), "update_phone", req.GetData())
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdatePhoneToken(acc, code, err)
 		return
 	}
-	tk := ui.token
-	code, err = usermiddleware.CommonRequestVerify(acc, tk)
-	if err != nil {
-		log.Info().Msg(err.Error())
-		ui.makeUpdatePhoneToken(acc, code, err)
-		return
-	}
-	//正在执行中
+	//正在处理
 	if ui.doing[acc] {
-		log.Info().Msg("account is operating, please do it later")
-		ui.makeUpdatePswToken(acc, http.StatusBadRequest, errors.New("account is operating, please do it later"))
+		msg := acc + " - is doing update phone, please try again later"
+		log.Info().Msg(msg)
+		ui.makeUpdatePhoneToken(acc, http.StatusBadRequest, errors.New(msg))
 		return
 	}
 	ui.doing[acc] = true
+	//校验数据
+	tk := ui.token
+	code, err = usermiddleware.CommonRequestVerify(acc, tk)
+	if err != nil {
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
+		ui.makeUpdatePhoneToken(acc, code, err)
+		return
+	}
+
 	//检验phone字段
 	p, ok := tk.Result["phone"].(string)
 	if !ok || len(p) == 0 {
-		log.Info().Msg("`phone` cannot be empty")
+		msg := acc + " - `phone` cannot be empty"
+		log.Info().Msg(msg)
 		ui.makeUpdatePhoneToken(acc, http.StatusBadRequest, errors.New("`phone` cannot be empty"))
 		return
 	}
 	//更新手机号
 	err = usermodel.SetUserPhone(acc, tk.UserID, p)
 	if err != nil {
-		log.Info().Msg("internal server error")
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdatePhoneToken(acc, http.StatusInternalServerError, errors.New("internal server error"))
 		return
 	}
@@ -353,7 +366,8 @@ func (ui *updateInfoSrv) handleUpdateNickname() {
 	//token校验
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
+		msg := acc + " - `data` cannot be empty"
+		log.Info().Msg(msg)
 		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New("`data` cannot be empty"))
 		return
 	}
@@ -368,26 +382,30 @@ func (ui *updateInfoSrv) handleUpdateNickname() {
 	//解析数据
 	code, err := ui.token.Parse(req.GetAccount(), "update_phone", req.GetData())
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdateNicknameToken(acc, code, err)
 		return
 	}
 	tk := ui.token
 	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdateNicknameToken(acc, code, err)
 		return
 	}
 	nk, ok := tk.Result["nickname"].(string)
 	if !ok || len(nk) == 0 {
-		log.Info().Msg("`nickname` cannot be empty")
+		msg := acc + " - `nickname` cannot be empty"
+		log.Info().Msg(msg)
 		ui.makeUpdateNicknameToken(acc, http.StatusBadRequest, errors.New("`nickname` cannot be empty"))
 		return
 	}
 	err = usermodel.SetUserNickname(acc, tk.UserID, nk)
 	if err != nil {
-		log.Info().Msg("internal server error")
+		msg := acc + " - internal server error" + err.Error()
+		log.Info().Msg(msg)
 		ui.makeUpdateNicknameToken(acc, http.StatusInternalServerError, err)
 		return
 	}

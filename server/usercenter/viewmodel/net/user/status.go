@@ -74,26 +74,30 @@ func (ss *userStatusSrv) handleUserStatus() {
 	}
 	tkstr := req.GetData()
 	if len(tkstr) == 0 {
-		log.Info().Msg("`data` cannot be empty")
-		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, errors.New("`data` cannot be empty"))
+		msg := acc + " - `data` cannot be empty"
+		log.Info().Msg(msg)
+		ss.makeStatusToken(acc, http.StatusBadRequest, 0, 0, errors.New(msg))
 		return
 	}
 	tk := ss.token
 	code, err := tk.Parse(acc, "user_status", tkstr)
 	if err != nil {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error: " + err.Error()
+		log.Info().Msg(msg)
 		ss.makeStatusToken(acc, code, 0, 0, err)
 		return
 	}
 	code, err = usermiddleware.CommonRequestVerify(acc, tk)
 	//用户是否存在
 	if code == netstatus.UserInactive || code == netstatus.UserNotRegisted {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error:" + err.Error()
+		log.Info().Msg(msg)
 		ss.makeStatusToken(acc, code, 0, 0, err)
 		return
 	}
 	if code == netstatus.SessionInvalidate || code == netstatus.UserLogout {
-		log.Info().Msg(err.Error())
+		msg := acc + " - internal server error:" + err.Error()
+		log.Info().Msg(msg)
 		ss.makeStatusToken(acc, code, 0, 1, err)
 		return
 	}
