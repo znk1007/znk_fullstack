@@ -833,7 +833,8 @@ func (m *UserUpdateNicknameRes) GetData() string {
 //平台类型：platform，
 //应用标识：appkey，
 //目标用户账号：targetAcc，
-//目标用户ID：targetID]
+//目标用户ID：targetID，
+//激活状态：active]
 type UserUpdateActiveReq struct {
 	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 	Data                 string   `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
