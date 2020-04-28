@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	usercrypto "github.com/znk_fullstack/server/usercenter/source/controller/crypto"
+	usercrypto "github.com/znk_fullstack/server/imcenter/source/controller/crypto"
 )
 
 //UserJWT 用户jwt验证对象
