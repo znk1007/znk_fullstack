@@ -1,4 +1,4 @@
-package imread
+package imconf
 
 import (
 	"path"

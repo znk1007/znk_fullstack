@@ -1,4 +1,4 @@
-package netim
+package imnetclient
 
 import (
 	userproto "github.com/znk_fullstack/server/imcenter/source/model/protos/generated"
