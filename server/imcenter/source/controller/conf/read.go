@@ -1,4 +1,4 @@
-package imseckey
+package imread
 
 import (
 	"path"
@@ -23,7 +23,7 @@ func init() {
 
 //TLSCredentials ca安全验证配置
 func TLSCredentials() (tc credentials.TransportCredentials, err error) {
-	tc, err = credentials.NewClientTLSFromFile(fm.srvpem, fm.srvkey)
+	tc, err = credentials.NewClientTLSFromFile(fm.srvpem, "com.znk.com")
 	return
 }
 
