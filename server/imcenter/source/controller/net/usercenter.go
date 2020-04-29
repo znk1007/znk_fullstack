@@ -1,4 +1,4 @@
-package netimuc
+package netim
 
 import (
 	userproto "github.com/znk_fullstack/server/imcenter/source/model/protos/generated"
