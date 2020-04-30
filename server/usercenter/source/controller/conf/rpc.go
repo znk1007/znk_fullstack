@@ -10,15 +10,15 @@ var rpcmap map[Env]RPCConf
 
 func init() {
 	rpcmap = map[Env]RPCConf{
-		Dev: RPCConf{
+		Dev: {
 			Host: "localhost",
 			Port: "50051",
 		},
-		Test: RPCConf{
+		Test: {
 			Host: "localhost",
 			Port: "50051",
 		},
-		Prod: RPCConf{
+		Prod: {
 			Host: "localhost",
 			Port: "50051",
 		},

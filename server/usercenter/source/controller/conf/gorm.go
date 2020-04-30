@@ -10,13 +10,11 @@ type GormConf struct {
 	DB       string
 }
 
-var gorms []GormConf
-
 var gormmap map[Env]GormConf
 
 func init() {
 	gormmap = map[Env]GormConf{
-		Dev: GormConf{
+		Dev: {
 			Host:     "localhost",
 			Port:     "3306",
 			Username: "znk",
@@ -24,7 +22,7 @@ func init() {
 			Dialect:  "mysql",
 			DB:       "znk",
 		},
-		Test: GormConf{
+		Test: {
 			Host:     "47.105.85.107",
 			Port:     "3308",
 			Username: "znk",
@@ -32,7 +30,7 @@ func init() {
 			Dialect:  "mysql",
 			DB:       "znk",
 		},
-		Prod: GormConf{
+		Prod: {
 			Host:     "47.105.85.107",
 			Port:     "3308",
 			Username: "znk",
