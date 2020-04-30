@@ -12,7 +12,20 @@ const (
 	Prod EnvType = 2
 )
 
-//EnvConf 环境配置
-type EnvConf struct {
-	Et EnvType //Et 环境变量
+//curEt 当前环境
+var curEt EnvType
+
+//SetCurEnvConf 设置当前环境
+func SetCurEnvConf(et EnvType) {
+	curEt = et
+}
+
+//SetUcEnv 配置用户中心环境
+func SetUcEnv(et EnvType, host, port string) {
+	setrpcenv(et, host, port)
+}
+
+//GetUcEnv 获取用户中心环境配置
+func GetUcEnv() UcEnv {
+	return getUcEnv(curEt)
 }
