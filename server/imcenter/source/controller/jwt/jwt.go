@@ -1,4 +1,4 @@
-package userjwt
+package imjwt
 
 import (
 	"crypto/rsa"
@@ -14,8 +14,8 @@ import (
 	usercrypto "github.com/znk_fullstack/server/imcenter/source/controller/crypto"
 )
 
-//UserJWT 用户jwt验证对象
-type UserJWT struct {
+//IMJWT 用户jwt验证对象
+type IMJWT struct {
 	expiredinterval int64
 	parseSucc       bool
 	err             error
@@ -39,19 +39,20 @@ func init() {
 }
 
 //NewUserJWT 创建用户jwt验证 expired 纳秒级别
-func NewUserJWT(expiredinterval int64) *UserJWT {
-	return &UserJWT{
+func NewUserJWT(expiredinterval int64) *IMJWT {
+	return &IMJWT{
 		expiredinterval: expiredinterval,
 	}
 }
 
-func (uj *UserJWT) ExpiredInterval() int64 {
-	return uj.expiredinterval
+//ExpiredInterval 超时
+func (ij *IMJWT) ExpiredInterval() int64 {
+	return ij.expiredinterval
 }
 
 //Token token令牌
-func (uj *UserJWT) Token(params map[string]interface{}) (token string, err error) {
-	tmpExp := uj.expiredinterval
+func (ij *IMJWT) Token(params map[string]interface{}) (token string, err error) {
+	tmpExp := ij.expiredinterval
 	if tmpExp == 0 {
 		tmpExp = DefaultInterval()
 	}
@@ -68,28 +69,28 @@ func (uj *UserJWT) Token(params map[string]interface{}) (token string, err error
 }
 
 //Parse 解析jwt
-func (uj *UserJWT) Parse(token string, build bool) {
-	uj.parseSucc = false
-	uj.res = nil
+func (ij *IMJWT) Parse(token string, build bool) {
+	ij.parseSucc = false
+	ij.res = nil
 	tk, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
 		t.Header["kid"] = usercrypto.GetSecurityKeyString()
 		t.Header["alg"] = "RS512"
 		return publicKey, nil
 	})
 	if err != nil {
-		uj.err = err
+		ij.err = err
 		return
 	}
 	clms, ok := tk.Claims.(jwt.MapClaims)
 	if !ok || !tk.Valid {
-		uj.err = errors.New("internal error")
+		ij.err = errors.New("internal error")
 		return
 	}
 	if ok && tk.Valid && build {
 		//是否生成map
 		v := reflect.ValueOf(clms)
 		if v.Kind() != reflect.Map {
-			uj.err = errors.New("type error")
+			ij.err = errors.New("type error")
 			return
 		}
 		if v.Kind() == reflect.Map {
@@ -100,17 +101,17 @@ func (uj *UserJWT) Parse(token string, build bool) {
 					kMap[k.String()] = val.Interface()
 				}
 			}
-			uj.err = nil
-			uj.res = kMap
-			uj.parseSucc = true
+			ij.err = nil
+			ij.res = kMap
+			ij.parseSucc = true
 		}
 	}
 }
 
 //Result 结果
-func (uj *UserJWT) Result() (res map[string]interface{}, err error) {
-	res = uj.res
-	err = uj.err
+func (ij *IMJWT) Result() (res map[string]interface{}, err error) {
+	res = ij.res
+	err = ij.err
 	return
 }
 
