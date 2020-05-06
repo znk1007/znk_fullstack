@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	skframe "github.com/znk_fullstack/server/socket/engine/frame"
+	skframe "github.com/znk_fullstack/server/socket/engine/tool/frame"
 )
 
 func TestPacketType(t *testing.T) {

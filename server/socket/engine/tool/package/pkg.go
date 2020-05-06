@@ -1,7 +1,7 @@
 package skpkg
 
 import (
-	skframe "github.com/znk_fullstack/server/socket/engine/frame"
+	skframe "github.com/znk_fullstack/server/socket/engine/tool/frame"
 )
 
 //PacketType type of packet
