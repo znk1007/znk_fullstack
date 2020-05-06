@@ -60,5 +60,8 @@ func (pt PacketType) BinaryByte() byte {
 
 //ByteToPacketType converts a byte to PacketType.
 func ByteToPacketType(b byte, ft skframe.FrameType) PacketType {
-
+	if ft == skframe.FrameString {
+		b -= '0'
+	}
+	return PacketType(b)
 }
