@@ -1,5 +1,9 @@
 package skpkg
 
+import (
+	skframe "github.com/znk_fullstack/server/socket/engine/frame"
+)
+
 //PacketType type of packet
 type PacketType int
 
