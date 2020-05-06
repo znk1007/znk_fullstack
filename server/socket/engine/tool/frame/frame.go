@@ -20,6 +20,6 @@ func (ft FrameType) Byte() byte {
 	return byte(ft)
 }
 
-type FrameReader interface {
-	NextReader() (FrameType, Package)
-}
+// type FrameReader interface {
+// 	NextReader() (FrameType, Packaget)
+// }
