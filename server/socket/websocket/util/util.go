@@ -241,6 +241,9 @@ headers:
 		for {
 			var t string
 			t, s = nextToken(skipSpace(s))
+			if t == "" {
+				continue headers
+			}
 		}
 	}
 	return result
