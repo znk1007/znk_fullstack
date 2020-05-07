@@ -120,8 +120,7 @@ func skipSpace(s string) (rest string) {
 			break
 		}
 	}
-	rest = s[i:]
-	return
+	return s[i:]
 }
 
 //nextToken 返回符合 rfc 2616 规则的令牌喝遵循令牌协议的字符串
@@ -132,9 +131,7 @@ func nextToken(s string) (token, rest string) {
 			break
 		}
 	}
-	token = s[:i]
-	rest = s[i:]
-	return
+	return s[:i], s[i:]
 }
 
 //nextTokenOrQuoted RFC 2616主要标志或引用字符串
@@ -237,13 +234,43 @@ func ParseExtensions(header http.Header) []map[string]string {
 	//     ;'token' ABNF.
 	var result []map[string]string
 headers:
-	for _, s := range header["Sec-WebSocket-Extensions"] {
+	for _, s := range header["Sec-Websocket-Extensions"] {
 		for {
 			var t string
 			t, s = nextToken(skipSpace(s))
 			if t == "" {
 				continue headers
 			}
+			ext := map[string]string{"": t}
+			for {
+				s = skipSpace(s)
+				if !strings.HasPrefix(s, ";") {
+					break
+				}
+				var k string
+				k, s = nextToken(skipSpace(s[1:]))
+				if k == "" {
+					continue headers
+				}
+				s = skipSpace(s)
+				var v string
+				if strings.HasPrefix(s, "=") {
+					v, s = nextTokenOrQuoted(skipSpace(s[1:]))
+					s = skipSpace(s)
+				}
+				if s != "" && s[0] != ',' && s[0] != ';' {
+					continue headers
+				}
+				ext[k] = v
+			}
+			if s != "" && s[0] != ',' {
+				continue headers
+			}
+			result = append(result, ext)
+			if s == "" {
+				continue headers
+			}
+			s = s[1:]
 		}
 	}
 	return result
