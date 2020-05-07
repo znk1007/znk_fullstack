@@ -221,3 +221,27 @@ headers:
 	}
 	return false
 }
+
+//ParseExtensions 解析header中包含websocket扩展相关信息
+func ParseExtensions(header http.Header) []map[string]string {
+	// From RFC 6455:
+	//
+	//  Sec-WebSocket-Extensions = extension-list
+	//  extension-list = 1#extension
+	//  extension = extension-token *( ";" extension-param )
+	//  extension-token = registered-token
+	//  registered-token = token
+	//  extension-param = token [ "=" (token | quoted-string) ]
+	//     ;When using the quoted-string syntax variant, the value
+	//     ;after quoted-string unescaping MUST conform to the
+	//     ;'token' ABNF.
+	var result []map[string]string
+headers:
+	for _, s := range header["Sec-WebSocket-Extensions"] {
+		for {
+			var t string
+			t, s = nextToken(skipSpace(s))
+		}
+	}
+	return result
+}
