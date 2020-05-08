@@ -42,7 +42,7 @@ var tokenListContainsValueTests = []struct {
 func TestTokenListContainsValue(t *testing.T) {
 	for _, tt := range tokenListContainsValueTests {
 		h := http.Header{"Upgrade": {tt.value}}
-		ok := TokenListContainsValue(h, "Upgrade", "websocket")
+		ok := tokenListContainsValue(h, "Upgrade", "websocket")
 		if ok != tt.ok {
 			t.Errorf("TokenListContainsValue(h, n, %q) = %v, want %v", tt.value, ok, tt.ok)
 		}
@@ -84,7 +84,7 @@ var parseExtensionTests = []struct {
 func TestParseExtensions(t *testing.T) {
 	for _, tt := range parseExtensionTests {
 		h := http.Header{http.CanonicalHeaderKey("Sec-WebSocket-Extensions"): {tt.value}}
-		extensions := ParseExtensions(h)
+		extensions := parseExtensions(h)
 		if !reflect.DeepEqual(extensions, tt.extensions) {
 			t.Errorf("ParseExtensions(%q)\n = %v,\nwant %v", tt.value, extensions, tt.extensions)
 		}

@@ -99,7 +99,17 @@ func (p *proxyPerHost) AddFromString(s string) {
 			if _, net, err := net.ParseCIDR(host); err == nil {
 				p.AddNetwork(net)
 			}
+			continue
 		}
+		if ip := net.ParseIP(host); ip != nil {
+			p.AddIP(ip)
+			continue
+		}
+		if strings.HasPrefix(host, "*.") {
+			p.AddZone(host[1:])
+			continue
+		}
+		p.AddHost(host)
 	}
 }
 
@@ -108,4 +118,31 @@ func (p *proxyPerHost) AddFromString(s string) {
 //A connection to a named host will never match.
 func (p *proxyPerHost) AddNetwork(net *net.IPNet) {
 	p.bypassNetworks = append(p.bypassNetworks, net)
+}
+
+//AddZone specifies a DNS suffix that will use the bypass proxy.
+//A zone of "example.com" matches "example.com" and all of its subdomains.
+func (p *proxyPerHost) AddZone(zone string) {
+	if strings.HasPrefix(zone, ".") {
+		zone = zone[:len(zone)-1]
+	}
+	if !strings.HasPrefix(zone, ".") {
+		zone = "." + zone
+	}
+	p.bypassZones = append(p.bypassZones, zone)
+}
+
+//AddIP specifies an IP address that will use the bypass proxy.
+//Note that this will only take effect if a literal IP address is dialed.
+//A connection to a named host will never match an IP.
+func (p *proxyPerHost) AddIP(ip net.IP) {
+	p.bypassIPs = append(p.bypassIPs, ip)
+}
+
+//AddHost specifies a host name that will use the bypass proxy.
+func (p *proxyPerHost) AddHost(host string) {
+	if strings.HasSuffix(host, ".") {
+		host = host[:len(host)-1]
+	}
+	p.bypassHosts = append(p.bypassHosts, host)
 }
