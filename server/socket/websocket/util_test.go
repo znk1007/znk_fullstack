@@ -1,4 +1,4 @@
-package wsutil
+package ws
 
 import (
 	"net/http"

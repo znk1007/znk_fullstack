@@ -1,4 +1,4 @@
-package wsutil
+package ws
 
 import (
 	"crypto/rand"
@@ -12,16 +12,16 @@ import (
 
 var keyGUID = []byte("258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
 
-//ComputeAcceptKey 计算拼接key
-func ComputeAcceptKey(challengeKey string) string {
+//computeAcceptKey 计算拼接key
+func computeAcceptKey(challengeKey string) string {
 	h := sha1.New()
 	h.Write([]byte(challengeKey))
 	h.Write(keyGUID)
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 
-//GenerateChallengeKey 生成关键key
-func GenerateChallengeKey() (str string, err error) {
+//generateChallengeKey 生成关键key
+func generateChallengeKey() (str string, err error) {
 	p := make([]byte, 16)
 	if _, err = io.ReadFull(rand.Reader, p); err != nil {
 		return
@@ -193,8 +193,8 @@ func equalASCIIFold(s, t string) bool {
 	return s == t
 }
 
-//TokenListContainsValue 令牌是否包含给定的字符串
-func TokenListContainsValue(header http.Header, name, value string) bool {
+//tokenListContainsValue 令牌是否包含给定的字符串
+func tokenListContainsValue(header http.Header, name, value string) bool {
 headers:
 	for _, s := range header[name] {
 		for {
@@ -219,8 +219,8 @@ headers:
 	return false
 }
 
-//ParseExtensions 解析header中包含websocket扩展相关信息
-func ParseExtensions(header http.Header) []map[string]string {
+//parseExtensions 解析header中包含websocket扩展相关信息
+func parseExtensions(header http.Header) []map[string]string {
 	// From RFC 6455:
 	//
 	//  Sec-WebSocket-Extensions = extension-list
