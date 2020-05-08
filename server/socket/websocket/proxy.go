@@ -2,7 +2,10 @@ package ws
 
 import (
 	"net"
+	"net/url"
+	"os"
 	"strings"
+	"sync"
 )
 
 type proxyDirect struct{}
@@ -150,4 +153,61 @@ func (p *proxyPerHost) AddHost(host string) {
 //Auth contains authentication parameters that specific Dialers may require
 type proxyAuth struct {
 	User, Password string
+}
+
+//EnvOnce looks up an environment variable (optionally by multiple names) once.
+//It mitigates expensive lookups on some platforms (e.g. Windows).
+//(Borrowed from net/http/transport.go)
+type proxyEnvOnce struct {
+	names []string
+	once  sync.Once
+	val   string
+}
+
+func (e *proxyEnvOnce) Get() string {
+	e.once.Do(e.init)
+	return e.val
+}
+
+//init 初始化
+func (e *proxyEnvOnce) init() {
+	for _, n := range e.names {
+		e.val = os.Getenv(n)
+		if e.val != "" {
+			return
+		}
+	}
+}
+
+var (
+	proxyAllProxyEnv = &proxyEnvOnce{
+		names: []string{"ALL_PROXY", "all_proxy"},
+	}
+	proxyNoProxyEnv = &proxyEnvOnce{
+		names: []string{"NO_PROXY", "no_proxy"},
+	}
+)
+
+//proxyProxySchemes is a map from URL schemes to a function that creates a Dialer
+//from a URL with such a scheme.
+var proxyProxySchemes map[string]func(*url.URL, proxyDialer) (proxyDialer, error)
+
+//proxyRegisterDialerType takes a URL scheme and a function to generate Dialers from
+//a URL with that scheme and a forwarding Dialer.
+//Registered schemes are used by FromURL.
+func proxyRegisterDialerType(scheme string, f func(*url.URL, proxyDialer) (proxyDialer, error)) {
+	if proxyProxySchemes == nil {
+		proxyProxySchemes = make(map[string]func(*url.URL, proxyDialer) (proxyDialer, error))
+	}
+	proxyProxySchemes[scheme] = f
+}
+
+func proxyFromURL(u *url.URL, forward proxyDialer) (proxyDialer, error) {
+
+}
+
+//proxyFromEnvironment returns the dialer specified by the proxy related variables
+//in the environment
+func proxyFromEnvironment() proxyDialer {
+	allProxy := proxy
 }
