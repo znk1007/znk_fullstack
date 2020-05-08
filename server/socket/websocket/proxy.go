@@ -146,3 +146,8 @@ func (p *proxyPerHost) AddHost(host string) {
 	}
 	p.bypassHosts = append(p.bypassHosts, host)
 }
+
+//Auth contains authentication parameters that specific Dialers may require
+type proxyAuth struct {
+	User, Password string
+}
