@@ -313,7 +313,50 @@ func (s *proxySocks5) connect(conn net.Conn, target string) error {
 		}
 		buf = append(buf, proxySocks5Domain)
 		buf = append(buf, byte(len(host)))
+		buf = append(buf, host...)
 	}
+	buf = append(buf, byte(port>>8), byte(port))
+	if _, err := conn.Write(buf); err != nil {
+		return errors.New("proxy: failed to write connect request to SOCKS5 proxy at " + s.addr + ": " + err.Error())
+	}
+	if _, err := io.ReadFull(conn, buf[:4]); err != nil {
+		return errors.New("proxy: failed to read connect reply from SOCKS5 proxy at " + s.addr + ": " + err.Error())
+	}
+	failure := "unknown error"
+	if int(buf[1]) < len(proxySocks5Errors) {
+		failure = proxySocks5Errors[buf[1]]
+	}
+	if len(failure) > 0 {
+		return errors.New("proxy: SOCKS5 proxy at " + s.addr + " failed to connect: " + failure)
+	}
+	bytesToDiscard := 0
+	switch buf[3] {
+	case proxySocks5IP4:
+		bytesToDiscard = net.IPv4len
+	case proxySocks5IP6:
+		bytesToDiscard = net.IPv6len
+	case proxySocks5Domain:
+		_, err := io.ReadFull(conn, buf[:1])
+		if err != nil {
+			return errors.New("proxy: failed to read domain length from SOCKS5 proxy at " + s.addr + ": " + err.Error())
+		}
+		bytesToDiscard = int(buf[0])
+	default:
+		return errors.New("proxy: got unkown address type " + strconv.Itoa(int(buf[3])) + " from SOCKS5 proxy at " + s.addr)
+	}
+	if cap(buf) < bytesToDiscard {
+		buf = make([]byte, bytesToDiscard)
+	} else {
+		buf = buf[:bytesToDiscard]
+	}
+	if _, err := io.ReadFull(conn, buf); err != nil {
+		return errors.New("proxy: failed to read address from SOCKS5 proxy at " + s.addr + ": " + err.Error())
+	}
+	//Also need to discard the port number
+	if _, err := io.ReadFull(conn, buf[:2]); err != nil {
+		return errors.New("proxy: failed to read port from SOCKS5 proxy at " + s.addr + ": " + err.Error())
+	}
+	return nil
 }
 
 var (
@@ -357,5 +400,9 @@ func proxyFromURL(u *url.URL, forward proxyDialer) (proxyDialer, error) {
 //proxyFromEnvironment returns the dialer specified by the proxy related variables
 //in the environment
 func proxyFromEnvironment() proxyDialer {
-	allProxy := proxy
+	allProxy := proxyAllProxyEnv.Get()
+	if len(allProxy) == 0 {
+		return pd
+	}
+	proxyURL, err := url.Parse(allProxy)
 }
