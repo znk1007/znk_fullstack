@@ -1,9 +1,12 @@
 package ws
 
 import (
+	"errors"
+	"io"
 	"net"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -179,6 +182,140 @@ func (e *proxyEnvOnce) init() {
 	}
 }
 
+type proxySocks5 struct {
+	user, passowrd string
+	network, addr  string
+	forward        proxyDialer
+}
+
+const proxySocks5Version = 5
+
+const (
+	proxySocks5AuthNone     = 0
+	proxySocks5AuthPassword = 2
+)
+
+const proxySocks5Connect = 1
+
+const (
+	proxySocks5IP4    = 1
+	proxySocks5Domain = 3
+	proxySocks5IP6    = 4
+)
+
+var proxySocks5Errors = []string{
+	"",
+	"general failure",
+	"connection forbidden",
+	"network unreachable",
+	"host unreachable",
+	"connection refused",
+	"TTL expired",
+	"command not supppored",
+	"address type not supported",
+}
+
+//proxySOCK5 returns a Dialer that makes SOCKSv5 connections to the given address
+//with an optional username and password. See RFC 1928 and RFC 1929.
+func proxySOCK5(network, addr string, auth *proxyAuth, forward proxyDialer) (proxyDialer, error) {
+	s := &proxySocks5{
+		network: network,
+		addr:    addr,
+		forward: forward,
+	}
+	if auth != nil {
+		s.user = auth.User
+		s.passowrd = auth.Password
+	}
+	return s, nil
+}
+
+func (s *proxySocks5) Dial(network, addr string) (net.Conn, error) {
+	switch network {
+	case "tcp", "tcp6", "tcp4":
+	default:
+		return nil, errors.New("proxy: no support for SOCKS5 proxy connections of type " + network)
+	}
+	conn, err := s.forward.Dial(s.network, s.addr)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.connect(conn, addr); err != nil {
+		conn.Close()
+		return nil, err
+	}
+	return conn, nil
+}
+
+//connect
+func (s *proxySocks5) connect(conn net.Conn, target string) error {
+	host, portStr, err := net.SplitHostPort(target)
+	if err != nil {
+		return err
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return errors.New("proxy: failed to parse port number: " + portStr)
+	}
+	if port < 1 || port > 0xffff {
+		return errors.New("proxy: port number out of range: " + portStr)
+	}
+	buf := make([]byte, 0, 6+len(host))
+	buf = append(buf, proxySocks5Version)
+	if len(s.user) > 0 && len(s.user) < 256 && len(s.passowrd) < 256 {
+		buf = append(buf, 2 /*num auth methods*/, proxySocks5AuthNone, proxySocks5AuthPassword)
+	} else {
+		buf = append(buf, 1 /*num auth methods*/, proxySocks5AuthNone)
+	}
+	if _, err := conn.Write(buf); err != nil {
+		return errors.New("proxy: failed to write greeting to SOCKS5 proxy at " + s.addr + ": " + err.Error())
+	}
+	if _, err := io.ReadFull(conn, buf[:2]); err != nil {
+		return errors.New("proxy: failed to read greeting from SOCKS5 proxy at " + s.addr + ": " + err.Error())
+	}
+	if buf[0] != 5 {
+		return errors.New("proxy: SOCKS5 proxy at " + s.addr + " has unexpected version " + strconv.Itoa(int(buf[0])))
+	}
+	if buf[1] == 0xff {
+		return errors.New("proxy: SOCKS5 proxy at " + s.addr + " requires authentication")
+	}
+	//See RFC 1929
+	if buf[1] == proxySocks5AuthPassword {
+		buf = buf[:0]
+		buf = append(buf, 1 /*password protocol version*/)
+		buf = append(buf, uint8(len(s.user)))
+		buf = append(buf, s.user...)
+		buf = append(buf, uint8(len(s.passowrd)))
+		buf = append(buf, s.passowrd...)
+		if _, err := conn.Write(buf); err != nil {
+			return errors.New("proxy: failed to write authentication request to SOCKS5 proxy at " + s.addr + ": " + err.Error())
+		}
+		if _, err := io.ReadFull(conn, buf[:2]); err != nil {
+			return errors.New("proxy: failed to read authentication reply from SOCKS5 proxy at " + s.addr + ": " + err.Error())
+		}
+		if buf[1] != 0 {
+			return errors.New("proxy: SOCKS5 proxy at " + s.addr + " rejected username/password")
+		}
+	}
+	buf = buf[:0]
+	buf = append(buf, proxySocks5Version, proxySocks5Connect, 0 /*reserved*/)
+	if ip := net.ParseIP(host); ip != nil {
+		if ip4 := ip.To4(); ip4 != nil {
+			buf = append(buf, proxySocks5IP4)
+			ip = ip4
+		} else {
+			buf = append(buf, proxySocks5IP6)
+		}
+		buf = append(buf, ip...)
+	} else {
+		if len(host) > 255 {
+			return errors.New("proxy: destination host name too long: " + host)
+		}
+		buf = append(buf, proxySocks5Domain)
+		buf = append(buf, byte(len(host)))
+	}
+}
+
 var (
 	proxyAllProxyEnv = &proxyEnvOnce{
 		names: []string{"ALL_PROXY", "all_proxy"},
@@ -203,7 +340,18 @@ func proxyRegisterDialerType(scheme string, f func(*url.URL, proxyDialer) (proxy
 }
 
 func proxyFromURL(u *url.URL, forward proxyDialer) (proxyDialer, error) {
-
+	var auth *proxyAuth
+	if u.User != nil {
+		auth = new(proxyAuth)
+		auth.User = u.User.Username()
+		if p, ok := u.User.Password(); ok {
+			auth.Password = p
+		}
+	}
+	switch u.Scheme {
+	case "socks5":
+		return prox_so
+	}
 }
 
 //proxyFromEnvironment returns the dialer specified by the proxy related variables
