@@ -393,8 +393,16 @@ func proxyFromURL(u *url.URL, forward proxyDialer) (proxyDialer, error) {
 	}
 	switch u.Scheme {
 	case "socks5":
-		return prox_so
+		return proxySOCK5("tcp", u.Host, auth, forward)
 	}
+	//If the scheme doesn't match any of the built-in schemes, see if it
+	//was registered by another package.
+	if proxyProxySchemes != nil {
+		if f, ok := proxyProxySchemes[u.Scheme]; ok {
+			return f(u, forward)
+		}
+	}
+	return nil, errors.New("proxy: unknown scheme: " + u.Scheme)
 }
 
 //proxyFromEnvironment returns the dialer specified by the proxy related variables
@@ -405,4 +413,18 @@ func proxyFromEnvironment() proxyDialer {
 		return pd
 	}
 	proxyURL, err := url.Parse(allProxy)
+	if err != nil {
+		return pd
+	}
+	proxy, err := proxyFromURL(proxyURL, pd)
+	if err != nil {
+		return pd
+	}
+	noProxy := proxyNoProxyEnv.Get()
+	if len(noProxy) == 0 {
+		return proxy
+	}
+	perHost := proxyNewPerHost(proxy, pd)
+	perHost.AddFromString(noProxy)
+	return perHost
 }
