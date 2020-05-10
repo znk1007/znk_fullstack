@@ -2,6 +2,7 @@ package ws
 
 import (
 	"bufio"
+	"encoding/binary"
 	"errors"
 	"io"
 	"net"
@@ -253,6 +254,7 @@ type Conn struct {
 	writeErr   error
 
 	enableWriteCompression bool
+	compressionLevel       int
 	compressionWriter      func(io.WriteCloser, int) io.WriteCloser
 
 	//Read fields
@@ -305,8 +307,72 @@ func newConn(conn net.Conn, isServer bool, readBufferSize, writeBufferSize int, 
 		writePool:              writeBufferPool,
 		writeBufSize:           writeBufferSize,
 		enableWriteCompression: true,
-		compressionWriter:      defaultCompressionLevel,
+		compressionLevel:       defaultCompressionLevel,
 	}
+	c.SetCloseHandler(nil)
+
+	return c
+}
+
+//WriteControl writes a control message with the given deadline.
+//The allowed message types are CloseMessage, PingMessage and PongMessage.
+func (c *Conn) WriteControl(messageType int, data []byte, deadline time.Time) error {
+	if !isControl(messageType) {
+		return errBadWriteOpCode
+	}
+	if len(data) > maxControlFramePayloadSize {
+		return errInvalidControlFrame
+	}
+	b0 := byte(messageType) | finalBit
+	b1 := byte(len(data))
+	if !c.isServer {
+		b1 |= maskBit
+	}
+	buf := make([]byte, 0, maxFrameHeaderSize+maxControlFramePayloadSize)
+	buf = append(buf, b0, b1)
+	if c.isServer {
+		buf = append(buf, data...)
+	} else {
+		key := newMaskKey()
+		buf = append(buf, key[:]...)
+	}
+}
+
+//SetCloseHandler sets the handler for close messages received from the peer.
+//The code argument to h is the received close code or CloseNoStatusReceived
+//if the close message is empty. The default close handler sends a close
+//message back to the peer.
+//
+//The handler function is called from the NextReader, ReadMessage and message
+//reader Read methods. The application must read the connection to process
+//close messages as described in the section on Control Message above.
+//
+//The connection read methods return a CloseError when a close message is received.
+//Most applications should handle close messages as part of their
+//normal error handling. Applications should only set a close handler when the
+//application must perform some action before sending a close message back to
+//the peer.
+func (c *Conn) SetCloseHandler(h func(code int, text string) error) {
+	if h == nil {
+		h = func(code int, text string) error {
+			msg := FormatCloseMessage(code, "")
+
+		}
+	}
+}
+
+//FormatCloseMessage formats closeCode and text as a ws close message.
+//An empty message is returned for code CloseNorStatusReceicved.
+func FormatCloseMessage(closeCode int, text string) []byte {
+	if closeCode == CloseNoStatusReceived {
+		//Return empty message because it's illegal to send CloseNoStatusReceived.
+		//Return non-nil value in case application checks for nil.
+		return []byte{}
+	}
+	buf := make([]byte, 2+len(text))
+	binary.BigEndian.PutUint16(buf, uint16(closeCode))
+	copy(buf[2:], text)
+	return buf
 }
 
 type messageReader struct {
