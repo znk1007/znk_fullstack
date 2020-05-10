@@ -90,3 +90,33 @@ func TestParseExtensions(t *testing.T) {
 		}
 	}
 }
+
+/*
+BenchmarkEmptyStr1-4   	1000000000	         0.330 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/znk_fullstack/server/socket/websocket	0.862s
+Success: Benchmarks passed.
+*/
+func BenchmarkEmptyStr1(t *testing.B) {
+	var str = "test"
+	for i := 0; i < t.N; i++ {
+		if str == "" {
+
+		}
+	}
+}
+
+/*
+BenchmarkEmptyStr2-4   	1000000000	         0.328 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/znk_fullstack/server/socket/websocket	0.790s
+Success: Benchmarks passed.
+*/
+func BenchmarkEmptyStr2(t *testing.B) {
+	var str = "test"
+	for i := 0; i < t.N; i++ {
+		if len(str) == 0 {
+
+		}
+	}
+}

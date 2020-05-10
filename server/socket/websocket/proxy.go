@@ -11,6 +11,34 @@ import (
 	"sync"
 )
 
+/******************************proxy***********************************/
+
+type netDialerFunc func(network, addr string) (net.Conn, error)
+
+func (fn netDialerFunc) Dial(network, addr string) (net.Conn, error) {
+	return fn(network, addr)
+}
+
+func init() {
+	proxyRegisterDialerType("http", func(proxyURL *url.URL, forwardDialer proxyDialer) (proxyDialer, error) {
+		return &httpProxyDialer{
+			proxyURL:    proxyURL,
+			forwardDial: forwardDialer.Dial,
+		}, nil
+	})
+}
+
+type httpProxyDialer struct {
+	proxyURL    *url.URL
+	forwardDial func(network, addr string) (net.Conn, error)
+}
+
+func (hpd *httpProxyDialer) Dial(netword, addr string) (net.Conn, error) {
+	return nil, nil
+}
+
+/********************************x_net_proxy************************************/
+
 type proxyDirect struct{}
 
 //pd is a direct proxy: one that makes network connections directly
