@@ -2,8 +2,12 @@ package ws
 
 import (
 	"errors"
+	"io"
+	"net"
 	"strconv"
 	"time"
+
+	"golang.org/x/exp/rand"
 )
 
 const (
@@ -56,6 +60,9 @@ const (
 	//payload contains a numeric code and text. Use the FormatCloseMessage
 	//function to format a close message payload
 	CloseMessage = 8
+	//PingMessage denotes a ping control message. The optional message payload
+	//is UTF-8 encoded text.
+	PingMessage = 9
 	//PongMessage denotes a ping control message. The optional message payload
 	//is UTF-8 encoded text.
 	PongMessage = 10
@@ -124,9 +131,96 @@ func (e *CloseError) Error() string {
 	case CloseTLSHandshake:
 		s = append(s, " (TLS hanshake error)"...)
 	}
-	if e.Text != "" {
+	if len(e.Text) != 0 {
 		s = append(s, ": "...)
 		s = append(s, e.Text...)
 	}
 	return string(s)
+}
+
+//IsCloseError returns boolean indicating whether the error is a *CloseError
+//with one of the specified codes.
+func IsCloseError(err error, codes ...int) bool {
+	if e, ok := err.(*CloseError); ok {
+		for _, code := range codes {
+			if e.Code == code {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+//IsUnexpectedCloseError returns boolean indicating whether the error is a
+//*CloseError with a code not in the list of expected codes.
+func IsUnexpectedCloseError(err error, expectedCodes ...int) bool {
+	if e, ok := err.(*CloseError); ok {
+		for _, code := range expectedCodes {
+			if e.Code == code {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+var (
+	errWriteTimeout        = &netError{msg: "ws: write timeout", timeout: true, temporary: true}
+	errUnexpectedEOF       = &CloseError{Code: CloseAbnormalClosure, Text: io.ErrUnexpectedEOF.Error()}
+	errBadWriteOpCode      = errors.New("ws: bad write message type")
+	errWriteClosed         = errors.New("ws: write closed")
+	errInvalidControlFrame = errors.New("ws: invalid control frame")
+)
+
+func newMaskKey() [4]byte {
+	n := rand.Uint32()
+	return [4]byte{byte(n), byte(n >> 8), byte(n >> 16), byte(n >> 24)}
+}
+
+func hideTempErr(err error) error {
+	if e, ok := err.(net.Error); ok && e.Temporary() {
+		err = &netError{msg: e.Error(), timeout: e.Timeout()}
+	}
+	return err
+}
+
+func isControl(frameType int) bool {
+	return frameType == CloseMessage ||
+		frameType == PingMessage ||
+		frameType == PongMessage
+}
+
+func isData(frameType int) bool {
+	return frameType == TextMessage ||
+		frameType == BinaryMessage
+}
+
+var validReceivedCloseCodes = map[int]bool{
+	CloseNormalClosure:           true,
+	CloseGoingAway:               true,
+	CloseProtocolError:           true,
+	CloseUnsupportedData:         true,
+	CloseNoStatusReceived:        true,
+	CloseAbnormalClosure:         false,
+	CloseInvalidFramePayloadData: true,
+	ClosePolicyViolation:         true,
+	CloseMessageTooBig:           true,
+	CloseMandatoryExtension:      true,
+	CloseInternalServerErr:       true,
+	CloseServiceRestart:          true,
+	CloseTryAgainLater:           true,
+	CloseTLSHandshake:            false,
+}
+
+func isValidReceivedCloseCode(code int) bool {
+	return validReceivedCloseCodes[code] || (code >= 300 && code <= 4999)
+}
+
+//BufferPool represents a pool of buffers. The &sync.Pool type satisfes(满足) this
+//interface. The type of the value stored in a pool is not specified.
+type BufferPool interface {
+	//Get gets a value from the pool or returns nil if the pool is empty.
+	Get() interface{}
+	//Put adds a value to the pool
+	Put(interface{})
 }
