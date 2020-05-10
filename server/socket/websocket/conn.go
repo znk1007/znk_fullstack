@@ -1,10 +1,12 @@
 package ws
 
 import (
+	"bufio"
 	"errors"
 	"io"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"golang.org/x/exp/rand"
@@ -223,4 +225,90 @@ type BufferPool interface {
 	Get() interface{}
 	//Put adds a value to the pool
 	Put(interface{})
+}
+
+//writePoolData is the type added to the write buffer pool.
+//This wrapper is used to prevent applications from peeking at and depending on the values
+//added to the pool
+type writePoolData struct {
+	buf []byte
+}
+
+//Conn represents a ws connection.
+type Conn struct {
+	conn        net.Conn
+	isServer    bool
+	subprotocol string
+
+	//Write fields
+	mu            chan struct{} //used as mutex to protect write to conn
+	writeBuf      []byte        //frame is constructed in this buffer.
+	writePool     BufferPool
+	writeBufSize  int
+	writeDeadline time.Time
+	writer        io.WriteCloser //the current writer returned to the application
+	isWriting     bool           //for best-effort concurrent write detection
+
+	writeErrMu sync.Mutex
+	writeErr   error
+
+	enableWriteCompression bool
+	compressionWriter      func(io.WriteCloser, int) io.WriteCloser
+
+	//Read fields
+	reader  io.ReadCloser //the current reader returned to the application
+	readErr error
+	br      *bufio.Reader
+	// bytes remaining in current frame.
+	// set setReadRemaining to safely update this value and prevent overflow
+	readRemaining int64
+	readFinal     bool  //true the current message has more frames.
+	readLength    int64 //Message size.
+	readLimit     int64 //Maximum message size.
+	readMaskKey   [4]byte
+	handlePong    func(string) error
+	handlePing    func(string) error
+	handleClose   func(int, string) error
+	readErrCount  int
+	messageReader *messageReader //the current low-level reader
+
+	readDecompress         bool //whether last read frame had RSV1 set
+	newDecompressionReader func(io.Reader) io.ReadCloser
+}
+
+func newConn(conn net.Conn, isServer bool, readBufferSize, writeBufferSize int, writeBufferPool BufferPool, br *bufio.Reader, writeBuf []byte) *Conn {
+	if br == nil {
+		if readBufferSize == 0 {
+			readBufferSize = defaultReadBufferSize
+		} else if readBufferSize < maxControlFramePayloadSize {
+			//must be large enough for control frame
+			readBufferSize = maxControlFramePayloadSize
+		}
+		br = bufio.NewReaderSize(conn, readBufferSize)
+	}
+	if writeBufferSize <= 0 {
+		writeBufferSize = defaultWriteBufferSize
+	}
+	writeBufferSize += maxFrameHeaderSize
+	if writeBuf == nil && writeBufferPool == nil {
+		writeBuf = make([]byte, writeBufferSize)
+	}
+	mu := make(chan struct{}, 1)
+	mu <- struct{}{}
+	c := &Conn{
+		isServer:               isServer,
+		br:                     br,
+		conn:                   conn,
+		mu:                     mu,
+		readFinal:              true,
+		writeBuf:               writeBuf,
+		writePool:              writeBufferPool,
+		writeBufSize:           writeBufferSize,
+		enableWriteCompression: true,
+		compressionWriter:      defaultCompressionLevel,
+	}
+}
+
+type messageReader struct {
+	c *Conn
 }
