@@ -458,7 +458,23 @@ func (c *Conn) beginMessage(mw *messageReader, messageType int) error {
 	//Close previous writer if not already closed by the application. It's
 	//probably better to return an error in this situation, but we cannot
 	//change this without breaking existing applications.
+	if c.writer != nil {
+		c.writer.Close()
+		c.writer = nil
+	}
+	if !isControl(messageType) && !isData(messageType) {
+		return errBadWriteOpCode
+	}
 
+	c.writeErrMu.Lock()
+	err := c.writeErr
+	c.writeErrMu.Unlock()
+	if err != nil {
+		return err
+	}
+	mw.c = c
+	mw.frameType = messageType
+	return nil
 }
 
 //CloseHandler returns the current close handler
@@ -555,7 +571,11 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 }
 
 type messageReader struct {
-	c *Conn
+	c         *Conn
+	compress  bool //whether next call to flushFrame should set RSV1
+	pos       int  //end of data in writeBuf.
+	frameType int  //type of the current frame.
+	err       error
 }
 
 func (c *Conn) writeBufs(bufs ...[]byte) error {
