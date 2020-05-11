@@ -255,7 +255,7 @@ type Conn struct {
 
 	enableWriteCompression bool
 	compressionLevel       int
-	compressionWriter      func(io.WriteCloser, int) io.WriteCloser
+	newCompressionWriter   func(io.WriteCloser, int) io.WriteCloser
 
 	//Read fields
 	reader  io.ReadCloser //the current reader returned to the application
@@ -454,7 +454,7 @@ func (c *Conn) WriteControl(messageType int, data []byte, deadline time.Time) er
 }
 
 //beginMessage prepares a connection and message writer for a new message
-func (c *Conn) beginMessage(mw *messageReader, messageType int) error {
+func (c *Conn) beginMessage(mw *messageWriter, messageType int) error {
 	//Close previous writer if not already closed by the application. It's
 	//probably better to return an error in this situation, but we cannot
 	//change this without breaking existing applications.
@@ -474,6 +474,145 @@ func (c *Conn) beginMessage(mw *messageReader, messageType int) error {
 	}
 	mw.c = c
 	mw.frameType = messageType
+	mw.pos = maxFrameHeaderSize
+	if c.writeBuf == nil {
+		wpd, ok := c.writePool.Get().(writePoolData)
+		if ok {
+			c.writeBuf = wpd.buf
+		} else {
+			c.writeBuf = make([]byte, c.writeBufSize)
+		}
+	}
+	return nil
+}
+
+//NextWriter returns a writer for the next message to send.
+//The writer's Close method flushes the complete message to the network.
+//
+//There can be at most one open writer on a connection. NextWriter closes the
+//previous writer if the application has not already done so.
+//
+//All message types (TextMessge, BinaryMessage, CloseMessage, PingMessage and
+//PongMessage) are supported.
+func (c *Conn) NextWriter(messageType int) (io.WriteCloser, error) {
+	var mw messageWriter
+	if err := c.beginMessage(&mw, messageType); err != nil {
+		return nil, err
+	}
+	c.writer = &mw
+	if c.newCompressionWriter != nil && c.enableWriteCompression && isData(messageType) {
+		w := c.newCompressionWriter(c.writer, c.compressionLevel)
+		mw.compress = true
+		c.writer = w
+	}
+	return c.writer, nil
+}
+
+type messageWriter struct {
+	c         *Conn
+	compress  bool //whether next call to flushFrame should set RSV1
+	pos       int  //end of data in writeBuf.
+	frameType int  //type of the current frame.
+	err       error
+}
+
+func (w *messageWriter) endMessage(err error) error {
+	if w.err != nil {
+		return err
+	}
+	c := w.c
+	w.err = err
+	c.writer = nil
+	if c.writePool != nil {
+		c.writePool.Put(writePoolData{
+			buf: c.writeBuf,
+		})
+		c.writeBuf = nil
+	}
+	return err
+}
+
+//flushFrame writes buffered data and extra as a frame to the network.
+//The final argument indicates that this is the last frame in the message.
+func (w *messageWriter) flushFrame(final bool, extra []byte) error {
+	c := w.c
+	length := w.pos - maxFrameHeaderSize + len(extra)
+	//Check for invalid control frames.
+	if isControl(w.frameType) &&
+		(!final || length > maxControlFramePayloadSize) {
+		return w.endMessage(errInvalidControlFrame)
+	}
+	b0 := byte(w.frameType)
+	if final {
+		b0 |= finalBit
+	}
+	if w.compress {
+		b0 |= rsv1Bit
+	}
+	w.compress = false
+
+	b1 := byte(0)
+	if !c.isServer {
+		b1 |= maskBit
+	}
+
+	//Assume that the frame starts at begining of c.writeBuf.
+	framePos := 0
+	if c.isServer {
+		//Adjust up if mask not included in the header.
+		framePos = 4
+	}
+	switch {
+	case length >= 65536:
+		c.writeBuf[framePos] = b0
+		c.writeBuf[framePos+1] = b1 | 127
+		binary.BigEndian.PutUint64(c.writeBuf[framePos+2:], uint64(length))
+	case length > 125:
+		framePos += 6
+		c.writeBuf[framePos] = b0
+		c.writeBuf[framePos+1] = b1 | 126
+		binary.BigEndian.PutUint16(c.writeBuf[framePos+2:], uint16(length))
+	default:
+		framePos += 8
+		c.writeBuf[framePos] = b0
+		c.writeBuf[framePos+1] = b1 | byte(length)
+	}
+
+	if !c.isServer {
+		key := newMaskKey()
+		copy(c.writeBuf[maxFrameHeaderSize-4:], key[:])
+		maskBytes(key, 0, c.writeBuf[maxFrameHeaderSize:w.pos])
+		if len(extra) > 0 {
+			return w.endMessage(c.writeFatal(errors.New("ws: internal error, extra used in client mode")))
+		}
+	}
+	//Write the buffers to the connection with best-effort detection of
+	//concurrent writes. See the concurrency section in the package
+	//documentation for more info.
+	if c.isWriting {
+		panic("concurrent write to websocket connection")
+	}
+	c.isWriting = true
+
+	err := c.write(w.frameType, c.writeDeadline, c.writeBuf[framePos:w.pos], extra)
+
+	if !c.isWriting {
+		panic("concurrent write to websocket connection")
+	}
+	c.isWriting = false
+
+	if err != nil {
+		return w.endMessage(err)
+	}
+
+	if final {
+		w.endMessage(errWriteClosed)
+		return nil
+	}
+
+	//Setup for next frame.
+	w.pos = maxFrameHeaderSize
+	w.frameType = continuationFrame
 	return nil
 }
 
@@ -571,11 +710,7 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 }
 
 type messageReader struct {
-	c         *Conn
-	compress  bool //whether next call to flushFrame should set RSV1
-	pos       int  //end of data in writeBuf.
-	frameType int  //type of the current frame.
-	err       error
+	c *Conn
 }
 
 func (c *Conn) writeBufs(bufs ...[]byte) error {
