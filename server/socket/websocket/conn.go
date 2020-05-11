@@ -367,7 +367,31 @@ func (c *Conn) read(n int) ([]byte, error) {
 }
 
 func (c *Conn) write(frameType int, deadline time.Time, buf0, buf1 []byte) error {
+	<-c.mu
+	defer func() {
+		c.mu <- struct{}{}
+	}()
 
+	c.writeErrMu.Lock()
+	err := c.writeErr
+	c.writeErrMu.Unlock()
+	if err != nil {
+		return err
+	}
+
+	c.conn.SetWriteDeadline(deadline)
+	if len(buf1) == 0 {
+		_, err = c.conn.Write(buf0)
+	} else {
+		err = c.writeBufs(buf0, buf1)
+	}
+	if err != nil {
+		return c.writeFatal(err)
+	}
+	if frameType == CloseMessage {
+		return c.writeFatal(ErrCloseSent)
+	}
+	return nil
 }
 
 //WriteControl writes a control message with the given deadline.
@@ -427,6 +451,14 @@ func (c *Conn) WriteControl(messageType int, data []byte, deadline time.Time) er
 		c.writeFatal(ErrCloseSent)
 	}
 	return err
+}
+
+//beginMessage prepares a connection and message writer for a new message
+func (c *Conn) beginMessage(mw *messageReader, messageType int) error {
+	//Close previous writer if not already closed by the application. It's
+	//probably better to return an error in this situation, but we cannot
+	//change this without breaking existing applications.
+
 }
 
 //CloseHandler returns the current close handler
@@ -524,4 +556,10 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 
 type messageReader struct {
 	c *Conn
+}
+
+func (c *Conn) writeBufs(bufs ...[]byte) error {
+	b := net.Buffers(bufs)
+	_, err := b.WriteTo(c.conn)
+	return err
 }
