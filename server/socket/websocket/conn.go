@@ -310,8 +310,64 @@ func newConn(conn net.Conn, isServer bool, readBufferSize, writeBufferSize int, 
 		compressionLevel:       defaultCompressionLevel,
 	}
 	c.SetCloseHandler(nil)
-
+	c.SetPingHandler(nil)
+	c.SetPongHandler(nil)
 	return c
+}
+
+//setReadRemaining
+func (c *Conn) setReadRemaining(n int64) error {
+	if n < 0 {
+		return ErrReadLimit
+	}
+	c.readRemaining = n
+	return nil
+}
+
+//SubProtocol returns the negotiated protocol for the connection.
+func (c *Conn) SubProtocol() string {
+	return c.subprotocol
+}
+
+//Close closes the underlying network connection without sending or waiting
+//for a close message.
+func (c *Conn) Close() error {
+	return c.conn.Close()
+}
+
+//LocalAddr returns the local network address.
+func (c *Conn) LocalAddr() net.Addr {
+	return c.conn.LocalAddr()
+}
+
+//RemoteAddr returns the remote network address.
+func (c *Conn) RemoteAddr() net.Addr {
+	return c.conn.RemoteAddr()
+}
+
+//writeFatal write fatal when error
+func (c *Conn) writeFatal(err error) error {
+	err = hideTempErr(err)
+	c.writeErrMu.Lock()
+	if c.writeErr == nil {
+		c.writeErr = err
+	}
+	c.writeErrMu.Unlock()
+	return err
+}
+
+//read read data and returns result data
+func (c *Conn) read(n int) ([]byte, error) {
+	p, err := c.br.Peek(n)
+	if err == io.EOF {
+		err = errUnexpectedEOF
+	}
+	c.br.Discard(len(p))
+	return p, err
+}
+
+func (c *Conn) write(frameType int, deadline time.Time, buf0, buf1 []byte) error {
+
 }
 
 //WriteControl writes a control message with the given deadline.
@@ -335,7 +391,47 @@ func (c *Conn) WriteControl(messageType int, data []byte, deadline time.Time) er
 	} else {
 		key := newMaskKey()
 		buf = append(buf, key[:]...)
+		buf = append(buf, data...)
+		maskBytes(key, 0, buf[6:])
 	}
+	d := 1000 * time.Hour
+	if !deadline.IsZero() {
+		d = deadline.Sub(time.Now())
+		if d < 0 {
+			return errWriteTimeout
+		}
+	}
+
+	timer := time.NewTimer(d)
+	select {
+	case <-c.mu:
+		timer.Stop()
+	case <-timer.C:
+		return errWriteTimeout
+	}
+	defer func() {
+		c.mu <- struct{}{}
+	}()
+	c.writeErrMu.Lock()
+	err := c.writeErr
+	c.writeErrMu.Unlock()
+	if err != nil {
+		return err
+	}
+	c.conn.SetWriteDeadline(deadline)
+	_, err = c.conn.Write(buf)
+	if err != nil {
+		return c.writeFatal(err)
+	}
+	if messageType == CloseMessage {
+		c.writeFatal(ErrCloseSent)
+	}
+	return err
+}
+
+//CloseHandler returns the current close handler
+func (c *Conn) CloseHandler() func(code int, text string) error {
+	return c.handleClose
 }
 
 //SetCloseHandler sets the handler for close messages received from the peer.
@@ -356,9 +452,60 @@ func (c *Conn) SetCloseHandler(h func(code int, text string) error) {
 	if h == nil {
 		h = func(code int, text string) error {
 			msg := FormatCloseMessage(code, "")
-
+			c.WriteControl(CloseMessage, msg, time.Now().Add(writeWait))
+			return nil
 		}
 	}
+	c.handleClose = h
+}
+
+//PingHandler returns the current ping handler
+func (c *Conn) PingHandler() func(appData string) error {
+	return c.handlePing
+}
+
+//SetPingHandler sets the handler for ping messages received from the peer.
+//The appData argument to h is the PING message application data.
+//The default ping handler sends a pong to the peer.
+//
+//The handler function is called from the NextReader, ReadMessage and message
+//reader Read methods.
+//The application must read the connection to process ping messages as described
+//in the section on Control Messages above.
+func (c *Conn) SetPingHandler(h func(appData string) error) {
+	if h == nil {
+		h = func(msg string) error {
+			err := c.WriteControl(PongMessage, []byte(msg), time.Now().Add(writeWait))
+			if err == ErrCloseSent {
+				return nil
+			} else if e, ok := err.(net.Error); ok && e.Temporary() {
+				return nil
+			}
+			return err
+		}
+	}
+	c.handlePing = h
+}
+
+//PongHandler returns the current pong handler
+func (c *Conn) PongHandler() func(appData string) error {
+	return c.handlePong
+}
+
+//SetPongHandler sets the handler for pong messages received from the peer.
+//The appData argument to h is the PONG message application data.
+//The default pong handler does nothing.
+//
+//The handler function is called from the NextReader, ReadMessage and message
+//reader Read methods. The application must read the connection to process
+//pong messages as described in the section on Control Messages above.
+func (c *Conn) SetPongHandler(h func(appData string) error) {
+	if h == nil {
+		h = func(string) error {
+			return nil
+		}
+	}
+	c.handlePong = h
 }
 
 //FormatCloseMessage formats closeCode and text as a ws close message.
