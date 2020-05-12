@@ -705,7 +705,54 @@ func (w *messageWriter) Close() error {
 	return w.flushFrame(true, nil)
 }
 
-func (c *Conn)WritePreparedMessage(pm *)
+//WritePreparedMessage writes prepared message into connection.
+func (c *Conn) WritePreparedMessage(pm *PreparedMessage) error {
+	frameType, frameData, err := pm.frame(prepareKey{
+		isServer:         c.isServer,
+		compress:         c.newCompressionWriter != nil && c.enableWriteCompression && isData(pm.messageType),
+		compressionLevel: c.compressionLevel,
+	})
+	if err != nil {
+		return err
+	}
+	if c.isWriting {
+		panic("concurrent write to websocket connection")
+	}
+	c.isWriting = true
+	err = c.write(frameType, c.writeDeadline, frameData, nil)
+	if !c.isWriting {
+		panic("concurrent write to websocket connection")
+	}
+	c.isWriting = false
+	return err
+}
+
+//WriteMessage is a helper method for getting a writer using NextWriter,
+//writing the message and closing the writer.
+func (c *Conn) WriteMessage(messageType int, data []byte) error {
+	if c.isServer && (c.newCompressionWriter == nil || !c.enableWriteCompression) {
+		//Fast path with no allocations and single frame.
+		var mw messageWriter
+		if err := c.beginMessage(&mw, messageType); err != nil {
+			return err
+		}
+		n := copy(c.writeBuf[mw.pos:], data)
+		mw.pos += n
+		data = data[n:]
+		return mw.flushFrame(true, data)
+	}
+	w, err := c.NextWriter(messageType)
+	if err != nil {
+		return err
+	}
+	if _, err = w.Write(data); err != nil {
+		return err
+	}
+	if _, err = w.Write(data); err != nil {
+		return err
+	}
+	return w.Close()
+}
 
 //CloseHandler returns the current close handler
 func (c *Conn) CloseHandler() func(code int, text string) error {
