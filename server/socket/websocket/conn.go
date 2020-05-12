@@ -616,6 +616,97 @@ func (w *messageWriter) flushFrame(final bool, extra []byte) error {
 	return nil
 }
 
+func (w *messageWriter) ncopy(max int) (int, error) {
+	n := len(w.c.writeBuf) - w.pos
+	if n <= 0 {
+		if err := w.flushFrame(false, nil); err != nil {
+			return 0, err
+		}
+		n = len(w.c.writeBuf) - w.pos
+	}
+	if n > max {
+		n = max
+	}
+	return n, nil
+}
+
+func (w *messageWriter) Write(p []byte) (int, error) {
+	if w.err != nil {
+		return 0, w.err
+	}
+
+	if len(p) > 2*len(w.c.writeBuf) && w.c.isServer {
+		//Don't buffer large messages.
+		err := w.flushFrame(false, p)
+		if err != nil {
+			return 0, err
+		}
+		return len(p), nil
+	}
+	nn := len(p)
+	for len(p) > 0 {
+		n, err := w.ncopy(len(p))
+		if err != nil {
+			return 0, err
+		}
+		copy(w.c.writeBuf[w.pos:], p[:n])
+		w.pos += n
+		p = p[n:]
+	}
+	return nn, nil
+}
+
+func (w *messageWriter) WriteString(p string) (int, error) {
+	if w.err != nil {
+		return 0, w.err
+	}
+	nn := len(p)
+	for len(p) > 0 {
+		n, err := w.ncopy(len(p))
+		if err != nil {
+			return 0, err
+		}
+		copy(w.c.writeBuf[w.pos:], p[:n])
+		w.pos += n
+		p = p[n:]
+	}
+	return nn, nil
+}
+
+func (w *messageWriter) ReadFrom(r io.Reader) (nn int64, err error) {
+	if w.err != nil {
+		return 0, w.err
+	}
+	for {
+		if w.pos == len(w.c.writeBuf) {
+			err = w.flushFrame(false, nil)
+			if err != nil {
+				break
+			}
+		}
+		var n int
+		n, err = r.Read(w.c.writeBuf[w.pos:])
+		w.pos += n
+		nn += int64(n)
+		if err != nil {
+			if err == io.EOF {
+				err = nil
+			}
+			break
+		}
+	}
+	return nn, err
+}
+
+func (w *messageWriter) Close() error {
+	if w.err != nil {
+		return w.err
+	}
+	return w.flushFrame(true, nil)
+}
+
+func (c *Conn)WritePreparedMessage(pm *)
+
 //CloseHandler returns the current close handler
 func (c *Conn) CloseHandler() func(code int, text string) error {
 	return c.handleClose
