@@ -206,7 +206,7 @@ var validReceivedCloseCodes = map[int]bool{
 	CloseGoingAway:               true,
 	CloseProtocolError:           true,
 	CloseUnsupportedData:         true,
-	CloseNoStatusReceived:        true,
+	CloseNoStatusReceived:        false,
 	CloseAbnormalClosure:         false,
 	CloseInvalidFramePayloadData: true,
 	ClosePolicyViolation:         true,
