@@ -3,9 +3,8 @@ package ws
 import (
 	"bytes"
 	"compress/flate"
+	"math/rand"
 	"testing"
-
-	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 var preparedMessageTests = []struct {

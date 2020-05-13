@@ -128,7 +128,7 @@ func (r *flateReadWrapper) Read(p []byte) (int, error) {
 		//Preemptively place the reader back in the pool. This helps with
 		//scenarios where the application does not call NextReader() soon later
 		//this final read.
-		r.fr.Close()
+		r.Close()
 	}
 	return n, err
 }
@@ -139,5 +139,6 @@ func (r *flateReadWrapper) Close() error {
 	}
 	err := r.fr.Close()
 	flateReaderPool.Put(r.fr)
+	r.fr = nil
 	return err
 }

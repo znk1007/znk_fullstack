@@ -292,10 +292,12 @@ func newConn(conn net.Conn, isServer bool, readBufferSize, writeBufferSize int, 
 		}
 		br = bufio.NewReaderSize(conn, readBufferSize)
 	}
+
 	if writeBufferSize <= 0 {
 		writeBufferSize = defaultWriteBufferSize
 	}
 	writeBufferSize += maxFrameHeaderSize
+
 	if writeBuf == nil && writeBufferPool == nil {
 		writeBuf = make([]byte, writeBufferSize)
 	}
