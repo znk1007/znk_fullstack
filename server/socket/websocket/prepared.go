@@ -32,6 +32,10 @@ type preparedFrame struct {
 	data []byte
 }
 
+//NewPreparedMessage returns an initialized PreparedMessage. You can then send it
+//to connection using WritePreparedMessage method.
+//Valid wire representation will be calculated lazily only once for a set of current
+//connection options.
 func NewPreparedMessage(messageType int, data []byte) (*PreparedMessage, error) {
 	pm := &PreparedMessage{
 		messageType: messageType,
@@ -76,9 +80,12 @@ func (pm *PreparedMessage) frame(key prepareKey) (int, []byte, error) {
 			writeBuf:               make([]byte, defaultWriteBufferSize+maxFrameHeaderSize),
 		}
 		if key.compress {
-			c.newCompressionWriter = com
+			c.newCompressionWriter = compressNoContextTakeover
 		}
+		err = c.WriteMessage(pm.messageType, pm.data)
+		frame.data = nc.buf.Bytes()
 	})
+	return pm.messageType, frame.data, err
 }
 
 type prepareConn struct {

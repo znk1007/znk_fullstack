@@ -1005,6 +1005,36 @@ func (r *messageReader) Read(b []byte) (int, error) {
 	return 0, err
 }
 
+func (r *messageReader) Close() error {
+	return nil
+}
+
+//ReadMessage is a helper method for getting a reader using NextReader
+//and reading from that reader to a buffer
+func (c *Conn) ReadMessage() (messageType int, p []byte, err error) {
+	var r io.Reader
+	messageType, r, err = c.NextReader()
+	if err != nil {
+		return messageType, nil, err
+	}
+	p, err = ioutil.ReadAll(r)
+	return messageType, p, err
+}
+
+//SetReadDeadline sets the read deadline on the underlying network connection.
+//After a read has timed out, the websocket connection state is corrupt and
+//all future reads will return an error.
+//A zero value for t means reads will not time out.
+func (c *Conn) SetReadDeadline(t time.Time) error {
+	return c.conn.SetReadDeadline(t)
+}
+
+//SetReadLimit sets the maximum size in bytes for a message read from the peer.
+//If a message exceeds
+func (c *Conn) SetReadLimit(limit int64) {
+	c.readLimit = limit
+}
+
 //CloseHandler returns the current close handler
 func (c *Conn) CloseHandler() func(code int, text string) error {
 	return c.handleClose
@@ -1084,6 +1114,30 @@ func (c *Conn) SetPongHandler(h func(appData string) error) {
 	c.handlePong = h
 }
 
+//UnderlyingConn returns the internal net.Conn.
+//This can be used to furter modifications to connection specific flags.
+func (c *Conn) UnderlyingConn() net.Conn {
+	return c.conn
+}
+
+//EnableWriteCompression enables and disables write compression of
+//subsequent text and binary messages.
+//This function is a noop if compression was not negotiated with the peer.
+func (c *Conn) EnableWriteCompression(enable bool) {
+	c.enableWriteCompression = enable
+}
+
+//SetCompressionLevel sets the flate compression level for subsequent(后续) text
+//and binary message.
+//This function is a noop if compression was not negotiated(协商)
+func (c *Conn) SetCompressionLevel(level int) error {
+	if !isValidCompressionLevel(level) {
+		return errors.New("ws: invalid compression level")
+	}
+	c.compressionLevel = level
+	return nil
+}
+
 //FormatCloseMessage formats closeCode and text as a ws close message.
 //An empty message is returned for code CloseNorStatusReceicved.
 func FormatCloseMessage(closeCode int, text string) []byte {
@@ -1096,10 +1150,4 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 	binary.BigEndian.PutUint16(buf, uint16(closeCode))
 	copy(buf[2:], text)
 	return buf
-}
-
-func (c *Conn) writeBufs(bufs ...[]byte) error {
-	b := net.Buffers(bufs)
-	_, err := b.WriteTo(c.conn)
-	return err
 }
