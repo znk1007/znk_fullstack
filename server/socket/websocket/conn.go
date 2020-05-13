@@ -914,6 +914,97 @@ func (c *Conn) handleProtocolError(message string) error {
 	return errors.New("ws: " + message)
 }
 
+//NextReader returns the next data message received from the peer.
+//The returned messageType is either TextMessage or BinaryMessage.
+//
+//There can be at most one open reader on a connection.
+//NextReader discards(丢弃) the previous message if the application has
+//not already consumed it.
+//
+//Applications must break out of the application's read loop when this method
+//returns a non-nil error value. Errors returned from this method are permanet.
+//Once this method returns a non-nil error, all subsequent calls to this method
+//return the same error.
+func (c *Conn) NextReader() (messageType int, r io.Reader, err error) {
+	//Close previous reader, only relevant for decompression.
+	if c.reader != nil {
+		c.reader.Close()
+		c.reader = nil
+	}
+	c.messageReader = nil
+	c.readLength = 0
+	for c.readErr == nil {
+		frameType, err := c.advanceFrame()
+		if err != nil {
+			c.readErr = hideTempErr(err)
+			break
+		}
+		if frameType == TextMessage || frameType == BinaryMessage {
+			c.messageReader = &messageReader{c: c}
+			c.reader = c.messageReader
+			if c.readDecompress {
+				c.reader = c.newDecompressionReader(c.reader)
+			}
+			return frameType, c.reader, nil
+		}
+	}
+	//Applications that do handle the error returned from this method spin in
+	//tight loop on connection failure.
+	//To help application developers detect this error, panic on repeated reads
+	//to the failed connection.
+	c.readErrCount++
+	if c.readErrCount >= 1000 {
+		panic("repeated read on failed websocket connection")
+	}
+	return noFrame, nil, c.readErr
+}
+
+type messageReader struct {
+	c *Conn
+}
+
+func (r *messageReader) Read(b []byte) (int, error) {
+	c := r.c
+	if c.messageReader != r {
+		return 0, io.EOF
+	}
+	for c.readErr == nil {
+		if c.readRemaining > 0 {
+			if int64(len(b)) > c.readRemaining {
+				b = b[:c.readRemaining]
+			}
+			n, err := c.br.Read(b)
+			c.readErr = hideTempErr(err)
+			if c.isServer {
+				c.readMaskPos = maskBytes(c.readMaskKey, c.readMaskPos, b[:n])
+			}
+			rem := c.readRemaining
+			rem -= int64(n)
+			c.setReadRemaining(rem)
+			if c.readRemaining > 0 && c.readErr == io.EOF {
+				c.readErr = errUnexpectedEOF
+			}
+			return n, c.readErr
+		}
+		if c.readFinal {
+			c.messageReader = nil
+			return 0, io.EOF
+		}
+		frameType, err := c.advanceFrame()
+		switch {
+		case err != nil:
+			c.readErr = hideTempErr(err)
+		case frameType == TextMessage || frameType == BinaryMessage:
+			c.readErr = errors.New("ws: internal error, unexpected text or binary in Reader")
+		}
+	}
+	err := c.readErr
+	if err == io.EOF && c.messageReader == r {
+		err = errUnexpectedEOF
+	}
+	return 0, err
+}
+
 //CloseHandler returns the current close handler
 func (c *Conn) CloseHandler() func(code int, text string) error {
 	return c.handleClose
@@ -1005,10 +1096,6 @@ func FormatCloseMessage(closeCode int, text string) []byte {
 	binary.BigEndian.PutUint16(buf, uint16(closeCode))
 	copy(buf[2:], text)
 	return buf
-}
-
-type messageReader struct {
-	c *Conn
 }
 
 func (c *Conn) writeBufs(bufs ...[]byte) error {
