@@ -165,8 +165,9 @@ func IsUnexpectedCloseError(err error, expectedCodes ...int) bool {
 				return false
 			}
 		}
+		return true
 	}
-	return true
+	return false
 }
 
 var (
