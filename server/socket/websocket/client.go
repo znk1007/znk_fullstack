@@ -1,9 +1,31 @@
 package ws
 
-import "crypto/tls"
+import (
+	"crypto/tls"
+	"net/url"
+	"strings"
+)
 
 type joinReader struct {
 	// c *Conn
+}
+
+func hostPortNoPort(u *url.URL) (hostPort, hostNoPort string) {
+	hostPort = u.Host
+	hostNoPort = u.Host
+	if i := strings.LastIndex(u.Host, ":"); i > strings.LastIndex(u.Host, "]") {
+		hostNoPort = hostNoPort[:i]
+	} else {
+		switch u.Scheme {
+		case "wss":
+			hostPort += ":443"
+		case "https":
+			hostPort += ":443"
+		default:
+			hostPort += ":80"
+		}
+	}
+	return hostPort, hostNoPort
 }
 
 func doHandshake(tlsConn *tls.Conn, cfg *tls.Config) error {

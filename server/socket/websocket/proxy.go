@@ -1,9 +1,12 @@
 package ws
 
 import (
+	"bufio"
+	"encoding/base64"
 	"errors"
 	"io"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -33,8 +36,48 @@ type httpProxyDialer struct {
 	forwardDial func(network, addr string) (net.Conn, error)
 }
 
-func (hpd *httpProxyDialer) Dial(netword, addr string) (net.Conn, error) {
-	return nil, nil
+func (hpd *httpProxyDialer) Dial(network, addr string) (net.Conn, error) {
+	hostPort, _ := hostPortNoPort(hpd.proxyURL)
+	conn, err := hpd.forwardDial(network, hostPort)
+	if err != nil {
+		return nil, err
+	}
+
+	connectHeader := make(http.Header)
+	if user := hpd.proxyURL.User; user != nil {
+		proxyUser := user.Username()
+		if proxyPassword, passwordSet := user.Password(); passwordSet {
+			credential := base64.StdEncoding.EncodeToString([]byte(proxyUser + ":" + proxyPassword))
+			connectHeader.Set("Proxy-Authorization", "Basic "+credential)
+		}
+	}
+	connectReq := &http.Request{
+		Method: "CONNECT",
+		URL:    &url.URL{Opaque: addr},
+		Host:   addr,
+		Header: connectHeader,
+	}
+
+	if err := connectReq.Write(conn); err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	//Read response. It's OK to use and discard buffered reader here because
+	//the remote server does not speak until spoken to.
+	br := bufio.NewReader(conn)
+	resp, err := http.ReadResponse(br, connectReq)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		conn.Close()
+		f := strings.SplitN(resp.Status, " ", 2)
+		return nil, errors.New(f[1])
+	}
+	return conn, nil
 }
 
 /********************************x_net_proxy************************************/
