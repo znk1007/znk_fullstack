@@ -395,7 +395,7 @@ func (c *Conn) write(frameType int, deadline time.Time, buf0, buf1 []byte) error
 		return c.writeFatal(err)
 	}
 	if frameType == CloseMessage {
-		return c.writeFatal(ErrCloseSent)
+		c.writeFatal(ErrCloseSent)
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package ws
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -47,4 +48,37 @@ func TestParticalJSONRead(t *testing.T) {
 
 	//Partial JSON values.
 	data, err := json.Marshal(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := len(data) - 1; i >= 0; i-- {
+		if err := wc.WriteMessage(TextMessage, data[:i]); err != nil {
+			t.Fatal(err)
+		}
+		messageCount++
+	}
+
+	//Whitespace
+
+	if err := wc.WriteMessage(TextMessage, []byte(" ")); err != nil {
+		t.Fatal(err)
+	}
+	messageCount++
+
+	//Close
+	if err := wc.WriteMessage(CloseMessage, FormatCloseMessage(CloseNormalClosure, "")); err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < messageCount; i++ {
+		err := rc.ReadJSON(&v)
+		if err != io.ErrUnexpectedEOF {
+			t.Error("read", i, err)
+		}
+	}
+
+	err = rc.ReadJSON(&v)
+	if _, ok := err.(*CloseError); !ok {
+		t.Error("final", err)
+	}
 }
