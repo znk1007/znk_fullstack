@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"golang.org/x/exp/rand"
+	"math/rand"
 )
 
 const (
