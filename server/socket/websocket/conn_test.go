@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -518,4 +519,52 @@ func TestReadLimit(t *testing.T) {
 			t.Fatalf("read limit exeeded: limit %d, read %d", readLimit, read)
 		}
 	})
+}
+
+func TestAddrs(t *testing.T) {
+	c := newTestConn(nil, nil, true)
+	if c.LocalAddr() != localAddr {
+		t.Errorf("LocalAddr = %v, want %v", c.LocalAddr(), localAddr)
+	}
+	if c.RemoteAddr() != remoteAddr {
+		t.Errorf("RemoteAddr = %v, want %v", c.RemoteAddr(), remoteAddr)
+	}
+}
+
+func TestUnderlyingConn(t *testing.T) {
+	var b1, b2 bytes.Buffer
+	fc := fakeNetConn{Reader: &b1, Writer: &b2}
+	c := newConn(fc, true, 1024, 1024, nil, nil, nil)
+	ul := c.UnderlyingConn()
+	if ul != fc {
+		t.Fatalf("Underlying conn is not what it should be.")
+	}
+}
+
+func TestBufioReadBytes(t *testing.T) {
+	//Test calling bufio.ReadBytes for value longer than read buffer size.
+
+	m := make([]byte, 512)
+	m[len(m)-1] = '\n'
+
+	var b1, b2 bytes.Buffer
+	wc := newConn(fakeNetConn{Writer: &b1}, false, len(m)+64, len(m)+64, nil, nil, nil)
+	rc := newConn(fakeNetConn{Reader: &b1, Writer: &b2}, true, len(m)-64, len(m)-64, nil, nil, nil)
+
+	w, _ := wc.NextWriter(BinaryMessage)
+	w.Write(m)
+	w.Close()
+
+	op, r, err := rc.NextReader()
+	if op != BinaryMessage || err != nil {
+		t.Fatalf("NextReader() returned %d, %v", op, err)
+	}
+	br := bufio.NewReader(r)
+	p, err := br.ReadBytes('\n')
+	if err != nil {
+		t.Fatalf("ReadBytes() returned %v", err)
+	}
+	if len(p) != len(m) {
+		t.Fatalf("read returned %d bytes, want %d bytes", len(p), len(m))
+	}
 }
