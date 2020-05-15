@@ -2,10 +2,13 @@ package ws
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
+	"reflect"
+	"sync"
 	"testing"
 	"testing/iotest"
 	"time"
@@ -258,5 +261,136 @@ func TestWriteBufferPool(t *testing.T) {
 
 	if s := string(p); s != message {
 		t.Fatalf("message is %s, want %s", s, message)
+	}
+}
+
+func TestWriteBufferPoolSync(t *testing.T) {
+	var buf bytes.Buffer
+	var pool sync.Pool
+	wc := newConn(fakeNetConn{Writer: &buf}, true, 1024, 1024, &pool, nil, nil)
+	rc := newTestConn(&buf, nil, false)
+
+	const message = "Hello World!"
+	for i := 0; i < 3; i++ {
+		if err := wc.WriteMessage(TextMessage, []byte(message)); err != nil {
+			t.Fatalf("wc.WriteMessage() returned %v", err)
+		}
+		opCode, p, err := rc.ReadMessage()
+		if opCode != TextMessage || err != nil {
+			t.Fatalf("ReadMessage() returned %d, p, %v", opCode, err)
+		}
+		if s := string(p); s != message {
+			t.Fatalf("message is %s, want %s", s, message)
+		}
+	}
+}
+
+//errorWriter is an io.Writer than returns an error on all writes.
+type errorWriter struct{}
+
+func (ew errorWriter) Write(p []byte) (int, error) { return 0, errors.New("error") }
+
+//TestWriteBufferPoolError ensure that buffer is returned to after error
+//on write.
+func TestWriteBufferPoolError(t *testing.T) {
+	//Part 1: Test NextWriter/Write/Close
+	var pool simpleBufferPool
+	wc := newConn(fakeNetConn{Writer: errorWriter{}}, true, 1024, 1024, &pool, nil, nil)
+
+	w, err := wc.NextWriter(TextMessage)
+	if err != nil {
+		t.Fatalf("wc.NextWriter() returned %v", err)
+	}
+	if wc.writeBuf == nil {
+		t.Fatalf("writeBuf is nil after NextWriter")
+	}
+
+	writeBufAddr := &wc.writeBuf[0]
+
+	if _, err := io.WriteString(w, "Hello"); err != nil {
+		t.Fatalf("io.WriteString(w, message) returned %v", err)
+	}
+
+	if err := w.Close(); err == nil {
+		t.Fatalf("w.Close() did not return error")
+	}
+
+	if wpd, ok := pool.v.(writePoolData); !ok || len(wpd.buf) == 0 || &wpd.buf[0] != writeBufAddr {
+		t.Fatal("writeBuf not returned to pool")
+	}
+
+	//Part 2: Test WriteMessage
+
+	wc = newConn(fakeNetConn{Writer: errorWriter{}}, true, 1024, 1024, &pool, nil, nil)
+
+	if err := wc.WriteMessage(TextMessage, []byte("Hello")); err == nil {
+		t.Fatalf("wc.WriteMessage did not return error")
+	}
+
+	if wpd, ok := pool.v.(writePoolData); !ok || len(wpd.buf) == 0 || &wpd.buf[0] != writeBufAddr {
+		t.Fatal("writeBuf not returned to pool")
+	}
+}
+
+func TestCloseFrameBeforeFinalMessageFrame(t *testing.T) {
+	const bufSize = 512
+
+	expectedErr := &CloseError{Code: CloseNormalClosure, Text: "hello"}
+
+	var b1, b2 bytes.Buffer
+	wc := newConn(&fakeNetConn{Reader: nil, Writer: &b1}, false, 1024, bufSize, nil, nil, nil)
+	rc := newTestConn(&b1, &b2, true)
+
+	w, _ := wc.NextWriter(BinaryMessage)
+	w.Write(make([]byte, bufSize+bufSize/2))
+	wc.WriteControl(CloseMessage, FormatCloseMessage(expectedErr.Code, expectedErr.Text), time.Now().Add(10*time.Second))
+	w.Close()
+
+	op, r, err := rc.NextReader()
+	if op != BinaryMessage || err != nil {
+		t.Fatalf("NextReader() returned %d, %v", op, err)
+	}
+	_, err = io.Copy(ioutil.Discard, r)
+	if !reflect.DeepEqual(err, expectedErr) {
+		t.Fatalf("io.Copy() returned %v, want %v", err, expectedErr)
+	}
+	_, _, err = rc.NextReader()
+	if !reflect.DeepEqual(err, expectedErr) {
+		t.Fatalf("NextReader() returned %v, want %v", err, expectedErr)
+	}
+}
+
+func TestEOFWithinFrame(t *testing.T) {
+	const bufSize = 64
+
+	for n := 0; ; n++ {
+		var b bytes.Buffer
+		wc := newTestConn(nil, &b, false)
+		rc := newTestConn(&b, nil, true)
+
+		w, _ := wc.NextWriter(BinaryMessage)
+		w.Write(make([]byte, bufSize))
+		w.Close()
+
+		if n >= b.Len() {
+			break
+		}
+		b.Truncate(n)
+
+		op, r, err := rc.NextReader()
+		if err == errUnexpectedEOF {
+			continue
+		}
+		if op != BinaryMessage || err != nil {
+			t.Fatalf("%d: NextReader() returned %d, %v", n, op, err)
+		}
+		_, err = io.Copy(ioutil.Discard, r)
+		if err != errUnexpectedEOF {
+			t.Fatalf("%d: io.Copy() returned %v, want %v", n, err, errUnexpectedEOF)
+		}
+		_, _, err = rc.NextReader()
+		if err != errUnexpectedEOF {
+			t.Fatalf("%d: NextReader() returned %v, want %v", n, err, errUnexpectedEOF)
+		}
 	}
 }
