@@ -394,3 +394,28 @@ func TestEOFWithinFrame(t *testing.T) {
 		}
 	}
 }
+
+func TestEOFBeforeFinalFrame(t *testing.T) {
+	const bufSize = 512
+
+	var b1, b2 bytes.Buffer
+	wc := newConn(&fakeNetConn{Writer: &b1}, false, 1024, bufSize, nil, nil, nil)
+	rc := newTestConn(&b1, &b2, true)
+
+	w, _ := wc.NextWriter(BinaryMessage)
+	w.Write(make([]byte, bufSize+bufSize/2))
+
+	op, r, err := rc.NextReader()
+	if op != BinaryMessage || err != nil {
+		t.Fatalf("NextReader() returned %d, %v", op, err)
+	}
+
+	_, err = io.Copy(ioutil.Discard, r)
+	if err != errUnexpectedEOF {
+		t.Fatalf("io.Copy() returned %v, want %v", err, errUnexpectedEOF)
+	}
+	_, _, err = rc.NextReader()
+	if err != errUnexpectedEOF {
+		t.Fatalf("NextReader() returned %v, want %v", err, errUnexpectedEOF)
+	}
+}
