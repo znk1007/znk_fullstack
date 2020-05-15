@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-type joinReader struct {
-	// c *Conn
-}
-
 func hostPortNoPort(u *url.URL) (hostPort, hostNoPort string) {
 	hostPort = u.Host
 	hostNoPort = u.Host
