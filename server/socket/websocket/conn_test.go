@@ -169,3 +169,94 @@ func TestControl(t *testing.T) {
 		}
 	}
 }
+
+type simpleBufferPool struct {
+	v interface{}
+}
+
+func (p *simpleBufferPool) Get() interface{} {
+	v := p.v
+	p.v = nil
+	return v
+}
+
+func (p *simpleBufferPool) Put(v interface{}) {
+	p.v = v
+}
+
+func TestWriteBufferPool(t *testing.T) {
+	const message = "Now is the time for all good people to come to the aid of the party."
+
+	var buf bytes.Buffer
+	var pool simpleBufferPool
+	rc := newTestConn(&buf, nil, false)
+
+	//Specify writeBufferSize smaller than message size to ensure that pooling
+	//works with fragmented messages.
+	wc := newConn(fakeNetConn{Writer: &buf}, true, 1024, len(message)-1, &pool, nil, nil)
+
+	if wc.writeBuf != nil {
+		t.Fatal("writeBuf not nil after create")
+	}
+
+	//Part 1: test NextWriter/Write/Close
+
+	w, err := wc.NextWriter(TextMessage)
+	if err != nil {
+		t.Fatalf("wc.NextWriter() returned %v", err)
+	}
+
+	if wc.writeBuf == nil {
+		t.Fatal("writeBuf is nil after NextWriter")
+	}
+
+	writeBufAddr := &wc.writeBuf[0]
+
+	if _, err := io.WriteString(w, message); err != nil {
+		t.Fatalf("io.WriteString(w, message) returned %v", err)
+	}
+
+	if err := w.Close(); err != nil {
+		t.Fatalf("w.Close() returned %v", err)
+	}
+
+	if wc.writeBuf != nil {
+		t.Fatal("writeBuf not nil after w.Close()")
+	}
+
+	if wpd, ok := pool.v.(writePoolData); !ok || len(wpd.buf) == 0 || &wpd.buf[0] != writeBufAddr {
+		t.Fatal("writeBuf not returned to pool")
+	}
+
+	opCode, p, err := rc.ReadMessage()
+	if opCode != TextMessage || err != nil {
+		t.Fatalf("ReadMessage() returned %d, p, %v", opCode, err)
+	}
+
+	if s := string(p); s != message {
+		t.Fatalf("message is %s, want %s", s, message)
+	}
+
+	//Part 2: Test WriteMessage.
+
+	if err := wc.WriteMessage(TextMessage, []byte(message)); err != nil {
+		t.Fatalf("wc.WriteMessage() returned %v", err)
+	}
+
+	if wc.writeBuf != nil {
+		t.Fatal("writeBuf not nil after wc.WriteMessage()")
+	}
+
+	if wpd, ok := pool.v.(writePoolData); !ok || len(wpd.buf) == 0 || &wpd.buf[0] != writeBufAddr {
+		t.Fatal("writeBuf not returned to pool after WriteMessage")
+	}
+
+	opCode, p, err = rc.ReadMessage()
+	if opCode != TextMessage || err != nil {
+		t.Fatalf("ReadMessage() returned %d, p, %v", opCode, err)
+	}
+
+	if s := string(p); s != message {
+		t.Fatalf("message is %s, want %s", s, message)
+	}
+}
