@@ -419,3 +419,103 @@ func TestEOFBeforeFinalFrame(t *testing.T) {
 		t.Fatalf("NextReader() returned %v, want %v", err, errUnexpectedEOF)
 	}
 }
+
+func TestWriteAfterMessageWriterClose(t *testing.T) {
+	wc := newTestConn(nil, &bytes.Buffer{}, false)
+	w, _ := wc.NextWriter(BinaryMessage)
+	io.WriteString(w, "hello")
+	if err := w.Close(); err != nil {
+		t.Fatalf("unexpected error closing message writer, %v", err)
+	}
+	if _, err := io.WriteString(w, "world"); err == nil {
+		t.Fatalf("no error writing after close")
+	}
+
+	w, _ = wc.NextWriter(BinaryMessage)
+	io.WriteString(w, "hello")
+
+	//close w by getting next writer
+	_, err := wc.NextWriter(BinaryMessage)
+	if err != nil {
+		t.Fatalf("unexpected error getting next writer, %v", err)
+	}
+	if _, err := io.WriteString(w, "world"); err == nil {
+		t.Fatalf("no error writing after close")
+	}
+}
+
+func TestReadLimit(t *testing.T) {
+	t.Run("Test ReadLimit is enforced", func(t *testing.T) {
+		const readLimit = 512
+		message := make([]byte, readLimit+1)
+
+		var b1, b2 bytes.Buffer
+		wc := newConn(&fakeNetConn{Writer: &b1}, false, 1024, readLimit-2, nil, nil, nil)
+		rc := newTestConn(&b1, &b2, true)
+		rc.SetReadLimit(readLimit)
+
+		//Send message at the limit with interleaved pong.
+		w, _ := wc.NextWriter(BinaryMessage)
+		w.Write(message[:readLimit-1])
+		wc.WriteControl(PongMessage, []byte("this is a pong"), time.Now().Add(10*time.Second))
+		w.Write(message[:1])
+		w.Close()
+
+		//Send message larger than the limit
+		wc.WriteMessage(BinaryMessage, message[:readLimit+1])
+
+		op, _, err := rc.NextReader()
+		if op != BinaryMessage || err != nil {
+			t.Fatalf("1: NextReader() returned %d, %v", op, err)
+		}
+		op, r, err := rc.NextReader()
+		if op != BinaryMessage || err != nil {
+			t.Fatalf("2: NextReader() returned %d, %v", op, err)
+		}
+		_, err = io.Copy(ioutil.Discard, r)
+		if err != ErrReadLimit {
+			t.Fatalf("io.Copy() returned %v", err)
+		}
+	})
+	t.Run("Test that ReadLimit cannot be overflowed", func(t *testing.T) {
+		const readLimit = 1
+
+		var b1, b2 bytes.Buffer
+		rc := newTestConn(&b1, &b2, true)
+		rc.SetReadLimit(readLimit)
+
+		//First, send a non-final binary message
+		b1.Write([]byte("\x02\x81"))
+
+		//Mask key
+		b1.Write([]byte("\x00\x00\x00\x00"))
+
+		//First payload
+		b1.Write([]byte("A"))
+
+		//Next, send a negative-length, non-final continuation frame
+		b1.Write([]byte("\x00\xFF\x80\x00\x00\x00\x00\x00\x00\x00"))
+
+		//Mask key
+		b1.Write([]byte("\x00\x00\x00\x00"))
+
+		//Too-long payload
+		b1.Write([]byte("BCDEF"))
+
+		op, r, err := rc.NextReader()
+		if op != BinaryMessage || err != nil {
+			t.Fatalf("1: NextReader() returned %d, %v", op, err)
+		}
+
+		var buf [10]byte
+		var read int
+		n, err := r.Read(buf[:])
+		if err != nil && err != ErrReadLimit {
+			t.Fatalf("unexpected error testing read limit: %v", err)
+		}
+		read += n
+		if err == nil && read > readLimit {
+			t.Fatalf("read limit exeeded: limit %d, read %d", readLimit, read)
+		}
+	})
+}
