@@ -1,9 +1,12 @@
 package ws
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
+	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptrace"
@@ -95,6 +98,11 @@ var DefaultDialer = &Dialer{
 	Proxy:            http.ProxyFromEnvironment,
 	HandshakeTimeout: 45 * time.Second,
 }
+
+//nilDialer is dialer to use when receiver is nil.
+var nilDialer = *DefaultDialer
+
+var errMalformedURL = errors.New("malformed ws or wss URL")
 
 //DialContext creates a new client connection. Use requestHeader to specify the origin (Origin),
 //subprotocols (Sec-WebSocket-Protocol) and cookies (Cookie). Use the response.Header
@@ -293,12 +301,51 @@ func (d *Dialer) DialContext(ctx context.Context, urlStr string, requestHeader h
 			trace.GotFirstResponseByte()
 		}
 	}
+
+	resp, err := http.ReadResponse(conn.br, req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if d.Jar != nil {
+		if rc := resp.Cookies(); len(rc) > 0 {
+			d.Jar.SetCookies(u, rc)
+		}
+	}
+
+	if resp.StatusCode != 101 ||
+		!strings.EqualFold(resp.Header.Get("Upgrade"), "websocket") ||
+		!strings.EqualFold(resp.Header.Get("Connection"), "upgrade") ||
+		resp.Header.Get("Sec-Websocket-Accept") != computeAcceptKey(challengeKey) {
+		//Before closing the network connection on return from this function,
+		//slurp up (吞吐数据) some of the response to aid application debugging.
+		buf := make([]byte, 1024)
+		n, _ := io.ReadFull(resp.Body, buf)
+		resp.Body = ioutil.NopCloser(bytes.NewReader(buf[:n]))
+		return nil, resp, ErrBadHandshake
+	}
+
+	for _, ext := range parseExtensions(resp.Header) {
+		if ext[""] != "permessage-deflate" {
+			continue
+		}
+		_, snct := ext["server_no_context_takeover"]
+		_, cnct := ext["client_no_context_takeover"]
+		if !snct || !cnct {
+			return nil, resp, errInvalidCompression
+		}
+		conn.newCompressionWriter = compressNoContextTakeover
+		conn.newDecompressionReader = decompressNoContextTakeover
+		break
+	}
+
+	resp.Body = ioutil.NopCloser(bytes.NewReader([]byte{}))
+	conn.subprotocol = resp.Header.Get("Sec-Websocket-Protocol")
+
+	netConn.SetDeadline(time.Time{})
+	netConn = nil // to avoid close in defer
+	return conn, resp, nil
 }
-
-//nilDialer is dialer to use when receiver is nil.
-var nilDialer = *DefaultDialer
-
-var errMalformedURL = errors.New("malformed ws or wss URL")
 
 func hostPortNoPort(u *url.URL) (hostPort, hostNoPort string) {
 	hostPort = u.Host
