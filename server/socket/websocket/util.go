@@ -200,11 +200,11 @@ headers:
 		for {
 			var t string
 			t, s = nextToken(skipSpace(s))
-			if t == "" {
+			if len(t) == 0 {
 				continue headers
 			}
 			s = skipSpace(s)
-			if s != "" && s[0] != ',' {
+			if len(s) > 0 && s[0] != ',' {
 				continue headers
 			}
 			if equalASCIIFold(t, value) {

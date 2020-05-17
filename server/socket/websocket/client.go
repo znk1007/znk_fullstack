@@ -85,11 +85,11 @@ func NewClient(netConn net.Conn, u *url.URL, requestHeader http.Header, readBufS
 			return netConn, nil
 		},
 	}
-	return d.Dialer(u.String(), requestHeader)
+	return d.Dial(u.String(), requestHeader)
 }
 
-//Dialer creates a new client connection by calling DialContext with a background context.
-func (d *Dialer) Dialer(urlStr string, requestHeader http.Header) (*Conn, *http.Response, error) {
+//Dial creates a new client connection by calling DialContext with a background context.
+func (d *Dialer) Dial(urlStr string, requestHeader http.Header) (*Conn, *http.Response, error) {
 	return d.DialContext(context.Background(), urlStr, requestHeader)
 }
 
