@@ -1,9 +1,11 @@
 package ws
 
 import (
+	"crypto/x509"
 	"encoding/base64"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"net/url"
 	"reflect"
@@ -215,4 +217,62 @@ func TestDial(t *testing.T) {
 	}
 	defer ws.Close()
 	sendRecv(t, ws)
+}
+
+func TestDialCookieJar(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	jar, _ := cookiejar.New(nil)
+	d := cstDialer
+	d.Jar = jar
+
+	u, _ := url.Parse(s.URL)
+
+	switch u.Scheme {
+	case "ws":
+		u.Scheme = "http"
+	case "wss":
+		u.Scheme = "https"
+	}
+
+	cookies := []*http.Cookie{{Name: "gorilla", Value: "ws", Path: "/"}}
+	d.Jar.SetCookies(u, cookies)
+
+	ws, _, err := d.Dial(s.URL, nil)
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer ws.Close()
+
+	var gorilla string
+	var sessionID string
+	for _, c := range d.Jar.Cookies(u) {
+		if c.Name == "gorilla" {
+			gorilla = c.Value
+		}
+
+		if c.Name == "sessionID" {
+			sessionID = c.Value
+		}
+	}
+	if gorilla != "ws" {
+		t.Error("Cookie not present in jar.")
+	}
+
+	if sessionID != "1234" {
+		t.Error("Set-Cookie not received from the server.")
+	}
+
+	sendRecv(t, ws)
+}
+
+func rootCAs(t *testing.T, s *httptest.Server) *x509.CertPool {
+	certs := x509.NewCertPool()
+	for _, c := range s.TLS.Certificates {
+		roots, err := x509.ParseCertificate(c.Certificate[len(c.Certificate)-1])
+		if err != nil {
+			t.Fatalf("error parsing server's root cert: %v", err)
+		}
+	}
 }
