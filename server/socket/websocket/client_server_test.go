@@ -391,3 +391,80 @@ func TestHandshakeTimeoutInContext(t *testing.T) {
 	}
 	ws.Close()
 }
+
+func TestDialBadScheme(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	ws, _, err := cstDialer.Dial(s.Server.URL, nil)
+	if err == nil {
+		ws.Close()
+		t.Fatalf("Dial: nil")
+	}
+}
+
+func TestDialBadOrigin(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	ws, resp, err := cstDialer.Dial(s.URL, http.Header{"Origin": {"bad"}})
+	if err == nil {
+		ws.Close()
+		t.Fatalf("Dial: nil")
+	}
+	if resp == nil {
+		t.Fatalf("resp=nil, err=%v", err)
+	}
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("status=%d, want %d", resp.StatusCode, http.StatusForbidden)
+	}
+}
+
+func TestDialBadHeader(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	for _, k := range []string{
+		"Upgrade",
+		"Connection",
+		"Sec-Websocket-Key",
+		"Sec-Websocket-Version",
+		"Sec-Websocket-Protocol",
+	} {
+		h := http.Header{}
+		h.Set(k, "bad")
+		ws, _, err := cstDialer.Dial(s.URL, http.Header{"Origin": {"bad"}})
+		if err == nil {
+			ws.Close()
+			t.Errorf("Dial with header %s returned nil", k)
+		}
+	}
+}
+
+func TestBadMethod(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ws, err := cstUpgrader.Upgrade(w, r, nil)
+		if err == nil {
+			t.Errorf("handshake succeeded, expect fail")
+			ws.Close()
+		}
+	}))
+	defer s.Close()
+
+	req, err := http.NewRequest("POST", s.URL, strings.NewReader(""))
+	if err != nil {
+		t.Fatalf("NewRequest returned error %v", err)
+	}
+	req.Header.Set("Connection", "upgrade")
+	req.Header.Set("Upgrade", "websocket")
+	req.Header.Set("Sec-Websocket-Version", "13")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("Do returned error %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("Status = %d, want %d", resp.StatusCode, http.StatusMethodNotAllowed)
+	}
+}
