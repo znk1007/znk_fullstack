@@ -561,4 +561,5 @@ func TestHost(t *testing.T) {
 	defer tlsServer.Close()
 
 	addrs := map[*httptest.Server]string{server: server.Listener.Addr().String(), tlsServer: tlsServer.Listener.Addr().String()}
+	wsProtos := map[*httptest.Server]string{server: "ws://", tlsServer: "wss://"}
 }
