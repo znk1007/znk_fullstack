@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -467,4 +468,97 @@ func TestBadMethod(t *testing.T) {
 	if resp.StatusCode != http.StatusMethodNotAllowed {
 		t.Errorf("Status = %d, want %d", resp.StatusCode, http.StatusMethodNotAllowed)
 	}
+}
+
+func TestHandshake(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	ws, resp, err := cstDialer.Dial(s.URL, http.Header{"Origin": {s.URL}})
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer ws.Close()
+
+	var sessionID string
+	for _, c := range resp.Cookies() {
+		if c.Name == "sessionID" {
+			sessionID = c.Value
+		}
+	}
+	if sessionID != "1234" {
+		t.Error("Set-Cookie not received from the server.")
+	}
+
+	if ws.SubProtocol() != "p1" {
+		t.Errorf("ws.Subprotocol() = %s, want p1", ws.SubProtocol())
+	}
+	sendRecv(t, ws)
+}
+
+func TestRespOnBadHandshake(t *testing.T) {
+	const expectedStatus = http.StatusGone
+	const expectedBody = "This is the response body."
+
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(expectedStatus)
+		io.WriteString(w, expectedBody)
+	}))
+	defer s.Close()
+
+	ws, resp, err := cstDialer.Dial(makeWsProto(s.URL), nil)
+	if err == nil {
+		ws.Close()
+		t.Fatalf("Dial: nil")
+	}
+
+	if resp == nil {
+		t.Fatalf("resp=nil, err=%v", err)
+	}
+
+	if resp.StatusCode != expectedStatus {
+		t.Errorf("resp.StatusCode=%d, want %d", resp.StatusCode, expectedStatus)
+	}
+
+	p, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("ReadFull(resp.Body) returned error %v", err)
+	}
+
+	if string(p) != expectedBody {
+		t.Errorf("resp.Body=%s, want %s", p, expectedBody)
+	}
+}
+
+type testLogWriter struct {
+	t *testing.T
+}
+
+func (w testLogWriter) Write(p []byte) (int, error) {
+	w.t.Logf("%s", p)
+	return len(p), nil
+}
+
+//TestHost tests handling of host names and confirms that it matches net/http.
+func TestHost(t *testing.T) {
+	upgrader := Upgrader{}
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if IsWebSocketUpgrade(r) {
+			c, err := upgrader.Upgrade(w, r, http.Header{"X-Test-Host": {r.Host}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			c.Close()
+		} else {
+			w.Header().Set("X-Test-Host", r.Host)
+		}
+	})
+
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	tlsServer := httptest.NewTLSServer(handler)
+	defer tlsServer.Close()
+
+	addrs := map[*httptest.Server]string{server: server.Listener.Addr().String(), tlsServer: tlsServer.Listener.Addr().String()}
 }
