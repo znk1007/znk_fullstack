@@ -1,9 +1,12 @@
 package ws
 
 import (
+	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"io"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -270,9 +273,121 @@ func TestDialCookieJar(t *testing.T) {
 func rootCAs(t *testing.T, s *httptest.Server) *x509.CertPool {
 	certs := x509.NewCertPool()
 	for _, c := range s.TLS.Certificates {
-		roots, err := x509.ParseCertificate(c.Certificate[len(c.Certificate)-1])
+		roots, err := x509.ParseCertificates(c.Certificate[len(c.Certificate)-1])
 		if err != nil {
 			t.Fatalf("error parsing server's root cert: %v", err)
 		}
+		for _, root := range roots {
+			certs.AddCert(root)
+		}
 	}
+	return certs
+}
+
+func TestDialTLS(t *testing.T) {
+	s := newTLSServer(t)
+	defer s.Close()
+
+	d := cstDialer
+	d.TLSClientConfig = &tls.Config{RootCAs: rootCAs(t, s.Server)}
+	ws, _, err := d.Dial(s.URL, nil)
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer ws.Close()
+	sendRecv(t, ws)
+}
+
+func TestDialTimeout(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	d := cstDialer
+	d.HandshakeTimeout = -1
+	ws, _, err := d.Dial(s.URL, nil)
+	if err == nil {
+		ws.Close()
+		t.Fatalf("Dial: nil")
+	}
+}
+
+//requireDeadlineNetConn fails the current test when Read or Write are called
+//with no deadline.
+type requireDeadlineNetConn struct {
+	t                  *testing.T
+	c                  net.Conn
+	readDeadlineIsSet  bool
+	writeDeadlineIsSet bool
+}
+
+func (c *requireDeadlineNetConn) SetDeadline(t time.Time) error {
+	c.writeDeadlineIsSet = !t.Equal(time.Time{})
+	c.readDeadlineIsSet = c.writeDeadlineIsSet
+	return c.c.SetDeadline(t)
+}
+
+func (c *requireDeadlineNetConn) SetReadDeadline(t time.Time) error {
+	c.writeDeadlineIsSet = !t.Equal(time.Time{})
+	return c.c.SetDeadline(t)
+}
+
+func (c *requireDeadlineNetConn) SetWriteDeadline(t time.Time) error {
+	c.writeDeadlineIsSet = !t.Equal(time.Time{})
+	return c.c.SetDeadline(t)
+}
+
+func (c *requireDeadlineNetConn) Write(p []byte) (int, error) {
+	if !c.writeDeadlineIsSet {
+		c.t.Fatalf("write with no deadline")
+	}
+	return c.c.Write(p)
+}
+
+func (c *requireDeadlineNetConn) Read(p []byte) (int, error) {
+	if !c.readDeadlineIsSet {
+		c.t.Fatalf("read with no deadline")
+	}
+	return c.c.Read(p)
+}
+
+func (c *requireDeadlineNetConn) Close() error         { return c.c.Close() }
+func (c *requireDeadlineNetConn) LocalAddr() net.Addr  { return c.c.LocalAddr() }
+func (c *requireDeadlineNetConn) RemoteAddr() net.Addr { return c.c.RemoteAddr() }
+
+func TestHandshakeTimeout(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	d := cstDialer
+	d.NetDial = func(n, a string) (net.Conn, error) {
+		c, err := net.Dial(n, a)
+		return &requireDeadlineNetConn{c: c, t: t}, err
+	}
+	ws, _, err := d.Dial(s.URL, nil)
+	if err != nil {
+		t.Fatal("Dial:", err)
+	}
+	ws.Close()
+}
+
+func TestHandshakeTimeoutInContext(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	d := cstDialer
+	d.HandshakeTimeout = 0
+	d.NetDialConText = func(ctx context.Context, n, a string) (net.Conn, error) {
+		netDialer := &net.Dialer{}
+		c, err := netDialer.DialContext(ctx, n, a)
+		return &requireDeadlineNetConn{c: c, t: t}, err
+	}
+
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	defer cancel()
+
+	ws, _, err := d.DialContext(ctx, s.URL, nil)
+	if err != nil {
+		t.Fatal("Dial:", err)
+	}
+	ws.Close()
 }
