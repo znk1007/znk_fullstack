@@ -5,8 +5,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -562,4 +564,154 @@ func TestHost(t *testing.T) {
 
 	addrs := map[*httptest.Server]string{server: server.Listener.Addr().String(), tlsServer: tlsServer.Listener.Addr().String()}
 	wsProtos := map[*httptest.Server]string{server: "ws://", tlsServer: "wss://"}
+	httpProtos := map[*httptest.Server]string{server: "http://", tlsServer: "https://"}
+
+	//Avoid log noise from net/http server by logging to testing.T
+	server.Config.ErrorLog = log.New(testLogWriter{t}, "", 0)
+	tlsServer.Config.ErrorLog = server.Config.ErrorLog
+
+	cas := rootCAs(t, tlsServer)
+
+	tests := []struct {
+		fail               bool
+		server             *httptest.Server
+		url                string
+		header             string
+		tls                string
+		wantAddr           string
+		wantHeader         string
+		insecureSkipVerify bool
+	}{
+		{
+			server:     server,
+			url:        addrs[server],
+			wantAddr:   addrs[server],
+			wantHeader: addrs[server],
+		},
+		{
+			server:     tlsServer,
+			url:        addrs[tlsServer],
+			wantAddr:   addrs[tlsServer],
+			wantHeader: addrs[tlsServer],
+		},
+		{
+			server:     server,
+			url:        addrs[server],
+			header:     "badhost.com",
+			wantAddr:   addrs[server],
+			wantHeader: "badhost.com",
+		},
+		{
+			server:     tlsServer,
+			url:        addrs[tlsServer],
+			header:     "badhost.com",
+			wantAddr:   addrs[tlsServer],
+			wantHeader: "badhost.com",
+		},
+		{
+			server:     server,
+			url:        "example.com",
+			header:     "badhost.com",
+			wantAddr:   "example.com:80",
+			wantHeader: "badhost.com",
+		},
+		{
+			server:     tlsServer,
+			url:        "example.com",
+			header:     "badhost.com",
+			wantAddr:   "example.com:443",
+			wantHeader: "badhost.com",
+		},
+		{
+			server:     server,
+			url:        "badhost.com",
+			header:     "example.com",
+			wantAddr:   "badhost.com:80",
+			wantHeader: "example.com",
+		},
+		{
+			fail:     true,
+			server:   tlsServer,
+			url:      "badhost.com",
+			header:   "example.com",
+			wantAddr: "badhost.com:443",
+		},
+		{
+			server:             tlsServer,
+			url:                "badhost.com",
+			insecureSkipVerify: true,
+			wantAddr:           "badhost.com:443",
+			wantHeader:         "badhost.com",
+		},
+		{
+			server:     tlsServer,
+			url:        "badhost.com",
+			tls:        "example.com",
+			wantAddr:   "badhost.com:443",
+			wantHeader: "badhost.com",
+		},
+	}
+
+	for i, tt := range tests {
+		tls := &tls.Config{
+			RootCAs:            cas,
+			ServerName:         tt.tls,
+			InsecureSkipVerify: tt.insecureSkipVerify,
+		}
+
+		var gotAddr string
+		dialer := Dialer{
+			NetDial: func(network, addr string) (net.Conn, error) {
+				gotAddr = addr
+				return net.Dial(network, addrs[tt.server])
+			},
+			TLSClientConfig: tls,
+		}
+
+		//Test websocket dial
+		h := http.Header{}
+		if len(tt.header) != 0 {
+			h.Set("Host", tt.header)
+		}
+		c, resp, err := dialer.Dial(wsProtos[tt.server]+tt.url+"/", h)
+		if err == nil {
+			c.Close()
+		}
+
+		check := func(protos map[*httptest.Server]string) {
+			name := fmt.Sprintf("%d: %s%s/ header[Host]=%q, tls.ServerName=%q", i+1, protos[tt.server], tt.url, tt.header, tt.tls)
+			if gotAddr != tt.wantAddr {
+				t.Errorf("%s: got addr %s, want %s", name, gotAddr, tt.wantAddr)
+			}
+			switch {
+			case tt.fail && err == nil:
+				t.Errorf("%s: unexpected success", name)
+			case !tt.fail && err != nil:
+				t.Errorf("%s: unexpected error %v", name, err)
+			case !tt.fail && err == nil:
+				if gotHost := resp.Header.Get("X-Test-Host"); gotHost != tt.wantHeader {
+					t.Errorf("%s: got host %s, want %s", name, gotHost, tt.wantHeader)
+				}
+			}
+		}
+
+		check(wsProtos)
+
+		//Confirm that net/http has same result
+		transport := &http.Transport{
+			Dial:            dialer.NetDial,
+			TLSClientConfig: dialer.TLSClientConfig,
+		}
+		req, _ := http.NewRequest("GET", httpProtos[tt.server]+tt.url+"/", nil)
+		if len(tt.header) != 0 {
+			req.Host = tt.header
+		}
+		client := &http.Client{Transport: transport}
+		resp, err = client.Do(req)
+		if err == nil {
+			resp.Body.Close()
+		}
+		transport.CloseIdleConnections()
+		check(httpProtos)
+	}
 }
