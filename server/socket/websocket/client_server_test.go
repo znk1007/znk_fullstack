@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/http/httptrace"
 	"net/url"
 	"reflect"
 	"strings"
@@ -806,6 +807,64 @@ func TestSocksProxyDial(t *testing.T) {
 	ws, _, err := cstDialer.Dial(s.URL, nil)
 	if err != nil {
 		t.Fatalf("Dial: %v", err)
+	}
+	defer ws.Close()
+	sendRecv(t, ws)
+}
+
+func TestTracingDialWithContext(t *testing.T) {
+	var headersWrote, requestWrote, getConn, gotConn, connectDone, gotFirstResponseByte bool
+	trace := &httptrace.ClientTrace{
+		WroteHeaders: func() {
+			headersWrote = true
+		},
+		WroteRequest: func(httptrace.WroteRequestInfo) {
+			requestWrote = true
+		},
+		GetConn: func(hostPort string) {
+			getConn = true
+		},
+		GotConn: func(info httptrace.GotConnInfo) {
+			gotConn = true
+		},
+		ConnectDone: func(network, addr string, err error) {
+			connectDone = true
+		},
+		GotFirstResponseByte: func() {
+			gotFirstResponseByte = true
+		},
+	}
+
+	ctx := httptrace.WithClientTrace(context.Background(), trace)
+
+	s := newTLSServer(t)
+	defer s.Close()
+
+	d := cstDialer
+	d.TLSClientConfig = &tls.Config{RootCAs: rootCAs(t, s.Server)}
+
+	ws, _, err := d.DialContext(ctx, s.URL, nil)
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+
+	if !headersWrote {
+		t.Fatal("Headers was not written")
+	}
+	if !requestWrote {
+		t.Fatal("Request was not wrtten")
+	}
+	if !getConn {
+		t.Fatal("getConn was not called")
+	}
+	if !gotConn {
+		t.Fatal("gotConn was not called")
+	}
+	if !connectDone {
+		t.Fatal("connectDone was not called")
+	}
+	if !gotFirstResponseByte {
+		t.Fatal("GotFirstResponseByte was not called")
 	}
 	defer ws.Close()
 	sendRecv(t, ws)
