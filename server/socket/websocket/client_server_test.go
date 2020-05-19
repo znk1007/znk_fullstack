@@ -869,3 +869,21 @@ func TestTracingDialWithContext(t *testing.T) {
 	defer ws.Close()
 	sendRecv(t, ws)
 }
+
+func TestEmptyTracingDialWithContext(t *testing.T) {
+	trace := &httptrace.ClientTrace{}
+	ctx := httptrace.WithClientTrace(context.Background(), trace)
+
+	s := newTLSServer(t)
+	defer s.Close()
+
+	d := cstDialer
+	d.TLSClientConfig = &tls.Config{RootCAs: rootCAs(t, s.Server)}
+
+	ws, _, err := d.DialContext(ctx, s.URL, nil)
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	defer ws.Close()
+	sendRecv(t, ws)
+}
