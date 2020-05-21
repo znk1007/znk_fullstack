@@ -14,9 +14,9 @@ type opError struct {
 	Err error
 }
 
-//opError new a *NetError
-func opError(url, op string, err error) error {
-	return &NetError{
+//opErr new a *opError
+func opErr(url, op string, err error) error {
+	return &opError{
 		URL: url,
 		Op:  op,
 		Err: err,
@@ -55,19 +55,19 @@ const (
 	frameBinary
 )
 
-//byteToFrameType converts a byte to FrameType.
-func byteToFrameType(b byte) FrameType {
+//byteToFrameType converts a byte to frameType.
+func byteToFrameType(b byte) frameType {
 	return frameType(b)
 }
 
 //byte return type in byte
-func (t FrameType) byte() byte {
+func (t frameType) byte() byte {
 	return byte(t)
 }
 
 //frameReader frameReader reads a frame. It need be closed before next reading.
 type frameReader interface {
-	nextReader() (FrameType, packageType, error)
+	nextReader() (frameType, packetType, error)
 }
 
 //frameWriter writes a frame. It need be closed before next writing.
