@@ -22,4 +22,27 @@ const (
 	//when client sends an upgrade packets which requests the server to flush
 	//tis cache on the old transport and switch to the new transport.
 	UPGRADE
+	//NOOP is a noop packet. Used primarily to force a poll cycle when an
+	//incoming websocket connection is received.
+	NOOP
 )
+
+func (pt PacketType) String() string {
+	switch pt {
+	case OPEN:
+		return "open"
+	case CLOSE:
+		return "close"
+	case PING:
+		return "ping"
+	case PONG:
+		return "pong"
+	case MESSAGE:
+		return "message"
+	case UPGRADE:
+		return "upgrade"
+	case NOOP:
+		return "noop"
+	}
+	return "unknown"
+}
