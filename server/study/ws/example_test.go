@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	ws "github.com/znk_fullstack/server/socket/websocket"
+	ws "github.com/znk_fullstack/server/study/ws"
 )
 
 var (
