@@ -193,7 +193,7 @@ func ReadConnParameters(r io.Reader) (ConnParamters, error) {
 		SID:          param.SID,
 		Upgrades:     param.Upgrades,
 		PingInterval: time.Duration(param.PingInterval) * time.Millisecond,
-		PingTimeout:  time.Duration(param.PingTimeout) * time.Microsecond,
+		PingTimeout:  time.Duration(param.PingTimeout) * time.Millisecond,
 	}, nil
 }
 
@@ -202,7 +202,7 @@ func (cp ConnParamters) WriteTo(w io.Writer) (int64, error) {
 	arg := jsonParameters{
 		SID:          cp.SID,
 		Upgrades:     cp.Upgrades,
-		PingInterval: int(cp.PingInterval / time.Microsecond),
+		PingInterval: int(cp.PingInterval / time.Millisecond),
 		PingTimeout:  int(cp.PingTimeout / time.Millisecond),
 	}
 	writer := writer{

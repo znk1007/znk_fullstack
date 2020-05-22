@@ -1,8 +1,10 @@
 package base
 
 import (
+	"bytes"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -93,5 +95,52 @@ func TestOpError(t *testing.T) {
 		at.Equal(test.timeout, e.Timeout())
 		at.Equal(test.temporary, e.Temporary())
 		at.Equal(test.errStr, e.Error())
+	}
+}
+
+func TestFrameType(t *testing.T) {
+	at := assert.New(t)
+	tests := []struct {
+		b  byte
+		ft FrameType
+		ob byte
+	}{
+		{0, FrameString, 0},
+		{1, FrameBinary, 1},
+	}
+	for _, test := range tests {
+		ft := ByteToFrameType(test.b)
+		at.Equal(test.ft, ft)
+		b := ft.Byte()
+		at.Equal(test.ob, b)
+	}
+}
+
+func TestConnParameters(t *testing.T) {
+	at := assert.New(t)
+	tests := []struct {
+		param ConnParamters
+		out   string
+	}{
+		{
+			ConnParamters{
+				time.Second * 10,
+				time.Second * 5,
+				"vCcJKmYQcIf801WDAAAB",
+				[]string{"websocket", "polling"},
+			},
+			"{\"sid\":\"vCcJKmYQcIf801WDAAAB\",\"upgrades\":[\"websocket\",\"polling\"],\"pingInterval\":10000,\"pingTimeout\":5000}\n",
+		},
+	}
+	for _, test := range tests {
+		buf := bytes.NewBuffer(nil)
+		n, err := test.param.WriteTo(buf)
+		at.Nil(err)
+		at.Equal(int64(len(test.out)), n)
+		at.Equal(test.out, buf.String())
+
+		conn, err := ReadConnParameters(buf)
+		at.Nil(err)
+		at.Equal(test.param, conn)
 	}
 }
