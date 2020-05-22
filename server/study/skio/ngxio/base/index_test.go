@@ -3,6 +3,7 @@ package base
 import (
 	"bytes"
 	"io"
+	"io/ioutil"
 	"testing"
 	"time"
 
@@ -142,5 +143,19 @@ func TestConnParameters(t *testing.T) {
 		conn, err := ReadConnParameters(buf)
 		at.Nil(err)
 		at.Equal(test.param, conn)
+	}
+}
+
+func BenchmarkConnParameters(b *testing.B) {
+	param := ConnParamters{
+		time.Second * 10,
+		time.Second * 5,
+		"vCcJKmYQcIf801WDAAAB",
+		[]string{"websocket", "polling"},
+	}
+	discarder := ioutil.Discard
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		param.WriteTo(discarder)
 	}
 }
