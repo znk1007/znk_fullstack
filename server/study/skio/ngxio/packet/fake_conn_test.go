@@ -107,3 +107,19 @@ func (fcr *fakeConstReader) NextReader() (base.FrameType, io.ReadCloser, error) 
 	}
 	return ft, ioutil.NopCloser(fcr.r), nil
 }
+
+type fakeOneFrameDiscarder struct{}
+
+func (d fakeOneFrameDiscarder) Write(p []byte) (int, error) {
+	return len(p), nil
+}
+
+func (d fakeOneFrameDiscarder) Close() error {
+	return nil
+}
+
+type fakeDiscardWriter struct{}
+
+func (w *fakeDiscardWriter) NextWriter(ft base.FrameType) (io.WriteCloser, error) {
+	return fakeOneFrameDiscarder{}, nil
+}

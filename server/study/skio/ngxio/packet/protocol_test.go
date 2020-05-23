@@ -1,8 +1,11 @@
 package packet
 
 import (
+	"io"
+	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
 )
 
@@ -75,9 +78,69 @@ var tests = []struct {
 }
 
 func TestEncoder(t *testing.T) {
-	// at := assert.New(t)
+	at := assert.New(t)
 
-	// for _, test := range tests {
+	for _, test := range tests {
+		w := newFakeConnWriter()
+		encoder := NewEncoder(w)
+		for _, p := range test.packets {
+			fw, err := encoder.NextWriter(p.ft, p.pt)
+			at.Nil(err)
+			_, err = fw.Write(p.data)
+			at.Nil(err)
+			err = fw.Close()
+			at.Nil(err)
+		}
+		at.Equal(test.frames, w.frames)
+	}
+}
 
-	// }
+func TestDecoder(t *testing.T) {
+	at := assert.New(t)
+
+	for _, test := range tests {
+		r := newFakeConnReader(test.frames)
+		decoder := NewDecoder(r)
+		var output []Packet
+		for {
+			ft, pt, fr, err := decoder.NextReader()
+			if err != nil {
+				at.Equal(io.EOF, err)
+				break
+			}
+			b, err := ioutil.ReadAll(fr)
+			at.Nil(err)
+			fr.Close()
+			output = append(output, Packet{
+				ft:   ft,
+				pt:   pt,
+				data: b,
+			})
+		}
+		at.Equal(test.packets, output)
+	}
+}
+
+func BenchmarkEncoder(b *testing.B) {
+	discarder := &fakeDiscardWriter{}
+	encoder := NewEncoder(discarder)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		w, _ := encoder.NextWriter(base.FrameString, base.MESSAGE)
+		w.Close()
+		w, _ = encoder.NextWriter(base.FrameBinary, base.MESSAGE)
+		w.Close()
+	}
+}
+
+func BenchmarkDecoder(b *testing.B) {
+	r := newFakeConstReader()
+	decoder := NewDecoder(r)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _, fr, _ := decoder.NextReader()
+		fr.Close()
+		_, _, fr, _ = decoder.NextReader()
+		fr.Close()
+	}
 }
