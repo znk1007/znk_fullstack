@@ -16,7 +16,7 @@ type byteReader interface {
 
 type readerFeeder interface {
 	getReader() (io.Reader, bool, error)
-	putReader(error) error
+	setReader(error) error
 }
 
 type decoder struct {
@@ -99,7 +99,7 @@ func (d *decoder) setNextReader(r byteReader, supportBinary bool) error {
 }
 
 func (d *decoder) sendError(err error) error {
-	if e := d.feeder.putReader(err); e != nil {
+	if e := d.feeder.setReader(err); e != nil {
 		return e
 	}
 	return err

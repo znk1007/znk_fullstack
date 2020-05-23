@@ -10,7 +10,7 @@ import (
 
 type writerFeeder interface {
 	getWriter() (io.Writer, error)
-	putWriter(error) error
+	setWriter(error) error
 }
 
 type encoder struct {
@@ -77,7 +77,7 @@ func (e *encoder) Close() error {
 	if err == nil {
 		_, err = e.header.WriteTo(e.rawWriter)
 	}
-	if werr := e.feeder.putWriter(err); werr != nil {
+	if werr := e.feeder.setWriter(err); werr != nil {
 		return werr
 	}
 	return err
