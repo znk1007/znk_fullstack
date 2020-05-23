@@ -161,3 +161,12 @@ func BenchmarkReadStringLen(b *testing.B) {
 		readTextLen(r)
 	}
 }
+
+func BenchmarkReadBinaryLen(b *testing.B) {
+	bs := bytes.Repeat([]byte{2, 3, 4, 6, 1, 0xff}, b.N)
+	r := bufio.NewReader(bytes.NewReader(bs))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		readBinaryLen(r)
+	}
+}
