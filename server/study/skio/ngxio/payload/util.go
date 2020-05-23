@@ -59,13 +59,13 @@ func readBinaryLen(r byteReader) (int64, error) {
 		if err != nil {
 			return 0, err
 		}
-		if b == ':' {
+		if b == 0xff {
 			break
 		}
-		if b < '0' || b > '9' {
+		if b > 9 {
 			return 0, errInvalidPayload
 		}
-		ret = ret*10 + int64(b-'0')
+		ret = ret*10 + int64(b)
 	}
 	return ret, nil
 }
