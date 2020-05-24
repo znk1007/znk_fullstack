@@ -77,6 +77,9 @@ func (e *encoder) Close() error {
 	if err == nil {
 		_, err = e.header.WriteTo(e.rawWriter)
 	}
+	if err == nil {
+		_, err = e.frameCache.WriteTo(e.rawWriter)
+	}
 	if werr := e.feeder.setWriter(err); werr != nil {
 		return werr
 	}
