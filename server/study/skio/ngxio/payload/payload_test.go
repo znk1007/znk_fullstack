@@ -1,8 +1,9 @@
 package payload
 
-// func TestPayloadFeedIn(t *testing.T) {
-// 	should := assert.New(t)
-// 	must := require.New(t)
+import (
+	"testing"
+)
 
-// 	p := new
-// }
+func TestPayloadFeedIn(t *testing.T) {
+
+}

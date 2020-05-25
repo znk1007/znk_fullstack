@@ -206,3 +206,38 @@ func BenchmarkB64Encoder(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkBinaryEncoder(b *testing.B) {
+	must := require.New(b)
+	packets := []Packet{
+		{base.FrameString, base.OPEN, []byte{}},
+		{base.FrameBinary, base.MESSAGE, []byte("你好\n")},
+		{base.FrameString, base.PING, []byte("probe")},
+	}
+	e := encoder{
+		supportBinary: true,
+		feeder: &fakeWriterFeeder{
+			w: ioutil.Discard,
+		},
+	}
+
+	//warm up for memory allocation
+	for _, p := range packets {
+		f, err := e.NextWriter(p.ft, p.pt)
+		must.Nil(err)
+		_, err = f.Write(p.data)
+		must.Nil(err)
+		err = f.Close()
+		must.Nil(err)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, p := range packets {
+			f, _ := e.NextWriter(p.ft, p.pt)
+			f.Write(p.data)
+			f.Close()
+		}
+	}
+
+}
