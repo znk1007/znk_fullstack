@@ -54,6 +54,67 @@ func New(supportBinary bool) *Payload {
 	return ret
 }
 
+//FlushOut write data from
+func (p *Payload) FlushOut(w io.Writer) error {
+	select {
+	case <-p.close:
+		return p.load()
+	default:
+	}
+	if !atomic.CompareAndSwapInt32(&p.flushing, 0, 1) {
+		return newOpError("write", errOverlap)
+	}
+	defer atomic.StoreInt32(&p.flushing, 0)
+
+	if ok := p.pauser.Working(); !ok {
+		_, err := w.Write(p.encoder.NOOP())
+		return err
+	}
+	defer p.pauser.Done()
+
+	for {
+		after, ok := p.writeTimeout()
+		if !ok {
+			return p.Store("write", errTimeout)
+		}
+		select {
+		case <-p.close:
+			return p.load()
+		case <-after:
+			continue
+		case <-p.pauser.PausingTrigger():
+			_, err := w.Write(p.encoder.NOOP())
+			return err
+		case p.writerChan <- w:
+		}
+		break
+	}
+}
+
+//NextReader returns a reader for next frame.
+//NextReader and SetReadDeadline needs be called sync.
+//
+//If Close called when NextReader, it return io.EOF.
+//Pause doesn't effect to NextReader. NextReader should wait till resumed
+//and next FeedIn.
+func (p *Payload) NextReader() (base.FrameType, base.PacketType, io.ReadCloser, error) {
+	ft, pt, r, err := p.decoder.NextReader()
+	return ft, pt, r, err
+}
+
+//SetReadDeadline set next reader deadline.
+//NextReader and SetReadDeadline needs be called sync.
+//NextReader will wait a FeedIn call, then it returns
+//ReadCloser which decodes packet from FeedIn's Reader.
+//
+//If Close called when SetReadDeadline, it return io.EOF.
+//If beyond the time set by SetReadDeadline, it returns ErrTimeout.
+//Pause doesn't effect to SetReadDeadline.
+func (p *Payload) SetReadDeadline(t time.Time) error {
+	p.readDeadline.Store(t)
+	return nil
+}
+
 //NextWriter returns a writer for next frame.
 //NextWriter and SetWriteDeadline needs be called sync.
 //NextWriter will wait a FlushOut call, the it returns WriteCloser which
@@ -61,7 +122,7 @@ func New(supportBinary bool) *Payload {
 //
 //If Close called when NextWriter, it returns io.EOF.
 //If beyond the time set by SetWriteDeadline, it returns ErrTimeout.
-
+//If Pause called when NextWriter, it returns ErrPaused.
 func (p *Payload) NextWriter(ft base.FrameType, pt base.PacketType) (io.WriteCloser, error) {
 	return p.encoder.NextWriter(ft, pt)
 }
