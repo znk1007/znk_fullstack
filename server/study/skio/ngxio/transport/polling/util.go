@@ -24,10 +24,12 @@ func mimeSupportBinary(m string) (bool, error) {
 	return false, errors.New("invalid content-type")
 }
 
+//Addr is address of the polling
 type Addr struct {
 	Host string
 }
 
+//Network is network of the polling
 func (a Addr) Network() string {
 	return "tcp"
 }
