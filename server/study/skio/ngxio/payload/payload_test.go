@@ -2,6 +2,7 @@ package payload
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"sync"
 	"testing"
@@ -159,4 +160,36 @@ func TestPayloadFlushOutBinary(t *testing.T) {
 	should.Equal("write: timeout", err.Error())
 
 	wg.Wait()
+}
+
+func TestPayloadWaitNextClose(t *testing.T) {
+	should := assert.New(t)
+
+	p := New(true)
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		defer wg.Done()
+		_, _, _, err := p.NextReader()
+		should.Equal(io.EOF, err)
+	}()
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		defer wg.Done()
+		_, err := p.NextWriter(base.FrameBinary, base.OPEN)
+		should.Equal(io.EOF, err)
+	}()
+
+	//let next run
+	time.Sleep(time.Second / 10)
+	err := p.Close()
+	should.Nil(err)
+
+	wg.Wait()
+
+	_, _, _, err = p.NextReader()
 }
