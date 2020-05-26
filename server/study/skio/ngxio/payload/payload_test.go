@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/znk_fullstack/server/study/skio/ngxio/base"
 )
 
 func TestPayloadFeedIn(t *testing.T) {
@@ -52,6 +53,110 @@ func TestPayloadFeedIn(t *testing.T) {
 	p.SetReadDeadline(time.Now().Add(time.Second / 10))
 	_, _, _, err := p.NextReader()
 	should.Equal("read: timeout", err.Error())
+
+	wg.Wait()
+}
+
+func TestPayloadFlushOutText(t *testing.T) {
+	should := assert.New(t)
+	must := require.New(t)
+
+	supportBinary := false
+	p := New(supportBinary)
+	p.Pause()
+	p.Resume()
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		must := require.New(t)
+		defer wg.Done()
+		for _, test := range tests {
+			if len(test.packets) != 1 {
+				continue
+			}
+			if test.supportBinary != supportBinary {
+				continue
+			}
+			buf := bytes.NewBuffer(nil)
+			err := p.FlushOut(buf)
+			must.Nil(err)
+			should.Equal(test.data, buf.Bytes())
+		}
+	}()
+
+	for _, test := range tests {
+		if len(test.packets) != 1 {
+			continue
+		}
+		if test.supportBinary != supportBinary {
+			continue
+		}
+		p.SetWriteDeadline(time.Now().Add(time.Second / 10))
+		w, err := p.NextWriter(test.packets[0].ft, test.packets[0].pt)
+		must.Nil(err)
+		_, err = w.Write(test.packets[0].data)
+		must.Nil(err)
+		err = w.Close()
+		must.Nil(err)
+	}
+
+	p.SetWriteDeadline(time.Now().Add(time.Second / 10))
+	_, err := p.NextWriter(base.FrameBinary, base.OPEN)
+	should.Equal("write: timeout", err.Error())
+
+	wg.Wait()
+}
+
+func TestPayloadFlushOutBinary(t *testing.T) {
+	should := assert.New(t)
+	must := require.New(t)
+
+	supportBinary := true
+	p := New(supportBinary)
+	p.Pause()
+	p.Resume()
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		must := require.New(t)
+		defer wg.Done()
+		for _, test := range tests {
+			if len(test.packets) != 1 {
+				continue
+			}
+			if test.supportBinary != supportBinary {
+				continue
+			}
+			buf := bytes.NewBuffer(nil)
+			err := p.FlushOut(buf)
+			must.Nil(err)
+			should.Equal(test.data, buf.Bytes())
+		}
+	}()
+
+	for _, test := range tests {
+		if len(test.packets) != 1 {
+			continue
+		}
+		if test.supportBinary != supportBinary {
+			continue
+		}
+		p.SetWriteDeadline(time.Now().Add(time.Second / 10))
+		w, err := p.NextWriter(test.packets[0].ft, test.packets[0].pt)
+		must.Nil(err)
+		_, err = w.Write(test.packets[0].data)
+		must.Nil(err)
+		err = w.Close()
+		must.Nil(err)
+	}
+
+	p.SetWriteDeadline(time.Now().Add(time.Second / 10))
+	_, err := p.NextWriter(base.FrameBinary, base.OPEN)
+	should.Equal("write: timeout", err.Error())
 
 	wg.Wait()
 }

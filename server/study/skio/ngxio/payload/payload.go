@@ -316,7 +316,7 @@ func (p *Payload) getWriter() (io.Writer, error) {
 	for {
 		after, ok := p.writeTimeout()
 		if !ok {
-			return nil, p.Store("write", errPaused)
+			return nil, p.Store("write", errTimeout)
 		}
 		select {
 		case <-p.close:
