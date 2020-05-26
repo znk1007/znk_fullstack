@@ -192,4 +192,118 @@ func TestPayloadWaitNextClose(t *testing.T) {
 	wg.Wait()
 
 	_, _, _, err = p.NextReader()
+	should.Equal(io.EOF, err)
+	_, err = p.NextWriter(base.FrameBinary, base.OPEN)
+	should.Equal(io.EOF, err)
+
+	err = p.FeedIn(bytes.NewReader([]byte("1:0")), false)
+	should.Equal(io.EOF, err)
+	err = p.FlushOut(ioutil.Discard)
+	should.Equal(io.EOF, err)
+}
+
+func TestPayloadWaitInOutClose(t *testing.T) {
+	should := assert.New(t)
+
+	p := New(true)
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		defer wg.Done()
+		err := p.FeedIn(bytes.NewReader([]byte("1:0")), false)
+		should.Equal(io.EOF, err)
+	}()
+
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		defer wg.Done()
+		err := p.FlushOut(ioutil.Discard)
+		should.Equal(io.EOF, err)
+	}()
+
+	//let next run
+	time.Sleep(time.Second / 10)
+	err := p.Close()
+	should.Nil(err)
+
+	wg.Wait()
+
+	_, _, _, err = p.NextReader()
+	should.Equal(io.EOF, err)
+	_, err = p.NextWriter(base.FrameBinary, base.OPEN)
+	should.Equal(io.EOF, err)
+}
+
+func TestPayloadPauseClose(t *testing.T) {
+	should := assert.New(t)
+
+	p := New(true)
+	p.Pause()
+
+	err := p.Close()
+	should.Nil(err)
+
+	_, _, _, err = p.NextReader()
+	should.Equal(io.EOF, err)
+	_, err = p.NextWriter(base.FrameBinary, base.OPEN)
+	should.Equal(io.EOF, err)
+
+	err = p.FeedIn(bytes.NewReader([]byte("1:0")), false)
+	should.Equal(io.EOF, err)
+	err = p.FlushOut(ioutil.Discard)
+	should.Equal(io.EOF, err)
+}
+
+func TestPayloadNextPause(t *testing.T) {
+	should := assert.New(t)
+
+	p := New(true)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		must := require.New(t)
+		defer wg.Done()
+		_, _, _, err := p.NextReader()
+		op, ok := err.(Error)
+		must.True(ok)
+		should.True(op.Temporary())
+	}()
+	wg.Add(1)
+	go func() {
+		should := assert.New(t)
+		must := require.New(t)
+		defer wg.Done()
+		_, err := p.NextWriter(base.FrameBinary, base.OPEN)
+		op, ok := err.(Error)
+		must.True(ok)
+		should.True(op.Temporary())
+	}()
+
+	//let next run
+	time.Sleep(time.Second / 10)
+	p.Pause()
+
+	wg.Wait()
+
+	_, _, _, err := p.NextReader()
+	op, ok := err.(Error)
+	should.True(ok)
+	should.True(op.Temporary())
+
+	err = p.FeedIn(bytes.NewReader([]byte("1:0")), false)
+	op, ok = err.(Error)
+	should.True(ok)
+	should.True(op.Temporary())
+
+	b := bytes.NewBuffer(nil)
+	err = p.FlushOut(b)
+	should.Nil(err)
+	should.Equal([]byte{0x0, 0x1, 0xff, '6'}, b.Bytes())
+
 }
