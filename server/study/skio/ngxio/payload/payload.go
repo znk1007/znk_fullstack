@@ -54,6 +54,63 @@ func New(supportBinary bool) *Payload {
 	return ret
 }
 
+//FeedIn feeds in a new reader for NextReader.
+//Multi-FeedIn needs be called sync.
+//
+//If Close called when FeedIn, it returns io.EOF
+//If have Paused when FeedIn, it returns ErrPaused.
+//If NextReader has timeout, it returns ErrTimeout.
+//If read error while FeedIn, it returns read error.
+func (p *Payload) FeedIn(r io.Reader, supportBinary bool) error {
+	select {
+	case <-p.close:
+		return p.load()
+	default:
+	}
+	if !atomic.CompareAndSwapInt32(&p.feeding, 0, 1) {
+		return newOpError("read", errOverlap)
+	}
+	defer atomic.StoreInt32(&p.feeding, 0)
+
+	if ok := p.pauser.Working(); !ok {
+		return newOpError("payload", errPaused)
+	}
+	defer p.pauser.Done()
+
+	for {
+		after, ok := p.readTimeout()
+		if !ok {
+			return p.Store("read", errTimeout)
+		}
+		select {
+		case <-p.close:
+			return p.load()
+		case <-after:
+			//it may changed during wait, need check again
+			continue
+		case p.readerChan <- readArg{
+			r:             r,
+			supportBinary: supportBinary,
+		}:
+		}
+		break
+	}
+
+	for {
+		after, ok := p.readTimeout()
+		if !ok {
+			return p.Store("read", errTimeout)
+		}
+		select {
+		case <-after:
+			//it may changed during wait, need check again
+			continue
+		case err := <-p.readError:
+			return p.Store("read", err)
+		}
+	}
+}
+
 //FlushOut write data from NextWriter.
 //FlushOut needs be called sync.
 //
