@@ -54,7 +54,15 @@ func New(supportBinary bool) *Payload {
 	return ret
 }
 
-//FlushOut write data from
+//FlushOut write data from NextWriter.
+//FlushOut needs be called sync.
+//
+//If Close called when Flushout, it return io.EOF.
+//If Pause called when Flushout, it flushs out a NOOP message
+//and return nil.
+//
+//If NextWriter has timeout, it returns ErrTimeout.
+//It write error while Flushout, it returns writer error.
 func (p *Payload) FlushOut(w io.Writer) error {
 	select {
 	case <-p.close:
@@ -88,6 +96,18 @@ func (p *Payload) FlushOut(w io.Writer) error {
 		case p.writerChan <- w:
 		}
 		break
+	}
+	for {
+		after, ok := p.writeTimeout()
+		if !ok {
+			return p.Store("write", errTimeout)
+		}
+		select {
+		case <-after:
+			//it may changed during wait, need check again
+		case err := <-p.writeError:
+			return p.Store("write", err)
+		}
 	}
 }
 
