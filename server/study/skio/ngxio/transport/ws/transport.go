@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
+	ws "github.com/znk_fullstack/server/study/skio/ws"
 )
 
 //DialError is the error when dialing to a server.
@@ -37,6 +38,13 @@ func (t *Transport) Name() string {
 	return "websocket"
 }
 
+//Dial creates a new client connection.
 func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (base.Conn, error) {
-	dialer := ws.Dialer{}
+	dialer := ws.Dialer{
+		ReadBufferSize:  t.ReadBufferSize,
+		WriteBufferSize: t.WriteBufferSize,
+		NetDial:         t.NetDial,
+		Proxy:           t.Proxy,
+	}
+
 }
