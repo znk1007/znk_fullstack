@@ -26,7 +26,8 @@ type serverConn struct {
 
 func newServerConn(t *Transport, r *http.Request) base.Conn {
 	query := r.URL.Query()
-	supportBinary := query.Get("b64") == ""
+	b64 := query.Get("b64")
+	supportBinary := len(b64) == 0
 	jsonp := query.Get("j")
 	if len(jsonp) != 0 {
 		supportBinary = false

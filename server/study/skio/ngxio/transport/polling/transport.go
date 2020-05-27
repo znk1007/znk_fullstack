@@ -2,6 +2,7 @@ package polling
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
@@ -30,4 +31,17 @@ func (t *Transport) Name() string {
 func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, error) {
 	conn := newServerConn(t, r)
 	return conn, nil
+}
+
+//Dial dials connection to url.
+func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (base.Conn, error) {
+	query := u.Query()
+	query.Set("transport", t.Name())
+	u.RawQuery = query.Encode()
+
+	client := t.Client
+	if client == nil {
+		client = Default.Client
+	}
+	return dial(client, u, requestHeader)
 }
