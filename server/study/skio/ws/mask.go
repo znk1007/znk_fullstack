@@ -1,6 +1,6 @@
 // +build !appengine
 
-package ws
+package websocket
 
 import "unsafe"
 

@@ -1,7 +1,7 @@
 // +build go1.8
 
 //Package ws websocket
-package ws
+package websocket
 
 import "net"
 
