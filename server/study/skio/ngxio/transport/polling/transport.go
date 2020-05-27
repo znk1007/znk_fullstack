@@ -28,5 +28,6 @@ func (t *Transport) Name() string {
 
 //Accept accepts a http request and create Conn.
 func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, error) {
-
+	conn := newServerConn(t, r)
+	return conn, nil
 }
