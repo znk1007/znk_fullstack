@@ -37,7 +37,7 @@ func dial(client *http.Client, url *url.URL, requestHeader http.Header) (*client
 	b64 := req.URL.Query().Get("b64")
 	supportBinary := len(b64) == 0
 	if supportBinary {
-		requestHeader.Set("Content-Type", "application/octet-stream")
+		req.Header.Set("Content-Type", "application/octet-stream")
 	} else {
 		req.Header.Set("Content-Type", "text/plain;charset=UTF-8")
 	}

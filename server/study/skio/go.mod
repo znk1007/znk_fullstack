@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/containerd/containerd v1.3.4 // indirect
 	github.com/google/go-cmp v0.4.1 // indirect
-	github.com/googollee/go-engine.io v1.4.2 // indirect
+	github.com/googollee/go-engine.io v1.4.2
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/smartystreets/assertions v1.1.0 // indirect
 	github.com/stretchr/testify v1.5.1

@@ -65,7 +65,6 @@ func TestPollingBinary(t *testing.T) {
 		for _, test := range tests {
 			ft, pt, r, err := cc.NextReader()
 			should.Nil(err)
-
 			should.Equal(test.ft, ft)
 			should.Equal(test.pt, pt)
 			b, err := ioutil.ReadAll(r)
