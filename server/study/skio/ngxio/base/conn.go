@@ -35,8 +35,8 @@ type Conn interface {
 	SetWriteDeadline(t time.Time) error
 }
 
-//ConnParamters is connection parameter of server
-type ConnParamters struct {
+//ConnParameters is connection parameter of server
+type ConnParameters struct {
 	PingInterval time.Duration
 	PingTimeout  time.Duration
 	SID          string
@@ -51,12 +51,12 @@ type jsonParameters struct {
 }
 
 //ReadConnParameters reads ConnParameters from r.
-func ReadConnParameters(r io.Reader) (ConnParamters, error) {
+func ReadConnParameters(r io.Reader) (ConnParameters, error) {
 	var param jsonParameters
 	if err := json.NewDecoder(r).Decode(&param); err != nil {
-		return ConnParamters{}, err
+		return ConnParameters{}, err
 	}
-	return ConnParamters{
+	return ConnParameters{
 		SID:          param.SID,
 		Upgrades:     param.Upgrades,
 		PingInterval: time.Duration(param.PingInterval) * time.Millisecond,
@@ -65,7 +65,7 @@ func ReadConnParameters(r io.Reader) (ConnParamters, error) {
 }
 
 //WriteTo writes to w with json format.
-func (cp ConnParamters) WriteTo(w io.Writer) (int64, error) {
+func (cp ConnParameters) WriteTo(w io.Writer) (int64, error) {
 	arg := jsonParameters{
 		SID:          cp.SID,
 		Upgrades:     cp.Upgrades,

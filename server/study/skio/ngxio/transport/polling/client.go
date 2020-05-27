@@ -2,9 +2,11 @@ package polling
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"sync/atomic"
@@ -48,8 +50,60 @@ func dial(client *http.Client, url *url.URL, requestHeader http.Header) (*client
 	return ret, nil
 }
 
-func (cc *clientConn) Open() (base.ConnParamters, error) {
+func (cc *clientConn) Open() (base.ConnParameters, error) {
+	go cc.getOpen()
 
+	_, pt, r, err := cc.NextReader()
+	if err != nil {
+		return base.ConnParameters{}, err
+	}
+	if pt != base.OPEN {
+		r.Close()
+		return base.ConnParameters{}, errors.New("invalid open")
+	}
+	conn, err := base.ReadConnParameters(r)
+	if err != nil {
+		r.Close()
+		return base.ConnParameters{}, err
+	}
+	err = r.Close()
+	if err != nil {
+		return base.ConnParameters{}, err
+	}
+	query := cc.request.URL.Query()
+	query.Set("sid", conn.SID)
+	cc.request.URL.RawQuery = query.Encode()
+
+	go cc.serveGet()
+	go cc.servePost()
+
+	return conn, nil
+}
+
+func (cc *clientConn) URL() url.URL {
+	return *cc.request.URL
+}
+
+func (cc *clientConn) LocalAddr() net.Addr {
+	return Addr{""}
+}
+
+func (cc *clientConn) RemoteAddr() net.Addr {
+	return Addr{cc.request.Host}
+}
+
+func (cc *clientConn) RemoteHeader() http.Header {
+	ret := cc.remoteHeader.Load()
+	if ret == nil {
+		return nil
+	}
+	return ret.(http.Header)
+}
+
+func (cc *clientConn) Resume() {
+	cc.Payload.Resume()
+	go cc.serveGet()
+	go cc.servePost()
 }
 
 func (cc *clientConn) servePost() {

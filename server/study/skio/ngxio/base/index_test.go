@@ -120,11 +120,11 @@ func TestFrameType(t *testing.T) {
 func TestConnParameters(t *testing.T) {
 	at := assert.New(t)
 	tests := []struct {
-		param ConnParamters
+		param ConnParameters
 		out   string
 	}{
 		{
-			ConnParamters{
+			ConnParameters{
 				time.Second * 10,
 				time.Second * 5,
 				"vCcJKmYQcIf801WDAAAB",
@@ -147,7 +147,7 @@ func TestConnParameters(t *testing.T) {
 }
 
 func BenchmarkConnParameters(b *testing.B) {
-	param := ConnParamters{
+	param := ConnParameters{
 		time.Second * 10,
 		time.Second * 5,
 		"vCcJKmYQcIf801WDAAAB",
