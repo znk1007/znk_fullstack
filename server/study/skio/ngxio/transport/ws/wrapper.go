@@ -132,6 +132,6 @@ func (w wcWrapper) Close() error {
 	w.nagTimer.Stop()
 	close(w.quitNag)
 	//Unlock the wrapper's write lock for future calls to NextWriter.
-	defer w.l.Lock()
+	defer w.l.Unlock()
 	return w.WriteCloser.Close()
 }
