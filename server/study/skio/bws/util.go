@@ -1,4 +1,4 @@
-package websocket
+package bws
 
 import (
 	"crypto/rand"

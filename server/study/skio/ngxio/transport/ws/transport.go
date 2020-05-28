@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"time"
 
+	bws "github.com/znk_fullstack/server/study/skio/bws"
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
-	websocket "github.com/znk_fullstack/server/study/skio/websocket"
 )
 
 //DialError is the error when dialing to a server.
@@ -40,7 +40,7 @@ func (t *Transport) Name() string {
 
 //Dial creates a new client connection.
 func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (base.Conn, error) {
-	dialer := websocket.Dialer{
+	dialer := bws.Dialer{
 		ReadBufferSize:   t.ReadBufferSize,
 		WriteBufferSize:  t.WriteBufferSize,
 		NetDial:          t.NetDial,
@@ -71,7 +71,7 @@ func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (base.Conn, erro
 
 //Accept accepts a http request and create Conn.
 func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, error) {
-	upgrader := websocket.Upgrader{
+	upgrader := bws.Upgrader{
 		ReadBufferSize:  t.ReadBufferSize,
 		WriteBufferSize: t.WriteBufferSize,
 		CheckOrigin:     t.CheckOrigin,

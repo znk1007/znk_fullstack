@@ -1,15 +1,15 @@
-package ws_test
+package bws_test
 
 import (
 	"log"
 	"net/http"
 	"testing"
 
-	ws "github.com/znk_fullstack/server/study/ws"
+	bws "github.com/znk_fullstack/server/study/skio/bws"
 )
 
 var (
-	c   *ws.Conn
+	c   *bws.Conn
 	req *http.Request
 )
 
@@ -19,13 +19,13 @@ var (
 //	This server application works with a client application running in the
 //	browser. The client application does not explicitly close the websocket.
 //	The only expected close message from the client has the code
-//	ws.CloseGoingAway. All other close messages are likely the result of an
+//	bws.CloseGoingAway. All other close messages are likely the result of an
 //	application or protocol error and are logged to aid debugging.
 func ExampleIsUnexpectedCloseError() {
 	for {
 		messageType, p, err := c.ReadMessage()
 		if err != nil {
-			if ws.IsUnexpectedCloseError(err, ws.CloseGoingAway) {
+			if bws.IsUnexpectedCloseError(err, bws.CloseGoingAway) {
 				log.Printf("error: %v, user-agent: %v", err, req.Header.Get("User-Agent"))
 			}
 			return

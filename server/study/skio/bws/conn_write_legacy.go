@@ -2,8 +2,8 @@
 
 // +build !go1.8
 
-//Package ws websocket
-package websocket
+//Package ws bws
+package bws
 
 func (c *Conn) writeBufs(bufs ...[]byte) error {
 	for _, buf := range bufs {

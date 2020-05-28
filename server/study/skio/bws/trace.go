@@ -1,6 +1,6 @@
 // +build go1.8
 
-package websocket
+package bws
 
 import (
 	"crypto/tls"

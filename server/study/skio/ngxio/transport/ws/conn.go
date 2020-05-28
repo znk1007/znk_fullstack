@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
+	bws "github.com/znk_fullstack/server/study/skio/bws"
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
 	"github.com/znk_fullstack/server/study/skio/ngxio/packet"
-	websocket "github.com/znk_fullstack/server/study/skio/websocket"
 )
 
 //conn implements base.Conn
@@ -23,7 +23,7 @@ type conn struct {
 	base.FrameReader
 }
 
-func newConn(ws *websocket.Conn, url url.URL, header http.Header) base.Conn {
+func newConn(ws *bws.Conn, url url.URL, header http.Header) base.Conn {
 	w := newWrapper(ws)
 	closed := make(chan struct{})
 	return &conn{

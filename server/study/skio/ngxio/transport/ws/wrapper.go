@@ -7,18 +7,19 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
+	bws "github.com/znk_fullstack/server/study/skio/bws"
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
 	"github.com/znk_fullstack/server/study/skio/ngxio/transport"
-	websocket "github.com/znk_fullstack/server/study/skio/websocket"
 )
 
 type wrapper struct {
-	*websocket.Conn
+	*bws.Conn
 	writeLocker *sync.Mutex
 	readLocker  *sync.Mutex
 }
 
-func newWrapper(conn *websocket.Conn) wrapper {
+func newWrapper(conn *bws.Conn) wrapper {
 	return wrapper{
 		Conn:        conn,
 		writeLocker: new(sync.Mutex),
@@ -48,9 +49,9 @@ func (w wrapper) NextWriter(ft base.FrameType) (io.WriteCloser, error) {
 	var t int
 	switch ft {
 	case base.FrameString:
-		t = websocket.TextMessage
+		t = bws.TextMessage
 	case base.FrameBinary:
-		t = websocket.BinaryMessage
+		t = bws.BinaryMessage
 	default:
 		return nil, transport.ErrInvalidFrame
 	}
