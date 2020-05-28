@@ -9,7 +9,7 @@ import (
 
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
 	"github.com/znk_fullstack/server/study/skio/ngxio/transport"
-	websocket "github.com/znk_fullstack/server/study/skio/ws"
+	websocket "github.com/znk_fullstack/server/study/skio/websocket"
 )
 
 type wrapper struct {

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
-	websocket "github.com/znk_fullstack/server/study/skio/ws"
+	websocket "github.com/znk_fullstack/server/study/skio/websocket"
 )
 
 //DialError is the error when dialing to a server.
@@ -66,5 +66,19 @@ func (t *Transport) Dial(u *url.URL, requestHeader http.Header) (base.Conn, erro
 			Response: resp,
 		}
 	}
-	return n
+	return newConn(c, *u, resp.Header), nil
+}
+
+//Accept accepts a http request and create Conn.
+func (t *Transport) Accept(w http.ResponseWriter, r *http.Request) (base.Conn, error) {
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  t.ReadBufferSize,
+		WriteBufferSize: t.WriteBufferSize,
+		CheckOrigin:     t.CheckOrigin,
+	}
+	c, err := upgrader.Upgrade(w, r, w.Header())
+	if err != nil {
+		return nil, err
+	}
+	return newConn(c, *r.URL, r.Header), nil
 }

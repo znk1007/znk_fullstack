@@ -9,7 +9,7 @@ import (
 
 	"github.com/znk_fullstack/server/study/skio/ngxio/base"
 	"github.com/znk_fullstack/server/study/skio/ngxio/packet"
-	websocket "github.com/znk_fullstack/server/study/skio/ws"
+	websocket "github.com/znk_fullstack/server/study/skio/websocket"
 )
 
 //conn implements base.Conn
