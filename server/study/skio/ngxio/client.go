@@ -3,6 +3,7 @@ package ngxio
 import (
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"sync"
@@ -63,8 +64,16 @@ func (d *Dialer) Dial(urlStr string, requestHeader http.Header) (Conn, error) {
 		if err != nil {
 			continue
 		}
-		ret := &client{}
+		ret := &client{
+			conn:      conn,
+			params:    params,
+			transport: t.Name(),
+			close:     make(chan struct{}),
+		}
+		go ret.serve()
+		return ret, nil
 	}
+	return nil, err
 }
 
 type client struct {
@@ -114,5 +123,46 @@ func (c *client) NextReader() (FrameType, io.ReadCloser, error) {
 		case base.MESSAGE:
 			return FrameType(ft), r, nil
 		}
+		r.Close()
+	}
+}
+
+func (c *client) NextWriter(ft FrameType) (io.WriteCloser, error) {
+	return c.conn.NextWriter(base.FrameType(ft), base.MESSAGE)
+}
+
+func (c *client) URL() url.URL {
+	return c.conn.URL()
+}
+
+func (c *client) LocalAddr() net.Addr {
+	return c.conn.LocalAddr()
+}
+
+func (c *client) RemoteAddr() net.Addr {
+	return c.conn.RemoteAddr()
+}
+
+func (c *client) RemoteHeader() http.Header {
+	return c.conn.RemoteHeader()
+}
+
+func (c *client) serve() {
+	defer c.conn.Close()
+	for {
+		select {
+		case <-c.close:
+			return
+		case <-time.After(c.params.PingInterval):
+
+		}
+		w, err := c.conn.NextWriter(base.FrameString, base.PING)
+		if err != nil {
+			return
+		}
+		if err := w.Close(); err != nil {
+			return
+		}
+		c.conn.SetWriteDeadline(time.Now().Add(c.params.PingInterval + c.params.PingTimeout))
 	}
 }
