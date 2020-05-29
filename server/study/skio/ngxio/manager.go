@@ -42,6 +42,12 @@ func (m *manager) Add(s *session) {
 	m.s[s.ID()] = s
 }
 
+func (m *manager) Get(sid string) *session {
+	m.locker.RLock()
+	defer m.locker.RUnlock()
+	return m.s[sid]
+}
+
 func (m *manager) Remove(sid string) {
 	m.locker.Lock()
 	defer m.locker.Unlock()
