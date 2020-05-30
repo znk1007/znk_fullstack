@@ -38,7 +38,7 @@ func newManager(g SessionIDGenerator) *manager {
 
 func (m *manager) Add(s *session) {
 	m.locker.RLock()
-	defer m.locker.Unlock()
+	defer m.locker.RUnlock()
 	m.s[s.ID()] = s
 }
 

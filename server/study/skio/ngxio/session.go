@@ -59,7 +59,7 @@ func (s *session) Transport() string {
 
 func (s *session) Close() error {
 	s.upgradeLocker.RLock()
-	defer s.upgradeLocker.Unlock()
+	defer s.upgradeLocker.RUnlock()
 	s.closeOnce.Do(func() {
 		s.manager.Remove(s.params.SID)
 	})
