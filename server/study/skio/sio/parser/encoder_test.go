@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 	"io"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,6 +59,47 @@ func TestEncoder(t *testing.T) {
 				should.Equal(ngxio.BINARY, w.fts[i])
 				should.Equal(test.Datas[i], w.bufs[i].Bytes())
 			}
+		})
+	}
+}
+
+func TestAttachBuffer(t *testing.T) {
+	tests := []struct {
+		name    string
+		data    interface{}
+		max     uint64
+		binarys [][]byte
+	}{
+		{"&Buffer", &Buffer{Data: []byte{1, 2}}, 1, [][]byte{{1, 2}}},
+		{"[]interface{}{Buffer}", []interface{}{&Buffer{Data: []byte{1, 2}}}, 1, [][]byte{{1, 2}}},
+		{"[]interface{}{Buffer,Buffer}", []interface{}{&Buffer{Data: []byte{1, 2}}}, 1, [][]byte{{1, 2}}},
+		{"[]interface{}{Buffer,Buffer}", []interface{}{
+			&Buffer{Data: []byte{1, 2}},
+			&Buffer{Data: []byte{3, 4}},
+		}, 2, [][]byte{{1, 2}, {3, 4}}},
+		{"[1]interface{}{Buffer}", [...]interface{}{&Buffer{Data: []byte{1, 2}}}, 1, [][]byte{{1, 2}}},
+		{"Struct{Buffer}", struct {
+			Data *Buffer
+			I    int
+		}{
+			&Buffer{Data: []byte{1, 2}},
+			3,
+		}, 1, [][]byte{{1, 2}}},
+		{"map{Buffer}", map[string]interface{}{
+			"data": &Buffer{Data: []byte{1, 2}},
+			"i":    3,
+		}, 1, [][]byte{{1, 2}}},
+	}
+	e := Encoder{}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			should := assert.New(t)
+			must := require.New(t)
+			index := uint64(0)
+			b, err := e.attachBuffer(reflect.ValueOf(test.data), &index)
+			must.Nil(err)
+			should.Equal(test.max, index)
+			should.Equal(test.binarys, b)
 		})
 	}
 }
