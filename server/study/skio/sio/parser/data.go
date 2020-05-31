@@ -1,5 +1,11 @@
 package parser
 
+import (
+	"bytes"
+	"encoding/json"
+	"strconv"
+)
+
 //Type of packet
 type Type byte
 
@@ -40,5 +46,51 @@ type Buffer struct {
 
 //MarshalJSON marshals to JSON data from buffer
 func (b Buffer) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	if err := b.marshalJSONBuf(&buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
 
+func (b *Buffer) marshalJSONBuf(buf *bytes.Buffer) error {
+	encode := b.encodeText
+	if b.isBinary {
+		encode = b.encodeBinary
+	}
+	return encode(buf)
+}
+
+func (b *Buffer) encodeText(buf *bytes.Buffer) error {
+	buf.WriteString("{\"type\":\"Buffer\", \"data\":[")
+	for i, d := range b.Data {
+		if i > 0 {
+			buf.WriteString(",")
+		}
+		buf.WriteString(strconv.Itoa(int(d)))
+	}
+	buf.WriteString("]}")
+	return nil
+}
+
+func (b *Buffer) encodeBinary(buf *bytes.Buffer) error {
+	buf.WriteString("\"_placeholder\":true,\"num\":")
+	buf.WriteString(strconv.FormatUint(b.num, 10))
+	return nil
+}
+
+//UnmarshalJSON unmarshals data from JSON
+func (b *Buffer) UnmarshalJSON(bt []byte) error {
+	var data struct {
+		Data        []byte
+		Placeholder bool `json:"_placeholder"`
+		Num         uint64
+	}
+	if err := json.Unmarshal(bt, &data); err != nil {
+		return err
+	}
+	b.isBinary = data.Placeholder
+	b.Data = data.Data
+	b.num = data.Num
+	return nil
 }
