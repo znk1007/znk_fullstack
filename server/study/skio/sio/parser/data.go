@@ -74,8 +74,9 @@ func (b *Buffer) encodeText(buf *bytes.Buffer) error {
 }
 
 func (b *Buffer) encodeBinary(buf *bytes.Buffer) error {
-	buf.WriteString("\"_placeholder\":true,\"num\":")
+	buf.WriteString("{\"_placeholder\":true,\"num\":")
 	buf.WriteString(strconv.FormatUint(b.num, 10))
+	buf.WriteString("}")
 	return nil
 }
 

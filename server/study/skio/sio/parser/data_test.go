@@ -1,6 +1,12 @@
 package parser
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
 type noBufferStruct struct {
 	Str   string            `json:"str"`
@@ -95,7 +101,7 @@ var attachmentTests = []struct {
 	},
 	{
 		Buffer{[]byte{}, false, 1},
-		`{"type":"Buffer","data":[1,255]}`,
+		`{"type":"Buffer","data":[]}`,
 		`{"_placeholder":true,"num":1}`,
 	},
 	{
@@ -106,5 +112,27 @@ var attachmentTests = []struct {
 }
 
 func TestAttachmentEncodeText(t *testing.T) {
+	should := assert.New(t)
+	must := require.New(t)
 
+	for _, test := range attachmentTests {
+		b := test.buffer
+		b.isBinary = false
+		j, e := json.Marshal(b)
+		must.Nil(e)
+		should.Equal(test.textEncoding, string(j))
+	}
+}
+
+func TestAttachmentEncodeBinary(t *testing.T) {
+	should := assert.New(t)
+	must := require.New(t)
+
+	for _, test := range attachmentTests {
+		b := test.buffer
+		b.isBinary = true
+		j, e := json.Marshal(b)
+		must.Nil(e)
+		should.Equal(test.binaryEncoding, string(j))
+	}
 }
