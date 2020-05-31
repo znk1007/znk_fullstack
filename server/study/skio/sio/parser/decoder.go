@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -27,6 +28,22 @@ type Decoder struct {
 	isEvent      bool
 }
 
+//NewDecoder new the data decode struct
+func NewDecoder(r FrameReader) *Decoder {
+	return &Decoder{
+		r: r,
+	}
+}
+
+//Close close the frame from decoder
+func (d *Decoder) Close() error {
+	if d.lastFrame != nil {
+		d.lastFrame.Close()
+		d.lastFrame = nil
+	}
+	return nil
+}
+
 type byteReader interface {
 	io.Reader
 	ReadByte() (byte, error)
@@ -40,6 +57,39 @@ func (d *Decoder) DiscardLast() (err error) {
 		d.lastFrame = nil
 	}
 	return
+}
+
+//DecodeHeader decode the data header frame
+func (d *Decoder) DecodeHeader(header *Header, event *string) error {
+	ft, r, err := d.r.NextReader()
+	if err != nil {
+		return err
+	}
+	if ft != ngxio.TEXT {
+		return errors.New("first packet should be TEXT frame")
+	}
+	d.lastFrame = r
+	br, ok := r.(byteReader)
+	if !ok {
+		br = bufio.NewReader(r)
+	}
+	d.packetReader = br
+
+	bufCnt, err := d.readHeader(header)
+	if err != nil {
+		return err
+	}
+	d.bufferCount = bufCnt
+	if header.Type == binaryEvent || header.Type == binaryAck {
+		header.Type -= 3
+	}
+	d.isEvent = header.Type == Event
+	if d.isEvent {
+		if err := d.readEvent(event); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 //DecodeArgs decode the arg parameters
