@@ -136,3 +136,32 @@ func TestAttachmentEncodeBinary(t *testing.T) {
 		should.Equal(test.binaryEncoding, string(j))
 	}
 }
+
+func TestAttachmentDecodeText(t *testing.T) {
+	should := assert.New(t)
+	must := require.New(t)
+
+	for _, test := range attachmentTests {
+		var b Buffer
+		err := json.Unmarshal([]byte(test.textEncoding), &b)
+		must.Nil(err)
+		should.False(b.isBinary)
+		if len(test.buffer.Data) == 0 {
+			continue
+		}
+		should.Equal(test.buffer.Data, b.Data)
+	}
+}
+
+func TestAttachmentDecodeBinary(t *testing.T) {
+	should := assert.New(t)
+	must := require.New(t)
+
+	for _, test := range attachmentTests {
+		var b Buffer
+		err := json.Unmarshal([]byte(test.binaryEncoding), &b)
+		must.Nil(err)
+		should.True(b.isBinary)
+		should.Equal(test.buffer.num, b.num)
+	}
+}
