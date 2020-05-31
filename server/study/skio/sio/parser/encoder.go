@@ -133,12 +133,11 @@ func (e *Encoder) writeUint64(w byteWriter, i uint64) error {
 }
 
 func (e *Encoder) attachBuffer(v reflect.Value, index *uint64) ([][]byte, error) {
-	vk := v.Kind()
-	for vk == reflect.Ptr || vk == reflect.Interface {
+	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
 	}
 	var ret [][]byte
-	switch vk {
+	switch v.Kind() {
 	case reflect.Struct:
 		if v.Type().Name() == "Buffer" {
 			if !v.CanAddr() {

@@ -26,7 +26,7 @@ type bufferInnerStruct struct {
 	Inner  *bufferInnerStruct `json:"inner,omitempty"`
 }
 
-var test = []struct {
+var tests = []struct {
 	Name   string
 	Header Header
 	Event  string
@@ -79,7 +79,7 @@ var test = []struct {
 	{"NamespaceIDData", Header{Event, "/woot", 1, true}, "msg", []interface{}{
 		1,
 	}, [][]byte{
-		[]byte("1/woot,1[\"msg\",1]\n"),
+		[]byte("2/woot,1[\"msg\",1]\n"),
 	}},
 	{"NamespaceIDBData", Header{Event, "/woot", 1, true}, "msg", []interface{}{
 		&Buffer{Data: []byte{2, 3, 4}},
