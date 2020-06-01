@@ -132,6 +132,7 @@ func (bc *broadcast) Len(room string) int {
 	defer bc.lock.RUnlock()
 	return len(bc.rooms[room])
 }
+
 //Rooms
 func (bc *broadcast) Rooms(connection Conn) []string {
 	//get a read lock
@@ -139,4 +140,21 @@ func (bc *broadcast) Rooms(connection Conn) []string {
 	defer bc.lock.RUnlock()
 
 	rooms := make([]string, 0)
+
+	if connection == nil { //create a new list of all the room names
+		//iterate through the rooms map and add the room name to the above list
+		for room := range bc.rooms {
+			rooms = append(rooms, room)
+		}
+	} else { //create a new list of all the room names the connection is joined to
+		//iterate through the rooms map and add the room name to the above list
+		for room, connections := range bc.rooms {
+			//check if the connection is joined to the room
+			if _, ok := connections[connection.ID()]; ok {
+				// add the room name to the list
+				rooms = append(rooms, room)
+			}
+		}
+	}
+	return rooms
 }
