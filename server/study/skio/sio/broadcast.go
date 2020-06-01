@@ -73,6 +73,70 @@ func (bc *broadcast) LeaveAll(connection Conn) {
 	}
 }
 
-func (bc *broadcast)Clear(room string) {
-	
+//Clear clears the room
+func (bc *broadcast) Clear(room string) {
+	//get write lock
+	bc.lock.Lock()
+	defer bc.lock.Unlock()
+	//delete the room
+	delete(bc.rooms, room)
+}
+
+//Send sends given event & args to all the connections in the specified room
+func (bc *broadcast) Send(room, event string, args ...interface{}) {
+	//get a read lock
+	bc.lock.RLock()
+	defer bc.lock.RUnlock()
+
+	//iterate through each connection in the room
+	for _, connection := range bc.rooms[room] {
+		//emit the event to the connection
+		connection.Emit(event, args...)
+	}
+}
+
+//SendAll sends given event & args to all the connections to all the rooms
+func (bc *broadcast) SendAll(event string, args ...interface{}) {
+	//get a read lock
+	bc.lock.RLock()
+	defer bc.lock.RUnlock()
+	//iterate through each room
+	for _, connections := range bc.rooms {
+		//iterate through each connection in the room
+		for _, connection := range connections {
+			//emit the event to the connection
+			connection.Emit(event, args...)
+		}
+	}
+}
+
+//ForEach sends data returned by DataFunc, if the return is 'ok' (second return)
+func (bc *broadcast) ForEach(room string, f EachFunc) {
+	//get a read lock
+	bc.lock.RLock()
+	defer bc.lock.RUnlock()
+
+	occupants, ok := bc.rooms[room]
+	if !ok {
+		return
+	}
+	for _, connection := range occupants {
+		f(connection)
+	}
+}
+
+//Len gives number of connections in the room
+func (bc *broadcast) Len(room string) int {
+	//get a read lock
+	bc.lock.RLock()
+	defer bc.lock.RUnlock()
+	return len(bc.rooms[room])
+}
+//Rooms
+func (bc *broadcast) Rooms(connection Conn) []string {
+	//get a read lock
+	bc.lock.RLock()
+	defer bc.lock.RUnlock()
+
+	rooms := make([]string, 0)
 }
