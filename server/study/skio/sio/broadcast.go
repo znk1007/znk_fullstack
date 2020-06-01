@@ -2,13 +2,14 @@ package sio
 
 import "sync"
 
+//EachFunc iterate each connection func
 type EachFunc func(Conn)
 
 //Broadcast is the adaptor to handle broadcasts & rooms for socket.io server API
 type Broadcast interface {
 	Join(room string, connection Conn)            //causes the connection to join a room
 	Leave(room string, connection Conn)           //causes the connection to leave room
-	LeaveAll()                                    // causes given connection to leave all rooms
+	LeaveAll(connection Conn)                     // causes given connection to leave all rooms
 	Clear(room string)                            //causes removal of all connections from the room
 	Send(room, event string, args ...interface{}) // will send an event with args to the room
 	SendAll(event string, args ...interface{})    //will send an event with args to all the rooms
