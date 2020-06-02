@@ -132,7 +132,10 @@ func (bc *broadcast) Len(room string) int {
 	defer bc.lock.RUnlock()
 	return len(bc.rooms[room])
 }
-//Rooms
+
+//Rooms gives the list of all the rooms available for broadcast in case of
+//no connection is given, in case of a connection is given, it gives list
+//of all the rooms the connection is joined to
 func (bc *broadcast) Rooms(connection Conn) []string {
 	//get a read lock
 	bc.lock.RLock()
