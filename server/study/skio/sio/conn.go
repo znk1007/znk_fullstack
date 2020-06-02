@@ -4,6 +4,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"reflect"
+	"sync"
 
 	"github.com/znk_fullstack/server/study/skio/ngxio"
 	"github.com/znk_fullstack/server/study/skio/sio/parser"
@@ -53,4 +55,43 @@ type conn struct {
 	quitChan   chan struct{}
 	handlers   map[string]*namespaceHandler
 	namespaces map[string]*namespaceConn
+	closeOnce  sync.Once
+	id         uint64
+}
+
+func (c *conn) nextID() uint64 {
+	c.id++
+	return c.id
+}
+
+func (c *conn) write(header parser.Header, args []reflect.Value) {
+	data := make([]interface{}, len(args))
+	for i := range data {
+		data[i] = args[i].Interface()
+	}
+	pkg := writePacket{
+		header: header,
+		data:   data,
+	}
+	select {
+	case c.writeChan <- pkg:
+	case <-c.quitChan:
+		return
+	}
+}
+
+func (c *conn) onError(namespace string, err error) {
+	onErr := errorMessage{
+		namespace: namespace,
+		error:     err,
+	}
+	select {
+	case c.errorChan <- onErr:
+	case <-c.quitChan:
+		return
+	}
+}
+
+func (c *conn) parseArgs(types []reflect.Type) ([]reflect.Value, error) {
+	return c.decoder.DecodeArgs(types)
 }
