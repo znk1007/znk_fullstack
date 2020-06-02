@@ -46,10 +46,11 @@ type writePacket struct {
 
 type conn struct {
 	ngxio.Conn
-	encoder   *parser.Encoder
-	decoder   *parser.Decoder
-	errorChan chan errorMessage
-	writeChan chan writePacket
-	quitChan  chan struct{}
-	handlers map[string]
+	encoder    *parser.Encoder
+	decoder    *parser.Decoder
+	errorChan  chan errorMessage
+	writeChan  chan writePacket
+	quitChan   chan struct{}
+	handlers   map[string]*namespaceHandler
+	namespaces map[string]*namespaceConn
 }
