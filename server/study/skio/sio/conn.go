@@ -1,6 +1,7 @@
 package sio
 
 import (
+	"errors"
 	"net"
 	"net/http"
 	"net/url"
@@ -57,6 +58,47 @@ type conn struct {
 	namespaces map[string]*namespaceConn
 	closeOnce  sync.Once
 	id         uint64
+}
+
+func newConn(c ngxio.Conn, handlers map[string]*namespaceHandler) (*conn, error) {
+	ret := &conn{
+		Conn:       c,
+		encoder:    parser.NewEncoder(c),
+		decoder:    parser.NewDecoder(c),
+		errorChan:  make(chan errorMessage),
+		writeChan:  make(chan writePacket),
+		quitChan:   make(chan struct{}),
+		handlers:   handlers,
+		namespaces: make(map[string]*namespaceConn),
+	}
+	if err := ret.connect(); err != nil {
+		ret.Close()
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (c *conn) Close() error {
+	var err error
+	c.closeOnce.Do(func() {
+		//For each namespace, leave all rooms, and call the disconnect handler.
+		for ns, nc := range c.namespaces {
+			nc.LeaveAll()
+			if nh := c.handlers[ns]; nh != nil && nh.onDisconnect != nil {
+				nh.onDisconnect(nc, "client namespace disconnect")
+			}
+		}
+		err = c.Conn.Close()
+		close(c.quitChan)
+	})
+	return err
+}
+
+func (c *conn) connect() error {
+	rootHandler, ok := c.handlers[""]
+	if !ok {
+		return errors.New("root ('/') doesn't have a namespace handler")
+	}
 }
 
 func (c *conn) nextID() uint64 {
