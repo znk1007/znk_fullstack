@@ -14,10 +14,17 @@ func TestNamespaceHandler(t *testing.T) {
 	h := newHandler()
 
 	onConnectCalled := false
-	h.OnConnect(func(c Conn) error{
+	h.OnConnect(func(c Conn) error {
 		onConnectCalled = true
 		return
 	})
 	disconnectMsg := ""
-	
+	h.OnDisconnect(func(c Conn, reason string) {
+		disconnectMsg = reason
+	})
+
+	var onerror error
+	h.OnError(func(conn Conn, err error) {
+
+	})
 }
