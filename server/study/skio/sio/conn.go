@@ -111,6 +111,16 @@ func (c *conn) connect() error {
 
 	handler, ok := c.handlers[header.Namespace]
 
+	go c.serveError()
+	go c.serveWrite()
+	go c.serveRead()
+
+	if ok {
+		handler.dispatch(root, header, "", nil)
+	}
+
+	return nil
+
 }
 
 func (c *conn) nextID() uint64 {
@@ -247,9 +257,20 @@ func (c *conn) serveRead() {
 			c.write(header, nil)
 		case parser.Disconnect:
 			types := []reflect.Type{reflect.TypeOf("")}
-			args, err:=c.decoder.DecodeArgs(types)
+			args, err := c.decoder.DecodeArgs(types)
 			if err != nil {
 				c.onError(header.Namespace, err)
+			}
+			conn, ok := c.namespaces[header.Namespace]
+			if !ok {
+				c.decoder.DiscardLast()
+				continue
+			}
+			conn.LeaveAll()
+			delete(c.namespaces, header.Namespace)
+			handler, ok := c.handlers[header.Namespace]
+			if ok {
+				handler.dispatch(conn, header, "", args)
 			}
 		}
 	}
