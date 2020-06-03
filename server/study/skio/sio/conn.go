@@ -99,6 +99,18 @@ func (c *conn) connect() error {
 	if !ok {
 		return errors.New("root ('/') doesn't have a namespace handler")
 	}
+	root := newNamespaceConn(c, "/", rootHandler.broadcast)
+	c.namespaces[""] = root
+	root.Join(root.ID())
+	header := parser.Header{
+		Type: parser.Connect,
+	}
+	if err := c.encoder.Encode(header, nil); err != nil {
+		return err
+	}
+
+	handler, ok := c.handlers[header.Namespace]
+
 }
 
 func (c *conn) nextID() uint64 {
@@ -136,4 +148,113 @@ func (c *conn) onError(namespace string, err error) {
 
 func (c *conn) parseArgs(types []reflect.Type) ([]reflect.Value, error) {
 	return c.decoder.DecodeArgs(types)
+}
+
+func (c *conn) serveError() {
+	defer c.Close()
+	for {
+		select {
+		case <-c.quitChan:
+			return
+		case msg := <-c.errorChan:
+			if handler := c.namespace(msg.namespace); handler != nil {
+				if handler.onError != nil {
+					handler.onError(c.namespaces[msg.namespace], msg.error)
+				}
+			}
+		}
+	}
+}
+
+func (c *conn) serveWrite() {
+	defer c.Close()
+	for {
+		select {
+		case <-c.quitChan:
+			return
+		case pkg := <-c.writeChan:
+			if err := c.encoder.Encode(pkg.header, pkg.data); err != nil {
+				c.onError(pkg.header.Namespace, err)
+			}
+		}
+	}
+}
+
+func (c *conn) serveRead() {
+	defer c.Close()
+	var event string
+	for {
+		var header parser.Header
+		if err := c.decoder.DecodeHeader(&header, &event); err != nil {
+			c.onError("", err)
+			return
+		}
+		if header.Namespace == "/" {
+			header.Namespace = ""
+		}
+		switch header.Type {
+		case parser.Ack:
+			conn, ok := c.namespaces[header.Namespace]
+			if !ok {
+				c.decoder.DiscardLast()
+				continue
+			}
+			conn.dispatch(header)
+		case parser.Event:
+			conn, ok := c.namespaces[header.Namespace]
+			if !ok {
+				c.decoder.DiscardLast()
+				continue
+			}
+			handler, ok := c.handlers[header.Namespace]
+			if !ok {
+				c.decoder.DiscardLast()
+				continue
+			}
+			types := handler.getTypes(header, event)
+			args, err := c.decoder.DecodeArgs(types)
+			if err != nil {
+				c.onError(header.Namespace, err)
+				return
+			}
+			ret, err := handler.dispatch(conn, header, event, args)
+			if err != nil {
+				c.onError(header.Namespace, err)
+				return
+			}
+			if len(ret) > 0 {
+				header.Type = parser.Ack
+				c.write(header, ret)
+			}
+		case parser.Connect:
+			if err := c.decoder.DiscardLast(); err != nil {
+				c.onError(header.Namespace, err)
+				return
+			}
+			handler, ok := c.handlers[header.Namespace]
+			if ok {
+				conn, ok := c.namespaces[header.Namespace]
+				if !ok {
+					conn = newNamespaceConn(c, header.Namespace, handler.broadcast)
+					c.namespaces[header.Namespace] = conn
+					conn.Join(c.ID())
+				}
+				handler.dispatch(conn, header, "", nil)
+			} else { //leave default room?!
+				c.onError(header.Namespace, errors.New("can't connect to namespace without handler"))
+				return
+			}
+			c.write(header, nil)
+		case parser.Disconnect:
+			types := []reflect.Type{reflect.TypeOf("")}
+			args, err:=c.decoder.DecodeArgs(types)
+			if err != nil {
+				c.onError(header.Namespace, err)
+			}
+		}
+	}
+}
+
+func (c *conn) namespace(nsp string) *namespaceHandler {
+	return c.handlers[nsp]
 }
