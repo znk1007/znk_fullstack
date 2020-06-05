@@ -76,6 +76,7 @@ func RegistUserCenter(acc, pwd string) (err error) {
 		log.Info().Msg(e.Error())
 		return
 	}
+	res.Data
 	return
 }
 
