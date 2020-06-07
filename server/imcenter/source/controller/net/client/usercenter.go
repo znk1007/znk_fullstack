@@ -10,6 +10,7 @@ import (
 	imjwt "github.com/znk_fullstack/server/imcenter/source/controller/jwt"
 	userproto "github.com/znk_fullstack/server/imcenter/source/model/protos/generated"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const (
@@ -32,22 +33,22 @@ func RegistUserCenter(acc, pwd string) (err error) {
 		err = errors.New("`password` cannot be empty")
 		return
 	}
-	creds, e := imconf.TLSCredentials()
-	if e != nil {
-		err = e
-		log.Info().Msg(e.Error())
+	var creds credentials.TransportCredentials
+	creds, err = imconf.TLSCredentials()
+	if err != nil {
+		log.Info().Msg(err.Error())
 		return
 	}
 	ucEnv := imconf.GetUcEnv()
 	addr := ucEnv.Host + ":" + ucEnv.Port
-	conn, e := grpc.Dial(
+	var conn *grpc.ClientConn
+	conn, err = grpc.Dial(
 		addr,
 		grpc.WithTransportCredentials(creds),
 		grpc.WithBlock(),
 	)
-	if e != nil {
-		err = e
-		log.Info().Msg(e.Error())
+	if err != nil {
+		log.Info().Msg(err.Error())
 		return
 	}
 	defer conn.Close()
@@ -59,24 +60,30 @@ func RegistUserCenter(acc, pwd string) (err error) {
 		"appkey":     appkey,
 	}
 	var data string
-	data, e = ij.Token(datamap)
-	if e != nil {
-		err = e
+	data, err = ij.Token(datamap)
+	if err != nil {
+		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	rc := userproto.NewUserSrvClient(conn)
-	var res *userproto.UserRgstRes
-	res, e = rc.Regist(ctx, &userproto.UserRgstReq{
+	var rgsRet *userproto.UserRgstRes
+	rgsRet, err = rc.Regist(ctx, &userproto.UserRgstReq{
 		Account: acc,
 		Data:    data,
 	})
-	if e != nil {
-		err = e
-		log.Info().Msg(e.Error())
+	if err != nil {
+		log.Info().Msg(err.Error())
 		return
 	}
-	res.Data
+	ij.Parse(rgsRet.Data, true)
+	var ret map[string]interface{}
+	ret, err = ij.Result()
+	if err != nil {
+		return
+	}
+	var user userproto.User
+	user, err = 
 	return
 }
 
