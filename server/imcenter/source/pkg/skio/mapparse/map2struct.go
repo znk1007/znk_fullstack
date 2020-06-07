@@ -93,5 +93,39 @@ type DecoderConfig struct {
 	//
 	//- bools to string (true = "1", false = "0")
 	//- numbers to string (base 10)
+	//- bools to int/uint (true = 1, false = 0)
+	//- strings to int/uint (base implies by prefix)
+	//-	int to bool (true is value != 0)
+	//- string to bool (accepts: 1, t, T, TRUE, true, True, 0, f, F,
+	//	FALSE, false, False. Anything else is an error)
+	//-	empty array = empty map and vice versa
+	//-	negative numbers to overflowed uint values (base 10)
+	//- slice of maps to a merged map
+	//-	single values are converted to slices if required. Each
+	//	element is weakly decoded. For example: "4" can become []int{4}
+	//	if the target type is an int slice.
 	WeaklyTypedInput bool
+	//Squash will squash embedded structs. A squash(压缩映射) tag may also
+	//be added to an individual struct field using a tag. For example:
+	//
+	// type Parent struct {
+	//		Child `m2s:",squash"`
+	//}
+	Squash bool
+	//Metadata is the struct that will contain extra metadata about
+	//the decoding. If this nil, then no metadata will be tracked.
+	Metadata *Metadata
+	// Result is a pointer to the struct that will contain the decoded value.
+	Result interface{}
+}
+
+//Metadata contains information about decoding a structure that
+//is tedious or difficult to get otherwise.
+type Metadata struct {
+	//Keys are the keys of the struct which were successfully decoded
+	Keys []string
+	//Unused is a slice of keys that were found in the raw value but
+	//weren't decoded since there was no matching field in the result
+	//interface
+	Unused []string
 }
