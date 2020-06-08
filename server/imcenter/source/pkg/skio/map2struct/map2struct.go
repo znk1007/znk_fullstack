@@ -128,13 +128,43 @@ type DecoderConfig struct {
 	TagName string
 }
 
+//Decoder takes a raw interface value and turns ti into structured data,
+//keeping track of rich error information along the way in case anything
+//goes wrong. Unlike the basic top-level Decode method, you can more finely
+//control how the Decoder behaves using the DecoderConfig struct.
+//The top-level Decode method is just a convenience that sets up the most
+//basic Decoder.
+type Decoder struct {
+	config *DecoderConfig
+}
+
 //Metadata contains information about decoding a structure that
 //is tedious or difficult to get otherwise.
 type Metadata struct {
+
 	//Keys are the keys of the struct which were successfully decoded
 	Keys []string
+
 	//Unused is a slice of keys that were found in the raw value but
 	//weren't decoded since there was no matching field in the result
 	//interface
 	Unused []string
+}
+
+//Decode takes an input struct and uses reflection to translate it to
+//the output struct. output must be a pointer to a map or struct.
+func Decode(input interface{}, output interface{}) error {
+	config := &DecoderConfig{
+		Metadata: nil,
+		Result:   output,
+	}
+	// decoder, err :=
+	return nil
+}
+
+//NewDecoder returns a new decoder for the given configuration.
+//Once a decoder has been returned, the same configuration must not
+//be used again.
+func NewDecoder(config *DecoderConfig) (*Decoder, error) {
+	val := reflect.ValueOf(config.Result)
 }
