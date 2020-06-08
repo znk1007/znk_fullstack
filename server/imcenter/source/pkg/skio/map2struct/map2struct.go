@@ -79,10 +79,12 @@ type DecoderConfig struct {
 	//If an error is returned, the entire decode will fail with that
 	//error
 	DecodeHook DecodeHookFunc
+
 	//ErrorUnused if is true, the it is an error for there to exist
 	//keys in the original map that were unused in the decoding process
 	//(extra keys)
 	ErrorUnuserd bool
+
 	//ZeroFields, if set to true, will zero fields before writing them.
 	//For example, a map will be emptyed before decoded values are put
 	//in it. If this is false, a map will be merged.
@@ -105,6 +107,7 @@ type DecoderConfig struct {
 	//	element is weakly decoded. For example: "4" can become []int{4}
 	//	if the target type is an int slice.
 	WeaklyTypedInput bool
+
 	//Squash will squash embedded structs. A squash(压缩映射) tag may also
 	//be added to an individual struct field using a tag. For example:
 	//
@@ -112,11 +115,17 @@ type DecoderConfig struct {
 	//		Child `m2s:",squash"`
 	//}
 	Squash bool
+
 	//Metadata is the struct that will contain extra metadata about
 	//the decoding. If this nil, then no metadata will be tracked.
 	Metadata *Metadata
+
 	// Result is a pointer to the struct that will contain the decoded value.
 	Result interface{}
+
+	//The tag name that map2struct reads for field names.
+	//This defaults to "map2struct"
+	TagName string
 }
 
 //Metadata contains information about decoding a structure that
