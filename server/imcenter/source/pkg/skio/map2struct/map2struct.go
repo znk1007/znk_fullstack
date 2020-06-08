@@ -1,4 +1,4 @@
-package m2p
+package map2struct
 
 import (
 	"errors"
