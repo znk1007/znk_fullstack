@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"time"
 )
 
 //Error implements the error interface and can represents multiple
@@ -220,11 +221,39 @@ func ComposeDecodeHookFunc(fs ...DecodeHookFunc) DecodeHookFunc {
 //StringToSliceHookFunc returns a DecodeHookFunc that converts
 //string to []string by splitting on the given sep.
 func StringToSliceHookFunc(sep string) DecodeHookFunc {
-	return func (
+	return func(
 		f reflect.Kind,
-		
+		t reflect.Kind,
+		data interface{},
 	) (interface{}, error) {
-		
+		if f != reflect.String || t != reflect.Slice {
+			return data, nil
+		}
+
+		raw := data.(string)
+		if len(raw) == 0 {
+			return []string{}, nil
+		}
+		return strings.Split(raw, sep), nil
+	}
+}
+
+func StringToTimeDurationHookFunc() DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{},
+	) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+
+		if t != reflect.TypeOf(time.Duration(5)) {
+			return data, nil
+		}
+
+		//Convert it by parsing
+		return time.ParseDuration(data.(string))
 	}
 }
 
