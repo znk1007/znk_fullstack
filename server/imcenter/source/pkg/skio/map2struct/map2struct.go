@@ -45,44 +45,6 @@ func appendErrors(errors []string, err error) []string {
 	}
 }
 
-//typedDecodeHook takes a raw DecodeHookFunc (an interface{}) and turns
-//it into the proper DecodeHookFunc type, such as DecodeHookFuncType.
-func typedDecodeHook(h DecodeHookFunc) DecodeHookFunc {
-	//Create variables here so we can reference them with the reflect pkg
-	var f1 DecodeHookFuncType
-	var f2 DecodeHookFuncType
-
-	//Fill in the variables into this interface and the rest is done
-	//automatically using the reflect package.
-	potential := []interface{}{f1, f2}
-
-	v := reflect.ValueOf(h)
-	vt := v.Type()
-	for _, raw := range potential {
-		pt := reflect.ValueOf(raw).Type()
-		if vt.ConvertibleTo(pt) {
-			return v.Convert(pt).Interface()
-		}
-	}
-	return nil
-}
-
-//DecodeHookExec executes the given decode hook. This should be used since
-//it'll naturally degrade to the older backwards compatible DecodeHookFunc
-//that took reflect.Kind instead of reflect.Type.
-func DecodeHookExec(
-	raw DecodeHookFunc,
-	from, to reflect.Type,
-	data interface{}) (interface{}, error) {
-
-	switch f := typedDecodeHook(raw).(type) {
-	case DecodeHookFuncType:
-		return f(from, to, data)
-		
-	}
-	return nil, nil
-}
-
 //DecodeHookFunc is the callback function that can be used for
 //data transformations. See "DecodeHook" in the DecoderConfig
 //struct.
@@ -185,6 +147,85 @@ type Metadata struct {
 	//weren't decoded since there was no matching field in the result
 	//interface
 	Unused []string
+}
+
+//typedDecodeHook takes a raw DecodeHookFunc (an interface{}) and turns
+//it into the proper DecodeHookFunc type, such as DecodeHookFuncType.
+func typedDecodeHook(h DecodeHookFunc) DecodeHookFunc {
+	//Create variables here so we can reference them with the reflect pkg
+	var f1 DecodeHookFuncType
+	var f2 DecodeHookFuncType
+
+	//Fill in the variables into this interface and the rest is done
+	//automatically using the reflect package.
+	potential := []interface{}{f1, f2}
+
+	v := reflect.ValueOf(h)
+	vt := v.Type()
+	for _, raw := range potential {
+		pt := reflect.ValueOf(raw).Type()
+		if vt.ConvertibleTo(pt) {
+			return v.Convert(pt).Interface()
+		}
+	}
+	return nil
+}
+
+//DecodeHookExec executes the given decode hook. This should be used since
+//it'll naturally degrade to the older backwards compatible DecodeHookFunc
+//that took reflect.Kind instead of reflect.Type.
+func DecodeHookExec(
+	raw DecodeHookFunc,
+	from, to reflect.Type,
+	data interface{}) (interface{}, error) {
+
+	switch f := typedDecodeHook(raw).(type) {
+	case DecodeHookFuncType:
+		return f(from, to, data)
+	case DecodeHookFuncKind:
+		return f(from.Kind(), to.Kind(), data)
+	default:
+		return nil, errors.New("invalid decode hook signature")
+	}
+}
+
+//ComposeDecodeHookFunc creates a single DecodeHookFunc that
+//automatically composes multiple DecodeHookFuncs.
+//
+//The composed funcs are called in order, with the result of
+//the previous transformation.
+func ComposeDecodeHookFunc(fs ...DecodeHookFunc) DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{},
+	) (interface{}, error) {
+		var err error
+		for _, f1 := range fs {
+			data, err = DecodeHookExec(f1, f, t, data)
+			if err != nil {
+				return nil, err
+			}
+
+			//Modify the from kind to be correct with the new data
+			f = nil
+			if val := reflect.ValueOf(data); val.IsValid() {
+				f = val.Type()
+			}
+		}
+		return data, nil
+	}
+}
+
+//StringToSliceHookFunc returns a DecodeHookFunc that converts
+//string to []string by splitting on the given sep.
+func StringToSliceHookFunc(sep string) DecodeHookFunc {
+	return func (
+		f reflect.Kind,
+		
+	) (interface{}, error) {
+		
+	}
 }
 
 //Decode takes an input struct and uses reflection to translate it to
