@@ -45,7 +45,43 @@ func appendErrors(errors []string, err error) []string {
 	}
 }
 
-func typedDecodeHook(h DecodeHookFunc)
+//typedDecodeHook takes a raw DecodeHookFunc (an interface{}) and turns
+//it into the proper DecodeHookFunc type, such as DecodeHookFuncType.
+func typedDecodeHook(h DecodeHookFunc) DecodeHookFunc {
+	//Create variables here so we can reference them with the reflect pkg
+	var f1 DecodeHookFuncType
+	var f2 DecodeHookFuncType
+
+	//Fill in the variables into this interface and the rest is done
+	//automatically using the reflect package.
+	potential := []interface{}{f1, f2}
+
+	v := reflect.ValueOf(h)
+	vt := v.Type()
+	for _, raw := range potential {
+		pt := reflect.ValueOf(raw).Type()
+		if vt.ConvertibleTo(pt) {
+			return v.Convert(pt).Interface()
+		}
+	}
+	return nil
+}
+
+//DecodeHookExec executes the given decode hook. This should be used since
+//it'll naturally degrade to the older backwards compatible DecodeHookFunc
+//that took reflect.Kind instead of reflect.Type.
+func DecodeHookExec(
+	raw DecodeHookFunc,
+	from, to reflect.Type,
+	data interface{}) (interface{}, error) {
+
+	switch f := typedDecodeHook(raw).(type) {
+	case DecodeHookFuncType:
+		return f(from, to, data)
+		
+	}
+	return nil, nil
+}
 
 //DecodeHookFunc is the callback function that can be used for
 //data transformations. See "DecodeHook" in the DecoderConfig
@@ -167,4 +203,73 @@ func Decode(input interface{}, output interface{}) error {
 //be used again.
 func NewDecoder(config *DecoderConfig) (*Decoder, error) {
 	val := reflect.ValueOf(config.Result)
+	if val.Kind() != reflect.Ptr {
+		return nil, errors.New("result must be a pointer")
+	}
+
+	val = val.Elem()
+	if !val.CanAddr() {
+		return nil, errors.New("result must be addressable (a pointer)")
+	}
+
+	if config.Metadata != nil {
+		if config.Metadata.Keys == nil {
+			config.Metadata.Keys = make([]string, 0)
+		}
+		if config.Metadata.Unused == nil {
+			config.Metadata.Unused = make([]string, 0)
+		}
+	}
+
+	if len(config.TagName) == 0 {
+		config.TagName = "map2strct"
+	}
+
+	result := &Decoder{
+		config: config,
+	}
+	return result, nil
+}
+
+//decode deco
+func (d *Decoder) decode(name string, input interface{}, outVal reflect.Value) error {
+	var inputVal reflect.Value
+	if input != nil {
+		inputVal = reflect.ValueOf(input)
+		//We need to check here if input is a typed nil.
+		//Typed nils won't match the "input == nil" below so we check
+		//that here.
+		if inputVal.Kind() == reflect.Ptr && inputVal.IsNil() {
+			input = nil
+		}
+	}
+
+	if input == nil {
+		//If the data is nil, then we don't set anything,
+		//unless ZeroFields is set to true.
+		if d.config.ZeroFields {
+			outVal.Set(reflect.Zero(outVal.Type()))
+
+			if d.config.Metadata != nil && len(name) > 0 {
+				d.config.Metadata.Keys = append(d.config.Metadata.Keys, name)
+			}
+		}
+		return nil
+	}
+
+	if !inputVal.IsValid() {
+		//If the input value is invalid, then we just set the value
+		//to be the zero value.
+		outVal.Set(reflect.Zero(outVal.Type()))
+		if d.config.Metadata != nil && len(name) > 0 {
+			d.config.Metadata.Keys = append(d.config.Metadata.Keys, name)
+		}
+		return nil
+	}
+
+	if d.config.DecodeHook != nil {
+		//We have a DecodeHook, so let's pre-process the input.
+		var err error
+		// input, err =
+	}
 }
