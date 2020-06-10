@@ -87,3 +87,39 @@ func TestComposeDecodeHookFunc_kinds(t *testing.T) {
 		t.Fatalf("bad: %#v", f2From)
 	}
 }
+
+func TestStrToSliceHookFunc(t *testing.T) {
+	f := StrToSliceHookFunc(",")
+
+	strType := reflect.TypeOf("")
+	sliceType := reflect.TypeOf([]byte(""))
+	cases := []struct{
+		f, t reflect.Type,
+		data interface{},
+		result interface{},
+		err bool
+	} {
+		{sliceType, sliceType, 42,42,false},
+		{strType, strType, 42,42,false},
+		{
+			strType,
+			sliceType,
+			"foo,bar,baz",
+			[]string{"foo","bar","baz"},
+			false,
+		},
+		{
+			strType,
+			sliceType,
+			"",
+			[]string{},
+			false,
+		},
+	}
+	for i, tc := range cases {
+		actual, err := DecodeHookExec(f,tc.f,tc.t,tc.data)
+		if tc.err != (err != nil) {
+			t.Fatalf("case %d: expected err %#v", i, tc.err)
+		}
+	}
+}
