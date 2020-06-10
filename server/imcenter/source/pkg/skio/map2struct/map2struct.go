@@ -3,8 +3,10 @@ package map2struct
 import (
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -218,9 +220,9 @@ func ComposeDecodeHookFunc(fs ...DecodeHookFunc) DecodeHookFunc {
 	}
 }
 
-//StringToSliceHookFunc returns a DecodeHookFunc that converts
+//StrToSliceHookFunc returns a DecodeHookFunc that converts
 //string to []string by splitting on the given sep.
-func StringToSliceHookFunc(sep string) DecodeHookFunc {
+func StrToSliceHookFunc(sep string) DecodeHookFunc {
 	return func(
 		f reflect.Kind,
 		t reflect.Kind,
@@ -238,7 +240,9 @@ func StringToSliceHookFunc(sep string) DecodeHookFunc {
 	}
 }
 
-func StringToTimeDurationHookFunc() DecodeHookFunc {
+//StrToTimeDurationHookFunc returns a DecodeHookFunc that converts
+//strings to time.Duration.
+func StrToTimeDurationHookFunc() DecodeHookFunc {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
@@ -255,6 +259,102 @@ func StringToTimeDurationHookFunc() DecodeHookFunc {
 		//Convert it by parsing
 		return time.ParseDuration(data.(string))
 	}
+}
+
+//StrToIPHookFunc returns a DecodeHookFunc that converts
+//strings to net.IP
+func StrToIPHookFunc() DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{},
+	) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+		if t != reflect.TypeOf(net.IP{}) {
+			return data, nil
+		}
+
+		//Convert it by parsing
+		ip := net.ParseIP(data.(string))
+		if ip == nil {
+			return net.IP{}, fmt.Errorf("failed parsing ip %v", data)
+		}
+		return ip, nil
+	}
+}
+
+//StrToIPNetHookFunc returns a DecodeHookFunc that converts
+//strings to net.IPNet
+func StrToIPNetHookFunc() DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{},
+	) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+		if t != reflect.TypeOf(net.IPNet{}) {
+			return data, nil
+		}
+		//Convert it by parsing
+		_, net, err := net.ParseCIDR(data.(string))
+		return net, err
+	}
+}
+
+//StrToTimeHookFunc returns a DecodeHookFunc that converts
+//strings to time.Time.
+func StrToTimeHookFunc(layout string) DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{},
+	) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+		if t != reflect.TypeOf(time.Time{}) {
+			return data, nil
+		}
+		//Convert it by parsing
+		return time.Parse(layout, data.(string))
+	}
+}
+
+//WeaklyTypedHook is a DecodeHookFunc which adds support for weak typing to
+//
+func WeaklyTypedHook(
+	f reflect.Kind,
+	t reflect.Kind,
+	data interface{},
+) (interface{}, error) {
+	dataVal := reflect.ValueOf(data)
+	switch t {
+	case reflect.String:
+		switch f {
+		case reflect.Bool:
+			if dataVal.Bool() {
+				return "1", nil
+			}
+			return "0", nil
+		case reflect.Float32:
+			return strconv.FormatFloat(dataVal.Float(), 'f', -1, 64), nil
+		case reflect.Int:
+			return strconv.FormatInt(dataVal.Int(), 10), nil
+		case reflect.Slice:
+			dataType := dataVal.Type()
+			elemKind := dataType.Elem().Kind()
+			if elemKind == reflect.Uint8 {
+				return string(dataVal.Interface().([]uint8)), nil
+			}
+		case reflect.Uint:
+			return strconv.FormatUint(dataVal.Uint(), 10), nil
+		}
+	}
+	return data, nil
 }
 
 //Decode takes an input struct and uses reflection to translate it to
