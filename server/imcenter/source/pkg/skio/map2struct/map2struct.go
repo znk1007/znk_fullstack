@@ -1,4 +1,4 @@
-package map2struct
+package m2s
 
 import (
 	"errors"
@@ -157,7 +157,7 @@ type Metadata struct {
 func typedDecodeHook(h DecodeHookFunc) DecodeHookFunc {
 	//Create variables here so we can reference them with the reflect pkg
 	var f1 DecodeHookFuncType
-	var f2 DecodeHookFuncType
+	var f2 DecodeHookFuncKind
 
 	//Fill in the variables into this interface and the rest is done
 	//automatically using the reflect package.
@@ -360,10 +360,10 @@ func WeaklyTypedHook(
 //Decode takes an input struct and uses reflection to translate it to
 //the output struct. output must be a pointer to a map or struct.
 func Decode(input interface{}, output interface{}) error {
-	config := &DecoderConfig{
-		Metadata: nil,
-		Result:   output,
-	}
+	// config := &DecoderConfig{
+	// 	Metadata: nil,
+	// 	Result:   output,
+	// }
 	// decoder, err :=
 	return nil
 }
@@ -392,7 +392,7 @@ func NewDecoder(config *DecoderConfig) (*Decoder, error) {
 	}
 
 	if len(config.TagName) == 0 {
-		config.TagName = "map2strct"
+		config.TagName = "m2s"
 	}
 
 	result := &Decoder{
@@ -439,7 +439,8 @@ func (d *Decoder) decode(name string, input interface{}, outVal reflect.Value) e
 
 	if d.config.DecodeHook != nil {
 		//We have a DecodeHook, so let's pre-process the input.
-		var err error
+		// var err error
 		// input, err =
 	}
+	return nil
 }

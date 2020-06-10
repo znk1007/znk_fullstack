@@ -145,4 +145,4 @@
 //
 //map2struct is highly configurable. See the DecoderConfig struct for
 //other features and options that are supported.
-package map2struct
+package m2s
