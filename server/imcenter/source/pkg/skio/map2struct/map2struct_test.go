@@ -93,19 +93,19 @@ func TestStrToSliceHookFunc(t *testing.T) {
 
 	strType := reflect.TypeOf("")
 	sliceType := reflect.TypeOf([]byte(""))
-	cases := []struct{
-		f, t reflect.Type,
-		data interface{},
-		result interface{},
-		err bool
-	} {
-		{sliceType, sliceType, 42,42,false},
-		{strType, strType, 42,42,false},
+	cases := []struct {
+		f, t   reflect.Type
+		data   interface{}
+		result interface{}
+		err    bool
+	}{
+		{sliceType, sliceType, 42, 42, false},
+		{strType, strType, 42, 42, false},
 		{
 			strType,
 			sliceType,
 			"foo,bar,baz",
-			[]string{"foo","bar","baz"},
+			[]string{"foo", "bar", "baz"},
 			false,
 		},
 		{
@@ -117,9 +117,12 @@ func TestStrToSliceHookFunc(t *testing.T) {
 		},
 	}
 	for i, tc := range cases {
-		actual, err := DecodeHookExec(f,tc.f,tc.t,tc.data)
+		actual, err := DecodeHookExec(f, tc.f, tc.t, tc.data)
 		if tc.err != (err != nil) {
 			t.Fatalf("case %d: expected err %#v", i, tc.err)
+		}
+		if !reflect.DeepEqual(actual, tc.result) {
+			t.Fatalf("cast %d: expected %#v, got %#v", i, tc.err, actual)
 		}
 	}
 }
