@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestComposeDecodeHookFunc(t *testing.T) {
@@ -124,5 +125,50 @@ func TestStrToSliceHookFunc(t *testing.T) {
 		if !reflect.DeepEqual(actual, tc.result) {
 			t.Fatalf("cast %d: expected %#v, got %#v", i, tc.err, actual)
 		}
+	}
+}
+
+func TestStrToTimeDurationHookFunc(t *testing.T) {
+	f := StrToTimeDurationHookFunc()
+
+	strType := reflect.TypeOf("")
+	timeType := reflect.TypeOf(time.Duration(5))
+	cases := []struct {
+		f, t   reflect.Type
+		data   interface{}
+		result interface{}
+		err    bool
+	}{
+		{strType, timeType, "5s", 5 * time.Second, false},
+		{strType, timeType, "5", time.Duration(0), true},
+		{strType, strType, "5", "5", false},
+	}
+
+	for i, tc := range cases {
+		actual, err := DecodeHookExec(f, tc.f, tc.t, tc.data)
+		if tc.err != (err != nil) {
+			t.Fatalf("case %d: expected err %#v", i, tc.err)
+		}
+		if !reflect.DeepEqual(actual, tc.result) {
+			t.Fatalf("case %d: expected %#v, got %#v", i, tc.result, actual)
+		}
+	}
+}
+
+func TestStrToTimeHookFunc(t *testing.T) {
+	strType := reflect.TypeOf("")
+	timeType := reflect.TypeOf(time.Time{})
+	cases := []struct {
+		f, t   reflect.Type
+		layout string
+		data   interface{}
+		result interface{}
+		err    bool
+	}{
+		{strType, timeType, time.RFC3339, "2006-01-02T15:04:05Z", time.Date(2006,1,2,15,4,5,0,time.UTC), false},
+		{strType, timeType, time.RFC3339, "5", time.Time{}, true},
+		
+
+
 	}
 }
