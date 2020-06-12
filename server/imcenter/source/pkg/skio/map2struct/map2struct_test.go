@@ -2,6 +2,7 @@ package m2s
 
 import (
 	"errors"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -172,6 +173,31 @@ func TestStrToTimeHookFunc(t *testing.T) {
 
 	for i, tc := range cases {
 		f := StrToTimeHookFunc(tc.layout)
+		actual, err := DecodeHookExec(f, tc.f, tc.t, tc.data)
+		if tc.err != (err != nil) {
+			t.Fatalf("case %d: expected err %#v", i, tc.err)
+		}
+		if !reflect.DeepEqual(actual, tc.result) {
+			t.Fatalf("case %d: expected %#v, got %#v", i, tc.result, actual)
+		}
+	}
+}
+
+func TestStrToIPHookFunc(t *testing.T) {
+	strType := reflect.TypeOf("")
+	ipType := reflect.TypeOf(net.IP{})
+	cases := []struct {
+		f, t   reflect.Type
+		data   interface{}
+		result interface{}
+		err    bool
+	}{
+		{strType, ipType, "1.2.3.4", net.IPv4(0x01, 0x02, 0x03, 0x04), false},
+		{strType, ipType, "5", net.IP{}, true},
+		{strType, strType, "5", "5", false},
+	}
+	for i, tc := range cases {
+		f := StrToIPHookFunc()
 		actual, err := DecodeHookExec(f, tc.f, tc.t, tc.data)
 		if tc.err != (err != nil) {
 			t.Fatalf("case %d: expected err %#v", i, tc.err)
