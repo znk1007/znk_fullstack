@@ -207,3 +207,7 @@ func TestStrToIPHookFunc(t *testing.T) {
 		}
 	}
 }
+
+func TestStrToIPNetHookFunc(t *testing.T) {
+
+}
