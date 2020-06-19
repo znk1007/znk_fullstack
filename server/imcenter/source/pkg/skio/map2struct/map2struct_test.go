@@ -255,3 +255,71 @@ func TestStrToIPNetHookFunc(t *testing.T) {
 		}
 	}
 }
+
+func TestWeaklyTypedHook(t *testing.T) {
+	var f DecodeHookFunc = WeaklyTypedHook
+
+	boolType := reflect.TypeOf(true)
+	strType := reflect.TypeOf("")
+	sliceType := reflect.TypeOf([]byte(""))
+	cases := []struct {
+		f, t   reflect.Type
+		data   interface{}
+		result interface{}
+		err    bool
+	}{
+		//To STRING
+		{
+			boolType,
+			strType,
+			false,
+			"0",
+			false,
+		},
+		{
+			boolType,
+			strType,
+			true,
+			"1",
+			false,
+		},
+		{
+			reflect.TypeOf(float32(1)),
+			strType,
+			float32(7),
+			"7",
+			false,
+		},
+		{
+			reflect.TypeOf(int(1)),
+			strType,
+			int(7),
+			"7",
+			false,
+		},
+		{
+			sliceType,
+			strType,
+			[]uint8("foo"),
+			"foo",
+			false,
+		},
+		{
+			reflect.TypeOf(uint(1)),
+			strType,
+			uint(7),
+			"7",
+			false,
+		},
+	}
+
+	for i, tc := range cases {
+		actual, err := DecodeHookExec(f, tc.f, tc.t, tc.data)
+		if tc.err != (err != nil) {
+			t.Fatalf("case %d: expected err %#v", i, tc.err)
+		}
+		if !reflect.DeepEqual(actual, tc.result) {
+			t.Fatalf("case %d: expected %#v, got %#v", i, tc.result, actual)
+		}
+	}
+}
