@@ -460,6 +460,40 @@ func (d *Decoder) decode(name string, input interface{}, outVal reflect.Value) e
 	return nil
 }
 
+func (d *Decoder) decodeStruct(name string, data interface{}, val reflect.Value) error {
+	dataVal := reflect.Indirect(reflect.ValueOf(data))
+
+	//If the type of the value to write to and the data match directly,
+	//then we just set it directly instread of recursing into the struct.
+	if dataVal.Type() == val.Type() {
+		val.Set(dataVal)
+		return nil
+	}
+
+	dataValKind := dataVal.Kind()
+	switch dataValKind {
+	case reflect.Map:
+		return d.decodeStructFromMap(name, dataVal, val)
+	case reflect.Struct:
+		//Not the most efficient way to do this but we can optimize later if
+		//we want to. To convert from struct to struct we go to map first
+		//as an intermediary.
+		m := make(map[string]interface{})
+		mval := reflect.Indirect(reflect.ValueOf(&m))
+		if err := d.decodeStructFromMap() {
+			
+		}
+	}
+}
+
+func (d *Decoder)decodeMapFromStruct(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+	t := dataVal.Type()
+	for i := 0; i < t.NumField(); i++ {
+		//Get the StructField first since this is a cheap operation. If the 
+		//field is unexported, then ignore it.
+	}
+}
+
 func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) error {
 	dataValType := dataVal.Type()
 	if kind := dataValType.Key().Kind(); kind != reflect.String && kind != reflect.Interface {
