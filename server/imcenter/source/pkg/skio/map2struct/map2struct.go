@@ -491,6 +491,10 @@ func (d *Decoder)decodeMapFromStruct(name string, dataVal reflect.Value, val ref
 	for i := 0; i < t.NumField(); i++ {
 		//Get the StructField first since this is a cheap operation. If the 
 		//field is unexported, then ignore it.
+		f := t.Field(i)
+		if len(f.PkgPath) > 0 {
+			continue
+		}
 	}
 }
 
