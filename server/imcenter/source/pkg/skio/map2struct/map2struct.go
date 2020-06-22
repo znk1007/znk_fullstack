@@ -495,6 +495,27 @@ func (d *Decoder)decodeMapFromStruct(name string, dataVal reflect.Value, val ref
 		if len(f.PkgPath) > 0 {
 			continue
 		}
+
+		//Next get the actual value of this field and verify it is assignable
+		//to the map value.
+		v:=dataVal.Field(i)
+		if !v.Type().AssignableTo(valMap.Type().Elem()) {
+			return fmt.Errorf("cannot assign type '%s' to map value field of type '%s'", v.Type(),valMap.Type().Elem())
+		}
+
+		tagVale := f.Tag.Get(d.config.TagName)
+		keyName := f.Name
+
+		//If Squash is set in the config, we squash the field down.
+		squash := d.config.Squash && v.Kind() == reflect.Struct && f.Anonymous
+		//Determine the name of the key in the map
+		if index := strings.Index(tagVale, ","); index != -1 {
+			if tagValue[:index] == "-" {
+				continue
+			}
+
+			//If "squash" is 
+		}
 	}
 }
 
