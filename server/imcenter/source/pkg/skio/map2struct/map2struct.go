@@ -450,9 +450,9 @@ func (d *Decoder) decode(name string, input interface{}, outVal reflect.Value) e
 			return fmt.Errorf("error decoding '%s': %s", name, err)
 		}
 	}
-	var err error
+	// var err error
 	outputKind := getKind(outVal)
-	addMetaKey := true
+	// addMetaKey := true
 	switch outputKind {
 	case reflect.Bool:
 		// err = d.
@@ -478,18 +478,19 @@ func (d *Decoder) decodeStruct(name string, data interface{}, val reflect.Value)
 		//Not the most efficient way to do this but we can optimize later if
 		//we want to. To convert from struct to struct we go to map first
 		//as an intermediary.
-		m := make(map[string]interface{})
-		mval := reflect.Indirect(reflect.ValueOf(&m))
-		if err := d.decodeStructFromMap() {
-			
-		}
+		// m := make(map[string]interface{})
+		// mval := reflect.Indirect(reflect.ValueOf(&m))
+		// if err := d.decodeStructFromMap() {
+
+		// }
 	}
+	return nil
 }
 
-func (d *Decoder)decodeMapFromStruct(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+func (d *Decoder) decodeMapFromStruct(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
 	t := dataVal.Type()
 	for i := 0; i < t.NumField(); i++ {
-		//Get the StructField first since this is a cheap operation. If the 
+		//Get the StructField first since this is a cheap operation. If the
 		//field is unexported, then ignore it.
 		f := t.Field(i)
 		if len(f.PkgPath) > 0 {
@@ -498,25 +499,205 @@ func (d *Decoder)decodeMapFromStruct(name string, dataVal reflect.Value, val ref
 
 		//Next get the actual value of this field and verify it is assignable
 		//to the map value.
-		v:=dataVal.Field(i)
+		v := dataVal.Field(i)
 		if !v.Type().AssignableTo(valMap.Type().Elem()) {
-			return fmt.Errorf("cannot assign type '%s' to map value field of type '%s'", v.Type(),valMap.Type().Elem())
+			return fmt.Errorf("cannot assign type '%s' to map value field of type '%s'", v.Type(), valMap.Type().Elem())
 		}
 
-		tagVale := f.Tag.Get(d.config.TagName)
+		tagValue := f.Tag.Get(d.config.TagName)
 		keyName := f.Name
 
 		//If Squash is set in the config, we squash the field down.
 		squash := d.config.Squash && v.Kind() == reflect.Struct && f.Anonymous
 		//Determine the name of the key in the map
-		if index := strings.Index(tagVale, ","); index != -1 {
+		if index := strings.Index(tagValue, ","); index != -1 {
 			if tagValue[:index] == "-" {
 				continue
 			}
 
-			//If "squash" is 
+			//If "omitempty" is specified in the tag, it ignores empty values.
+			if strings.Index(tagValue[index+1:], "omitempty") != -1 && isEmptyValue(v) {
+				continue
+			}
+
+			//If "squash" is specified in the tag, we squash the field down.
+			squash = !squash && strings.Index(tagValue[index+1:], "omitempty") != -1
+			if squash && v.Kind() != reflect.Struct {
+				return fmt.Errorf("cannot squash non-struct type '%s'", v.Type())
+			}
+			keyName = tagValue[:index]
+		} else if len(tagValue) > 0 {
+			if tagValue == "-" {
+				continue
+			}
+			keyName = tagValue
+		}
+
+		switch v.Kind() {
+		case reflect.Struct: //this is embeded struct, so handle it differently
+			x := reflect.New(v.Type())
+			x.Elem().Set(v)
+
+			vType := valMap.Type()
+			vKeyType := vType.Key()
+			vElemType := vType.Elem()
+			mType := reflect.MapOf(vKeyType, vElemType)
+			vMap := reflect.MakeMap(mType)
+
+			err := d.decode(keyName, x.Interface(), vMap)
+			if err != nil {
+				return err
+			}
+
+			if squash {
+				for _, k := range vMap.MapKeys() {
+					valMap.SetMapIndex(k, vMap.MapIndex(k))
+				}
+			} else {
+				valMap.SetMapIndex(reflect.ValueOf(keyName), vMap)
+			}
+		default:
+			valMap.SetMapIndex(reflect.ValueOf(keyName), v)
 		}
 	}
+	if val.CanAddr() {
+		val.Set(valMap)
+	}
+	return nil
+}
+
+func (d *Decoder) decodePtr(name string, data interface{}, val reflect.Value) (bool, error) {
+	//If the input data is nil, then we want to just set the output
+	//pointer to be nil as well.
+	isNil := data == nil
+	if !isNil {
+		switch v := reflect.Indirect(reflect.ValueOf(data)); v.Kind() {
+		case reflect.Chan,
+			reflect.Func,
+			reflect.Interface,
+			reflect.Map,
+			reflect.Ptr,
+			reflect.Slice:
+			isNil = v.IsNil()
+		}
+	}
+	if isNil {
+		if !val.IsNil() && val.CanSet() {
+			nilValue := reflect.New(val.Type()).Elem()
+			val.Set(nilValue)
+		}
+		return true, nil
+	}
+
+	//Create an element of the concrete (non pointer) type and decode
+	//into that. Then set the value of the pointer to this type.
+	valType := val.Type()
+	valElemType := valType.Elem()
+	if val.CanSet() {
+		realVal := val
+		if realVal.IsNil() || d.config.ZeroFields {
+			realVal = reflect.New(valElemType)
+		}
+
+		if err := d.decode(name, data, reflect.Indirect(realVal)); err != nil {
+			return false, err
+		}
+
+		val.Set(realVal)
+	} else {
+		if err := d.decode(name, data, reflect.Indirect(val)); err != nil {
+			return false, err
+		}
+	}
+	return false, nil
+}
+
+func (d *Decoder) decodeFunc(name string, data interface{}, val reflect.Value) error {
+	//Create an element of the concrete (non pointer) type and decode
+	//into that. Then set the value of the pointer to this type.
+	dataVal := reflect.Indirect(reflect.ValueOf(data))
+	if val.Type() != dataVal.Type() {
+		return fmt.Errorf("'%s' expected type '%s', got unconvertable type '%s'", name, val.Type(), dataVal.Type())
+	}
+	val.Set(dataVal)
+	return nil
+}
+
+func (d *Decoder) decodeSlice(name string, data interface{}, val reflect.Value) error {
+	dataVal := reflect.Indirect(reflect.ValueOf(data))
+	dataValKind := dataVal.Kind()
+	valType := val.Type()
+	valElemType := valType.Elem()
+	sliceType := reflect.SliceOf(valElemType)
+
+	//If we have a non array/slice type then we first attempt to convert.
+	if dataValKind != reflect.Array && dataValKind != reflect.Slice {
+		if d.config.WeaklyTypedInput {
+			switch {
+			//Slice and array we use the normal logic
+			case dataValKind == reflect.Slice, dataValKind == reflect.Array:
+				break
+			//Empty maps turn into empty slices
+			case dataValKind == reflect.Map:
+				if dataVal.Len() == 0 {
+					val.Set(reflect.MakeSlice(sliceType, 0, 0))
+					return nil
+				}
+				//Create slice of maps of other sizes
+				return d.decodeSlice(name, []interface{}{data}, val)
+			case dataValKind == reflect.String && valElemType.Kind() == reflect.Uint8:
+				return d.decodeSlice(name, []byte(dataVal.String()), val)
+
+			//All other types we try to convert to the slice type
+			//and "lift" it into it. i.e. a string becomes a string slice.
+			default:
+				//Just re-try this function with data as a slice.
+				return d.decodeSlice(name, []interface{}{data}, val)
+			}
+		}
+		return fmt.Errorf("'%s': source data must be an array or slice, got %s", name, dataValKind)
+	}
+
+	//If the input vale is nil, then don't allocate since empty != nil
+	if dataVal.IsNil() {
+		return nil
+	}
+
+	valSlice := val
+	if valSlice.IsNil() || d.config.ZeroFields {
+		//Make a new slice to hold our result, same size as the original data.
+		valSlice = reflect.MakeSlice(sliceType, dataVal.Len(), dataVal.Len())
+	}
+
+	//Accumulate any errors
+	errors := make([]string, 0)
+
+	for i := 0; i < dataVal.Len(); i++ {
+		curData := dataVal.Index(i).Interface()
+		for valSlice.Len() <= i {
+			valSlice = reflect.Append(valSlice, reflect.Zero(valElemType))
+		}
+		curField := valSlice.Index(i)
+
+		fieldName := fmt.Sprintf("%s[%d]", name, i)
+		if err := d.decode(fieldName, curData, curField); err != nil {
+			errors = appendErrors(errors, err)
+		}
+	}
+
+	//Finally, set the value to the slice we built up
+	val.Set(valSlice)
+
+	//If there were errors, we return those
+	if len(errors) > 0 {
+		return &Error{errors}
+	}
+	return nil
+}
+
+func (d *Decoder)decodeArray(name string, data interface{}, val reflect.Value) error {
+	dataVal := reflect.Indirect(reflect.ValueOf(data))
+	
 }
 
 func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) error {
