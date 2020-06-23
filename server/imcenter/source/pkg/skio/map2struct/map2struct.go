@@ -478,11 +478,15 @@ func (d *Decoder) decodeStruct(name string, data interface{}, val reflect.Value)
 		//Not the most efficient way to do this but we can optimize later if
 		//we want to. To convert from struct to struct we go to map first
 		//as an intermediary.
-		// m := make(map[string]interface{})
-		// mval := reflect.Indirect(reflect.ValueOf(&m))
-		// if err := d.decodeStructFromMap() {
-
-		// }
+		m := make(map[string]interface{})
+		mval := reflect.Indirect(reflect.ValueOf(&m))
+		if err := d.decodeMapFromStruct(name, dataVal, mval, mval); err != nil {
+			return err
+		}
+		result := d.decodeStructFromMap(name, mval, val)
+		return result
+	default:
+		return fmt.Errorf("'%s' expected a map , got '%s'", name, dataVal.Kind())
 	}
 	return nil
 }
@@ -695,9 +699,64 @@ func (d *Decoder) decodeSlice(name string, data interface{}, val reflect.Value) 
 	return nil
 }
 
-func (d *Decoder)decodeArray(name string, data interface{}, val reflect.Value) error {
+func (d *Decoder) decodeArray(name string, data interface{}, val reflect.Value) error {
 	dataVal := reflect.Indirect(reflect.ValueOf(data))
-	
+	dataValKind := dataVal.Kind()
+	valType := val.Type()
+	valElemType := valType.Elem()
+	arrayType := reflect.ArrayOf(valType.Len(), valElemType)
+
+	valArray := val
+
+	if valArray.Interface() == reflect.Zero(valArray.Type()).Interface() || d.config.ZeroFields {
+		//Check input type
+		if dataValKind != reflect.Array && dataValKind != reflect.Slice {
+			if d.config.WeaklyTypedInput {
+				switch {
+				//Empty maps turn into empty arrays
+				case dataValKind == reflect.Map:
+					if dataVal.Len() == 0 {
+						val.Set(reflect.Zero(arrayType))
+						return nil
+					}
+				//All other types we try to convert to the array type
+				//and "lift" it into it. i.e. a string becomes a string array.
+				default:
+					//Just re-try this function with data as a slice.
+					return d.decodeArray(name, []interface{}{data}, val)
+				}
+			}
+
+			return fmt.Errorf("'%s': source data must be an array or slice, got %s", name, dataValKind)
+		}
+		if dataVal.Len() > arrayType.Len() {
+			return fmt.Errorf("'%s': expected source data to have length less or equal to %d, got %d", name, arrayType.Len(), dataVal.Len())
+		}
+
+		//Make a new array to hold our result, same size as the original data
+		valArray = reflect.New(arrayType).Elem()
+	}
+	//Accumulate any erros
+	errors := make([]string, 0)
+
+	for i := 0; i < dataVal.Len(); i++ {
+		curData := dataVal.Index(i).Interface()
+		curField := valArray.Index(i)
+
+		fieldName := fmt.Sprintf("%s[%d]", name, i)
+		if err := d.decode(fieldName, curData, curField); err != nil {
+			errors = appendErrors(errors, err)
+		}
+	}
+
+	//Finally, set the value to the array we built up
+	val.Set(valArray)
+
+	//If there were errors, we return those
+	if len(errors) > 0 {
+		return &Error{errors}
+	}
+	return nil
 }
 
 func (d *Decoder) decodeStructFromMap(name string, dataVal, val reflect.Value) error {
