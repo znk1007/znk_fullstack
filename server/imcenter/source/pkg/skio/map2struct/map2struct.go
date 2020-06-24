@@ -460,6 +460,57 @@ func (d *Decoder) decode(name string, input interface{}, outVal reflect.Value) e
 	return nil
 }
 
+func (d *Decoder) decodeMapFromMap(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
+	valType := val.Type()
+	valKeyType := valType.Key()
+	valElemType := valType.Elem()
+
+	//Accumulate errors
+	errors := make([]string, 0)
+
+	//If the input data is empty, then we just match what the input data is.
+	if dataVal.Len() == 0 {
+		if dataVal.IsNil() {
+			if !val.IsNil() {
+				val.Set(dataVal)
+			}
+		} else {
+			//Set to empty allocated value
+			val.Set(valMap)
+		}
+		return nil
+	}
+
+	for _, k := range dataVal.MapKeys() {
+		fieldName := fmt.Sprintf("%s[%s]", name, k)
+
+		//First decode the key into the proper type
+		curKey := reflect.Indirect(reflect.New(valKeyType))
+		if err := d.decode(fieldName, k.Interface(), curKey); err != nil {
+			errors = appendErrors(errors, err)
+			continue
+		}
+
+		//Next decode the data into the proper type
+		v := dataVal.MapIndex(k).Interface()
+		curVal := reflect.Indirect(reflect.New(valElemType))
+		if err := d.decode(fieldName, v, curVal); err != nil {
+			errors = appendErrors(errors, err)
+			continue
+		}
+		valMap.SetMapIndex(curKey, curVal)
+	}
+
+	//Set the built up map to the value
+	val.Set(valMap)
+
+	//If we had errors, return those
+	if len(errors) > 0 {
+		return &Error{errors}
+	}
+	return nil
+}
+
 func (d *Decoder) decodeMapFromStruct(name string, dataVal reflect.Value, val reflect.Value, valMap reflect.Value) error {
 	t := dataVal.Type()
 	for i := 0; i < t.NumField(); i++ {
