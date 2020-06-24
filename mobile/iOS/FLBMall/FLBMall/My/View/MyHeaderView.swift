@@ -15,16 +15,6 @@ enum HeaderExtraType {
 
 fileprivate class HeaderExtraView: UIView {
     
-    var type: HeaderExtraType = .rate {
-        didSet {
-            switch type {
-            case .rate:
-                <#code#>
-            default:
-                <#code#>
-            }
-        }
-    }
     
     
     lazy var titleLab: UILabel = {
@@ -43,14 +33,34 @@ fileprivate class HeaderExtraView: UIView {
        }(UILabel.init())
     
     lazy var btn: UIButton = {
-        $0.addTarget(self(), action: #selector(<#T##@objc method#>), for: <#T##UIControl.Event#>)
+        $0.addTarget(self, action: #selector(extraItemClick), for: .touchUpInside)
         return $0
     }(UIButton.init(type: .custom))
     
-    @objc func
+    @objc func extraItemClick() {
+        
+    }
 }
 
 class MyHeaderView: UIView {
+    
+    fileprivate lazy var extraHeader: HeaderExtraView = {
+        
+        return $0
+    }(HeaderExtraView.init())
+    
+    var type: HeaderExtraType = .rate {
+        didSet {
+            switch type {
+            case .rate:
+                self.extraHeader.titleLab.text = "66"
+                self.extraHeader.subtitleLab.text = "我的积分"
+            case .packet:
+                self.extraHeader.titleLab.text = "88"
+                self.extraHeader.subtitleLab.text = "我的红包"
+            }
+        }
+    }
 
     private lazy var bgView: UIView = {
            $0.backgroundColor = UIColor.randomColor
@@ -81,10 +91,6 @@ class MyHeaderView: UIView {
            $0.backgroundColor = UIColor.randomColor
            return $0
        }(UIView.init())
-    
-    lazy var <#property name#>: <#type name#> = {
-        <#statements#>
-        return <#value#>
-    }()
+
 
 }

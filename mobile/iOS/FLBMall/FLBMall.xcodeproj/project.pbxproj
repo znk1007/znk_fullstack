@@ -22,6 +22,7 @@
 		1330E8D024A34D8800A3C99B /* MyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1330E8CF24A34D8800A3C99B /* MyView.swift */; };
 		1330E8D224A3522600A3C99B /* NSObject+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1330E8D124A3522600A3C99B /* NSObject+Ext.swift */; };
 		1330E8D424A3536A00A3C99B /* MyHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1330E8D324A3536A00A3C99B /* MyHeaderView.swift */; };
+		1330E8D624A3614C00A3C99B /* BaseTabBarPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1330E8D524A3614C00A3C99B /* BaseTabBarPage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		1330E8CF24A34D8800A3C99B /* MyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyView.swift; sourceTree = "<group>"; };
 		1330E8D124A3522600A3C99B /* NSObject+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSObject+Ext.swift"; sourceTree = "<group>"; };
 		1330E8D324A3536A00A3C99B /* MyHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyHeaderView.swift; sourceTree = "<group>"; };
+		1330E8D524A3614C00A3C99B /* BaseTabBarPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTabBarPage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				1330E8C524A344D800A3C99B /* BasePage.swift */,
+				1330E8D524A3614C00A3C99B /* BaseTabBarPage.swift */,
 				1330E8D124A3522600A3C99B /* NSObject+Ext.swift */,
 			);
 			path = Base;
@@ -243,6 +246,7 @@
 				1330E8D024A34D8800A3C99B /* MyView.swift in Sources */,
 				1330E8CE24A34D7600A3C99B /* MyViewModel.swift in Sources */,
 				1330E8BD24A338FD00A3C99B /* ClassifyPage.swift in Sources */,
+				1330E8D624A3614C00A3C99B /* BaseTabBarPage.swift in Sources */,
 				1330E8C424A344CB00A3C99B /* MyPage.swift in Sources */,
 				1330E8D424A3536A00A3C99B /* MyHeaderView.swift in Sources */,
 				1330E8A924A32D1D00A3C99B /* ViewController.swift in Sources */,
