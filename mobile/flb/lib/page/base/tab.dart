@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class FLBTab extends StatelessWidget {
-  const FLBTab({Key key}) : super(key: key);
+class FLBTab extends BottomNavigationBar {
+  
 
   @override
   Widget build(BuildContext context) {
