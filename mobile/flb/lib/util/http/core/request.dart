@@ -1,13 +1,13 @@
 
 import 'package:dio/dio.dart';
 
-class ReqeustHandler {
+class RequestHandler {
   Dio _dio = Dio();
   /// 单例
-  ReqeustHandler._();
-  static final ReqeustHandler _instance = ReqeustHandler._();
-  static ReqeustHandler get shared => _instance;
-  factory ReqeustHandler() {
+  RequestHandler._();
+  static final RequestHandler _instance = RequestHandler._();
+  static RequestHandler get shared => _instance;
+  factory RequestHandler() {
     return _instance;
   }
 
@@ -20,7 +20,7 @@ class ReqeustHandler {
       Function(bool succ, Map<String, dynamic>) callback,
     }
   ) async {
-    Response res = await ReqeustHandler.shared._dio.get(
+    Response res = await RequestHandler.shared._dio.get(
       path,
       queryParameters: queryParams,
       options: Options(headers: headers)
@@ -44,7 +44,7 @@ class ReqeustHandler {
      Function(bool succ, Map<String, dynamic>) callback 
     }
   ) async {
-    Response res = await ReqeustHandler.shared._dio.post(
+    Response res = await RequestHandler.shared._dio.post(
       path,
       data: data,
       options: Options(headers: headers)
