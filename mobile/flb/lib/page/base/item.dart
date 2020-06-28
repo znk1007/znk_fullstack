@@ -3,14 +3,13 @@ import 'package:flb/page/my/my.dart';
 import 'package:flutter/material.dart';
 
 class TabbarItem extends BottomNavigationBarItem {
-
+  final String identifier;//唯一标识
   final int index;
-  final Widget page;
   final BottomNavigationBarItem item;
 
   const TabbarItem({
+    this.identifier,
     this.index, 
-    @required this.page,
     @required this.item,
   });
 }
@@ -19,7 +18,7 @@ class TabbarItems extends ChangeNotifier {
   //分栏项目
   List<TabbarItem> _items = [];
   //分栏项目
-  get items => _items;
+  List<TabbarItem> get items => _items;
   //添加分栏项目
   void add(List<TabbarItem> items) {
     if (items.length == 0) {
@@ -34,7 +33,6 @@ class TabbarItems extends ChangeNotifier {
   void _setDefaultItems() {
     _items = [
       TabbarItem(
-        page: HomePage(), 
         item: BottomNavigationBarItem(
           icon: Icon(Icons.home), 
           title: Text('首页'),
@@ -42,7 +40,6 @@ class TabbarItems extends ChangeNotifier {
         index: 0,
       ), 
       TabbarItem(
-        page: HomePage(), 
         item: BottomNavigationBarItem(
           icon: Icon(Icons.category), 
           title: Text('分类'),
@@ -50,7 +47,6 @@ class TabbarItems extends ChangeNotifier {
         index: 1,
       ),
       TabbarItem(
-        page: HomePage(), 
         item: BottomNavigationBarItem(
           icon: Icon(Icons.shopping_cart), 
           title: Text('购物车'),
@@ -58,7 +54,6 @@ class TabbarItems extends ChangeNotifier {
         index: 2,
       ),
       TabbarItem(
-        page: MyPage(), 
         item: BottomNavigationBarItem(
           icon: Icon(Icons.person), 
           title: Text('我的'),

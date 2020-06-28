@@ -2,7 +2,8 @@
 import 'package:dio/dio.dart';
 
 class ResponseResult {
-  int code;//状态码
+  int statusCode;//状态码
+  int code;//结果状态码
   String message;//结果描述
   Map data;//数据
 }
@@ -25,16 +26,31 @@ class RequestHandler {
       Function(bool succ, Map<String, dynamic>) callback,
     }
   ) async {
-    Response res = await RequestHandler._instance._dio.get(
-      path,
-      queryParameters: queryParams,
-      options: Options(headers: headers)
-    );
-    ResponseResult result = ResponseResult();
-    result.code = res.statusCode;
-    result.message = res.statusMessage;
-    result.data = res.data;
-    return result;
+    if (path.length == 0) {
+      ResponseResult result = ResponseResult();
+      result.statusCode = 404;
+      result.message = '网络异常';
+      result.data = null;
+      return result;
+    }
+    try {
+      Response res = await RequestHandler._instance._dio.get(
+        path,
+        queryParameters: queryParams,
+        options: Options(headers: headers)
+      );
+      ResponseResult result = ResponseResult();
+      result.statusCode = res.statusCode;
+      result.message = res.statusMessage;
+      result.data = res.data;
+      return result;
+    } catch (e) {
+      ResponseResult result = ResponseResult();
+      result.statusCode = 404;
+      result.message = '网络异常';
+      result.data = null;
+      return result;
+    }
   }
 
   /* post 请求 */
@@ -46,15 +62,23 @@ class RequestHandler {
      Function(bool succ, Map<String, dynamic>) callback 
     }
   ) async {
-    Response res = await RequestHandler._instance._dio.post(
-      path,
-      data: data,
-      options: Options(headers: headers)
-    );
-    ResponseResult result = ResponseResult();
-    result.code = res.statusCode;
-    result.message = res.statusMessage;
-    result.data = res.data;
-    return result;
+    try {
+      Response res = await RequestHandler._instance._dio.post(
+        path,
+        data: data,
+        options: Options(headers: headers)
+      );
+      ResponseResult result = ResponseResult();
+      result.statusCode = res.statusCode;
+      result.message = res.statusMessage;
+      result.data = res.data;
+      return result;
+    } catch (e) {
+      ResponseResult result = ResponseResult();
+      result.statusCode = 404;
+      result.message = '网络异常';
+      result.data = null;
+      return result;
+    }
   }
 }
