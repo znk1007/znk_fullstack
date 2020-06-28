@@ -1,3 +1,4 @@
+import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class MyPage extends StatelessWidget {
@@ -7,6 +8,7 @@ class MyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Text('我的'),
+      color: RandomHandler.randomColor,
     );
   }
 }

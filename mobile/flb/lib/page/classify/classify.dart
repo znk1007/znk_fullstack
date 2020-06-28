@@ -1,3 +1,4 @@
+import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class ClassifyPage extends StatefulWidget {
@@ -12,6 +13,7 @@ class _ClassifyPageState extends State<ClassifyPage> {
   Widget build(BuildContext context) {
     return Container(
        child: Text('分类'),
+       color: RandomHandler.randomColor,
     );
   }
 }

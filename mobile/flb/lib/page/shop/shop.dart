@@ -1,3 +1,4 @@
+import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class ShopPage extends StatefulWidget {
@@ -12,6 +13,7 @@ class _ShopPageState extends State<ShopPage> {
   Widget build(BuildContext context) {
     return Container(
        child: Text('购物车'),
+       color: RandomHandler.randomColor,
     );
   }
 }
