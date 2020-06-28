@@ -44,7 +44,7 @@ class ReqeustHandler {
      Function(bool succ, Map<String, dynamic>) callback 
     }
   ) async {
-    ReqeustHandler res = await ReqeustHandler.shared._dio.post(
+    Response res = await ReqeustHandler.shared._dio.post(
       path,
       data: data,
       options: Options(headers: headers)

@@ -1,5 +1,4 @@
 import 'package:flb/model/user.dart';
-import 'package:flutter/material.dart';
 import 'sqlitedb.dart';
 ///UserModel 用户模型
 class UserDB {
@@ -35,7 +34,7 @@ class UserDB {
   }
 
   /* 创建用户名 */
-  Future<void> createUserTBL() async {
+  Future<void> createUser() async {
     await SqliteDB.shared.createTable('''
     $_dbName (
       userID text not null primary key,
@@ -46,7 +45,6 @@ class UserDB {
       email text not null,
       createdAt text not null,
       updatedAt text not null,
-      isOnline integer,
     )
     ''');
   }
@@ -98,7 +96,6 @@ class UserDB {
   Future<User> currentUser() async {
     List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
       _dbName,
-      where: 'isOnline = 1',
       orderBy: 'updatedAt DESC',
     );
     Map<String, dynamic> userMap = userMaps.first;
