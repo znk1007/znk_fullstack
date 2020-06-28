@@ -12,13 +12,12 @@ class RequestHandler {
   /// 单例
   RequestHandler._();
   static final RequestHandler _instance = RequestHandler._();
-  static RequestHandler get shared => _instance;
   factory RequestHandler() {
     return _instance;
   }
 
   /// GET 请求
-  static Future<ResponseResult> requestGet (
+  static Future<ResponseResult> get(
     String path,
     {
       Map<String, dynamic> queryParams,
@@ -26,7 +25,7 @@ class RequestHandler {
       Function(bool succ, Map<String, dynamic>) callback,
     }
   ) async {
-    Response res = await RequestHandler.shared._dio.get(
+    Response res = await RequestHandler._instance._dio.get(
       path,
       queryParameters: queryParams,
       options: Options(headers: headers)
@@ -37,8 +36,9 @@ class RequestHandler {
     result.data = res.data;
     return result;
   }
+
   /* post 请求 */
-  static Future<ResponseResult> requestPost(
+  static Future<ResponseResult> post(
     String path,
     {
      data,
@@ -46,7 +46,7 @@ class RequestHandler {
      Function(bool succ, Map<String, dynamic>) callback 
     }
   ) async {
-    Response res = await RequestHandler.shared._dio.post(
+    Response res = await RequestHandler._instance._dio.post(
       path,
       data: data,
       options: Options(headers: headers)

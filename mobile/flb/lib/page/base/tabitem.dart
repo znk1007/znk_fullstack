@@ -15,17 +15,17 @@ class TabbarItem extends BottomNavigationBarItem {
   });
 }
 
-class TabbarItemHandler {
+class TabbarItems {
   //分栏项目
-  static List<TabbarItem> _items = [];
+  List<TabbarItem> _items = [];
   //分栏项目
-  static get items => _items;
+  get items => _items;
   //添加分栏项目
-  static void add(TabbarItem item) {
+  void add(TabbarItem item) {
     _items.add(item);
   }
   //默认分栏项目集合
-  static void setDefaultItems() {
+  void setDefaultItems() {
     _items = [
       TabbarItem(
         page: HomePage(), 
