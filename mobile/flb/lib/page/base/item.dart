@@ -15,17 +15,23 @@ class TabbarItem extends BottomNavigationBarItem {
   });
 }
 
-class TabbarItems {
+class TabbarItems extends ChangeNotifier {
   //分栏项目
   List<TabbarItem> _items = [];
   //分栏项目
   get items => _items;
   //添加分栏项目
-  void add(TabbarItem item) {
-    _items.add(item);
+  void add(List<TabbarItem> items) {
+    if (items.length == 0) {
+      _setDefaultItems();
+    } else {
+      _items.addAll(items);
+    }
+    
+    notifyListeners();
   }
   //默认分栏项目集合
-  void setDefaultItems() {
+  void _setDefaultItems() {
     _items = [
       TabbarItem(
         page: HomePage(), 
