@@ -1,19 +1,10 @@
+import 'package:flb/model/user.dart';
 import 'package:flutter/material.dart';
-import 'package:znkauth/model/delegate/auth.dart';
-import '../../model/protos/generated/auth/user.pb.dart';
 import 'sqlitedb.dart';
 ///UserModel 用户模型
-class UserTBL {
+class UserDB {
   /* 数据表格名 */
   static final _dbName = 'user';
-  /* 配置 */
-  ZnkAuthConfig _config;
-
-  UserTBL._();
-  /* 工厂模式 */
-  factory UserTBL(ZnkAuthConfig config) {
-
-  }
 
   /* 模型转换 */
   Map<String, dynamic> _toMap(User user) {
@@ -26,7 +17,6 @@ class UserTBL {
     map['email'] = user.email;
     map['createdAt'] = user.createdAt;
     map['updatedAt'] = DateTime.now().toString();
-    map['online'] = user.online;
     return map;
   }
 
@@ -41,7 +31,6 @@ class UserTBL {
     user.email = map['email'] ?? '';
     user.createdAt = map['createdAt'] ?? '';
     user.updatedAt = map['updatedAt'] ?? '';
-    user.online = map['online'] ?? 0;
     return user;
   }
 
@@ -68,9 +57,6 @@ class UserTBL {
       _dbName, 
       _toMap(user)
     );
-    if (_config != null) {
-      _config.authenticate(user, user.online);
-    }
     return state;
   }
 
