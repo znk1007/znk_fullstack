@@ -1,6 +1,12 @@
 
 import 'package:dio/dio.dart';
 
+class ResponseResult {
+  int code;//状态码
+  String message;//结果描述
+  Map data;//数据
+}
+
 class RequestHandler {
   Dio _dio = Dio();
   /// 单例
@@ -12,7 +18,7 @@ class RequestHandler {
   }
 
   /// GET 请求
-  static Future<void> requestGet (
+  static Future<ResponseResult> requestGet (
     String path,
     {
       Map<String, dynamic> queryParams,
@@ -25,18 +31,14 @@ class RequestHandler {
       queryParameters: queryParams,
       options: Options(headers: headers)
     );
-    if (res.statusCode != 200) {
-      callback ?? callback(false, null);
-      return;
-    }
-    if (res.data is Map) {
-      callback ?? callback(true, res.data);
-    } else {
-      callback ?? callback(false, null);
-    }
+    ResponseResult result = ResponseResult();
+    result.code = res.statusCode;
+    result.message = res.statusMessage;
+    result.data = res.data;
+    return result;
   }
   /* post 请求 */
-  static Future<void> requestPost(
+  static Future<ResponseResult> requestPost(
     String path,
     {
      data,
@@ -49,14 +51,10 @@ class RequestHandler {
       data: data,
       options: Options(headers: headers)
     );
-    if (res.statusCode != 200) {
-      callback ?? callback(false, null);
-      return;
-    }
-    if (res.data is Map) {
-      callback ?? callback(true, res.data);
-    } else {
-      callback ?? callback(false, null);
-    }
+    ResponseResult result = ResponseResult();
+    result.code = res.statusCode;
+    result.message = res.statusMessage;
+    result.data = res.data;
+    return result;
   }
 }
