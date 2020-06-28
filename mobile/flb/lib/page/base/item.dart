@@ -1,5 +1,3 @@
-import 'package:flb/page/home/home.dart';
-import 'package:flb/page/my/my.dart';
 import 'package:flutter/material.dart';
 
 class TabbarItem extends BottomNavigationBarItem {

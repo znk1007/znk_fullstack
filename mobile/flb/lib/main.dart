@@ -45,7 +45,8 @@ class MyApp extends StatelessWidget {
   void fetchTabbarItems(BuildContext context) async {
     ResponseResult res = await TabbarItemReq.fetch();
     if (res.statusCode != 0) {
-      Provider.of<TabbarItems>(context).add([]);
+      // Provider.of<TabbarItems>(context, listen: false).add([]);
+      context.read<TabbarItems>().add([]);
       return;
     }
     List<Map> body = res.data['body'];
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
       );
       items.add(item);
     }
-    Provider.of<TabbarItems>(context).add(items);
+    context.read<TabbarItems>().add(items);
+    // Provider.of<TabbarItems>(context, listen: false).add(items);
   }
 }
