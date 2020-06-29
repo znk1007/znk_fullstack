@@ -20,24 +20,31 @@ void main() {
 
 class MyApp extends StatelessWidget {
 
+  bool _loadedItem = false;
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    _fetchTabbarItems(context);
     List<TabbarItem> items = context.watch<TabbarItems>().items;
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: (items.length > 0) ? TabPage(pages: []) : LaunchPage(),
+      home: (items.length > 0) ? TabPage(items: items,) : LaunchPage(),
     );
   }
 
   //获取分栏类目数据
-  void fetchTabbarItems(BuildContext context) async {
+  void _fetchTabbarItems(BuildContext context) async {
+    if (_loadedItem) {
+      return;
+    }
+    _loadedItem = true;
     ResponseResult res = await TabbarItemReq.fetch();
     if (res.statusCode != 0) {
-      // Provider.of<TabbarItems>(context, listen: false).add([]);
       context.read<TabbarItems>().add([]);
       return;
     }

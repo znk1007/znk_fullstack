@@ -66,7 +66,12 @@ class TabbarItems extends ChangeNotifier {
     _items = [
       TabbarItem(
         item: BottomNavigationBarItem(
-          icon: Icon(Icons.home), 
+          icon: Icon(
+            Icons.home,
+          ), 
+          activeIcon: Icon(
+            Icons.home, 
+          ),
           title: Text('首页'),
         ),
         index: 0,
@@ -75,7 +80,12 @@ class TabbarItems extends ChangeNotifier {
       ), 
       TabbarItem(
         item: BottomNavigationBarItem(
-          icon: Icon(Icons.category), 
+          icon: Icon(
+            Icons.category,
+          ), 
+          activeIcon: Icon(
+            Icons.category, 
+          ),
           title: Text('分类'),
         ),
         index: 1,
@@ -84,7 +94,12 @@ class TabbarItems extends ChangeNotifier {
       ),
       TabbarItem(
         item: BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart), 
+          icon: Icon(
+            Icons.shopping_cart,
+          ), 
+          activeIcon: Icon(
+            Icons.shopping_cart, 
+          ),
           title: Text('购物车'),
         ),
         index: 2,
@@ -93,7 +108,12 @@ class TabbarItems extends ChangeNotifier {
       ),
       TabbarItem(
         item: BottomNavigationBarItem(
-          icon: Icon(Icons.person), 
+          icon: Icon(
+            Icons.person, 
+          ), 
+          activeIcon: Icon(
+            Icons.person, 
+          ),
           title: Text('我的'),
         ),
         index: 3,
