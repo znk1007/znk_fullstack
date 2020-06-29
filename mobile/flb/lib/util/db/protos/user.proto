@@ -1,0 +1,23 @@
+syntax = "proto3";
+package user;
+option go_package = "userproto";
+
+enum Permission {
+    super = 0;
+    admin = 1;
+    user = 2;
+    visitor = 3;
+}
+
+message User {
+    string userID = 1;
+    string account = 2;
+    string nickname = 3;
+    string phone = 4;
+    string email = 5;
+    string photo = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+    int32 online = 9;
+    Permission permission = 10;
+}

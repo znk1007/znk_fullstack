@@ -1,4 +1,4 @@
-PROTO_ROOT = $(shell brew --prefix)/Cellar/protobuf/3.11.2/include
+PROTO_ROOT = $(shell brew --prefix)/Cellar/protobuf/3.12.3/include
 VERSION = 0.0.2
 default: clean generate
 #3.11.4

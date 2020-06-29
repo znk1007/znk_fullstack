@@ -3,12 +3,14 @@ import 'package:flb/page/base/hud.dart';
 import 'package:flb/page/base/item.dart';
 import 'package:flb/page/base/launch.dart';
 import 'package:flb/page/base/tab.dart';
-import 'package:flb/util/http/business/tab.dart';
+import 'package:flb/util/db/sqlite/user/user.dart';
+import 'package:flb/util/http/tab/tab.dart';
 import 'package:flb/util/http/core/request.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
+  await UserDB.createUserTable();
   runApp(
     MultiProvider(
       providers: [

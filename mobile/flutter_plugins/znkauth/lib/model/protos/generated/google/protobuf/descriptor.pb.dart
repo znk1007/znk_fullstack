@@ -344,6 +344,7 @@ class FieldDescriptorProto extends $pb.GeneratedMessage {
     ..aOM<FieldOptions>(8, 'options', subBuilder: FieldOptions.create)
     ..a<$core.int>(9, 'oneofIndex', $pb.PbFieldType.O3)
     ..aOS(10, 'jsonName')
+    ..aOB(17, 'proto3Optional')
   ;
 
   FieldDescriptorProto._() : super();
@@ -452,6 +453,15 @@ class FieldDescriptorProto extends $pb.GeneratedMessage {
   $core.bool hasJsonName() => $_has(9);
   @$pb.TagNumber(10)
   void clearJsonName() => clearField(10);
+
+  @$pb.TagNumber(17)
+  $core.bool get proto3Optional => $_getBF(10);
+  @$pb.TagNumber(17)
+  set proto3Optional($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(17)
+  $core.bool hasProto3Optional() => $_has(10);
+  @$pb.TagNumber(17)
+  void clearProto3Optional() => clearField(17);
 }
 
 class OneofDescriptorProto extends $pb.GeneratedMessage {
@@ -784,7 +794,7 @@ class FileOptions extends $pb.GeneratedMessage {
     ..aOB(20, 'javaGenerateEqualsAndHash')
     ..aOB(23, 'deprecated')
     ..aOB(27, 'javaStringCheckUtf8')
-    ..aOB(31, 'ccEnableArenas')
+    ..a<$core.bool>(31, 'ccEnableArenas', $pb.PbFieldType.OB, defaultOrMaker: true)
     ..aOS(36, 'objcClassPrefix')
     ..aOS(37, 'csharpNamespace')
     ..aOS(39, 'swiftPrefix')
@@ -916,7 +926,7 @@ class FileOptions extends $pb.GeneratedMessage {
   void clearJavaStringCheckUtf8() => clearField(27);
 
   @$pb.TagNumber(31)
-  $core.bool get ccEnableArenas => $_getBF(11);
+  $core.bool get ccEnableArenas => $_getB(11, true);
   @$pb.TagNumber(31)
   set ccEnableArenas($core.bool v) { $_setBool(11, v); }
   @$pb.TagNumber(31)
