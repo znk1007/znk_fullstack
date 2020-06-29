@@ -9,9 +9,17 @@ service TimestampSrv {
 message TSReq {
     //平台类型
     string platform = 1;
+    //设备ID
+    string deviceID = 2;
+    // 设备名称
+    string deviceName = 3;
 }
 
 message TSRes {
+    //状态码
+    int32 code = 1;
+    //反馈消息
+    string message = 2;
     //时间戳
-    int64 timestamp = 1;
+    string timestamp = 3;
 }

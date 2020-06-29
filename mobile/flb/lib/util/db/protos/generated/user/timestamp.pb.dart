@@ -7,12 +7,13 @@
 
 import 'dart:core' as $core;
 
-import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class TSReq extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('TSReq', package: const $pb.PackageName('timestamp'), createEmptyInstance: create)
     ..aOS(1, 'platform')
+    ..aOS(2, 'deviceID', protoName: 'deviceID')
+    ..aOS(3, 'deviceName', protoName: 'deviceName')
     ..hasRequiredFields = false
   ;
 
@@ -39,11 +40,31 @@ class TSReq extends $pb.GeneratedMessage {
   $core.bool hasPlatform() => $_has(0);
   @$pb.TagNumber(1)
   void clearPlatform() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get deviceID => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set deviceID($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasDeviceID() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDeviceID() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get deviceName => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set deviceName($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasDeviceName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDeviceName() => clearField(3);
 }
 
 class TSRes extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('TSRes', package: const $pb.PackageName('timestamp'), createEmptyInstance: create)
-    ..aInt64(1, 'timestamp')
+    ..a<$core.int>(1, 'code', $pb.PbFieldType.O3)
+    ..aOS(2, 'message')
+    ..aOS(3, 'timestamp')
     ..hasRequiredFields = false
   ;
 
@@ -63,12 +84,30 @@ class TSRes extends $pb.GeneratedMessage {
   static TSRes _defaultInstance;
 
   @$pb.TagNumber(1)
-  $fixnum.Int64 get timestamp => $_getI64(0);
+  $core.int get code => $_getIZ(0);
   @$pb.TagNumber(1)
-  set timestamp($fixnum.Int64 v) { $_setInt64(0, v); }
+  set code($core.int v) { $_setSignedInt32(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasTimestamp() => $_has(0);
+  $core.bool hasCode() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTimestamp() => clearField(1);
+  void clearCode() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get timestamp => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set timestamp($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasTimestamp() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTimestamp() => clearField(3);
 }
 
