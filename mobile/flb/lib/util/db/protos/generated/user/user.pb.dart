@@ -19,6 +19,8 @@ class User extends $pb.GeneratedMessage {
     ..aOS(6, 'photo')
     ..aOS(7, 'createdAt', protoName: 'createdAt')
     ..aOS(8, 'updatedAt', protoName: 'updatedAt')
+    ..aOS(9, 'sessionID', protoName: 'sessionID')
+    ..a<$core.int>(10, 'status', $pb.PbFieldType.O3)
     ..hasRequiredFields = false
   ;
 
@@ -108,6 +110,24 @@ class User extends $pb.GeneratedMessage {
   $core.bool hasUpdatedAt() => $_has(7);
   @$pb.TagNumber(8)
   void clearUpdatedAt() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.String get sessionID => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set sessionID($core.String v) { $_setString(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasSessionID() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearSessionID() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.int get status => $_getIZ(9);
+  @$pb.TagNumber(10)
+  set status($core.int v) { $_setSignedInt32(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasStatus() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearStatus() => clearField(10);
 }
 
 class UserRgstReq extends $pb.GeneratedMessage {

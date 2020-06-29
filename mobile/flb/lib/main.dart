@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flb/model/user/user.dart';
 import 'package:flb/page/base/hud.dart';
 import 'package:flb/page/base/item.dart';
 import 'package:flb/page/base/launch.dart';
@@ -14,7 +15,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TabbarItems())
+        ChangeNotifierProvider(create: (_) => TabbarItems()),
+        ChangeNotifierProvider(create: (_) => UserModel()),
       ],
       child: MyApp(),
     ),

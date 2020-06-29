@@ -11,6 +11,8 @@ message User {
     string photo = 6;
     string createdAt = 7;
     string updatedAt = 8;
+    string sessionID = 9;
+    int32 status = 10;
 }
 //UserSrv 用户服务
 service UserSrv {
