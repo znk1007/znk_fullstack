@@ -25,10 +25,13 @@ dependencies:
   sqflite: ^1.3.1
   #状态管理
   provider: ^4.1.3
-  #nosql数据库  
-  hive: ^1.4.1+1
   #图片加载库
   cached_network_image: ^2.2.0+1
+  #获取系统路径库
+  path_provider: ^1.6.11
+
+  loading: ^1.0.2
+  loading_overlay: ^0.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -37,6 +40,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  #nosql数据库 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

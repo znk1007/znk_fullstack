@@ -2,6 +2,11 @@ import 'dart:math';
 
 import 'package:flb/page/base/item.dart';
 import 'package:flutter/material.dart';
+import 'package:loading/indicator/ball_grid_pulse_indicator.dart';
+import 'package:loading/indicator/ball_pulse_indicator.dart';
+import 'package:loading/indicator/line_scale_indicator.dart';
+import 'package:loading/loading.dart';
+
 class TabPage extends StatefulWidget {
   final List<TabbarItem> items;
   List<Widget> _pages = [];
@@ -30,7 +35,9 @@ class _TabPageState extends State<TabPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _currentPage(),
+      body: Center(
+            child: Loading(indicator: LineScaleIndicator(), size: 100.0, color: Colors.pink,)
+          ),//_currentPage(),
       bottomNavigationBar: BottomNavigationBar(
         items:widget.items.map((e) => e.item).toList(),
         onTap: (value) {

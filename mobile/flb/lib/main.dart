@@ -7,7 +7,7 @@ import 'package:flb/util/http/core/request.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   runApp(
     MultiProvider(
       providers: [
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
     List<TabbarItem> items = context.watch<TabbarItems>().items;
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
