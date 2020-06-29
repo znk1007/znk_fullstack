@@ -6,13 +6,7 @@ class MyPage extends StatelessWidget {
 
   static String id = 'my';
 
-  MyPage({Key key}) {
-    print('my page init');
-    Future.delayed(Duration(seconds: 5), () {
-      print('my page delay');
-      Hud.shared.hide();
-    });
-  }
+  const MyPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

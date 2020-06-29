@@ -92,7 +92,7 @@ class SqliteDB {
   /* 建表 */
   Future<void> createTable(String tableSql) async {
     Database db = await this._getDB();
-    await db.execute("CREATE TABLE IF NOT EXISTS ${tableSql}");
+    await db.execute("CREATE TABLE IF NOT EXISTS $tableSql");
   }
 
   /* 插入数据 */

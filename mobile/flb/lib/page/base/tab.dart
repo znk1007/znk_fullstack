@@ -21,15 +21,14 @@ class TabPage extends StatefulWidget {
 class _TabPageState extends State<TabPage> {
   //_curPageIdx 当前下标
   int _curPageIdx = 0;
-  bool _isLoading = true;
-
-  
+  bool _isLoading = false;
+  /* 显示加载框 */
   void showLoading() {
     setState(() {
       _isLoading = true;
     });
   }
-
+  /* 隐藏加载框 */
   void hideLoading() {
     setState(() {
       _isLoading = false;
@@ -42,7 +41,6 @@ class _TabPageState extends State<TabPage> {
       return Container();
     }
     int pageIdx = min(_curPageIdx, max);
-    print('current page $pageIdx');
     return widget._pages[pageIdx];
   }
 
