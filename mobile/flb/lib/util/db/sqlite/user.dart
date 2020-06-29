@@ -23,6 +23,7 @@ class UserDB {
   User _fromMap(Map<String, dynamic> map) {
     User user = new User();
     user.userID = map['userID'] ?? '';
+    user.sessionID = map['sessionID'] ?? '';
     user.account = map['account'] ?? '';
     user.nickname = map['nickname'] ?? '';
     user.photo = map['photo'] ?? '';
@@ -38,6 +39,7 @@ class UserDB {
     await SqliteDB.shared.createTable('''
     $_dbName (
       userID text not null primary key,
+      sessionID text not null,
       account text not null,
       nickname text not null,
       photo text not null,
@@ -49,7 +51,7 @@ class UserDB {
     ''');
   }
 
-  /* 插入货更新数据 */
+  /* 插入或更新数据 */
   Future<int> upsertUser(User user) async {
     int state = await SqliteDB.shared.upsert(
       _dbName, 
@@ -74,10 +76,7 @@ class UserDB {
       whereArgs: [userID],
     );
     Map<String, dynamic> userMap = userMaps.first;
-    if (userMap == null) {
-      return null;
-    }
-    return _fromMap(userMap);
+    return userMap == null ? null : _fromMap(userMap);
   }
   /* 上次登录的用户 */
   Future<User> lastLoginUser() async {
@@ -86,10 +85,7 @@ class UserDB {
       orderBy: 'updatedAt DESC',
     );
     Map<String, dynamic> userMap = userMaps.first;
-    if (userMap == null) {
-      return null;
-    }
-    return _fromMap(userMap);
+    return userMap == null ? null : _fromMap(userMap);
   }
 
   /* 当前登录用户 */
@@ -99,10 +95,7 @@ class UserDB {
       orderBy: 'updatedAt DESC',
     );
     Map<String, dynamic> userMap = userMaps.first;
-    if (userMap == null) {
-      return null;
-    }
-    return _fromMap(userMap);
+    return userMap == null ? null : _fromMap(userMap);
   }
 
 }

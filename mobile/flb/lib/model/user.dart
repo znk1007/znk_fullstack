@@ -2,6 +2,8 @@
 class User {
   //用户ID
   String userID;
+  //会话ID
+  String sessionID;
   //账号
   String account;
   //昵称
