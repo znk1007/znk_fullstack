@@ -9,4 +9,4 @@ generate:
 	mkdir -p lib/util/db/protos/generated
 	mkdir -p lib/util/db/protos/generated/user
 	protoc -I=lib/util/db/protos --dart_out=grpc:lib/util/db/protos/generated/user lib/util/db/protos/*.proto
-	# protoc -I$(PROTO_ROOT) --dart_out=lib/util/db/protos/generated $(PROTO_ROOT)/google/protobuf/*.proto
+	protoc -I$(PROTO_ROOT) --dart_out=lib/util/db/protos/generated $(PROTO_ROOT)/google/protobuf/*.proto

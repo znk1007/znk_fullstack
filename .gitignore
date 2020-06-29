@@ -23,3 +23,4 @@
 /server/usercenter/usercenter
 /mobile/flb/.dart_tool
 /mobile/flb/build
+/mobile/flb/lib/util/db/protos/generated
