@@ -2,6 +2,9 @@ import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class ShopPage extends StatefulWidget {
+
+  static String id = 'shop';
+
   ShopPage({Key key}) : super(key: key);
 
   @override

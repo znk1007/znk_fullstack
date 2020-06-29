@@ -2,6 +2,9 @@ import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class ClassifyPage extends StatefulWidget {
+
+  static String id = 'classify';
+
   ClassifyPage({Key key}) : super(key: key);
 
   @override

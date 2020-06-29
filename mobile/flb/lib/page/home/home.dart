@@ -2,6 +2,9 @@ import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
+
+  static String id = 'home';
+
   HomePage({Key key}) : super(key: key);
 
   @override

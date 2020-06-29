@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 class TabPage extends StatefulWidget {
-  TabPage({Key key}) : super(key: key);
+  final List<Widget> pages;
+  TabPage({Key key, this.pages}) :  assert(pages != null), super(key: key);
 
   @override
   _TabPageState createState() => _TabPageState();
