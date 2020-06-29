@@ -2,10 +2,7 @@ import 'dart:math';
 
 import 'package:flb/page/base/item.dart';
 import 'package:flutter/material.dart';
-import 'package:loading/indicator/ball_grid_pulse_indicator.dart';
-import 'package:loading/indicator/ball_pulse_indicator.dart';
-import 'package:loading/indicator/line_scale_indicator.dart';
-import 'package:loading/loading.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class TabPage extends StatefulWidget {
   final List<TabbarItem> items;
@@ -13,14 +10,31 @@ class TabPage extends StatefulWidget {
   TabPage({Key key, this.items}) : assert(items != null) {
     _pages = items.map((e) => e.page).toList();
   }
+  //状态初始化
+  _TabPageState state = _TabPageState();
 
   @override
-  _TabPageState createState() => _TabPageState();
+  _TabPageState createState() => state;
+
 }
 
 class _TabPageState extends State<TabPage> {
   //_curPageIdx 当前下标
   int _curPageIdx = 0;
+  bool _isLoading = true;
+
+  
+  void showLoading() {
+    setState(() {
+      _isLoading = true;
+    });
+  }
+
+  void hideLoading() {
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   Widget _currentPage() {
     int max = widget._pages.length - 1;
@@ -35,9 +49,19 @@ class _TabPageState extends State<TabPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-            child: Loading(indicator: LineScaleIndicator(), size: 100.0, color: Colors.pink,)
-          ),//_currentPage(),
+      body: LoadingOverlay(
+              child: SingleChildScrollView(
+                child: Container(
+                  color: Colors.red,
+                  padding: const EdgeInsets.all(0),
+                  child: _currentPage(),
+                ),
+              ),
+              isLoading: _isLoading,
+              // demo of some additional parameters
+              opacity: 0,
+              progressIndicator: CircularProgressIndicator(),
+            ),//_currentPage(),
       bottomNavigationBar: BottomNavigationBar(
         items:widget.items.map((e) => e.item).toList(),
         onTap: (value) {

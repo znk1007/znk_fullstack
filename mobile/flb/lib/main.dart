@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flb/page/base/hud.dart';
 import 'package:flb/page/base/item.dart';
 import 'package:flb/page/base/launch.dart';
 import 'package:flb/page/base/tab.dart';
@@ -25,8 +26,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    //拉取数据
     _fetchTabbarItems(context);
+    //监听数据
     List<TabbarItem> items = context.watch<TabbarItems>().items;
+    //分栏页面
+    TabPage tabPage = TabPage(items: items);
+    //加载框
+    Hud().wrap(tabPage);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -34,7 +41,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: (items.length > 0) ? TabPage(items: items,) : LaunchPage(),
+      home: (items.length > 0) ? tabPage : LaunchPage(),
     );
   }
 
