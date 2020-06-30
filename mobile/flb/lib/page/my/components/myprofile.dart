@@ -8,9 +8,16 @@ class MyProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.read<UserModel>().current;
     return Container(
-      child: Text('data')
+      child: FutureBuilder(
+        future: _fetchUserData(context),
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          print("user: $snapshot");
+          return Container(
+            child: Text('我的'),
+          );
+        },
+      ),
     );
   }
 

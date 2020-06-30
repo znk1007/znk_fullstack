@@ -1,10 +1,9 @@
-
 import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 
 import '../sqlitedb.dart';
 
 ///UserModel 用户模型
-class UserDB  {
+class UserDB {
   /* 数据表格名 */
   static final _dbName = 'user';
 
@@ -52,28 +51,23 @@ class UserDB  {
       email TEXT not null,
       createdAt TEXT not null,
       updatedAt TEXT not null,
-      status INTEGER,
+      status INTEGER
     )
     ''');
   }
 
   /* 插入或更新数据 */
   static Future<int> upsertUser(User user) async {
-    int state = await SqliteDB.shared.upsert(
-      _dbName, 
-      _toMap(user)
-    );
+    int state = await SqliteDB.shared.upsert(_dbName, _toMap(user));
     return state;
   }
 
   /* 删除指定用户 */
   static Future<int> deleteUser(String userID) async {
-    return await SqliteDB.shared.delete(
-      _dbName, 
-      where: 'userID = ?', 
-      whereArgs: [userID]
-    );
+    return await SqliteDB.shared
+        .delete(_dbName, where: 'userID = ?', whereArgs: [userID]);
   }
+
   /* 查找用户 */
   static Future<User> findUser(String userID) async {
     List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
@@ -84,6 +78,7 @@ class UserDB  {
     Map<String, dynamic> userMap = userMaps.first;
     return userMap == null ? null : _fromMap(userMap);
   }
+
   /* 上次登录的用户 */
   static Future<User> lastLoginUser() async {
     List<Map<String, dynamic>> userMaps = await SqliteDB.shared.find(
@@ -104,6 +99,4 @@ class UserDB  {
     Map<String, dynamic> userMap = userMaps.first;
     return userMap == null ? null : _fromMap(userMap);
   }
-
 }
-
