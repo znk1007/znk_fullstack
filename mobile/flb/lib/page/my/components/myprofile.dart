@@ -17,11 +17,14 @@ class MyProfile extends StatelessWidget {
   Widget _loginedWidget(BuildContext context) {
     print('scale height: ${Screen.scaleHeight}');
     return Container(
-      child: Text('头部'),
-      color: Colors.red[500],
-      height: Screen.setHeight(150).toDouble(),
-      width: Screen.screenWidth,
-    );
+        color: Colors.red[500],
+        height: Screen.setHeight(150).toDouble(),
+        width: Screen.screenWidth,
+        child: Stack(
+          children: [
+            
+          ],
+        ));
   }
 
   Widget _unLoginedWidget(BuildContext context) {
