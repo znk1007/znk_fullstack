@@ -2,33 +2,55 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+/*
+
+XR/11	            6.1 inch	326 ppi	414*896 pt	828*1792 px	@2x
+XS Max/11 Pro Max	6.5 inch	458 ppi	414*896 pt	1242*2688 px	@3x
+X/XS/11 Pro	      5.8 inch	458 ppi	375*812 pt	1125*2436 px	@3x
+6P/6SP/7P/8P	    5.5 inch	401 ppi	414*736 pt	1242*2208 px	@3x
+6/6S/7/8	        4.7 inch	326 ppi	375*667 pt	750*1334 px	@2x
+5/5S/5c/SE  	    4.0 inch	326 ppi	320*568 pt	640*1136 px	@2x
+4/4s	            3.5 inch	326 ppi	320*480 pt	640*960 px	@2x
+
+*/
+
 class Screen {
-  
   /// 设计图宽度
   double _width = 375;
+
   /// 设计图高度
   double _height = 667;
+
   /// 上下文
   BuildContext _context;
+
   /// 宽缩放比例
   double _scaleWidth;
+
   /// 高缩放比例
   double _scaleHeight;
+
   /// 屏幕宽度
   double _screenWidth;
+
   /// 屏幕高度
   double _screenHeight;
+
   /// 像素比
   double _pixelRadio;
+
   /// 文本缩放因子
   double _textScaleFactor;
+
   /// 是否允许根据系统字体大小缩放字体
   bool _allowFontScaling;
+
   /// 顶部安全区域
   double _safeTopArea;
+
   /// 底部安全区域
   double _safeBottomArea;
-  
+
   /// 单例
   Screen._();
   static final Screen _instance = Screen._();
@@ -39,7 +61,8 @@ class Screen {
   }
 
   /// 设置设计参数
-  static void setDesignParams(double width, double height, [bool allowFontScaling = false]) {
+  static void setDesignParams(double width, double height,
+      [bool allowFontScaling = false]) {
     if (width > 0) {
       Screen.shared._width = width;
     }
@@ -49,11 +72,13 @@ class Screen {
     Screen.shared._allowFontScaling = allowFontScaling;
     _config();
   }
+
   /// 设置上下文
   static void setContext(BuildContext context) {
     Screen.shared._context = context;
     _config();
   }
+
   /// 配置
   static void _config() {
     BuildContext ctx = Screen.shared._context;
@@ -73,10 +98,12 @@ class Screen {
       Screen.shared._safeTopArea = window.padding.top;
       Screen.shared._safeBottomArea = window.padding.bottom;
     }
-    Screen.shared._scaleWidth = Screen.shared._screenWidth / Screen.shared._width;
-    Screen.shared._scaleHeight = Screen.shared._screenHeight / Screen.shared._height;
-
+    Screen.shared._scaleWidth =
+        Screen.shared._screenWidth / Screen.shared._width;
+    Screen.shared._scaleHeight =
+        Screen.shared._screenHeight / Screen.shared._height;
   }
+
   /// 宽度缩放比例
   static double get scaleWidth => Screen.shared._scaleWidth;
 
@@ -105,7 +132,7 @@ class Screen {
   static num setHeight(num h) => h * scaleHeight;
 
   /// 缩放后字体大小
-  static num setFont(num fontSize) => Screen.shared._allowFontScaling ? 
-                                        setWidth(fontSize) : 
-                                        setWidth(fontSize) / Screen.shared._textScaleFactor;
+  static num setFont(num fontSize) => Screen.shared._allowFontScaling
+      ? setWidth(fontSize)
+      : setWidth(fontSize) / Screen.shared._textScaleFactor;
 }

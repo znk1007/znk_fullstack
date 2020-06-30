@@ -1,4 +1,5 @@
 import 'package:flb/model/user/user.dart';
+import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,10 +15,13 @@ class MyProfile extends StatelessWidget {
   }
 
   Widget _loginedWidget(BuildContext context) {
+    num height = Screen.setHeight(120);
+    print('scale height: ${Screen.scaleHeight}');
     return Container(
       child: Text('头部'),
       color: Colors.red[500],
-      height: 120,
+      height: 150,
+      width: Screen.screenWidth,
     );
   }
 

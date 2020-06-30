@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flb/page/base/item.dart';
+import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
@@ -15,7 +16,6 @@ class TabPage extends StatefulWidget {
 
   @override
   _TabPageState createState() => state;
-
 }
 
 class _TabPageState extends State<TabPage> {
@@ -28,6 +28,7 @@ class _TabPageState extends State<TabPage> {
       _isLoading = true;
     });
   }
+
   /* 隐藏加载框 */
   void hideLoading() {
     setState(() {
@@ -46,22 +47,24 @@ class _TabPageState extends State<TabPage> {
 
   @override
   Widget build(BuildContext context) {
+    //设置屏幕
+    Screen.setContext(context);
     return Scaffold(
       body: LoadingOverlay(
-              child: SingleChildScrollView(
-                child: Container(
-                  color: Colors.red,
-                  padding: const EdgeInsets.all(0),
-                  child: _currentPage(),
-                ),
-              ),
-              isLoading: _isLoading,
-              // demo of some additional parameters
-              opacity: 0,
-              progressIndicator: CircularProgressIndicator(),
-            ),//_currentPage(),
+        child: SingleChildScrollView(
+          child: Container(
+            color: Colors.red,
+            padding: const EdgeInsets.all(0),
+            child: _currentPage(),
+          ),
+        ),
+        isLoading: _isLoading,
+        // demo of some additional parameters
+        opacity: 0,
+        progressIndicator: CircularProgressIndicator(),
+      ), //_currentPage(),
       bottomNavigationBar: BottomNavigationBar(
-        items:widget.items.map((e) => e.item).toList(),
+        items: widget.items.map((e) => e.item).toList(),
         onTap: (value) {
           setState(() {
             _curPageIdx = value;
