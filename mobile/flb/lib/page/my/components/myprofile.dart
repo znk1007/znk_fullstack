@@ -8,21 +8,13 @@ class MyProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLogined = context.watch<UserModel>().isLogined;
     return Container(
-      child: FutureBuilder(
-        future: _fetchUserData(context),
-        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-          print("user: $snapshot");
-          return Container(
-            child: Text('我的'),
-          );
-        },
-      ),
+      child: isLogined ? _loginedWidget(context) : _unLoginedWidget(context),
     );
   }
 
-  /* 请求用户数据 */
-  Future<User> _fetchUserData(BuildContext context) async {
-    return await context.read<UserModel>().current;
-  }
+  Widget _loginedWidget(BuildContext context) {}
+
+  Widget _unLoginedWidget(BuildContext context) {}
 }

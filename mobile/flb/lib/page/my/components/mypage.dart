@@ -1,9 +1,9 @@
 import 'package:flb/page/base/hud.dart';
+import 'package:flb/page/my/components/myprofile.dart';
 import 'package:flb/util/random/color.dart';
 import 'package:flutter/material.dart';
 
 class MyPage extends StatelessWidget {
-
   static String id = 'my';
 
   const MyPage({Key key}) : super(key: key);
@@ -14,11 +14,9 @@ class MyPage extends StatelessWidget {
       color: RandomHandler.randomColor,
       child: Column(
         children: [
-
-        ], 
+          MyProfile(),
+        ],
       ),
-      
     );
   }
-  
 }
