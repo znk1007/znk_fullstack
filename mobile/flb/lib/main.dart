@@ -37,8 +37,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     //拉取分栏数据
     _fetchTabbarItems(context);
-    //读取用户数据
-    _readUserData(context);
 
     //监听分栏数据
     List<TabbarItem> items = context.watch<TabbarItems>().items;
@@ -65,7 +63,7 @@ class MyApp extends StatelessWidget {
       return;
     }
     _readedUser = true;
-    await context.read<UserModel>().current;
+    context.read<UserModel>().current;
   }
 
   //获取分栏类目数据

@@ -3,6 +3,11 @@ import 'package:flb/util/db/sqlite/user/user.dart';
 import 'package:flutter/material.dart';
 
 class UserModel extends ChangeNotifier {
+  UserModel() {
+    print('user model init');
+    var _ = current;
+  }
+
   //用户信息
   User _user;
   //是否已登录
@@ -14,7 +19,9 @@ class UserModel extends ChangeNotifier {
       return _user;
     }
     _user = await UserDB.currentUser();
-    isLogined = _user.status == 1;
+    isLogined = _user != null && _user.status == 1;
+    isLogined = true;
+    print('init set is logined: $isLogined');
     return _user;
   }
 

@@ -1,5 +1,4 @@
 import 'package:flb/model/user/user.dart';
-import 'package:flb/util/db/protos/generated/user/user.pbgrpc.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,13 +7,21 @@ class MyProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isLogined = context.watch<UserModel>().isLogined;
+    bool isLogined = context.watch<UserModel>().isLogined ?? false;
     return Container(
       child: isLogined ? _loginedWidget(context) : _unLoginedWidget(context),
     );
   }
 
-  Widget _loginedWidget(BuildContext context) {}
+  Widget _loginedWidget(BuildContext context) {
+    return Container(
+      child: Text('头部'),
+      color: Colors.red[500],
+      height: 120,
+    );
+  }
 
-  Widget _unLoginedWidget(BuildContext context) {}
+  Widget _unLoginedWidget(BuildContext context) {
+    return Container();
+  }
 }

@@ -75,6 +75,9 @@ class UserDB {
       where: 'userID = ?',
       whereArgs: [userID],
     );
+    if (userMaps.length == 0) {
+      return null;
+    }
     Map<String, dynamic> userMap = userMaps.first;
     return userMap == null ? null : _fromMap(userMap);
   }
@@ -85,6 +88,9 @@ class UserDB {
       _dbName,
       orderBy: 'updatedAt DESC',
     );
+    if (userMaps.length == 0) {
+      return null;
+    }
     Map<String, dynamic> userMap = userMaps.first;
     return userMap == null ? null : _fromMap(userMap);
   }
@@ -96,6 +102,9 @@ class UserDB {
       where: 'status = 1',
       orderBy: 'updatedAt DESC',
     );
+    if (userMaps.length == 0) {
+      return null;
+    }
     Map<String, dynamic> userMap = userMaps.first;
     return userMap == null ? null : _fromMap(userMap);
   }
