@@ -30,8 +30,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   //是否加载了分栏数据
   bool _loadedItem = false;
-  //是否加载了用户数据
-  bool _readedUser = false;
 
   // This widget is the root of your application.
   @override
@@ -57,14 +55,6 @@ class MyApp extends StatelessWidget {
       ),
       home: (items.length > 0) ? tabPage : LaunchPage(),
     );
-  }
-
-  void _readUserData(BuildContext context) async {
-    if (_readedUser) {
-      return;
-    }
-    _readedUser = true;
-    context.read<UserModel>().current;
   }
 
   //获取分栏类目数据

@@ -1,8 +1,8 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=/usr/local/Cellar/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/mobile/flb"
-export "FLUTTER_TARGET=/Users/huangman/Desktop/golang/src/github.com/znk_fullstack/mobile/flb/lib/main.dart"
+export "FLUTTER_APPLICATION_PATH=/Users/huangsam/Desktop/golang/src/github.com/znk_fullstack/mobile/flb"
+export "FLUTTER_TARGET=/Users/huangsam/Desktop/golang/src/github.com/znk_fullstack/mobile/flb/lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"
 export "SYMROOT=${SOURCE_ROOT}/../build/ios"
 export "OTHER_LDFLAGS=$(inherited) -framework Flutter"
