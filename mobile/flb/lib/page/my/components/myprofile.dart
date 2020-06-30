@@ -15,12 +15,11 @@ class MyProfile extends StatelessWidget {
   }
 
   Widget _loginedWidget(BuildContext context) {
-    num height = Screen.setHeight(120);
     print('scale height: ${Screen.scaleHeight}');
     return Container(
       child: Text('头部'),
       color: Colors.red[500],
-      height: 150,
+      height: Screen.setHeight(150).toDouble(),
       width: Screen.screenWidth,
     );
   }
