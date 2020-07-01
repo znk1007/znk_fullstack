@@ -8,6 +8,9 @@ class UserModel extends ChangeNotifier {
     var _ = current;
   }
 
+  /* 当前用户 */
+  User get currentUser => _user;
+
   //用户信息
   User _user;
   //是否已登录

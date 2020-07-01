@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/model/user/user.dart';
+import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,33 +10,53 @@ class MyProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isLogined = context.watch<UserModel>().isLogined ?? false;
+    UserModel userModel = context.watch<UserModel>();
+    bool isLogined = userModel.isLogined ?? false;
+    User user = userModel.currentUser;
     return Container(
-      child: isLogined ? _loginedWidget(context) : _unLoginedWidget(context),
+      child: isLogined ? _loginedWidget(user) : _unLoginedWidget(context),
     );
   }
+
   //已登录页面布局
-  Widget _loginedWidget(BuildContext context) {
-    print('scale height: ${Screen.scaleHeight}');
+  Widget _loginedWidget(User user) {
+    double avatarS = Screen.setWidth(60).toDouble();
+    double height = Screen.setHeight(160).toDouble();
     return Container(
         color: Colors.red[500],
-        height: Screen.setHeight(150).toDouble(),
+        height: height,
         width: Screen.screenWidth,
         child: Stack(
           children: [
             Container(
-              child: CachedNetworkImage(
-                imageUrl: '',
-                placeholder: (context, url) => Icon(Icons.person),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover, //全圆
+                  imageUrl:
+                      'http://b-ssl.duitang.com/uploads/item/201509/22/20150922134955_vfEWL.jpeg',
+                  placeholder: (context, url) => Icon(Icons.person),
+                ),
               ),
-              width: Screen.setWidth(80),
-              height: Screen.setWidth(80),
-              color: Colors.orange,
+              width: avatarS,
+              height: avatarS,
+              margin: EdgeInsets.only(
+                  left: 50,
+                  top: (Screen.setHeight(160) - Screen.setWidth(60)) / 2.0),
             ),
-            Container(),
+            /* 适用本地资源 */
+            // Container(
+            //   width: avatarS,
+            //   height: avatarS,
+            //   margin: EdgeInsets.only(top: (height - avatarS) / 2.0, left: 50),
+            //   decoration: BoxDecoration(
+            //     shape: BoxShape.circle,
+            //     color: Colors.blue,
+            //   ),
+            // ),
           ],
         ));
   }
+
   //未登录页面
   Widget _unLoginedWidget(BuildContext context) {
     return Container();
