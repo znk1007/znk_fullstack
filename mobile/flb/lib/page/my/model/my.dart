@@ -1,16 +1,18 @@
+import 'package:flb/model/user/user.dart';
 import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flutter/widgets.dart';
 
 class MyModel {
-  //积分
-  String integral;
-  //红包
-  String bestowal;
   //列表
   List<MyList> lists;
 }
 
-class MyEquality extends ChangeNotifier {}
+class MyEquality extends ChangeNotifier {
+  //权益数
+  String number;
+  //权益标题
+  String title;
+}
 
 class MyList {
   //唯一标识
@@ -22,9 +24,25 @@ class MyList {
 }
 
 class MyModelHandler extends ChangeNotifier {
-  MyEquality _equality;
+  List<MyEquality> _equalitys;
 
-  Future<void> fetchEqualityData(User user) async {}
+  //权益数据
+  List<MyEquality> get equalitys => _equalitys;
+
+  Future<void> fetchEqualityData(UserModel userModel) async {
+    List<MyEquality> eqs = [];
+    MyEquality eq = MyEquality();
+    eq.number = userModel.isLogined ? '88' : '0';
+    eq.title = '积分';
+    eqs.add(eq);
+
+    eq = MyEquality();
+    eq.number = userModel.isLogined ? '88' : '0';
+    eq.title = '红包';
+    eqs.add(eq);
+
+    _equalitys = eqs;
+  }
 
   //已登录数据
   MyModel _myLoginedModel;
