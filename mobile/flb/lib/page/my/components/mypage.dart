@@ -1,6 +1,6 @@
-import 'package:flb/page/base/hud.dart';
 import 'package:flb/page/my/components/myprofile.dart';
 import 'package:flb/util/random/color.dart';
+import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 
 class MyPage extends StatelessWidget {
@@ -10,11 +10,14 @@ class MyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double topHeight = Screen.setHeight(180);
     return Container(
       color: RandomHandler.randomColor,
       child: Column(
         children: [
-          MyProfile(),
+          MyProfile(
+            profileHeight: topHeight,
+          ),
         ],
       ),
     );
