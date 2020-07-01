@@ -1,3 +1,4 @@
+import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flutter/widgets.dart';
 
 class MyModel {
@@ -9,6 +10,8 @@ class MyModel {
   List<MyList> lists;
 }
 
+class MyEquality extends ChangeNotifier {}
+
 class MyList {
   //唯一标识
   String identifier;
@@ -19,9 +22,21 @@ class MyList {
 }
 
 class MyModelHandler extends ChangeNotifier {
-  MyModel _myModel;
+  MyEquality _equality;
 
-  void fetchMyData() {
-    
+  Future<void> fetchEqualityData(User user) async {}
+
+  //已登录数据
+  MyModel _myLoginedModel;
+  //未登录数据
+  MyModel _myUnLoginedModel;
+  //读取我的页面数据
+  MyModel fetchMyList(bool isLogined) {
+    if (isLogined) {
+      if (_myLoginedModel != null) {}
+      return _myLoginedModel;
+    } else {
+      return _myUnLoginedModel;
+    }
   }
 }
