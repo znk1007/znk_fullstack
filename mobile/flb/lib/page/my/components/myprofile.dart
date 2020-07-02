@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 
 class MyProfile extends StatelessWidget {
   final double profileHeight;
-  const MyProfile({Key key, this.profileHeight}) : super(key: key);
+  const MyProfile({Key key, this.profileHeight, BuildContext ctx}):super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +34,9 @@ class MyProfile extends StatelessWidget {
     MyModelHandler handler = context.watch<MyModelHandler>();
     double eqWidth = Screen.screenWidth;
     double eqHeight = Screen.setHeight(50).toDouble();
+    
     List<Widget> eqChildren = handler.equalitys.map(
-        (e) => _equalityWidget(e.number, e.title, e.offsetRadio, (e.widthRadio * eqWidth)));
+        (e) => _equalityWidget(e.number, e.title, e.offsetRadio * (e.widthRadio * eqWidth), (e.widthRadio * eqWidth))).toList();
     return Container(
         color: Colors.red[400],
         height: height,
@@ -102,9 +104,10 @@ class MyProfile extends StatelessWidget {
 
   //收益模块
   Widget _equalityWidget(
-      String number, String title, double offsetRadio, double widthRadio) {
+      String number, String title, double left, double width) {
     return Container(
-      width: ,
+      width: width,
+      margin: EdgeInsets.only(left: left),
       child: Column(
         children: [
           Text(number),

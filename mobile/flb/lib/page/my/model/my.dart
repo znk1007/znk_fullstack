@@ -47,7 +47,7 @@ class MyEquality extends ChangeNotifier {
 }
 
 class MyModelHandler extends ChangeNotifier {
-  List<MyEquality> _equalitys;
+  List<MyEquality> _equalitys = [];
 
   //权益数据
   List<MyEquality> get equalitys => _equalitys;
