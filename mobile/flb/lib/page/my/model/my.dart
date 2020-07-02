@@ -3,20 +3,20 @@ import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flutter/widgets.dart';
 
 enum MyListType {
-  extend,//推广
-  cashcoupon,//代金券
-  order,//订单
-  collection,//收藏
-  integ,//积分商城
-  addr,//地址
-  msg,//消息
-  setting,//设置
-  about,//关于
+  extend, //推广
+  cashcoupon, //代金券
+  order, //订单
+  collection, //收藏
+  integ, //积分商城
+  addr, //地址
+  msg, //消息
+  setting, //设置
+  about, //关于
 }
 
 enum MyModelType {
-  normal,//普通
-  system,//系统
+  normal, //普通
+  system, //系统
 }
 
 class MyModel {
@@ -25,8 +25,6 @@ class MyModel {
   //列表
   List<MyList> lists;
 }
-
-
 
 class MyList {
   //icon地址
@@ -42,6 +40,10 @@ class MyEquality extends ChangeNotifier {
   String number;
   //权益标题
   String title;
+  //水平偏移比例
+  double offsetRadio;
+  //宽度比例
+  double widthRadio;
 }
 
 class MyModelHandler extends ChangeNotifier {
@@ -55,11 +57,15 @@ class MyModelHandler extends ChangeNotifier {
     MyEquality eq = MyEquality();
     eq.number = userModel.isLogined ? '88' : '0';
     eq.title = '积分';
+    eq.offsetRadio = 0;
+    eq.widthRadio = 1 / 2.0;
     eqs.add(eq);
 
     eq = MyEquality();
     eq.number = userModel.isLogined ? '88' : '0';
     eq.title = '红包';
+    eq.offsetRadio = 1 / 2.0;
+    eq.widthRadio = 1 / 2.0;
     eqs.add(eq);
 
     _equalitys = eqs;
@@ -69,6 +75,7 @@ class MyModelHandler extends ChangeNotifier {
   List<MyModel> _loginedList;
   //未登录数据
   List<MyModel> _unloginedList;
+
   //读取我的页面数据
   List<MyModel> fetchMyList(bool isLogined) {
     if (isLogined) {

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/model/user/user.dart';
-import 'package:flb/util/db/protos/generated/user/user.pb.dart';
+import 'package:flb/page/my/model/my.dart';
 import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,27 +15,33 @@ class MyProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     UserModel userModel = context.watch<UserModel>();
     bool isLogined = userModel.isLogined ?? false;
-    User user = userModel.currentUser;
     return Container(
-      child: isLogined ? _loginedWidget(user) : _unLoginedWidget(context),
+      child: isLogined
+          ? _loginedWidget(context, userModel)
+          : _unLoginedWidget(userModel),
     );
   }
 
   //已登录页面布局
-  Widget _loginedWidget(User user) {
+  Widget _loginedWidget(BuildContext context, UserModel userModel) {
     double avatarS = Screen.setWidth(60).toDouble();
-    double height = max(Screen.setHeight(160).toDouble(), profileHeight);
+    double height = max(Screen.setHeight(200).toDouble(), profileHeight);
     double lrW = Screen.setWidth(110).toDouble();
     double lrH = Screen.setHeight(40).toDouble();
-    double avatarTop = (height - avatarS) / 2.0 - 10;
+    double avatarTop = (height - avatarS) / 2.0 - 20;
     double lrTop = (height - lrH) / 2.0 - 10;
-
+    MyModelHandler handler = context.watch<MyModelHandler>();
+    double eqWidth = Screen.screenWidth;
+    double eqHeight = Screen.setHeight(50).toDouble();
+    List<Widget> eqChildren = handler.equalitys.map(
+        (e) => _equalityWidget(e.number, e.title, e.offsetRadio, (e.widthRadio * eqWidth)));
     return Container(
         color: Colors.red[400],
         height: height,
         width: Screen.screenWidth,
         child: Stack(
           children: [
+            //头像
             Container(
               child: ClipOval(
                 child: CachedNetworkImage(
@@ -49,16 +55,7 @@ class MyProfile extends StatelessWidget {
               height: avatarS,
               margin: EdgeInsets.only(left: 50, top: avatarTop),
             ),
-            /* 适用本地资源 */
-            // Container(
-            //   width: avatarS,
-            //   height: avatarS,
-            //   margin: EdgeInsets.only(top: (height - avatarS) / 2.0, left: 50),
-            //   decoration: BoxDecoration(
-            //     shape: BoxShape.circle,
-            //     color: Colors.blue,
-            //   ),
-            // ),
+            //登录/注册
             Container(
               width: lrW,
               height: lrH,
@@ -76,13 +73,25 @@ class MyProfile extends StatelessWidget {
                     ),
                   )),
             ),
-            _privateEquality(context),
+            //收益
+            Container(
+              height: eqHeight,
+              width: eqWidth,
+              margin: EdgeInsets.only(top: avatarTop + avatarS + 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(height / 2.0)),
+              ),
+              child: Row(
+                children: eqChildren,
+              ),
+            ),
           ],
         ));
   }
 
-  //已登录页面
-  Widget _unLoginedWidget(BuildContext context) {
+  //未登录页面
+  Widget _unLoginedWidget(UserModel userModel) {
     return Container();
   }
 
@@ -91,18 +100,16 @@ class MyProfile extends StatelessWidget {
     print('登录/注册');
   }
 
-  //积分、红包视图
-  Widget _privateEquality(BuildContext context) {
-    double height = Screen.setWidth(80).toDouble();
+  //收益模块
+  Widget _equalityWidget(
+      String number, String title, double offsetRadio, double widthRadio) {
     return Container(
-      height: height,
-      width: Screen.screenWidth,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(height / 2.0)),
-      ),
-      child: Row(
-        children: [],
+      width: ,
+      child: Column(
+        children: [
+          Text(number),
+          Text(title),
+        ],
       ),
     );
   }
