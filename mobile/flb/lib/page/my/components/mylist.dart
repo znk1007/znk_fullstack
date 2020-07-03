@@ -1,4 +1,6 @@
 import 'package:flb/model/style/mystyle.dart';
+import 'package:flb/model/user/user.dart';
+import 'package:flb/page/my/model/my.dart';
 import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,14 +16,18 @@ class MyListView extends StatelessWidget {
           Screen.safeBottomArea -
           style.profileBgHeight -
           48,
-      child: ListView.builder(
-        itemCount: 1,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            
-          );
-        },
-      ),
+      child: Consumer2<MyModelHandler, UserModel>(builder: (ctx, m, u, child) {
+        
+        return ListView.builder(
+          itemCount: m.fetchMyList(u.isLogined).length,
+          itemBuilder: (BuildContext context, int index) {
+
+            return ListTile(
+              leading: ,
+            );
+          },
+        );
+      }),
     );
   }
 }
