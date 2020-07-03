@@ -41,19 +41,18 @@ class _TabPageState extends State<TabPage> {
   }
 
   Widget _currentPage() {
-    int max = _pages.length - 1;
+    int max = widget._pages.length - 1;
     if (max < 0) {
       return Container();
     }
     int pageIdx = min(_curPageIdx, max);
-    return _pages[pageIdx];
+    return widget._pages[pageIdx];
   }
 
   @override
   Widget build(BuildContext context) {
     //设置屏幕
     Screen.setContext(context);
-
     return Scaffold(
       body: LoadingOverlay(
         child: SingleChildScrollView(

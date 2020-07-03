@@ -4,12 +4,14 @@ import 'package:flb/model/user/user.dart';
 import 'package:flb/page/base/item.dart';
 import 'package:flb/page/base/launch.dart';
 import 'package:flb/page/base/tab.dart';
+import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/db/sqlite/sqlitedb.dart';
 import 'package:flb/util/db/sqlite/user/user.dart';
 import 'package:flb/util/http/tab/tab.dart';
 import 'package:flb/util/http/core/request.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //fixed binary message binding
@@ -33,7 +35,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     //拉取分栏数据
     _fetchTabbarItems(context);
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: '货满仓',
@@ -41,13 +42,20 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Consumer<TabbarItems>(
-          builder: (ctx, t, w) =>
-              (t.items.length > 0) ? TabPage(items: t.items) : LaunchPage()),
+          builder: (ctx1, t, w) => (t.items.length > 0)
+              ? FutureBuilder(
+                  future: _loadUserData(context),
+                  // initialData: InitialData,
+                  builder: (BuildContext ctx2, AsyncSnapshot<User> snapshot) {
+                    return TabPage(items: t.items);
+                  },
+                )
+              : LaunchPage()),
     );
   }
 
   //获取分栏类目数据
-  void _fetchTabbarItems(BuildContext context) async {
+  Future<void> _fetchTabbarItems(BuildContext context) async {
     ResponseResult res = await TabbarItemReq.fetch();
     if (res.statusCode != 0) {
       context.read<TabbarItems>().add([]);
@@ -68,5 +76,12 @@ class MyApp extends StatelessWidget {
       items.add(item);
     }
     context.read<TabbarItems>().add(items);
+  }
+
+  //加载用户数据
+  Future<User> _loadUserData(BuildContext context) async {
+    UserModel userModel = context.read<UserModel>();
+    await userModel.loadUserData();
+    return userModel.currentUser;
   }
 }

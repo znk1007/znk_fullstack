@@ -3,28 +3,26 @@ import 'package:flb/util/db/sqlite/user/user.dart';
 import 'package:flutter/material.dart';
 
 class UserModel extends ChangeNotifier {
-  UserModel() {
-    print('user model init');
-    var _ = current;
-  }
-
   /* 当前用户 */
   User get currentUser => _user;
 
   //用户信息
   User _user;
   //是否已登录
-  bool isLogined;
+  bool get isLogined => (_user != null && _user.status == 1);
+  //是否测试
+  bool _test = false;
 
-  //当前用户
-  Future<User> get current async {
+  //加载当前用户信息
+  Future<void> loadUserData() async {
+    if (_test) {
+      _user = User();
+      _user.status = 1;
+    }
     if (_user != null) {
       return _user;
     }
     _user = await UserDB.currentUser();
-    isLogined = _user != null && _user.status == 1;
-    isLogined = true;
-    print('init set is logined: $isLogined');
     return _user;
   }
 
@@ -32,7 +30,11 @@ class UserModel extends ChangeNotifier {
   Future<void> upsert(User user) async {
     int stat = await UserDB.upsertUser(user);
     if (stat == 1) {
+      //登录
       notifyListeners();
+    }
+    if (user.status == 0) {
+      _user = null;
     }
   }
 
@@ -41,6 +43,9 @@ class UserModel extends ChangeNotifier {
     int stat = await UserDB.deleteUser(user.userID);
     if (stat == 1) {
       notifyListeners();
+    }
+    if (user.status == 0) {
+      _user = null;
     }
   }
 }

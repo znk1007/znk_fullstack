@@ -35,22 +35,30 @@ class MyList {
   MyListType type;
 }
 
-class MyEquality extends ChangeNotifier {
-  //权益数
-  String number;
-  //权益标题
-  String title;
-  //水平偏移比例
-  double offsetRadio;
-  //宽度比例
-  double widthRadio;
+class MyCompany {
+  //企业名
+  String name;
+  //企业编码
+  String code;
+  //积分
+  String integ;
+  //红包
+  String redPack;
 }
 
 class MyModelHandler extends ChangeNotifier {
-  List<MyEquality> _equalitys = [];
+  //企业信息
+  MyCompany _company;
 
-  //权益数据
-  List<MyEquality> get equalitys => _equalitys;
+  MyCompany get company => _company;
+  //拉取企业信息
+  Future<void> fetchCompanyInfo(UserModel userModel) async {
+    String sessionID = userModel.currentUser.sessionID;
+    if (userModel.isLogined && sessionID.length > 0) {
+      return
+    }
+  }
+
   /* 拉取收益数据 */
   Future<void> fetchEqualityData(UserModel userModel) async {
     List<MyEquality> eqs = [];
