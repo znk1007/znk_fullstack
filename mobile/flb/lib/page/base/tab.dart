@@ -1,15 +1,17 @@
 import 'dart:math';
 
+import 'package:flb/page/base/hud.dart';
 import 'package:flb/page/base/item.dart';
 import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
 class TabPage extends StatefulWidget {
-  final List<TabbarItem> items;
+  List<TabbarItem> _items = [];
   List<Widget> _pages = [];
-  TabPage({Key key, this.items}) : assert(items != null) {
-    _pages = items.map((e) => e.page).toList();
+  TabPage({Key key}) {
+    //加载框
+    Hud().wrap(this);
   }
   //状态初始化
   _TabPageState state = _TabPageState();
@@ -64,7 +66,7 @@ class _TabPageState extends State<TabPage> {
         progressIndicator: CircularProgressIndicator(),
       ), //_currentPage(),
       bottomNavigationBar: BottomNavigationBar(
-        items: widget.items.map((e) => e.item).toList(),
+        items: widget._items.map((e) => e.item).toList(),
         onTap: (value) {
           setState(() {
             _curPageIdx = value;

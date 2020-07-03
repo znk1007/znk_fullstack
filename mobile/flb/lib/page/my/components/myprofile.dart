@@ -9,8 +9,7 @@ import 'package:provider/provider.dart';
 
 class MyProfile extends StatelessWidget {
   final double profileHeight;
-  const MyProfile({Key key, this.profileHeight, BuildContext ctx}):super(key: key);
-
+  const MyProfile({Key key, this.profileHeight}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +33,11 @@ class MyProfile extends StatelessWidget {
     MyModelHandler handler = context.watch<MyModelHandler>();
     double eqWidth = Screen.screenWidth;
     double eqHeight = Screen.setHeight(50).toDouble();
-    
-    List<Widget> eqChildren = handler.equalitys.map(
-        (e) => _equalityWidget(e.number, e.title, e.offsetRadio * (e.widthRadio * eqWidth), (e.widthRadio * eqWidth))).toList();
+
+    List<Widget> eqChildren = handler.equalitys
+        .map((e) => _equalityWidget(e.number, e.title,
+            e.offsetRadio * (e.widthRadio * eqWidth), (e.widthRadio * eqWidth)))
+        .toList();
     return Container(
         color: Colors.red[400],
         height: height,

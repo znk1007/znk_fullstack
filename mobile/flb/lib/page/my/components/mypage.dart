@@ -1,3 +1,4 @@
+import 'package:flb/model/user/user.dart';
 import 'package:flb/page/my/components/myprofile.dart';
 import 'package:flb/page/my/model/my.dart';
 import 'package:flb/util/random/color.dart';
@@ -15,7 +16,7 @@ class MyPage extends StatelessWidget {
     double topHeight = Screen.setHeight(180);
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MyModelHandler()),
+        ChangeNotifierProvider(create: (ctx) => MyModelHandler()),
       ],
       child: Container(
         color: RandomHandler.randomColor,
