@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/model/style/mystyle.dart';
 import 'package:flb/model/user/user.dart';
+import 'package:flb/page/my/model/my.dart';
+import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -95,16 +97,66 @@ class MyProfile extends StatelessWidget {
               ),
               //收益
               Container(
-                width: style.profileBgWidth,
+                width: style.profileBgWidth - 10,
                 height: style.eqHeight,
                 margin: EdgeInsets.only(
-                    left: 5,
-                    top: style.avatarMargin.top + style.avatarL + 20,
-                    right: 5),
+                  left: 5,
+                  top: style.avatarMargin.top + style.avatarL + 20,
+                ),
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.all(
                         Radius.circular(style.eqHeight / 2.0))),
+                child: Consumer<MyModelHandler>(
+                  builder: (context, m, child) {
+                    return Row(
+                      children: [
+                        Container(
+                          width: (style.profileBgWidth - 10) / 2.0,
+                          child: FlatButton(
+                              onPressed: () {},
+                              child: Column(
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        left: Screen.setWidth(30), top: 8),
+                                    child: Text(m.company != null
+                                        ? m.company.integ
+                                        : '0'),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        left: Screen.setWidth(30)),
+                                    child: Text(u.isLogined ? '我的积分' : '积分'),
+                                  ),
+                                ],
+                              )),
+                        ),
+                        Container(
+                          width: (style.profileBgWidth - 10) / 2.0,
+                          child: FlatButton(
+                              onPressed: () {},
+                              child: Column(
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        top: 8, right: Screen.setWidth(30)),
+                                    child: Text(m.company != null
+                                        ? m.company.redPack
+                                        : '0'),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        right: Screen.setWidth(30)),
+                                    child: Text(u.isLogined ? '我的红包' : '红包'),
+                                  )
+                                ],
+                              )),
+                        )
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           );
@@ -194,7 +246,7 @@ class MyProfile extends StatelessWidget {
 
   //未登录页面
   void _loginOrRegist() {
-    print('登录/注册');
+    print('登录/注��');
   }
 
   //收益模块
