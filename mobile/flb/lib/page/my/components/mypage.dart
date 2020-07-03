@@ -1,4 +1,5 @@
 import 'package:flb/model/style/mystyle.dart';
+import 'package:flb/page/my/components/mylist.dart';
 import 'package:flb/page/my/components/myprofile.dart';
 import 'package:flb/page/my/model/my.dart';
 import 'package:flb/util/random/color.dart';
@@ -12,17 +13,16 @@ class MyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (ctx) => MyModelHandler()),
         ChangeNotifierProvider(create: (ctx) => MyPageStyle()),
       ],
       child: Container(
-        color: RandomHandler.randomColor,
         child: Column(
           children: [
-            MyProfile(),
+            MyProfileView(),
+            MyListView(),
           ],
         ),
       ),

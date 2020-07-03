@@ -6,8 +6,8 @@ import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MyProfile extends StatelessWidget {
-  const MyProfile({Key key}) : super(key: key);
+class MyProfileView extends StatelessWidget {
+  const MyProfileView({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +67,51 @@ class MyProfile extends StatelessWidget {
                       _loginOrRegist();
                     },
                     child: u.isLogined
-                        ? Column(
-                            children: [
-                              Text(
-                                u.currentUser.nickname.length > 0
-                                    ? u.currentUser.nickname
-                                    : '昵称',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600),
-                                textAlign: TextAlign.left,
-                              )
-                            ],
+                        ? Consumer<MyModelHandler>(
+                            builder: (context, m, child) {
+                              return (m.company != null &&
+                                      m.company.name.length > 0)
+                                  ? Container(
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            u.currentUser.nickname.length > 0
+                                                ? u.currentUser.nickname
+                                                : '昵称',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                          Text(
+                                            m.company.name,
+                                            style: TextStyle(
+                                                color: Colors.grey[200],
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : Container(
+                                      width: style.profileBgWidth -
+                                          (style.avatarMargin.left +
+                                              style.avatarL) -
+                                          10,
+                                      child: Text(
+                                        u.currentUser.nickname.length > 0
+                                            ? u.currentUser.nickname
+                                            : '昵称',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    );
+                            },
                           )
                         : Container(
                             width: style.profileBgWidth -
