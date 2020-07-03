@@ -5,11 +5,13 @@ import 'package:flb/page/base/item.dart';
 import 'package:flb/util/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:provider/provider.dart';
 
 class TabPage extends StatefulWidget {
-  List<TabbarItem> _items = [];
+  //页面集合
   List<Widget> _pages = [];
-  TabPage({Key key}) {
+  TabPage({Key key, List<TabbarItem> items}) : assert(items.length > 2) {
+    _pages = items.map((e) => e.page).toList();
     //加载框
     Hud().wrap(this);
   }
@@ -39,18 +41,19 @@ class _TabPageState extends State<TabPage> {
   }
 
   Widget _currentPage() {
-    int max = widget._pages.length - 1;
+    int max = _pages.length - 1;
     if (max < 0) {
       return Container();
     }
     int pageIdx = min(_curPageIdx, max);
-    return widget._pages[pageIdx];
+    return _pages[pageIdx];
   }
 
   @override
   Widget build(BuildContext context) {
     //设置屏幕
     Screen.setContext(context);
+
     return Scaffold(
       body: LoadingOverlay(
         child: SingleChildScrollView(
@@ -65,19 +68,20 @@ class _TabPageState extends State<TabPage> {
         opacity: 0,
         progressIndicator: CircularProgressIndicator(),
       ), //_currentPage(),
-      bottomNavigationBar: BottomNavigationBar(
-        items: widget._items.map((e) => e.item).toList(),
-        onTap: (value) {
-          setState(() {
-            _curPageIdx = value;
-          });
-        },
-        currentIndex: _curPageIdx,
-        type: BottomNavigationBarType.fixed,
-        selectedFontSize: 12,
-        selectedItemColor: Colors.red[900],
-        unselectedItemColor: Colors.grey[900],
-      ),
+      bottomNavigationBar: Consumer<TabbarItems>(
+          builder: (ctx, t, w) => BottomNavigationBar(
+                items: t.items.map((e) => e.item).toList(),
+                onTap: (value) {
+                  setState(() {
+                    _curPageIdx = value;
+                  });
+                },
+                currentIndex: _curPageIdx,
+                type: BottomNavigationBarType.fixed,
+                selectedFontSize: 12,
+                selectedItemColor: Colors.red[900],
+                unselectedItemColor: Colors.grey[900],
+              )),
     );
   }
 }

@@ -1,12 +1,9 @@
-import 'dart:js';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/model/style/style.dart';
 import 'package:flb/model/user/user.dart';
 import 'package:flb/page/base/item.dart';
 import 'package:flb/page/base/launch.dart';
 import 'package:flb/page/base/tab.dart';
-import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/db/sqlite/sqlitedb.dart';
 import 'package:flb/util/db/sqlite/user/user.dart';
 import 'package:flb/util/http/tab/tab.dart';
@@ -45,7 +42,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Consumer<TabbarItems>(
           builder: (ctx, t, w) =>
-              (t.items.length > 0) ? TabPage() : LaunchPage()),
+              (t.items.length > 0) ? TabPage(items: t.items) : LaunchPage()),
     );
   }
 
