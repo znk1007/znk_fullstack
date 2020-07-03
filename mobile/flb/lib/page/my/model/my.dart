@@ -1,3 +1,4 @@
+import 'package:flb/model/url/url.dart';
 import 'package:flb/model/user/user.dart';
 import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flutter/widgets.dart';
@@ -54,29 +55,16 @@ class MyModelHandler extends ChangeNotifier {
   //拉取企业信息
   Future<void> fetchCompanyInfo(UserModel userModel) async {
     String sessionID = userModel.currentUser.sessionID;
-    if (userModel.isLogined && sessionID.length > 0) {
-      return
+    String compInfoUrl = CompanyInfoURL.compInfo;
+    if (userModel.isLogined && sessionID.length > 0 && compInfoUrl.length > 0) {
+      return;
     }
-  }
-
-  /* 拉取收益数据 */
-  Future<void> fetchEqualityData(UserModel userModel) async {
-    List<MyEquality> eqs = [];
-    MyEquality eq = MyEquality();
-    eq.number = userModel.isLogined ? '88' : '0';
-    eq.title = '积分';
-    eq.offsetRadio = 0;
-    eq.widthRadio = 1 / 2.0;
-    eqs.add(eq);
-
-    eq = MyEquality();
-    eq.number = userModel.isLogined ? '88' : '0';
-    eq.title = '红包';
-    eq.offsetRadio = 1 / 2.0;
-    eq.widthRadio = 1 / 2.0;
-    eqs.add(eq);
-
-    _equalitys = eqs;
+    MyCompany comp = MyCompany();
+    comp.name = 'xxxx有限公司';
+    comp.code = '10000';
+    comp.integ = '0';
+    comp.redPack = '0';
+    _company = comp;
   }
 
   //已登录数据
