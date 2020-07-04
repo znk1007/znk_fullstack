@@ -45,22 +45,27 @@ class ZNKTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool test = true;
     return Container(
       child: this.headerSliverBuilder != null
           ? NestedScrollView(
-              headerSliverBuilder: this.headerSliverBuilder, body: null)
-          : ListView.separated(
-              physics: ScrollPhysics(),
-              scrollDirection: this.scrollDirection,
-              itemCount: 50,
-              separatorBuilder: (BuildContext context, int index) {
-                return this.separatorBuilder ?? Container();
-              },
-              itemBuilder: (BuildContext context, int index) {
-                return Text('data $index');
-              },
-            ),
+              headerSliverBuilder: this.headerSliverBuilder,
+              body: _separatedListView())
+          : _separatedListView(),
+    );
+  }
+
+  //分割线表格
+  Widget _separatedListView() {
+    return ListView.separated(
+      physics: ScrollPhysics(),
+      scrollDirection: this.scrollDirection,
+      itemCount: 50,
+      separatorBuilder: (BuildContext context, int index) {
+        return this.separatorBuilder ?? Container();
+      },
+      itemBuilder: (BuildContext context, int index) {
+        return Text('data $index');
+      },
     );
   }
 
