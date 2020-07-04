@@ -16,7 +16,12 @@ class MyApp extends StatelessWidget {
           title: Text('Grouped List View Example'),
         ),
         body: ZNKTable(
-          numberOfSection: 50,
+          // numberOfSection: 50,
+          numberOfRowsInSection: (section) => 20,
+          cellForRowAtIndexPath: (indexPath) => Text('data ${indexPath.section} ${indexPath.row}') ,
+          didSelectRowAtIndexPath: (context, indexPath) {
+            print('did select row at index path section: ${indexPath.section} row: ${indexPath.row}');
+          },
         ),
       ),
     );

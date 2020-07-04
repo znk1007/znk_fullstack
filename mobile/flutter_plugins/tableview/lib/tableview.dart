@@ -2,12 +2,6 @@ library znktable;
 
 import 'package:flutter/material.dart';
 
-//ZNKTableStyle 表格样式
-enum ZNKTableStyle {
-  plain, //平铺
-  grouped, //分组
-}
-
 //ZNKIndexPath 地址索引
 class ZNKIndexPath {
   final int section; //段下标
@@ -16,12 +10,12 @@ class ZNKIndexPath {
 }
 
 class ZNKTable extends StatelessWidget {
-  //表格样式
-  final ZNKTableStyle style;
   //段数
   final int numberOfSection;
   //每段行数
   final int Function(int section) numberOfRowsInSection;
+  //每单元格视图
+  final Widget Function(ZNKIndexPath indexPath) cellForRowAtIndexPath;
   //滚轴方向
   final Axis scrollDirection;
   //头部视图
@@ -29,19 +23,23 @@ class ZNKTable extends StatelessWidget {
       headerSliverBuilder;
   //分割视图
   final Widget Function(BuildContext context, int index) separatorBuilder;
+  //选择指定行
+  final void Function(BuildContext context, ZNKIndexPath indexPath) didSelectRowAtIndexPath;
 
   //ScrollController 嵌套滚动控制器
   // ScrollController _nestedScrollCtl;
 
   ZNKTable(
       {Key key,
-      this.style = ZNKTableStyle.plain,
       this.scrollDirection = Axis.vertical,
       this.numberOfSection = 1,
       @required this.numberOfRowsInSection,
+      @required this.cellForRowAtIndexPath,
+      this.didSelectRowAtIndexPath,
       this.separatorBuilder,
       this.headerSliverBuilder})
-      : super(key: key);
+      : assert(numberOfSection >= 1),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,21 +54,30 @@ class ZNKTable extends StatelessWidget {
 
   //分割线表格
   Widget _separatedListView() {
-    return ListView.separated(
-      physics: ScrollPhysics(),
-      scrollDirection: this.scrollDirection,
-      itemCount: 50,
-      separatorBuilder: (BuildContext context, int index) {
-        return this.separatorBuilder ?? Container();
-      },
-      itemBuilder: (BuildContext context, int index) {
-        return Text('data $index');
-      },
-    );
-  }
-
-  List<Widget> _defaultHeaderSliverBuilder(
-      BuildContext context, bool innerBoxIsScrolled) {
-    return <Widget>[SliverAppBar()];
+    return this.numberOfSection > 1
+        ? ListView.separated(
+            physics: ScrollPhysics(),
+            scrollDirection: this.scrollDirection,
+            itemCount: this.numberOfSection,
+            separatorBuilder: (BuildContext context, int index) {
+              return this.separatorBuilder ?? Container();
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return Text('data $index');
+            },
+          )
+        : ListView.separated(
+            itemBuilder: (BuildContext ctx, int index) {
+              return GestureDetector(child: this
+                  .cellForRowAtIndexPath(ZNKIndexPath(section: 0, row: index)),onTap: () {
+                    if (this.didSelectRowAtIndexPath != null) {
+                      this.didSelectRowAtIndexPath(ctx, ZNKIndexPath(section: 0, row: index));
+                    }
+                  },);
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return this.separatorBuilder ?? Container();
+            },
+            itemCount: this.numberOfRowsInSection(0));
   }
 }
