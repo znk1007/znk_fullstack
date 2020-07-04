@@ -21,7 +21,7 @@ class MyListView extends StatelessWidget {
         return ListView.builder(
           itemCount: m.fetchMyList(u.isLogined).length,
           itemBuilder: (BuildContext context, int index) {
-
+            
             return ListTile(
               leading: ,
             );
