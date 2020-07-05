@@ -15,16 +15,25 @@ class ZNKTable extends StatelessWidget {
   //每段行数
   final int Function(int section) numberOfRowsInSection;
   //每单元格视图
-  final Widget Function(ZNKIndexPath indexPath) cellForRowAtIndexPath;
+  final Widget Function(BuildContext context, ZNKIndexPath indexPath)
+      cellForRowAtIndexPath;
   //滚轴方向
   final Axis scrollDirection;
   //头部视图
   final List<Widget> Function(BuildContext context, bool innerBoxIsScrolled)
       headerSliverBuilder;
   //分割视图
-  final Widget Function(BuildContext context, int index) separatorBuilder;
+  final Widget Function(BuildContext context, ZNKIndexPath indexPath)
+      separatorBuilder;
   //选择指定行
-  final void Function(BuildContext context, ZNKIndexPath indexPath) didSelectRowAtIndexPath;
+  final void Function(BuildContext context, ZNKIndexPath indexPath)
+      didSelectRowAtIndexPath;
+  //行高
+  final double Function(BuildContext context, ZNKIndexPath indexPath)
+      heightForRowAtIndexPath;
+  //段头视图
+  final Widget Function(BuildContext context, int section)
+      viewForHeaderInSection;
 
   //ScrollController 嵌套滚动控制器
   // ScrollController _nestedScrollCtl;
@@ -35,7 +44,9 @@ class ZNKTable extends StatelessWidget {
       this.numberOfSection = 1,
       @required this.numberOfRowsInSection,
       @required this.cellForRowAtIndexPath,
+      this.viewForHeaderInSection,
       this.didSelectRowAtIndexPath,
+      this.heightForRowAtIndexPath,
       this.separatorBuilder,
       this.headerSliverBuilder})
       : assert(numberOfSection >= 1),
@@ -52,7 +63,40 @@ class ZNKTable extends StatelessWidget {
     );
   }
 
-  //分割线表格
+  //单列表
+  Widget _singleSeparatedListView(int section, bool shrinkWrap) {
+    return ListView.separated(
+        shrinkWrap: shrinkWrap,
+        scrollDirection: this.scrollDirection,
+        itemBuilder: (BuildContext ctx, int index) {
+          double rowHeight = this.heightForRowAtIndexPath != null
+              ? this.heightForRowAtIndexPath(
+                  ctx, ZNKIndexPath(section: section, row: index))
+              : 44;
+          return GestureDetector(
+            child: Container(
+              child: this.cellForRowAtIndexPath(
+                  ctx, ZNKIndexPath(section: section, row: index)),
+              height: rowHeight,
+            ),
+            onTap: () {
+              if (this.didSelectRowAtIndexPath != null) {
+                this.didSelectRowAtIndexPath(
+                    ctx, ZNKIndexPath(section: section, row: index));
+              }
+            },
+          );
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return this.separatorBuilder != null
+              ? this.separatorBuilder(
+                  context, ZNKIndexPath(section: section, row: index))
+              : Divider(height: 2);
+        },
+        itemCount: this.numberOfRowsInSection(section));
+  }
+
+  //嵌套表格
   Widget _separatedListView() {
     return this.numberOfSection > 1
         ? ListView.separated(
@@ -60,24 +104,19 @@ class ZNKTable extends StatelessWidget {
             scrollDirection: this.scrollDirection,
             itemCount: this.numberOfSection,
             separatorBuilder: (BuildContext context, int index) {
-              return this.separatorBuilder ?? Container();
+              return Container();
             },
-            itemBuilder: (BuildContext context, int index) {
-              return Text('data $index');
+            itemBuilder: (BuildContext context, int section) {
+              return Column(
+                children: [
+                  this.viewForHeaderInSection != null
+                      ? this.viewForHeaderInSection(context, section)
+                      : Container(),
+                  _singleSeparatedListView(section, true),
+                ],
+              );
             },
           )
-        : ListView.separated(
-            itemBuilder: (BuildContext ctx, int index) {
-              return GestureDetector(child: this
-                  .cellForRowAtIndexPath(ZNKIndexPath(section: 0, row: index)),onTap: () {
-                    if (this.didSelectRowAtIndexPath != null) {
-                      this.didSelectRowAtIndexPath(ctx, ZNKIndexPath(section: 0, row: index));
-                    }
-                  },);
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              return this.separatorBuilder ?? Container();
-            },
-            itemCount: this.numberOfRowsInSection(0));
+        : _singleSeparatedListView(0, false);
   }
 }
