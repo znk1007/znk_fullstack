@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tableview/tableview.dart';
-import 'package:tableview/refreshtable.dart';
 
 void main() => runApp(MyApp());
 
@@ -17,7 +16,7 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: Text('Grouped List View Example'),
         ),
-        body: ZNKRefreshView(
+        body: ZNKTable(
           numberOfSection: 2,
           separatorBuilder: (BuildContext context, ZNKIndexPath indexPath) {
             return Divider(height: 2);

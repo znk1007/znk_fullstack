@@ -1,4 +1,4 @@
-library znktable;
+library tableview;
 
 import 'package:flutter/material.dart';
 
