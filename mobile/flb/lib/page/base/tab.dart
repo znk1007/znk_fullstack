@@ -57,7 +57,6 @@ class _TabPageState extends State<TabPage> {
       body: LoadingOverlay(
         child: SingleChildScrollView(
           child: Container(
-            color: Colors.red,
             padding: const EdgeInsets.all(0),
             child: _currentPage(),
           ),

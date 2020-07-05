@@ -23,7 +23,6 @@ class MyListView extends StatelessWidget {
           itemBuilder: (BuildContext context, int index) {
             
             return ListTile(
-              leading: ,
             );
           },
         );

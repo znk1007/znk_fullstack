@@ -24,7 +24,7 @@ class MyModel {
   //段类型
   MyModelType type;
   //列表
-  List<MyList> lists;
+  List<MyList> lists = [];
 }
 
 class MyList {
@@ -68,9 +68,9 @@ class MyModelHandler extends ChangeNotifier {
   }
 
   //已登录数据
-  List<MyModel> _loginedList;
+  List<MyModel> _loginedList = [];
   //未登录数据
-  List<MyModel> _unloginedList;
+  List<MyModel> _unloginedList = [];
 
   //读取我的页面数据
   List<MyModel> fetchMyList(bool isLogined) {
@@ -78,38 +78,46 @@ class MyModelHandler extends ChangeNotifier {
       _unloginedList = [];
       if (_loginedList.length == 0) {
         List<MyModel> models = [];
+        List<MyList> temp = [];
+
         MyModel model = MyModel();
         model.type = MyModelType.normal;
-        List<MyList> temp = [];
+
         MyList sub = MyList();
         sub.title = '推广';
         sub.type = MyListType.extend;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '代金券';
         sub.type = MyListType.cashcoupon;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '我的订单';
         sub.type = MyListType.order;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '收藏';
         sub.type = MyListType.collection;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '积分商城';
         sub.type = MyListType.integ;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '我的地址';
         sub.type = MyListType.addr;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '我的消息';
         sub.type = MyListType.extend;
         temp.add(sub);
-        sub = MyList();
+
         model.lists = temp;
         models.add(model);
 
@@ -119,10 +127,13 @@ class MyModelHandler extends ChangeNotifier {
         sub.title = '关于我们';
         sub.type = MyListType.about;
         temp.add(sub);
+
         sub = MyList();
         sub.title = '设置';
         sub.type = MyListType.setting;
         temp.add(sub);
+
+        model.lists = temp;
         models.add(model);
         _loginedList = models;
       }
@@ -141,6 +152,7 @@ class MyModelHandler extends ChangeNotifier {
         sub.title = '设置';
         sub.type = MyListType.setting;
         temp.add(sub);
+        model.lists = temp;
         models.add(model);
         _unloginedList = models;
       }

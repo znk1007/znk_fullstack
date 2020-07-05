@@ -8,6 +8,7 @@ class ZNKIndexPath {
 }
 
 class ZNKTable extends StatelessWidget {
+  final bool shrinkWrap;
   //段数
   final int numberOfSection;
   //每段行数
@@ -35,6 +36,7 @@ class ZNKTable extends StatelessWidget {
 
   ZNKTable({
     Key key,
+    this.shrinkWrap = true,
     this.scrollDirection = Axis.vertical,
     this.numberOfSection = 1,
     @required this.numberOfRowsInSection,
@@ -108,11 +110,11 @@ class ZNKTable extends StatelessWidget {
                   this.viewForHeaderInSection != null
                       ? this.viewForHeaderInSection(context, section)
                       : Container(),
-                  _singleSeparatedListView(section, true, true),
+                  _singleSeparatedListView(section, this.shrinkWrap, false),
                 ],
               );
             },
           )
-        : _singleSeparatedListView(0, false, false);
+        : _singleSeparatedListView(0, this.shrinkWrap, true);
   }
 }
