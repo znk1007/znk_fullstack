@@ -17,14 +17,14 @@ class MyApp extends StatelessWidget {
           title: Text('Grouped List View Example'),
         ),
         body: ZNKTable(
-          numberOfSection: 2,
+          numberOfSection: 1,
           separatorBuilder: (BuildContext context, ZNKIndexPath indexPath) {
             return Divider(height: 2);
           },
           viewForHeaderInSection: (context, section) => Container(
            child: Text('段头 $section'), 
           ),
-          numberOfRowsInSection: (section) => 5,
+          numberOfRowsInSection: (section) => 15,
           cellForRowAtIndexPath: (ctx, indexPath) => Container(
               child: Text('data ${indexPath.section} ${indexPath.row}'),
               // color: Colors.cyan,

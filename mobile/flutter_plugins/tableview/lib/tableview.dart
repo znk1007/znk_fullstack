@@ -35,21 +35,25 @@ class ZNKTable extends StatelessWidget {
   final Widget Function(BuildContext context, int section)
       viewForHeaderInSection;
 
-  //ScrollController 嵌套滚动控制器
-  // ScrollController _nestedScrollCtl;
+  // ScrollController 嵌套滚动控制器
+  ScrollController _scrollCtl;
+  //刷新是否有效
+  bool _refreshValid = false;
+  //最大偏移值
+  final double _maxOffset = 100;
 
-  ZNKTable(
-      {Key key,
-      this.scrollDirection = Axis.vertical,
-      this.numberOfSection = 1,
-      @required this.numberOfRowsInSection,
-      @required this.cellForRowAtIndexPath,
-      this.viewForHeaderInSection,
-      this.didSelectRowAtIndexPath,
-      this.heightForRowAtIndexPath,
-      this.separatorBuilder,
-      this.headerSliverBuilder})
-      : assert(numberOfSection >= 1),
+  ZNKTable({
+    Key key,
+    this.scrollDirection = Axis.vertical,
+    this.numberOfSection = 1,
+    @required this.numberOfRowsInSection,
+    @required this.cellForRowAtIndexPath,
+    this.viewForHeaderInSection,
+    this.didSelectRowAtIndexPath,
+    this.heightForRowAtIndexPath,
+    this.separatorBuilder,
+    this.headerSliverBuilder,
+  })  : assert(numberOfSection >= 1),
         super(key: key);
 
   @override
@@ -64,8 +68,13 @@ class ZNKTable extends StatelessWidget {
   }
 
   //单列表
-  Widget _singleSeparatedListView(int section, bool shrinkWrap) {
+  Widget _singleSeparatedListView(int section, bool shrinkWrap, bool scrollable,
+      ScrollController controller) {
     return ListView.separated(
+        controller: controller,
+        physics: scrollable
+            ? NeverScrollableScrollPhysics()
+            : BouncingScrollPhysics(),
         shrinkWrap: shrinkWrap,
         scrollDirection: this.scrollDirection,
         itemBuilder: (BuildContext ctx, int index) {
@@ -100,6 +109,7 @@ class ZNKTable extends StatelessWidget {
   Widget _separatedListView() {
     return this.numberOfSection > 1
         ? ListView.separated(
+            controller: _scrollCtl,
             physics: ScrollPhysics(),
             scrollDirection: this.scrollDirection,
             itemCount: this.numberOfSection,
@@ -112,11 +122,11 @@ class ZNKTable extends StatelessWidget {
                   this.viewForHeaderInSection != null
                       ? this.viewForHeaderInSection(context, section)
                       : Container(),
-                  _singleSeparatedListView(section, true),
+                  _singleSeparatedListView(section, true, true, null),
                 ],
               );
             },
           )
-        : _singleSeparatedListView(0, false);
+        : _singleSeparatedListView(0, false, false, _scrollCtl);
   }
 }
