@@ -1,11 +1,11 @@
-import 'package:flb/util/screen/screen.dart';
+import 'package:flb/pkg/screen/screen.dart';
 import 'package:flutter/material.dart';
 
 class MyPageStyle extends ChangeNotifier {
   //用户信息展示宽度
   double profileBgWidth = Screen.screenWidth;
   //用户信息展示高度
-  double profileBgHeight = Screen.setHeight(200).toDouble();
+  double profileBgHeight = Screen.setHeight(180).toDouble();
   //用户信息区域背景颜色
   Color profileBgColor = Colors.red[400];
   //头像直径

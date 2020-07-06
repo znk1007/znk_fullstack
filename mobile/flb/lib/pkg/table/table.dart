@@ -8,7 +8,10 @@ class ZNKIndexPath {
 }
 
 class ZNKTable extends StatelessWidget {
+  //收缩包裹、解决无线滚动问题
   final bool shrinkWrap;
+  //是否可滚动
+  final bool scrollable;
   //段数
   final int numberOfSection;
   //每段行数
@@ -37,6 +40,7 @@ class ZNKTable extends StatelessWidget {
   ZNKTable({
     Key key,
     this.shrinkWrap = true,
+    this.scrollable = false,
     this.scrollDirection = Axis.vertical,
     this.numberOfSection = 1,
     @required this.numberOfRowsInSection,
@@ -52,18 +56,22 @@ class ZNKTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return this.headerSliverBuilder != null
-          ? NestedScrollView(
-              headerSliverBuilder: this.headerSliverBuilder,
-              body: _separatedListView())
-          : _separatedListView();
+        ? NestedScrollView(
+            physics: this.scrollable
+                ? BouncingScrollPhysics()
+                : NeverScrollableScrollPhysics(),
+            headerSliverBuilder: this.headerSliverBuilder,
+            body: _separatedListView())
+        : _separatedListView();
   }
 
   //单列表
-  Widget _singleSeparatedListView(int section, bool shrinkWrap, bool scrollable) {
+  Widget _singleSeparatedListView(
+      int section, bool shrinkWrap, bool scrollable) {
     return ListView.separated(
         physics: scrollable
-            ? NeverScrollableScrollPhysics()
-            : BouncingScrollPhysics(),
+            ? BouncingScrollPhysics()
+            : NeverScrollableScrollPhysics(),
         shrinkWrap: shrinkWrap,
         scrollDirection: this.scrollDirection,
         itemBuilder: (BuildContext ctx, int index) {
@@ -98,7 +106,9 @@ class ZNKTable extends StatelessWidget {
   Widget _separatedListView() {
     return this.numberOfSection > 1
         ? ListView.separated(
-            physics: ScrollPhysics(),
+            physics: this.scrollable
+                ? BouncingScrollPhysics()
+                : NeverScrollableScrollPhysics(),
             scrollDirection: this.scrollDirection,
             itemCount: this.numberOfSection,
             separatorBuilder: (BuildContext context, int index) {
@@ -115,6 +125,6 @@ class ZNKTable extends StatelessWidget {
               );
             },
           )
-        : _singleSeparatedListView(0, this.shrinkWrap, true);
+        : _singleSeparatedListView(0, this.shrinkWrap, this.scrollable);
   }
 }

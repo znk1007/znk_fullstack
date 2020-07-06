@@ -16,10 +16,6 @@
 		<data>
 		lILml1/Dm8FIsisqu4EM3Kg929Q=
 		</data>
-		<key>flutter_assets/LICENSE</key>
-		<data>
-		kvamD5245SoOPPOdRPbsd52LlOw=
-		</data>
 		<key>flutter_assets/NOTICES</key>
 		<data>
 		inuSRDLmRN0Xf6iyGGY1+1hVf9w=
@@ -30,11 +26,11 @@
 		</data>
 		<key>flutter_assets/isolate_snapshot_data</key>
 		<data>
-		qv+V6WqYl/iBKYVLihAxO+ANDpw=
+		LuAlj1vwlq6zGdL0unU2uJdrJRw=
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		o7MUSGecGT5f9Vc4kTwVf1rfmWo=
+		wE6DjMcDMRJ/ethimZ7/h8ZXb0s=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -42,7 +38,7 @@
 		</data>
 		<key>flutter_assets/vm_snapshot_data</key>
 		<data>
-		QYOHVxj5Cj8N46vAV8/Gxl/C1oI=
+		kHHg77jWRkspEAR53gjQa8ZamKI=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -67,17 +63,6 @@
 			<key>hash2</key>
 			<data>
 			YwkPE2N7k/su9XjVFpdeoUy7GFY9DEY+G4h3aEyC1dg=
-			</data>
-		</dict>
-		<key>flutter_assets/LICENSE</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			kvamD5245SoOPPOdRPbsd52LlOw=
-			</data>
-			<key>hash2</key>
-			<data>
-			Vvp8jtdw0Y76Rn+TO9FeBa2LodD70GnyNJvGNG3Ms/s=
 			</data>
 		</dict>
 		<key>flutter_assets/NOTICES</key>
@@ -106,22 +91,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			qv+V6WqYl/iBKYVLihAxO+ANDpw=
+			LuAlj1vwlq6zGdL0unU2uJdrJRw=
 			</data>
 			<key>hash2</key>
 			<data>
-			IOUdU+WCAvKYDP+Rh8JIT4JJb7yoFZ8jZj4yVBMk6UE=
+			IGDpjujZG3tOfuJk7gWj4hx0acf1yP6WGYbRCb+a6Fs=
 			</data>
 		</dict>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			o7MUSGecGT5f9Vc4kTwVf1rfmWo=
+			wE6DjMcDMRJ/ethimZ7/h8ZXb0s=
 			</data>
 			<key>hash2</key>
 			<data>
-			qjq2xEw0IlWAYBO0L6XSt9xvgZlY6IgYo2sUakA7N+E=
+			MypQs2EOnizmXgY83rv9rmLD6rNQCVg+spwASNzMVUI=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
@@ -139,11 +124,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			QYOHVxj5Cj8N46vAV8/Gxl/C1oI=
+			kHHg77jWRkspEAR53gjQa8ZamKI=
 			</data>
 			<key>hash2</key>
 			<data>
-			lWbwjZjSKnupTRAXDp6OMkTDmvj4AklYuoP1Ug8qd84=
+			ak+HSIf8crbZWg9kmhruGr8XwVJmDdXxFj1b8szPQcs=
 			</data>
 		</dict>
 	</dict>
