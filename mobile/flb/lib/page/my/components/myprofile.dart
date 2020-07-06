@@ -7,102 +7,78 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MyProfileView extends StatelessWidget {
-  const MyProfileView({Key key}) : super(key: key);
+  final MyPageStyle style;
+  final UserModel userModel;
+  const MyProfileView({Key key, this.style, this.userModel})
+      : assert(style != null),
+        assert(userModel != null),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    MyPageStyle style = context.watch<MyPageStyle>();
     return Container(
       height: style.profileBgHeight,
       width: style.profileBgWidth,
       color: style.profileBgColor,
-      child: Consumer<UserModel>(
-        builder: (ctx, u, child) {
-          return Stack(
-            children: [
-              //头像
-              Container(
-                child: ClipOval(
-                  child:
-                      (u.currentUser != null && u.currentUser.photo.length > 0)
-                          ? CachedNetworkImage(
-                              color: Colors.white,
-                              fit: BoxFit.cover, //全圆
-                              imageUrl: (u.currentUser != null &&
-                                      u.currentUser.photo.length > 0)
-                                  ? u.currentUser.photo
-                                  : '',
-                              placeholder: (context, url) =>
-                                  Icon(Icons.person_outline),
-                            )
-                          : Container(
-                              child: Icon(Icons.person_outline),
-                            ),
-                ),
-                width: style.avatarL,
-                height: style.avatarL,
-                margin: style.avatarMargin,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(style.avatarL / 2.0),
-                  ),
-                ),
+      child: Stack(
+        children: [
+          //头像
+          Container(
+            child: ClipOval(
+              child: (userModel.currentUser != null &&
+                      userModel.currentUser.photo.length > 0)
+                  ? CachedNetworkImage(
+                      color: Colors.white,
+                      fit: BoxFit.cover, //全圆
+                      imageUrl: (userModel.currentUser != null &&
+                              userModel.currentUser.photo.length > 0)
+                          ? userModel.currentUser.photo
+                          : '',
+                      placeholder: (context, url) => Icon(Icons.person_outline),
+                    )
+                  : Container(
+                      child: Icon(Icons.person_outline),
+                    ),
+            ),
+            width: style.avatarL,
+            height: style.avatarL,
+            margin: style.avatarMargin,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(
+                Radius.circular(style.avatarL / 2.0),
               ),
-              //昵称、登录/注册
-              Container(
-                height: style.nicknameHeight,
-                width: style.profileBgWidth -
-                    (style.avatarMargin.left + style.avatarL) -
-                    10,
-                margin: EdgeInsets.only(
-                    left: (style.avatarMargin.left + style.avatarL + 5),
-                    top: (style.avatarMargin.top +
-                        (style.avatarL - style.nicknameHeight) / 2.0)),
-                child: FlatButton(
-                    onPressed: () {
-                      if (u.isLogined) {
-                        return;
-                      }
-                      _loginOrRegist();
-                    },
-                    child: u.isLogined
-                        ? Consumer<MyModelHandler>(
-                            builder: (context, m, child) {
-                              return (m.company != null &&
-                                      m.company.name.length > 0)
-                                  ? Container(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            u.currentUser.nickname.length > 0
-                                                ? u.currentUser.nickname
-                                                : '昵称',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                          Text(
-                                            m.company.name,
-                                            style: TextStyle(
-                                                color: Colors.grey[200],
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : Container(
-                                      width: style.profileBgWidth -
-                                          (style.avatarMargin.left +
-                                              style.avatarL) -
-                                          10,
-                                      child: Text(
-                                        u.currentUser.nickname.length > 0
-                                            ? u.currentUser.nickname
+            ),
+          ),
+          //昵称、登录/注册
+          Container(
+            height: style.nicknameHeight,
+            width: style.profileBgWidth -
+                (style.avatarMargin.left + style.avatarL) -
+                10,
+            margin: EdgeInsets.only(
+                left: (style.avatarMargin.left + style.avatarL + 5),
+                top: (style.avatarMargin.top +
+                    (style.avatarL - style.nicknameHeight) / 2.0)),
+            child: FlatButton(
+                onPressed: () {
+                  if (userModel.isLogined) {
+                    return;
+                  }
+                  _loginOrRegist();
+                },
+                child: userModel.isLogined
+                    ? Consumer<MyModelHandler>(
+                        builder: (context, m, child) {
+                          return (m.company != null &&
+                                  m.company.name.length > 0)
+                              ? Container(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        userModel.currentUser.nickname.length >
+                                                0
+                                            ? userModel.currentUser.nickname
                                             : '昵称',
                                         style: TextStyle(
                                             color: Colors.white,
@@ -110,89 +86,114 @@ class MyProfileView extends StatelessWidget {
                                             fontWeight: FontWeight.w600),
                                         textAlign: TextAlign.left,
                                       ),
-                                    );
-                            },
-                          )
-                        : Container(
-                            width: style.profileBgWidth -
-                                (style.avatarMargin.left + style.avatarL) -
-                                10,
-                            child: Text(
-                              '登录/注册',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600),
-                              textAlign: TextAlign.left,
-                            ),
-                          )),
-              ),
-              //收益
-              Container(
-                width: style.profileBgWidth - 10,
-                height: style.eqHeight,
-                margin: EdgeInsets.only(
-                  left: 5,
-                  top: style.avatarMargin.top + style.avatarL + 20,
-                ),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(style.eqHeight / 2.0))),
-                child: Consumer<MyModelHandler>(
-                  builder: (context, m, child) {
-                    return Row(
-                      children: [
-                        Container(
-                          width: (style.profileBgWidth - 10) / 2.0,
-                          child: FlatButton(
-                              onPressed: () {},
-                              child: Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        left: Screen.setWidth(30), top: 8),
-                                    child: Text(m.company != null
-                                        ? m.company.integ
-                                        : '0'),
+                                      Text(
+                                        m.company.name,
+                                        style: TextStyle(
+                                            color: Colors.grey[200],
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ],
                                   ),
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        left: Screen.setWidth(30)),
-                                    child: Text(u.isLogined ? '我的积分' : '积分'),
+                                )
+                              : Container(
+                                  width: style.profileBgWidth -
+                                      (style.avatarMargin.left +
+                                          style.avatarL) -
+                                      10,
+                                  child: Text(
+                                    userModel.currentUser.nickname.length > 0
+                                        ? userModel.currentUser.nickname
+                                        : '昵称',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                    textAlign: TextAlign.left,
                                   ),
-                                ],
-                              )),
+                                );
+                        },
+                      )
+                    : Container(
+                        width: style.profileBgWidth -
+                            (style.avatarMargin.left + style.avatarL) -
+                            10,
+                        child: Text(
+                          '登录/注册',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.left,
                         ),
-                        Container(
-                          width: (style.profileBgWidth - 10) / 2.0,
-                          child: FlatButton(
-                              onPressed: () {},
-                              child: Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        top: 8, right: Screen.setWidth(30)),
-                                    child: Text(m.company != null
-                                        ? m.company.redPack
-                                        : '0'),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        right: Screen.setWidth(30)),
-                                    child: Text(u.isLogined ? '我的红包' : '红包'),
-                                  )
-                                ],
-                              )),
-                        )
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+                      )),
+          ),
+          //收益
+          Container(
+            width: style.profileBgWidth - 10,
+            height: style.eqHeight,
+            margin: EdgeInsets.only(
+              left: 5,
+              top: style.avatarMargin.top + style.avatarL + 20,
+            ),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    BorderRadius.all(Radius.circular(style.eqHeight / 2.0))),
+            child: Consumer<MyModelHandler>(
+              builder: (context, m, child) {
+                return Row(
+                  children: [
+                    Container(
+                      width: (style.profileBgWidth - 10) / 2.0,
+                      child: FlatButton(
+                          onPressed: () {},
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(
+                                    left: Screen.setWidth(30), top: 8),
+                                child: Text(
+                                    m.company != null ? m.company.integ : '0'),
+                              ),
+                              Container(
+                                margin:
+                                    EdgeInsets.only(left: Screen.setWidth(30)),
+                                child:
+                                    Text(userModel.isLogined ? '我的积分' : '积分'),
+                              ),
+                            ],
+                          )),
+                    ),
+                    Container(
+                      width: (style.profileBgWidth - 10) / 2.0,
+                      child: FlatButton(
+                          onPressed: () {},
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(
+                                    top: 8, right: Screen.setWidth(30)),
+                                child: Text(m.company != null
+                                    ? m.company.redPack
+                                    : '0'),
+                              ),
+                              Container(
+                                margin:
+                                    EdgeInsets.only(right: Screen.setWidth(30)),
+                                child:
+                                    Text(userModel.isLogined ? '我的红包' : '红包'),
+                              )
+                            ],
+                          )),
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -40,22 +40,34 @@ class MyPage extends StatelessWidget {
                         scrollable: false,
                         headerSliverBuilder: (context, innerBoxIsScrolled) =>
                             <Widget>[
-                              SliverList(
-                                  delegate:
-                                      SliverChildBuilderDelegate((ctx, index) {
-                                return Container(
-                                  child: MyProfileView(),
-                                );
-                              }, childCount: 1)),
+                              // SliverList(
+                              //     delegate:
+                              //         SliverChildBuilderDelegate((ctx, index) {
+                              //   return MyProfileView(style: ms, userModel: u);
+                              // }, childCount: 1)),
                             ],
                         numberOfSection: models.length,
                         numberOfRowsInSection: (section) {
                           List<MyList> lists = models[section].lists;
                           return lists.length;
                         },
+                        // heightForRowAtIndexPath: (context, indexPath) => 44,
+                        viewForHeaderInSection: (context, section) =>
+                            Container(height: 10, color: Colors.grey[300]),
                         cellForRowAtIndexPath: (ctx, indexPath) {
-                          return Text(
-                              'data section ${indexPath.section} row ${indexPath.row}');
+                          List<MyList> lists = models[indexPath.section].lists;
+                          MyList list = lists[indexPath.row];
+                          return list != null
+                              ? Container(
+                                  color: Colors.cyan,
+                                  child: ListTile(
+                                    leading: list.iconPath.length > 0
+                                        ? Image.asset(list.iconPath)
+                                        : Icon(Icons.help),
+                                    trailing: Icon(Icons.keyboard_arrow_right),
+                                  ),
+                                )
+                              : Container();
                         }),
                   );
                 })),
@@ -65,9 +77,3 @@ class MyPage extends StatelessWidget {
     );
   }
 }
-
-/*
-Container(
-              child: 
-            )
-*/

@@ -40,7 +40,7 @@ class ZNKTable extends StatelessWidget {
   ZNKTable({
     Key key,
     this.shrinkWrap = true,
-    this.scrollable = false,
+    this.scrollable = true,
     this.scrollDirection = Axis.vertical,
     this.numberOfSection = 1,
     @required this.numberOfRowsInSection,
@@ -69,6 +69,7 @@ class ZNKTable extends StatelessWidget {
   Widget _singleSeparatedListView(
       int section, bool shrinkWrap, bool scrollable) {
     return ListView.separated(
+        padding: EdgeInsets.only(top: 0), //置顶
         physics: scrollable
             ? BouncingScrollPhysics()
             : NeverScrollableScrollPhysics(),
@@ -116,6 +117,7 @@ class ZNKTable extends StatelessWidget {
             },
             itemBuilder: (BuildContext context, int section) {
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   this.viewForHeaderInSection != null
                       ? this.viewForHeaderInSection(context, section)
