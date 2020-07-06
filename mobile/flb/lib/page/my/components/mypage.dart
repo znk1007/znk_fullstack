@@ -40,34 +40,48 @@ class MyPage extends StatelessWidget {
                         scrollable: false,
                         headerSliverBuilder: (context, innerBoxIsScrolled) =>
                             <Widget>[
-                              // SliverList(
-                              //     delegate:
-                              //         SliverChildBuilderDelegate((ctx, index) {
-                              //   return MyProfileView(style: ms, userModel: u);
-                              // }, childCount: 1)),
+                              SliverList(
+                                  delegate:
+                                      SliverChildBuilderDelegate((ctx, index) {
+                                return MyProfileView(style: ms, userModel: u);
+                              }, childCount: 1)),
                             ],
                         numberOfSection: models.length,
                         numberOfRowsInSection: (section) {
                           List<MyList> lists = models[section].lists;
                           return lists.length;
                         },
-                        // heightForRowAtIndexPath: (context, indexPath) => 44,
+                        heightForRowAtIndexPath: (context, indexPath) =>
+                            ms.rowHeight,
                         viewForHeaderInSection: (context, section) =>
                             Container(height: 10, color: Colors.grey[300]),
                         cellForRowAtIndexPath: (ctx, indexPath) {
                           List<MyList> lists = models[indexPath.section].lists;
                           MyList list = lists[indexPath.row];
-                          return list != null
-                              ? Container(
-                                  color: Colors.cyan,
-                                  child: ListTile(
-                                    leading: list.iconPath.length > 0
-                                        ? Image.asset(list.iconPath)
-                                        : Icon(Icons.help),
-                                    trailing: Icon(Icons.keyboard_arrow_right),
-                                  ),
-                                )
-                              : Container();
+                          double iconTop = Screen.setWidth(5);
+                          double iconS = ms.rowHeight - 2 * iconTop;
+                          return GestureDetector(
+                              child: Row(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(left: 10, top: 0),
+                                width: iconS,
+                                height: iconS,
+                                child: (list.iconPath != null &&
+                                        list.iconPath.length > 0)
+                                    ? Image.asset(list.iconPath)
+                                    : Icon(Icons.add_alert),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 8),
+                                child: Text(list.title ?? ''),
+                              ),
+                              Flex(direction: Axis.horizontal),
+                              Container(
+                                child: Icon(Icons.keyboard_arrow_right),
+                              ),
+                            ],
+                          ));
                         }),
                   );
                 })),

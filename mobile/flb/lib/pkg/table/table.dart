@@ -107,6 +107,7 @@ class ZNKTable extends StatelessWidget {
   Widget _separatedListView() {
     return this.numberOfSection > 1
         ? ListView.separated(
+            padding: EdgeInsets.only(top: 0), //置顶
             physics: this.scrollable
                 ? BouncingScrollPhysics()
                 : NeverScrollableScrollPhysics(),

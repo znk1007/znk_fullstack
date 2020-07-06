@@ -17,4 +17,6 @@ class MyPageStyle extends ChangeNotifier {
   double nicknameHeight = Screen.setHeight(40).toDouble();
   //收益模块高度
   double eqHeight = Screen.setWidth(50);
+  //行高
+  double rowHeight = Screen.setWidth(40);
 }

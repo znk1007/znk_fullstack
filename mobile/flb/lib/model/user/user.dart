@@ -11,7 +11,7 @@ class UserModel extends ChangeNotifier {
   //是否已登录
   bool get isLogined => (_user != null && _user.status == 1);
   //是否测试
-  bool _test = false;
+  bool _test = true;
 
   //加载当前用户信息
   Future<void> loadUserData() async {
