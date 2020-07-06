@@ -1,7 +1,7 @@
 import 'package:flb/model/style/mystyle.dart';
 import 'package:flb/model/style/style.dart';
 import 'package:flb/model/user/user.dart';
-import 'package:flb/page/my/components/myprofile.dart';
+import 'package:flb/page/my/myprofile.dart';
 import 'package:flb/page/my/model/my.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flb/pkg/table/table.dart';
