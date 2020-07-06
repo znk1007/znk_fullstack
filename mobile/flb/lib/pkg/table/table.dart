@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 //ZNKIndexPath 地址索引
@@ -61,8 +62,8 @@ class ZNKTable extends StatelessWidget {
                 ? BouncingScrollPhysics()
                 : NeverScrollableScrollPhysics(),
             headerSliverBuilder: this.headerSliverBuilder,
-            body: _separatedListView())
-        : _separatedListView();
+            body: _separatedListView(context))
+        : _separatedListView(context);
   }
 
   //单列表
@@ -104,7 +105,7 @@ class ZNKTable extends StatelessWidget {
   }
 
   //嵌套表格
-  Widget _separatedListView() {
+  Widget _separatedListView(BuildContext context) {
     return this.numberOfSection > 1
         ? ListView.separated(
             padding: EdgeInsets.only(top: 0), //置顶
@@ -113,21 +114,27 @@ class ZNKTable extends StatelessWidget {
                 : NeverScrollableScrollPhysics(),
             scrollDirection: this.scrollDirection,
             itemCount: this.numberOfSection,
-            separatorBuilder: (BuildContext context, int index) {
+            separatorBuilder: (BuildContext ctx, int index) {
               return Container();
             },
-            itemBuilder: (BuildContext context, int section) {
+            itemBuilder: (BuildContext ctx, int section) {
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   this.viewForHeaderInSection != null
-                      ? this.viewForHeaderInSection(context, section)
+                      ? this.viewForHeaderInSection(ctx, section)
                       : Container(),
                   _singleSeparatedListView(section, this.shrinkWrap, false),
                 ],
               );
             },
           )
-        : _singleSeparatedListView(0, this.shrinkWrap, this.scrollable);
+        : Column(
+            children: [
+              this.viewForHeaderInSection != null
+                  ? this.viewForHeaderInSection(context, 0)
+                  : Container(),
+              _singleSeparatedListView(0, this.shrinkWrap, this.scrollable),
+            ],
+          );
   }
 }

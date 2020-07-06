@@ -56,6 +56,7 @@ class _TabPageState extends State<TabPage> {
     return Scaffold(
       body: LoadingOverlay(
         child: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
           child: Container(
             padding: const EdgeInsets.all(0),
             child: _currentPage(),

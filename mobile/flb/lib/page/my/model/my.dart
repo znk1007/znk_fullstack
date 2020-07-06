@@ -1,9 +1,8 @@
 import 'package:flb/model/url/url.dart';
 import 'package:flb/model/user/user.dart';
-import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flutter/widgets.dart';
 
-enum MyListType {
+enum MyItemType {
   extend, //推广
   cashcoupon, //代金券
   order, //订单
@@ -15,28 +14,121 @@ enum MyListType {
   about, //关于
 }
 
-enum MyModelType {
+enum MyListType {
   normal, //普通
   system, //系统
 }
 
-class MyModel {
-  //段类型
-  MyModelType type;
-  //列表
-  List<MyList> lists = [];
-}
-
-class MyList {
+class MyItem {
   //icon地址
   String iconPath = '';
   //标题
   String title;
   //列表类型
-  MyListType type;
+  MyItemType type;
 }
 
-class MyCompany {
+class MyList extends ChangeNotifier {
+  //段类型
+  MyListType type;
+  //列表
+  List<MyItem> items = [];
+
+  //已登录数据
+  List<MyList> _loginedList = [];
+  //未登录数据
+  List<MyList> _unloginedList = [];
+
+  //读取我的页面数据
+  List<MyList> fetch(bool isLogined) {
+    if (isLogined) {
+      _unloginedList = [];
+      if (_loginedList.length == 0) {
+        List<MyList> models = [];
+        List<MyItem> temp = [];
+
+        MyList model = MyList();
+        model.type = MyListType.normal;
+
+        MyItem sub = MyItem();
+        sub.title = '推广';
+        sub.type = MyItemType.extend;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '代金券';
+        sub.type = MyItemType.cashcoupon;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '我的订单';
+        sub.type = MyItemType.order;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '收藏';
+        sub.type = MyItemType.collection;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '积分商城';
+        sub.type = MyItemType.integ;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '我的地址';
+        sub.type = MyItemType.addr;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '我的消息';
+        sub.type = MyItemType.extend;
+        temp.add(sub);
+
+        model.items = temp;
+        models.add(model);
+
+        model = MyList();
+        temp = [];
+        sub = MyItem();
+        sub.title = '关于我们';
+        sub.type = MyItemType.about;
+        temp.add(sub);
+
+        sub = MyItem();
+        sub.title = '设置';
+        sub.type = MyItemType.setting;
+        temp.add(sub);
+
+        model.items = temp;
+        models.add(model);
+        _loginedList = models;
+      }
+      return _loginedList;
+    } else {
+      _loginedList = [];
+      if (_unloginedList.length == 0) {
+        List<MyList> models = [];
+        MyList model = MyList();
+        List<MyItem> temp = [];
+        MyItem sub = MyItem();
+        sub.title = '关于我们';
+        sub.type = MyItemType.about;
+        temp.add(sub);
+        sub = MyItem();
+        sub.title = '设置';
+        sub.type = MyItemType.setting;
+        temp.add(sub);
+        model.items = temp;
+        models.add(model);
+        _unloginedList = models;
+      }
+      return _unloginedList;
+    }
+  }
+}
+
+class MyCompany extends ChangeNotifier {
   //企业名
   String name;
   //企业编码
@@ -45,13 +137,11 @@ class MyCompany {
   String integ;
   //红包
   String redPack;
-}
 
-class MyModelHandler extends ChangeNotifier {
   //企业信息
-  MyCompany _company;
-
-  MyCompany get company => _company;
+  MyCompany _innerInfo;
+  //企业信息
+  MyCompany get info => _innerInfo;
   //拉取企业信息
   Future<void> fetchCompanyInfo(UserModel userModel) async {
     String sessionID = userModel.currentUser.sessionID;
@@ -64,99 +154,6 @@ class MyModelHandler extends ChangeNotifier {
     comp.code = '10000';
     comp.integ = '0';
     comp.redPack = '0';
-    _company = comp;
-  }
-
-  //已登录数据
-  List<MyModel> _loginedList = [];
-  //未登录数据
-  List<MyModel> _unloginedList = [];
-
-  //读取我的页面数据
-  List<MyModel> fetchMyList(bool isLogined) {
-    if (isLogined) {
-      _unloginedList = [];
-      if (_loginedList.length == 0) {
-        List<MyModel> models = [];
-        List<MyList> temp = [];
-
-        MyModel model = MyModel();
-        model.type = MyModelType.normal;
-
-        MyList sub = MyList();
-        sub.title = '推广';
-        sub.type = MyListType.extend;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '代金券';
-        sub.type = MyListType.cashcoupon;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '我的订单';
-        sub.type = MyListType.order;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '收藏';
-        sub.type = MyListType.collection;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '积分商城';
-        sub.type = MyListType.integ;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '我的地址';
-        sub.type = MyListType.addr;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '我的消息';
-        sub.type = MyListType.extend;
-        temp.add(sub);
-
-        model.lists = temp;
-        models.add(model);
-
-        model = MyModel();
-        temp = [];
-        sub = MyList();
-        sub.title = '关于我们';
-        sub.type = MyListType.about;
-        temp.add(sub);
-
-        sub = MyList();
-        sub.title = '设置';
-        sub.type = MyListType.setting;
-        temp.add(sub);
-
-        model.lists = temp;
-        models.add(model);
-        _loginedList = models;
-      }
-      return _loginedList;
-    } else {
-      _loginedList = [];
-      if (_unloginedList.length == 0) {
-        List<MyModel> models = [];
-        MyModel model = MyModel();
-        List<MyList> temp = [];
-        MyList sub = MyList();
-        sub.title = '关于我们';
-        sub.type = MyListType.about;
-        temp.add(sub);
-        sub = MyList();
-        sub.title = '设置';
-        sub.type = MyListType.setting;
-        temp.add(sub);
-        model.lists = temp;
-        models.add(model);
-        _unloginedList = models;
-      }
-      return _unloginedList;
-    }
+    _innerInfo = comp;
   }
 }
