@@ -48,11 +48,12 @@ class SearchView extends StatefulWidget {
 class _SearchViewState extends State<SearchView> {
   final TextEditingController _controller = TextEditingController();
   //占位文本
-  String _placeholder = '输入搜索内容';
+  String _curPlaceholder = '输入搜索内容';
+
+  List<String> _placeholders = [];
   //更新占位文本
-  void updatePlaceholer(String text) {
+  void updatePlaceholer(List<String> texts) {
     setState(() {
-      _placeholder = text;
     });
   }
 
@@ -82,7 +83,7 @@ class _SearchViewState extends State<SearchView> {
       child: widget._style.enabled ? _searchFormField() : Container()
     );
   }
-
+  //搜索输入框
   Widget _searchFormField() {
     return Container(
         width: widget._style.width - 10,
