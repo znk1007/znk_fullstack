@@ -222,7 +222,7 @@
 		</data>
 		<key>Frameworks/path_provider.framework/path_provider</key>
 		<data>
-		5Au8NKNYOr45wCfmASfBRCcnbjI=
+		+D5SF4j/FsJq/PH1pmHdQ2fCM4k=
 		</data>
 		<key>Frameworks/sqflite.framework/Info.plist</key>
 		<data>
@@ -234,7 +234,7 @@
 		</data>
 		<key>Frameworks/sqflite.framework/sqflite</key>
 		<data>
-		AqYSPdEMonRQ51aIjBeMdbsRcdM=
+		HWSExu4tU5HKLwykLWdF6UHUkYE=
 		</data>
 		<key>Info.plist</key>
 		<data>
@@ -845,11 +845,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			5Au8NKNYOr45wCfmASfBRCcnbjI=
+			+D5SF4j/FsJq/PH1pmHdQ2fCM4k=
 			</data>
 			<key>hash2</key>
 			<data>
-			z5MFMeCD2XY2Jhovj+N1LJMW+4LWoGHusfbpcVfKPQc=
+			v90TMXk7OTd5my8JIUX2idUXHOqkUxaz5GW6XSq/1uo=
 			</data>
 		</dict>
 		<key>Frameworks/sqflite.framework/Info.plist</key>
@@ -878,11 +878,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			AqYSPdEMonRQ51aIjBeMdbsRcdM=
+			HWSExu4tU5HKLwykLWdF6UHUkYE=
 			</data>
 			<key>hash2</key>
 			<data>
-			4Fmjzdd2hIMnz5VHUIYAErib6R5Q/FWJCZUPHpKx420=
+			hoxR4NlqUtTDkk7EX8Zp5vgbRDxArHbUEIo32KwLzlg=
 			</data>
 		</dict>
 	</dict>
