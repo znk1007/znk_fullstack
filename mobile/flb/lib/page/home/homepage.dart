@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
               style: SearchStyle(
                   margin:
                       EdgeInsets.only(left: 50, top: Screen.safeTopArea + 10),
-                  size: Size(300, 45),
+                  width: 300,
                   cornerRadius: 45 / 2.0)));
     });
   }
