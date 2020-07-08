@@ -1,5 +1,5 @@
-import 'package:flb/model/url/url.dart';
-import 'package:flb/model/user/user.dart';
+import 'package:flb/models/url/url.dart';
+import 'package:flb/models/user/user.dart';
 import 'package:flutter/widgets.dart';
 
 enum MyItemType {

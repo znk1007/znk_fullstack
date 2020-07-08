@@ -1,7 +1,7 @@
-import 'package:flb/page/classify/classifypage.dart';
-import 'package:flb/page/home/homepage.dart';
-import 'package:flb/page/my/mypage.dart';
-import 'package:flb/page/shop/shoppage.dart';
+import 'package:flb/views/classify/classifypage.dart';
+import 'package:flb/views/home/homepage.dart';
+import 'package:flb/views/my/mypage.dart';
+import 'package:flb/views/shop/shoppage.dart';
 import 'package:flutter/material.dart';
 
 class TabbarItem {

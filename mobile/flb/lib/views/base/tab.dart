@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flb/page/base/hud.dart';
-import 'package:flb/page/base/item.dart';
+import 'package:flb/views/base/hud.dart';
+import 'package:flb/views/base/item.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';

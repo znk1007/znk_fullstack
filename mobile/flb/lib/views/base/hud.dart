@@ -1,4 +1,4 @@
-import 'package:flb/page/base/tab.dart';
+import 'package:flb/views/base/tab.dart';
 
 class Hud {
   //单例

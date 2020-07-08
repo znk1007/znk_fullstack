@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flb/model/style/style.dart';
-import 'package:flb/model/user/user.dart';
-import 'package:flb/page/base/item.dart';
-import 'package:flb/page/base/launch.dart';
-import 'package:flb/page/base/tab.dart';
+import 'package:flb/models/style/style.dart';
+import 'package:flb/models/user/user.dart';
+import 'package:flb/views/base/item.dart';
+import 'package:flb/views/base/launch.dart';
+import 'package:flb/views/base/tab.dart';
 import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/db/sqlite/sqlitedb.dart';
 import 'package:flb/util/db/sqlite/user/user.dart';
