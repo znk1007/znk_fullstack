@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+
 //选择事件回调
 typedef ZNKBannerDidSelected = Function(int index);
 
@@ -21,6 +23,16 @@ class ZNKBanner extends StatefulWidget {
   final ZNKBannerDidSelected didSelected;
   //动画效果
   final Curve curve;
+  //是否显示指示器
+  final bool showIndicator;
+  //只有一个页码时，是否隐藏指示器
+  final bool hideIndicatorWhileSingle;
+  //指示器点大小
+  final double indicatorDotSize;
+  //指示器普通颜色
+  final Color indicatorTintColor;
+  //指示器轨迹颜色
+  final Color indicatorTrackColor;
 
   _ZNKBannerState state = _ZNKBannerState();
 
@@ -33,6 +45,11 @@ class ZNKBanner extends StatefulWidget {
       this.alignment = Alignment.centerLeft,
       this.curve = Curves.linear,
       this.didSelected,
+      this.showIndicator = true,
+      this.hideIndicatorWhileSingle = true,
+      this.indicatorDotSize = 8.0,
+      this.indicatorTintColor = Colors.lightBlue,
+      this.indicatorTrackColor = Colors.blue,
       @required this.banners})
       : assert(banners != null && banners.length > 0),
         super(key: key);
@@ -94,10 +111,13 @@ class _ZNKBannerState extends State<ZNKBanner>
   }
 
   void _startTimer() {
+    if (widget.banners.length < 2) {
+      return;
+    }
+    _stopTimer();
     _timer = Timer.periodic(Duration(seconds: 2 + widget.interval), (timer) {
       _pageController.animateToPage(2,
-          duration: Duration(seconds: widget.interval),
-          curve: widget.curve);
+          duration: Duration(seconds: widget.interval), curve: widget.curve);
     });
   }
 
@@ -127,17 +147,28 @@ class _ZNKBannerState extends State<ZNKBanner>
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        _pageView(),
+        _indicator(),
+      ],
+    );
+  }
+
+  Widget _pageView() {
+    print('pre page: $_prePage current page: $_curPage next page: $_nextPage');
     return GestureDetector(
         onTap: () {
           _stopTimer();
           if (widget.didSelected != null) {
             widget.didSelected(_curPage);
           }
-          Future.delayed(Duration(seconds: 1), (){
+          Future.delayed(Duration(seconds: 1), () {
             _startTimer();
           });
         },
         child: Container(
+          color: Colors.cyan,
           margin: widget.margin,
           height: widget.size.height,
           width: widget.size.width,
@@ -163,6 +194,102 @@ class _ZNKBannerState extends State<ZNKBanner>
         ));
   }
 
+  Widget _indicator() {
+    if (!widget.showIndicator) {
+      return Container();
+    }
+    if (widget.hideIndicatorWhileSingle && widget.banners.length == 1) {
+      return Container();
+    }
+    return _ZNKBannerIndicator(
+      margin: EdgeInsets.only(
+          top: widget.margin.top +
+              widget.size.height -
+              widget.indicatorDotSize -
+              2.0),
+      controller: _pageController,
+      current: _curPage,
+      itemCount: widget.banners.length,
+      dotMaxZoom: 1.0,
+      tintColor: widget.indicatorTintColor,
+      trackColor: widget.indicatorTrackColor,
+      dotSize: widget.indicatorDotSize,
+    );
+  }
+
   @override
   bool get wantKeepAlive => true;
+}
+
+class _ZNKBannerIndicator extends AnimatedWidget {
+  //分页控制器
+  final PageController controller;
+  //个数
+  final int itemCount;
+  //普通点颜色
+  final Color tintColor;
+  //选中点颜色
+  final Color trackColor;
+  //点大小
+  final double dotSize;
+  //点间距
+  final double dotSpacing;
+  //点放大最大范围
+  final double dotMaxZoom;
+  //当前点
+  final int current;
+  //边距
+  final EdgeInsets margin;
+  //选择指示器点回调
+  final Function(int index) didSelectedIndex;
+
+  _ZNKBannerIndicator(
+      {this.controller,
+      this.itemCount,
+      this.tintColor = Colors.grey,
+      this.trackColor = Colors.blue,
+      this.margin = EdgeInsets.zero,
+      this.current = 0,
+      this.dotSize = 8.0,
+      this.dotSpacing = 5.0,
+      this.dotMaxZoom = 2,
+      this.didSelectedIndex})
+      : assert(controller != null),
+        super(listenable: controller);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: this.margin,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List<Widget>.generate(this.itemCount, _createDot),
+      ),
+    );
+  }
+
+  //创建点
+  Widget _createDot(int index) {
+    double selectedness =
+        Curves.easeOut.transform(max(0.0, 1.0 - (current - index).abs()));
+    double zoom = 1.0 + (this.dotMaxZoom - 1.0) * selectedness;
+    return Container(
+      width: max(this.dotSpacing * (this.itemCount / 3), 10),
+      child: Material(
+        color: this.current == index ? this.trackColor : this.tintColor,
+        type: MaterialType.circle,
+        child: Container(
+          width: this.dotSize * zoom,
+          height: this.dotSize * zoom,
+          child: InkWell(
+            onTap: () {
+              if (didSelectedIndex != null) {
+                didSelectedIndex(index);
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
 }
