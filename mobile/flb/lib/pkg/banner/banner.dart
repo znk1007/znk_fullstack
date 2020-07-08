@@ -14,7 +14,9 @@ class ZNKBanner extends StatefulWidget {
   //大小
   final Size size;
   //动画间隔
-  final int interval;
+  final int timeInterval;
+  //动画时长
+  final Duration animateDuration;
   //边距
   final EdgeInsets margin;
   //停靠
@@ -33,6 +35,8 @@ class ZNKBanner extends StatefulWidget {
   final Color indicatorTintColor;
   //指示器轨迹颜色
   final Color indicatorTrackColor;
+  //是否可点击指示器
+  final bool enableIndicatorSelection;
 
   _ZNKBannerState state = _ZNKBannerState();
 
@@ -40,7 +44,8 @@ class ZNKBanner extends StatefulWidget {
       {Key key,
       this.scrollDirection = Axis.horizontal,
       this.size = const Size(300, 45),
-      this.interval = 2,
+      this.timeInterval = 5,
+      this.animateDuration = const Duration(milliseconds: 500),
       this.margin = EdgeInsets.zero,
       this.alignment = Alignment.centerLeft,
       this.curve = Curves.linear,
@@ -50,6 +55,7 @@ class ZNKBanner extends StatefulWidget {
       this.indicatorDotSize = 8.0,
       this.indicatorTintColor = Colors.lightBlue,
       this.indicatorTrackColor = Colors.blue,
+      this.enableIndicatorSelection = true,
       @required this.banners})
       : assert(banners != null && banners.length > 0),
         super(key: key);
@@ -115,9 +121,9 @@ class _ZNKBannerState extends State<ZNKBanner>
       return;
     }
     _stopTimer();
-    _timer = Timer.periodic(Duration(seconds: 2 + widget.interval), (timer) {
+    _timer = Timer.periodic(Duration(seconds: widget.timeInterval), (timer) {
       _pageController.animateToPage(2,
-          duration: Duration(seconds: widget.interval), curve: widget.curve);
+          duration: widget.animateDuration, curve: widget.curve);
     });
   }
 
@@ -156,7 +162,6 @@ class _ZNKBannerState extends State<ZNKBanner>
   }
 
   Widget _pageView() {
-    print('pre page: $_prePage current page: $_curPage next page: $_nextPage');
     return GestureDetector(
         onTap: () {
           _stopTimer();
@@ -214,6 +219,15 @@ class _ZNKBannerState extends State<ZNKBanner>
       tintColor: widget.indicatorTintColor,
       trackColor: widget.indicatorTrackColor,
       dotSize: widget.indicatorDotSize,
+      didSelectedIndex: (idx) {
+        _stopTimer();
+        _pageController.animateToPage(2,
+            duration: widget.animateDuration, curve: widget.curve);
+        _curPage = idx - 1;
+        Future.delayed(Duration(seconds: 1),(){
+          _startTimer();
+        });
+      },
     );
   }
 

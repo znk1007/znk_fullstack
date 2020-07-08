@@ -36,11 +36,11 @@ class _HomePageState extends State<HomePage> {
     List<Widget> models = [
       Container(child: Text('测试一'),color: RandomHandler.randomColor),
       Container(child: Text('测试二'),color: RandomHandler.randomColor),
-      // Container(child: Text('测试三'),color: RandomHandler.randomColor),
-      // Container(child: Text('测试四'),color: RandomHandler.randomColor),
-      // Container(child: Text('测试五'),color: RandomHandler.randomColor),
-      // Container(child: Text('测试六'),color: RandomHandler.randomColor),
-      // Container(child: Text('测试日'),color: RandomHandler.randomColor),
+      Container(child: Text('测试三'),color: RandomHandler.randomColor),
+      Container(child: Text('测试四'),color: RandomHandler.randomColor),
+      Container(child: Text('测试五'),color: RandomHandler.randomColor),
+      Container(child: Text('测试六'),color: RandomHandler.randomColor),
+      Container(child: Text('测试日'),color: RandomHandler.randomColor),
     ];
     return ZNKBanner(
       banners: models,
