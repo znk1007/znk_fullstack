@@ -1,4 +1,4 @@
-import 'package:flb/util/random/color.dart';
+import 'package:flb/util/random/random.dart';
 import 'package:flutter/material.dart';
 
 class LaunchPage extends StatelessWidget {

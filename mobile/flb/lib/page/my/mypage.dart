@@ -48,7 +48,6 @@ class _MyPageState extends State<MyPage> {
 
   @override
   void didUpdateWidget(MyPage oldWidget) {
-    print('didUpdateWidget');
     super.didUpdateWidget(oldWidget);
   }
 
