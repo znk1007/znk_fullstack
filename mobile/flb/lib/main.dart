@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/models/style/style.dart';
-import 'package:flb/models/user/user.dart';
-import 'package:flb/views/base/item.dart';
+import 'package:flb/models/user.dart';
+import 'package:flb/provider/provider.dart';
+import 'package:flb/views/tabbar/item.dart';
 import 'package:flb/views/base/launch.dart';
-import 'package:flb/views/base/tab.dart';
+import 'package:flb/views/tabbar/tabbar.dart';
 import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/db/sqlite/sqlitedb.dart';
 import 'package:flb/util/db/sqlite/user/user.dart';
@@ -17,16 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //fixed binary message binding
   SqliteDB.shared.setdbName('user.db');
   UserDB.createUserTable();
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => TabbarItems()),
-        ChangeNotifierProvider(create: (_) => UserModel()),
-        ChangeNotifierProvider(create: (_) => ThemeStyle()),
-      ],
-      child: MyApp(),
-    ),
-  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -35,22 +27,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     //拉取分栏数据
     _fetchTabbarItems(context);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: '货满仓',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: znkProviders,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: '货满仓',
+        theme: ThemeData(
+          primarySwatch: Provider.of<ThemeStyle>(context).primarySwatch,
+        ),
+        home: Consumer<TabbarItems>(
+            builder: (ctx1, t, w) => (t.items.length > 0)
+                ? FutureBuilder(
+                    future: _loadUserData(context),
+                    // initialData: InitialData,
+                    builder: (BuildContext ctx2, AsyncSnapshot<User> snapshot) {
+                      return ZNKTabbar(items: t.items);
+                    },
+                  )
+                : LaunchPage()),
       ),
-      home: Consumer<TabbarItems>(
-          builder: (ctx1, t, w) => (t.items.length > 0)
-              ? FutureBuilder(
-                  future: _loadUserData(context),
-                  // initialData: InitialData,
-                  builder: (BuildContext ctx2, AsyncSnapshot<User> snapshot) {
-                    return TabPage(items: t.items);
-                  },
-                )
-              : LaunchPage()),
     );
   }
 

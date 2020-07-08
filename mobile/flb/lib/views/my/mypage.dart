@@ -1,8 +1,8 @@
 import 'package:flb/models/style/mystyle.dart';
 import 'package:flb/models/style/style.dart';
-import 'package:flb/models/user/user.dart';
+import 'package:flb/models/user.dart';
 import 'package:flb/views/my/myprofile.dart';
-import 'package:flb/views/my/model/my.dart';
+import 'package:flb/models/my.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flb/pkg/table/table.dart';
 import 'package:flutter/material.dart';

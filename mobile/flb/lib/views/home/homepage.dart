@@ -1,5 +1,5 @@
 import 'package:flb/models/style/style.dart';
-import 'package:flb/views/home/model/home.dart';
+import 'package:flb/models/home.dart';
 import 'package:flb/pkg/banner/banner.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

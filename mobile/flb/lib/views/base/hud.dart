@@ -1,4 +1,4 @@
-import 'package:flb/views/base/tab.dart';
+import 'package:flb/views/tabbar/tabbar.dart';
 
 class Hud {
   //单例
@@ -11,9 +11,9 @@ class Hud {
   /* 单例方法二 */
   static Hud get shared => _instance;
   //分栏页
-  TabPage _tabPage;
+  ZNKTabbar _tabPage;
   //设置分栏页码对象
-  void wrap(TabPage tab) {
+  void wrap(ZNKTabbar tab) {
     _tabPage = tab;
   }
   //显示加载框
