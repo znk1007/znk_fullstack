@@ -45,8 +45,12 @@ class _HomePageState extends State<HomePage> {
     return ZNKBanner(
       banners: models,
       margin: EdgeInsets.only(left: 50, top: 80),
-      scrollDirection: Axis.horizontal,
+      scrollDirection: Axis.vertical,
       alignment: Alignment.centerLeft,
+
+      didSelected: (index) {
+        print('did selected: $index');
+      },
     );
   }
 }
