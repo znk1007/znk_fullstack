@@ -214,7 +214,7 @@ class _ZNKBannerState extends State<ZNKBanner>
           top: widget.margin.top +
               widget.size.height -
               widget.indicatorDotSize -
-              2.0),
+              5.0),
       controller: _pageController,
       current: _curPage,
       itemCount: widget.banners.length,
@@ -291,7 +291,7 @@ class _ZNKBannerIndicator extends AnimatedWidget {
         Curves.easeOut.transform(max(0.0, 1.0 - (current - index).abs()));
     double zoom = 1.0 + (this.dotMaxZoom - 1.0) * selectedness;
     return Container(
-      width: max(this.dotSpacing * (this.itemCount / 3), 10),
+      width: max(this.dotSpacing * (this.itemCount / 3), 12),
       child: Material(
         color: this.current == index ? this.trackColor : this.tintColor,
         type: MaterialType.circle,

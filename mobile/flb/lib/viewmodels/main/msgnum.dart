@@ -12,8 +12,8 @@ class ZNKMsgViewModel extends ZNKBaseViewModel {
   String get msgNum => _msgNum;
 
   //获取消息数量
-  Future<void> fetchMsgNum() async {
-    if (this.api.mainRecommandUrl.length == 0) {
+  Future<void> fetch() async {
+    if (this.api.msgNumUrl.length == 0) {
       _msgNum = '3';
       notifyListeners();
       return;
@@ -23,17 +23,11 @@ class ZNKMsgViewModel extends ZNKBaseViewModel {
     if (result.statusCode == 200 && result.data != null) {
       String code = result.data['code'];
       result.code = int.parse(code);
-      List<Map> body = result.data['body'];
-      if (body.length == 0) {
-        result.code = -1;
+      String number = result.data['number'];
+      if (number != null) {
+        _msgNum = number;
       }
     }
-    if (result.statusCode != 0) {
-      _msgNum = '3';
-      notifyListeners();
-      return;
-    }
-    _msgNum = '3';
     notifyListeners();
   }
 }

@@ -11,8 +11,8 @@ class ZNKMainRecommand extends ZNKBaseViewModel {
   List<String> get recommends => _recommends;
 
   //获取推荐数据
-  Future<void> fetchRecommand() async {
-    if (this.api.mainRecommandUrl.length == 0) {
+  Future<void> fetch() async {
+    if (this.api.recommandUrl.length == 0) {
       _recommends = ['防水地板', '集成墙板', '墙布墙漆', '家居软装', '吊顶天花', '五金配件'];
       notifyListeners();
       return;

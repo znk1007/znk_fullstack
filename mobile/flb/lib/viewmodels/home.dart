@@ -29,7 +29,7 @@ class ZNKHomeModel extends ZNKBaseViewModel {
 
   void setState(ZNKHomeLoadState state) {
     _state = state;
-    super.notifyListeners();
+    notifyListeners();
   }
 
   //获取分栏类目数据
