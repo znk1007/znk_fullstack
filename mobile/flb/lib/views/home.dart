@@ -13,7 +13,7 @@ class ZNKHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //设置屏幕
-    Screen.setContext(context);
+    ZNKScreen.setContext(context);
     return ZNKBaseView<ZNKHomeModel>(
       model: ZNKHomeModel(api: Provider.of(context)),
       onReady: (model) async {

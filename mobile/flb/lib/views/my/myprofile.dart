@@ -150,13 +150,13 @@ class MyProfileView extends StatelessWidget {
                         children: [
                           Container(
                             margin: EdgeInsets.only(
-                                left: Screen.setWidth(30), top: 8),
+                                left: ZNKScreen.setWidth(30), top: 8),
                             child: Text(company.info != null
                                 ? company.info.integ
                                 : '0'),
                           ),
                           Container(
-                            margin: EdgeInsets.only(left: Screen.setWidth(30)),
+                            margin: EdgeInsets.only(left: ZNKScreen.setWidth(30)),
                             child: Text(userModel.isLogined ? '我的积分' : '积分'),
                           ),
                         ],
@@ -170,13 +170,13 @@ class MyProfileView extends StatelessWidget {
                         children: [
                           Container(
                             margin: EdgeInsets.only(
-                                top: 8, right: Screen.setWidth(30)),
+                                top: 8, right: ZNKScreen.setWidth(30)),
                             child: Text(company.info != null
                                 ? company.info.redPack
                                 : '0'),
                           ),
                           Container(
-                            margin: EdgeInsets.only(right: Screen.setWidth(30)),
+                            margin: EdgeInsets.only(right: ZNKScreen.setWidth(30)),
                             child: Text(userModel.isLogined ? '我的红包' : '红包'),
                           )
                         ],

@@ -37,6 +37,8 @@ class ZNKBanner extends StatefulWidget {
   final Color indicatorTrackColor;
   //是否可点击指示器
   final bool enableIndicatorSelection;
+  //装饰
+  final Decoration decoration;
 
   _ZNKBannerState state = _ZNKBannerState();
 

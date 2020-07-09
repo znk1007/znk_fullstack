@@ -68,14 +68,14 @@ class _MyPageState extends State<MyPage> {
       child: Consumer<ThemeStyle>(
         builder: (context, s, child) {
           return Container(
-            height: Screen.screenHeight - s.tabbarHeight,
+            height: ZNKScreen.screenHeight - s.tabbarHeight,
             child: Consumer5<UserModel, MyList, MyCompany, MyPageStyle,
                 ThemeStyle>(
               builder: (context, userModel, list, company, myStyle, themeStyle,
                   child) {
                 List<MyList> models = list.fetch(userModel.isLogined);
                 return Container(
-                  height: Screen.screenHeight - themeStyle.tabbarHeight,
+                  height: ZNKScreen.screenHeight - themeStyle.tabbarHeight,
                   child: ZNKTable(
                       scrollable: false,
                       headerSliverBuilder: (context, innerBoxIsScrolled) =>
@@ -100,7 +100,7 @@ class _MyPageState extends State<MyPage> {
                       cellForRowAtIndexPath: (ctx, indexPath) {
                         List<MyItem> items = models[indexPath.section].items;
                         MyItem item = items[indexPath.row];
-                        double iconTop = Screen.setWidth(5);
+                        double iconTop = ZNKScreen.setWidth(5);
                         double iconS = myStyle.rowHeight - 2 * iconTop;
                         return GestureDetector(
                             onTap: () {
@@ -154,7 +154,7 @@ Column(children: [
                     );
                   }),
                   Container(
-                      height: Screen.screenHeight -
+                      height: ZNKScreen.screenHeight -
                           myStyle.profileBgHeight -
                           themeStyle.tabbarHeight,
                       child: EasyRefresh(
@@ -163,7 +163,7 @@ Column(children: [
                             List<MyModel> models =
                                 m.fetchMyList(userModel.isLogined);
                             return Container(
-                                height: Screen.screenHeight -
+                                height: ZNKScreen.screenHeight -
                                     myStyle.profileBgHeight -
                                     themeStyle.tabbarHeight,
                                 child: ZNKTable(
@@ -184,7 +184,7 @@ Column(children: [
                                       List<MyList> lists =
                                           models[indexPath.section].lists;
                                       MyList list = lists[indexPath.row];
-                                      double iconTop = Screen.setWidth(5);
+                                      double iconTop = ZNKScreen.setWidth(5);
                                       double iconS =
                                           myStyle.rowHeight - 2 * iconTop;
                                       return GestureDetector(

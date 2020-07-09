@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 
 class MyPageStyle extends ChangeNotifier {
   //用户信息展示宽度
-  double profileBgWidth = Screen.screenWidth;
+  double profileBgWidth = ZNKScreen.screenWidth;
   //用户信息展示高度
-  double profileBgHeight = Screen.setHeight(180).toDouble();
+  double profileBgHeight = ZNKScreen.setHeight(180).toDouble();
   //用户信息区域背景颜色
   Color profileBgColor = Colors.red[400];
   //头像直径
-  double avatarL = Screen.setWidth(60).toDouble();
+  double avatarL = ZNKScreen.setWidth(60).toDouble();
   //头像边距
   EdgeInsets avatarMargin =
-      EdgeInsets.only(left: 50, top: Screen.safeTopArea + 20);
+      EdgeInsets.only(left: 50, top: ZNKScreen.safeTopArea + 20);
   //昵称高度
-  double nicknameHeight = Screen.setHeight(40).toDouble();
+  double nicknameHeight = ZNKScreen.setHeight(40).toDouble();
   //收益模块高度
-  double eqHeight = Screen.setWidth(50);
+  double eqHeight = ZNKScreen.setWidth(50);
   //行高
-  double rowHeight = Screen.setWidth(40);
+  double rowHeight = ZNKScreen.setWidth(40);
 }

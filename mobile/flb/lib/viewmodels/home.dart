@@ -21,7 +21,7 @@ class ZNKHomeModel extends ZNKBaseViewModel {
   List<TabbarItem> get items => _items;
   //版本1分栏页面
   List<Map<String, Widget>> _pages_v1 = [
-    {MainPage.id: MainPage()},
+    {ZNKMainPage.id: ZNKMainPage()},
     {ClassifyPage.id: ClassifyPage()},
     {ShopPage.id: ShopPage()},
     {MyPage.id: MyPage()},
@@ -40,11 +40,12 @@ class ZNKHomeModel extends ZNKBaseViewModel {
     }
     ResponseResult result = await RequestHandler.get(this.api.tabbarUrl);
     result.code = -1;
+    List<Map> data = [];
     if (result.statusCode == 200 && result.data != null) {
       String code = result.data['code'];
       result.code = int.parse(code);
-      List<Map> body = result.data['body'];
-      if (body.length == 0) {
+      data = result.data['data'];
+      if (data.length == 0) {
         result.code = -1;
       }
     }
@@ -52,10 +53,10 @@ class ZNKHomeModel extends ZNKBaseViewModel {
       _setDefaultItems();
       return;
     }
-    List<Map> body = result.data['body'];
+
     List<TabbarItem> items = [];
-    for (var i = 0; i < body.length; i++) {
-      Map<String, dynamic> itemMap = body[i];
+    for (var i = 0; i < data.length; i++) {
+      Map<String, dynamic> itemMap = data[i];
       TabbarItem item = TabbarItem(
           identifier: itemMap['identifier'] ? '${itemMap["identifier"]}' : "$i",
           index: i,
@@ -87,8 +88,8 @@ class ZNKHomeModel extends ZNKBaseViewModel {
           title: Text('首页'),
         ),
         index: 0,
-        identifier: MainPage.id,
-        page: MainPage(),
+        identifier: ZNKMainPage.id,
+        page: ZNKMainPage(),
       ),
       TabbarItem(
         item: BottomNavigationBarItem(

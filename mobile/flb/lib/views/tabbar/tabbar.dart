@@ -56,7 +56,7 @@ class _ZNKTabbarState extends State<ZNKTabbar> {
         child: SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
           child: Container(
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.all(0),
             child: _currentPage(),
           ),
         ),
