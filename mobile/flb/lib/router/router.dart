@@ -8,9 +8,6 @@ class ZNKRouter {
   //配置路由
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case ZNKRoutePaths.launch:
-        return MaterialPageRoute(builder: (_) => LaunchPage());
-        break;
       case ZNKRoutePaths.login:
         return MaterialPageRoute(builder: (_) => ZNKLoginView());
         break;

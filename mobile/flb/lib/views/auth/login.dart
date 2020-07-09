@@ -11,7 +11,7 @@ class _ZNKLoginViewState extends State<ZNKLoginView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-       child: Container(),
+       child: Text('登录'),
     );
   }
 }

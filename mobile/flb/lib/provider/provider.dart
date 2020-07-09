@@ -16,7 +16,6 @@ List<SingleChildWidget> independentServices = [
 
 List<SingleChildWidget> dependentServices = [
   //这里使用ProxyProvider来定义需要依赖其他Provider的服务
-  Provider(create: (_) => TabbarItems()),
   ChangeNotifierProvider(create: (_) => UserModel()),
   ChangeNotifierProvider(create: (_) => ThemeStyle()),
 ];
