@@ -45,9 +45,9 @@ class ZNKBanner extends StatefulWidget {
   ZNKBanner(
       {Key key,
       this.scrollDirection = Axis.horizontal,
-      this.size = const Size(300, 45),
+      @required this.size,
       this.timeInterval = 5,
-      this.animateDuration = const Duration(milliseconds: 500),
+      this.animateDuration = const Duration(milliseconds: 1000),
       this.margin = EdgeInsets.zero,
       this.alignment = Alignment.centerLeft,
       this.curve = Curves.linear,
@@ -58,6 +58,7 @@ class ZNKBanner extends StatefulWidget {
       this.indicatorTintColor = Colors.lightBlue,
       this.indicatorTrackColor = Colors.blue,
       this.enableIndicatorSelection = true,
+      this.decoration = const BoxDecoration(),
       @required this.banners})
       : assert(banners != null && banners.length > 0),
         super(key: key);
@@ -81,7 +82,7 @@ class _ZNKBannerState extends State<ZNKBanner>
   Timer _timer;
   //监听变化
   void _listenChange() {
-    _pageController.addListener(() {
+    _pageController.addListener(() {      
       if (_pageController.offset <= 0) {
         _pageController.jumpToPage(1);
         _changePage(0);
@@ -144,9 +145,7 @@ class _ZNKBannerState extends State<ZNKBanner>
 
   @override
   void dispose() {
-    if (_timer != null) {
-      _timer.cancel();
-    }
+    _stopTimer();
     if (_pageController != null) {
       _pageController.dispose();
     }
@@ -155,17 +154,20 @@ class _ZNKBannerState extends State<ZNKBanner>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        _pageView(),
-        _indicator(),
-      ],
-    );
+    return Container(
+        decoration: widget.decoration,
+        child: Stack(
+          children: [
+            _pageView(),
+            _indicator(),
+          ],
+        ));
   }
 
   Widget _pageView() {
     return GestureDetector(
         onTap: () {
+          print('stop for tap');
           _stopTimer();
           if (widget.didSelected != null) {
             widget.didSelected(_curPage);
@@ -175,7 +177,6 @@ class _ZNKBannerState extends State<ZNKBanner>
           });
         },
         child: Container(
-          color: Colors.cyan,
           margin: widget.margin,
           height: widget.size.height,
           width: widget.size.width,
@@ -226,7 +227,7 @@ class _ZNKBannerState extends State<ZNKBanner>
         _pageController.animateToPage(2,
             duration: widget.animateDuration, curve: widget.curve);
         _curPage = idx - 1;
-        Future.delayed(Duration(seconds: 1),(){
+        Future.delayed(Duration(seconds: 1), () {
           _startTimer();
         });
       },

@@ -19,11 +19,12 @@ class ZNKMainRecommand extends ZNKBaseViewModel {
     }
     ResponseResult result = await RequestHandler.get(this.api.tabbarUrl);
     result.code = -1;
+    List<String> data = [];
     if (result.statusCode == 200 && result.data != null) {
       String code = result.data['code'];
       result.code = int.parse(code);
-      List<Map> body = result.data['body'];
-      if (body.length == 0) {
+      data = result.data['data'];
+      if (data.length == 0) {
         result.code = -1;
       }
     }
@@ -32,12 +33,7 @@ class ZNKMainRecommand extends ZNKBaseViewModel {
       notifyListeners();
       return;
     }
-    _recommends = result.data['data'];
+    _recommends = data;
     notifyListeners();
   }
-}
-
-class ZNKMainViewModel extends ZNKBaseViewModel {
-  final ZNKApi api;
-  ZNKMainViewModel({@required this.api}) : super(api: api);
 }

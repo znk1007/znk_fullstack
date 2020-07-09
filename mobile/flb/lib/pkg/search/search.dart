@@ -66,7 +66,7 @@ class _ZNKSearchViewState extends State<ZNKSearchView> {
 
   @override
   Widget build(BuildContext context) {
-    Size searchSize = Size(20,20);
+    Size searchSize = Size(20, 20);
     return Container(
         margin: widget._style.margin,
         decoration: BoxDecoration(
@@ -79,11 +79,14 @@ class _ZNKSearchViewState extends State<ZNKSearchView> {
             : (Stack(
                   children: [
                     Container(
-                      // color: Colors.red,
-                      margin: EdgeInsets.only(left: (widget._style.height - searchSize.width) / 2.0),
-                      width: searchSize.width,
-                      child: Icon(Icons.search)
-                    ),
+                        margin: EdgeInsets.only(
+                            left:
+                                (widget._style.height - searchSize.width) / 2.0,
+                            top: (widget._style.height - searchSize.height) /
+                                2.0),
+                        width: searchSize.width,
+                        height: searchSize.height,
+                        child: Icon(Icons.search)),
                     widget.child,
                   ],
                 ) ??
