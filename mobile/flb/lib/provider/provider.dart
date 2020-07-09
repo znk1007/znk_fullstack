@@ -1,7 +1,6 @@
 import 'package:flb/api/api.dart';
 import 'package:flb/models/style/style.dart';
 import 'package:flb/models/user.dart';
-import 'package:flb/views/tabbar/item.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 

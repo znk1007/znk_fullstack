@@ -4,6 +4,6 @@ class ZNKRoutePaths {
   static const String launch = 'launch';
   //登录
   static const String login = 'login';
-  //分类
-  static const String tabbar = 'tabbar';
+  //主页
+  static const String home = 'home';
 }

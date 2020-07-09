@@ -1,16 +1,16 @@
 import 'dart:math';
 
+import 'package:flb/models/tabbar.dart';
 import 'package:flb/views/base/hud.dart';
-import 'package:flb/views/tabbar/item.dart';
-import 'package:flb/pkg/screen/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
-import 'package:provider/provider.dart';
 
 class ZNKTabbar extends StatefulWidget {
   //页面集合
   List<Widget> _pages = [];
-  ZNKTabbar({Key key, List<TabbarItem> items}) : assert(items.length > 2) {
+  //数据源集合
+  final List<TabbarItem> items;
+  ZNKTabbar({Key key, this.items}) : assert(items.length > 2) {
     _pages = items.map((e) => e.page).toList();
     //加载框
     Hud().wrap(this);
@@ -51,8 +51,6 @@ class _ZNKTabbarState extends State<ZNKTabbar> {
 
   @override
   Widget build(BuildContext context) {
-    //设置屏幕
-    Screen.setContext(context);
     return Scaffold(
       body: LoadingOverlay(
         child: SingleChildScrollView(
@@ -67,20 +65,19 @@ class _ZNKTabbarState extends State<ZNKTabbar> {
         opacity: 0,
         progressIndicator: CircularProgressIndicator(),
       ), //_currentPage(),
-      bottomNavigationBar: Consumer<TabbarItems>(
-          builder: (ctx, t, w) => BottomNavigationBar(
-                items: t.items.map((e) => e.item).toList(),
-                onTap: (value) {
-                  setState(() {
-                    _curPageIdx = value;
-                  });
-                },
-                currentIndex: _curPageIdx,
-                type: BottomNavigationBarType.fixed,
-                selectedFontSize: 12,
-                selectedItemColor: Colors.red[900],
-                unselectedItemColor: Colors.grey[900],
-              )),
+      bottomNavigationBar: BottomNavigationBar(
+        items: widget.items.map((e) => e.item).toList(),
+        onTap: (value) {
+          setState(() {
+            _curPageIdx = value;
+          });
+        },
+        currentIndex: _curPageIdx,
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12,
+        selectedItemColor: Colors.red[900],
+        unselectedItemColor: Colors.grey[900],
+      ),
     );
   }
 }

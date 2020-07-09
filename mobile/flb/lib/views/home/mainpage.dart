@@ -1,19 +1,34 @@
 import 'package:flb/models/style/style.dart';
-import 'package:flb/models/home.dart';
+import 'package:flb/models/main.dart';
 import 'package:flb/pkg/banner/banner.dart';
+import 'package:flb/viewmodels/main.dart';
+import 'package:flb/views/base/base.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
-  static String id = 'home';
-
-  HomePage({Key key}) : super(key: key);
+class ZNKMainPage extends StatelessWidget {
+  static const String id = 'home';
+  const ZNKMainPage({Key key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    return ZNKBaseView<ZNKMainViewModel>(
+      model: ZNKMainViewModel(api: Provider.of(context)),
+
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
+class MainPage extends StatefulWidget {
+  static String id = 'home';
+
+  MainPage({Key key}) : super(key: key);
+
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
@@ -27,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void didUpdateWidget(HomePage oldWidget) {
+  void didUpdateWidget(MainPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     print('didUpdateWidget');
   }

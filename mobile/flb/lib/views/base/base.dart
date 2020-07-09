@@ -10,16 +10,16 @@ class ZNKBaseView<T extends ZNKBaseViewModel> extends StatefulWidget {
   //视图模型
   final T model;
   //模型是否已初始化完成
-  final Function(T) onReady;
+  final Function(T model) onReady;
 
   ZNKBaseView({Key key, this.model, this.child, this.builder, this.onReady})
       : super(key: key);
 
   @override
-  _ZNKBaseViewState createState() => _ZNKBaseViewState();
+  _ZNKBaseViewState<T> createState() => _ZNKBaseViewState<T>();//注意表明类型
 }
 
-class _ZNKBaseViewState<T extends ZNKBaseViewModel> extends State<ZNKBaseView> {
+class _ZNKBaseViewState<T extends ZNKBaseViewModel> extends State<ZNKBaseView<T>> {
   T model;
 
   @override
