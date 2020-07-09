@@ -19,7 +19,7 @@ class ZNKMainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size searchSize = Size(ZNKScreen.screenWidth - 80, 40.0);
+    Size searchSize = Size(ZNKScreen.screenWidth - 80, 31.0);
     double bannerHeight = ZNKScreen.setWidth(195);
     return Consumer<ThemeStyle>(builder: (ctx, style, child) {
       return Stack(
@@ -45,7 +45,8 @@ class ZNKMainPage extends StatelessWidget {
                                   e.path.startsWith('https://'))
                               ? CachedNetworkImage(imageUrl: e.path)
                               : Image.asset(e.path,
-                                  width: ZNKScreen.scaleWidth,
+                                  fit: BoxFit.fill,
+                                  width: ZNKScreen.screenWidth,
                                   height: bannerHeight))
                           .toList(),
                       scrollDirection: Axis.horizontal,
@@ -57,6 +58,7 @@ class ZNKMainPage extends StatelessWidget {
                   },
                 );
               }, childCount: 1)),
+              // SliverGrid.extent(maxCrossAxisExtent: null)
             ]),
           ),
           //搜索加消息数
@@ -123,7 +125,7 @@ class ZNKMainPage extends StatelessWidget {
                             left: 16,
                             top: (searchSize.height +
                                     ZNKScreen.safeTopArea -
-                                    msgIconSize) /
+                                    msgIconSize / 2.0) /
                                 2.0),
                       ),
                       Container(
@@ -131,7 +133,7 @@ class ZNKMainPage extends StatelessWidget {
                         height: msgSize,
                         margin: EdgeInsets.only(
                             left: msgIconSize + msgSize,
-                            top: (searchSize.height - msgSize) / 2.0),
+                            top: (searchSize.height) / 2.0),
                         decoration: BoxDecoration(
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(msgSize / 2.0),
