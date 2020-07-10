@@ -6,7 +6,7 @@ import 'package:flb/pkg/banner/banner.dart';
 import 'package:flb/pkg/grid/grid.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flb/pkg/search/search.dart';
-import 'package:flb/viewmodels/main/main.dart';
+import 'package:flb/viewmodels/main.dart';
 import 'package:flb/views/base/base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';

@@ -14,7 +14,8 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
   //是否显示模块
   bool showModule(ZNKMainModule module) {
     if (_mainModels != null) {
-      ZNKMainModel model = _mainModels.firstWhere((element) => element.module == module);
+      ZNKMainModel model =
+          _mainModels.firstWhere((element) => element.module == module);
       return model.show;
     }
     return false;
@@ -197,45 +198,67 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
     }
     _navs = [
       ZNKCollection(
-          identifier: '1', path: 'lib/resource/collection.jpg', title: '标题一'),
+          identifier: '1', path: 'lib/resource/collection.jpg', title: '标题标题一'),
       ZNKCollection(
-          identifier: '2', path: 'lib/resource/collection.jpg', title: '标题二'),
+          identifier: '2', path: 'lib/resource/collection.jpg', title: '标题标题二'),
       ZNKCollection(
-          identifier: '3', path: 'lib/resource/collection.jpg', title: '标题三'),
+          identifier: '3', path: 'lib/resource/collection.jpg', title: '标题标题三'),
       ZNKCollection(
-          identifier: '4', path: 'lib/resource/collection.jpg', title: '标题四'),
+          identifier: '4', path: 'lib/resource/collection.jpg', title: '标题标题四'),
       ZNKCollection(
-          identifier: '5', path: 'lib/resource/collection.jpg', title: '标题五'),
+          identifier: '5', path: 'lib/resource/collection.jpg', title: '标题标题五'),
       ZNKCollection(
-          identifier: '6', path: 'lib/resource/collection.jpg', title: '标题六'),
+          identifier: '6', path: 'lib/resource/collection.jpg', title: '标题标题六'),
       ZNKCollection(
-          identifier: '7', path: 'lib/resource/collection.jpg', title: '标题七'),
+          identifier: '7', path: 'lib/resource/collection.jpg', title: '标题标题七'),
       ZNKCollection(
-          identifier: '8', path: 'lib/resource/collection.jpg', title: '标题八'),
+          identifier: '8', path: 'lib/resource/collection.jpg', title: '标题标题八'),
       ZNKCollection(
-          identifier: '9', path: 'lib/resource/collection.jpg', title: '标题九'),
+          identifier: '9', path: 'lib/resource/collection.jpg', title: '标题标题九'),
       ZNKCollection(
-          identifier: '10', path: 'lib/resource/collection.jpg', title: '标题十'),
+          identifier: '10',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十'),
       ZNKCollection(
-          identifier: '11', path: 'lib/resource/collection.jpg', title: '标题十一'),
+          identifier: '11',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十一'),
       ZNKCollection(
-          identifier: '12', path: 'lib/resource/collection.jpg', title: '标题十二'),
+          identifier: '12',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十二'),
       ZNKCollection(
-          identifier: '13', path: 'lib/resource/collection.jpg', title: '标题十三'),
+          identifier: '13',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十三'),
       ZNKCollection(
-          identifier: '14', path: 'lib/resource/collection.jpg', title: '标题十四'),
+          identifier: '14',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十四'),
       ZNKCollection(
-          identifier: '15', path: 'lib/resource/collection.jpg', title: '标题十五'),
+          identifier: '15',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十五'),
       ZNKCollection(
-          identifier: '16', path: 'lib/resource/collection.jpg', title: '标题十六'),
+          identifier: '16',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十六'),
       ZNKCollection(
-          identifier: '17', path: 'lib/resource/collection.jpg', title: '标题十七'),
+          identifier: '17',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十七'),
       ZNKCollection(
-          identifier: '18', path: 'lib/resource/collection.jpg', title: '标题十八'),
+          identifier: '18',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十八'),
       ZNKCollection(
-          identifier: '19', path: 'lib/resource/collection.jpg', title: '标题十九'),
+          identifier: '19',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题十九'),
       ZNKCollection(
-          identifier: '20', path: 'lib/resource/collection.jpg', title: '标题二十'),
+          identifier: '20',
+          path: 'lib/resource/collection.jpg',
+          title: '标题标题二十'),
     ];
     notifyListeners();
   }
@@ -294,5 +317,4 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
     _recommends = data;
     notifyListeners();
   }
-
 }

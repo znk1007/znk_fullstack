@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flb/util/random/random.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +20,8 @@ class ZNKGrid extends StatelessWidget {
     this.items = const [],
     this.numberOfRow = 2,
     this.scrollDirection = Axis.horizontal,
-    this.height = 130,
-    this.childAspectRatio = 0.8,
+    this.height = 148,
+    this.childAspectRatio = 0.98,
   }) : super(key: key);
   //数据源
   final List<ZNKGridItem> items;
@@ -32,6 +33,8 @@ class ZNKGrid extends StatelessWidget {
   final double height;
   //宽高比例
   final double childAspectRatio;
+  //滚动控制器
+  ScrollController _controller = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,18 +42,40 @@ class ZNKGrid extends StatelessWidget {
       height: this.height,
       width: ZNKScreen.screenWidth,
       child: GridView.builder(
-          shrinkWrap: true,
+          controller: _controller,
           scrollDirection: Axis.horizontal,
           itemCount: this.items.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: this.numberOfRow,
               childAspectRatio: this.childAspectRatio),
           itemBuilder: (ctx, index) {
+            ZNKGridItem item = this.items[index];
             return GestureDetector(
               child: Container(
-                  color: RandomHandler.randomColor,
-                  width: ZNKScreen.screenWidth / 5.0,
-                  child: Text('测试')),
+                color: RandomHandler.randomColor,
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 5),
+                      alignment: Alignment.topCenter,
+                      width: 35,
+                      height: 35,
+                      child: (item.path.startsWith('http://') ||
+                              item.path.startsWith('https://'))
+                          ? CachedNetworkImage(imageUrl: item.path)
+                          : Image.asset(item.path),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 3),
+                      child: Text(
+                        item.title,
+                        style:
+                            TextStyle(fontSize: 10, color: Color(0xFF666666)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               onTap: () {
                 print('select at index: $index');
               },
