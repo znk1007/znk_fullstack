@@ -3,6 +3,7 @@ import 'package:flb/api/api.dart';
 import 'package:flb/models/main/main.dart';
 import 'package:flb/models/style/style.dart';
 import 'package:flb/pkg/banner/banner.dart';
+import 'package:flb/pkg/grid/grid.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flb/pkg/search/search.dart';
 import 'package:flb/viewmodels/main/main.dart';
@@ -53,7 +54,7 @@ class ZNKMainPage extends StatelessWidget {
                         _searchModule(mainVM),
                       ],
                     ),
-                    // _navModule(mainVM, navHeight),
+                    _navModule(mainVM, navHeight),
                   ],
                 ),
               ));
@@ -162,23 +163,16 @@ class ZNKMainPage extends StatelessWidget {
     );
   }
 
+  //导航模块
   Widget _navModule(ZNKMainViewModel mainVM, double navHeight) {
-    return Column(
-      children: [
-        SliverGrid.count(
-          crossAxisCount: 2,
-          children: mainVM.navs.map((e) => Column(
-            children: [
-              (e.path.startsWith('http://') || e.path.startsWith('https://')) ? CachedNetworkImage(imageUrl: e.path) : Image.asset(e.path),
-              Container(child: Text(e.title)), 
-            ],
-          )).toList(),
-        )
-      ],
-    );
+    List<ZNKCollection> navs = mainVM.navs;
+    return (mainVM.showModule(ZNKMainModule.nav) && navs.length > 0)
+        ? ZNKGrid(
+            items: navs
+                .map((e) => ZNKGridItem(
+                    identifier: e.identifier, title: e.title, path: e.path))
+                .toList(),
+          )
+        : Container();
   }
 }
-
-/*
-
-*/
