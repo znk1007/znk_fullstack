@@ -1,3 +1,24 @@
+//1.搜索，2.消息，3.幻灯片，4.导航栏，5.公告，6.秒杀，7.魔方栏，8.广告栏，9.产品列表
+enum ZNKMainModule {
+  search,
+  msessage,
+  slide,
+  nav,
+  notify,
+  seckill,
+  magic,
+  ads,
+  prod,
+}
+class ZNKMainModel {
+  //模块名称
+  final ZNKMainModule module;
+  //是否显示
+  final bool show;
+
+  ZNKMainModel({this.module, this.show});
+}
+
 //广告
 class ZNKBannerModel {
   final String identifier;
@@ -74,6 +95,8 @@ class ZNKProd {
   final String title;
   //详情
   final String detail;
+  //图片路径
+  final String path;
   //标签集合
   final List<String> tags;
   //原价
@@ -91,6 +114,7 @@ class ZNKProd {
       {this.sectionTitle,
       this.title,
       this.detail,
+      this.path,
       this.tags,
       this.orgPrice,
       this.newPrice,

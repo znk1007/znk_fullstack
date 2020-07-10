@@ -1,13 +1,22 @@
 class ZNKApi {
   //分栏数据地址
-  String tabbarUrl = '';
+  final String tabbarUrl = '';
+  //首页布局
+  final String mainPageConfigUrl = '';
   //首页推荐数据
-  String recommandUrl = '';
+  final String recommandUrl = '';
   //消息数
-  String msgNumUrl = '';
+  final String msgNumUrl = '';
   //广告
-  String bannerUrl = '';
-  //分类
-  String collectionUrl = '';
-
+  final String bannerUrl = '';
+  //导航分类
+  final String navUrl = '';
+  //便捷入口地址
+  final String convenienceUrl = '';
+  //秒杀
+  final String seckillUrl = '';
+  //火拼爆品
+  final String combineUrl = '';
+  //产品列表
+  final String prodListUrl = '';
 }

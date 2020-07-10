@@ -10,7 +10,7 @@
 		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		F42dKQAhxa4ksJfMRJRKGIwHIag=
+		H+DMxEi2N26kHy1gPqqCOzLGovI=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -22,7 +22,7 @@
 		</data>
 		<key>flutter_assets/NOTICES</key>
 		<data>
-		VT9Hon2C8fMf3O/Sn+l1CGfCgMM=
+		N3L4EOXT00+V4buRE9a/x8Kw2hg=
 		</data>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.ttf</key>
 		<data>
@@ -34,7 +34,11 @@
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		SOs0oK8W0qsAUtw+sXV905AT1/M=
+		q+/wMF7/vQsONKApCTB59OE3crM=
+		</data>
+		<key>flutter_assets/lib/resource/collection.jpg</key>
+		<data>
+		ZG22vhWxyEVbdRWeLgd/CNp/9Ps=
 		</data>
 		<key>flutter_assets/lib/resource/test_img_01.jpg</key>
 		<data>
@@ -63,11 +67,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			F42dKQAhxa4ksJfMRJRKGIwHIag=
+			H+DMxEi2N26kHy1gPqqCOzLGovI=
 			</data>
 			<key>hash2</key>
 			<data>
-			6X109bhETmC5kJZCSiCyddoiA3OguCD7z28B6je3SAo=
+			QaNKnrB3r9GjgdxE/z6uBIacaG2o83zmGAAwACGtDnQ=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -96,11 +100,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			VT9Hon2C8fMf3O/Sn+l1CGfCgMM=
+			N3L4EOXT00+V4buRE9a/x8Kw2hg=
 			</data>
 			<key>hash2</key>
 			<data>
-			ZSUvkVqzFGS8ajdsoE0ArPt3a6v8g3dSNw2adPcVpmM=
+			zLbpCnCe19zafqqo/ODhyQmzHmJ9oe5MnDgtFyscgBg=
 			</data>
 		</dict>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.ttf</key>
@@ -129,11 +133,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			SOs0oK8W0qsAUtw+sXV905AT1/M=
+			q+/wMF7/vQsONKApCTB59OE3crM=
 			</data>
 			<key>hash2</key>
 			<data>
-			kQiYoCuXMPbtPsOFHJO9m5XDpa0D+7csVVUtXbNpVD8=
+			cXxrByAJ15o6YdpJ031mucMt9tXN8xNo8MFFQjeH0k8=
+			</data>
+		</dict>
+		<key>flutter_assets/lib/resource/collection.jpg</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			ZG22vhWxyEVbdRWeLgd/CNp/9Ps=
+			</data>
+			<key>hash2</key>
+			<data>
+			tzM9zh2gfKsW4gxJA8tP6OOOknQykD0K9IT9si4crMY=
 			</data>
 		</dict>
 		<key>flutter_assets/lib/resource/test_img_01.jpg</key>

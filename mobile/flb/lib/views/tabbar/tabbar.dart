@@ -22,7 +22,7 @@ class ZNKTabbar extends StatefulWidget {
   _ZNKTabbarState createState() => state;
 }
 
-class _ZNKTabbarState extends State<ZNKTabbar> {
+class _ZNKTabbarState extends State<ZNKTabbar> with AutomaticKeepAliveClientMixin {
   //_curPageIdx 当前下标
   int _curPageIdx = 0;
   bool _isLoading = false;
@@ -49,15 +49,16 @@ class _ZNKTabbarState extends State<ZNKTabbar> {
     return widget._pages[pageIdx];
   }
 
+  //bottomNavigationBar+indexedStack防止切换tab重置状态
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: LoadingOverlay(
         child: SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
-          child: Container(
-            padding: EdgeInsets.all(0),
-            child: _currentPage(),
+          child: IndexedStack(
+            index: _curPageIdx,
+            children: widget._pages,
           ),
         ),
         isLoading: _isLoading,
@@ -80,4 +81,7 @@ class _ZNKTabbarState extends State<ZNKTabbar> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
