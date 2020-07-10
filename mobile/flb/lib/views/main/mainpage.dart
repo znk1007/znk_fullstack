@@ -22,7 +22,7 @@ class ZNKMainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double bannerHeight = ZNKScreen.setWidth(195);
-
+    double navHeight = bannerHeight * (2 / 3.0);
     ZNKApi api = Provider.of(context);
     return ZNKBaseView<ZNKMainViewModel>(
       model: ZNKMainViewModel(api: api),
@@ -53,6 +53,7 @@ class ZNKMainPage extends StatelessWidget {
                         _searchModule(mainVM),
                       ],
                     ),
+                    // _navModule(mainVM, navHeight),
                   ],
                 ),
               ));
@@ -157,6 +158,22 @@ class ZNKMainPage extends StatelessWidget {
                 ],
               )
             : Container()
+      ],
+    );
+  }
+
+  Widget _navModule(ZNKMainViewModel mainVM, double navHeight) {
+    return Column(
+      children: [
+        SliverGrid.count(
+          crossAxisCount: 2,
+          children: mainVM.navs.map((e) => Column(
+            children: [
+              (e.path.startsWith('http://') || e.path.startsWith('https://')) ? CachedNetworkImage(imageUrl: e.path) : Image.asset(e.path),
+              Container(child: Text(e.title)), 
+            ],
+          )).toList(),
+        )
       ],
     );
   }
