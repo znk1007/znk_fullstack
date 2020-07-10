@@ -7,5 +7,7 @@ class ZNKApi {
   String msgNumUrl = '';
   //广告
   String bannerUrl = '';
+  //分类
+  String collectionUrl = '';
 
 }

@@ -67,6 +67,7 @@ flutter:
     - lib/resource/test_img_03.jpg
     - lib/resource/test_img_02.jpg
     - lib/resource/test_img_01.jpg
+    - lib/resource/collection.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

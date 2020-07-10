@@ -19,7 +19,7 @@ class ZNKMainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size searchSize = Size(ZNKScreen.screenWidth - 80, 31.0);
+    Size searchSize = Size(ZNKScreen.screenWidth - 70, 31.0);
     double bannerHeight = ZNKScreen.setWidth(195);
     return Consumer<ThemeStyle>(builder: (ctx, style, child) {
       return Stack(
@@ -27,7 +27,14 @@ class ZNKMainPage extends StatelessWidget {
           //整体页面
           Container(
             height: ZNKScreen.screenHeight - style.tabbarHeight,
-            child: EasyRefresh.custom(slivers: <Widget>[
+            child: EasyRefresh.custom(
+              onRefresh: () async {
+                print('on refresh');
+              },
+              onLoad: () async {
+                print('on load');
+              },
+              slivers: <Widget>[
               SliverList(
                   delegate: SliverChildBuilderDelegate((ctx, index) {
                 return ZNKBaseView<ZNKBannerViewModel>(
