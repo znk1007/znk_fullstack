@@ -5,7 +5,7 @@ import 'package:flb/state/home.dart';
 import 'package:flb/util/http/core/request.dart';
 import 'package:flb/viewmodels/base.dart';
 import 'package:flb/views/classify/classifypage.dart';
-import 'package:flb/views/home/mainpage.dart';
+import 'package:flb/views/main/mainpage.dart';
 import 'package:flb/views/my/mypage.dart';
 import 'package:flb/views/shop/shoppage.dart';
 import 'package:flutter/material.dart';

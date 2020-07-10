@@ -1,5 +1,5 @@
 import 'package:flb/api/api.dart';
-import 'package:flb/models/main/banner.dart';
+import 'package:flb/models/main/main.dart';
 import 'package:flb/util/config/help.dart';
 import 'package:flb/util/http/core/request.dart';
 import 'package:flb/viewmodels/base.dart';

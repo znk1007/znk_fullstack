@@ -1,13 +1,13 @@
 import 'package:flb/api/api.dart';
-import 'package:flb/models/main/collection.dart';
+import 'package:flb/models/main/main.dart';
 import 'package:flb/util/config/help.dart';
 import 'package:flb/util/http/core/request.dart';
 import 'package:flb/viewmodels/base.dart';
 import 'package:flutter/material.dart';
 
-class ZNKCollectionViewModel extends ZNKBaseViewModel {
-  final ZNKApi api;
-  ZNKCollectionViewModel({@required this.api}) : super(api: api);
+class ZNKCollectionViewModel extends ChangeNotifier {
+  final String url;
+  ZNKCollectionViewModel({@required this.url});
 
 //广告数据
   List<ZNKCollection> _collections = [];
@@ -15,11 +15,11 @@ class ZNKCollectionViewModel extends ZNKBaseViewModel {
 
   //拉取广告数据
   Future<void> fetch() async {
-    if (this.api.collectionUrl.length == 0) {
+    if (this.url.length == 0) {
       _defaultData();
       return;
     }
-    ResponseResult result = await RequestHandler.get(this.api.tabbarUrl);
+    ResponseResult result = await RequestHandler.get(this.url);
     result.code = -1;
     List<Map> data = [];
     if (result.statusCode == 200 && result.data != null) {
@@ -47,7 +47,6 @@ class ZNKCollectionViewModel extends ZNKBaseViewModel {
       }
     }
     _collections = temp;
-    notifyListeners();
   }
 
   //默认数据

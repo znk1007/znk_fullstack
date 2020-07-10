@@ -31,21 +31,21 @@ class ZNKSearchStyle {
       this.margin = EdgeInsets.zero});
 }
 
-class ZNKSearchView extends StatefulWidget {
+class ZNKSearch extends StatefulWidget {
   //搜索样式
   ZNKSearchStyle _style;
   final Widget child;
-  ZNKSearchView({Key key, ZNKSearchStyle style, this.child}) {
+  ZNKSearch({Key key, ZNKSearchStyle style, this.child}) {
     _style = style ?? ZNKSearchStyle();
   }
 
-  final _ZNKSearchViewState state = _ZNKSearchViewState();
+  final _ZNKSearchState state = _ZNKSearchState();
 
   @override
-  _ZNKSearchViewState createState() => state;
+  _ZNKSearchState createState() => state;
 }
 
-class _ZNKSearchViewState extends State<ZNKSearchView> {
+class _ZNKSearchState extends State<ZNKSearch> {
   final TextEditingController _controller = TextEditingController();
   //占位文本
   String _curPlaceholder = '输入搜索内容';
