@@ -18,7 +18,7 @@ class ZNKMainPage extends StatelessWidget {
   //刷新控制
   EasyRefreshController _refreshController = EasyRefreshController();
   //集合
-  List<ZNKCollection> _collections = [];
+  List<ZNKNav> _collections = [];
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +165,7 @@ class ZNKMainPage extends StatelessWidget {
 
   //导航模块
   Widget _navModule(ZNKMainViewModel mainVM, double navHeight) {
-    List<ZNKCollection> navs = mainVM.navs;
+    List<ZNKNav> navs = mainVM.navs;
     return (mainVM.showModule(ZNKMainModule.nav) && navs.length > 0)
         ? ZNKGrid(
             items: navs
@@ -174,5 +174,9 @@ class ZNKMainPage extends StatelessWidget {
                 .toList(),
           )
         : Container();
+  }
+
+  Widget _magicModule(ZNKMainViewModel mainVM, double magicHeight) {
+    return (mainVM.showModule(ZNKMainModule.magic) && mainVM)
   }
 }

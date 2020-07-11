@@ -62,13 +62,13 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
           innerModule = ZNKMainModule.nav;
           break;
         case 5:
-          innerModule = ZNKMainModule.notify;
+          innerModule = ZNKMainModule.magic;
           break;
         case 6:
-          innerModule = ZNKMainModule.seckill;
+          innerModule = ZNKMainModule.notify;
           break;
         case 7:
-          innerModule = ZNKMainModule.magic;
+          innerModule = ZNKMainModule.seckill;
           break;
         case 8:
           innerModule = ZNKMainModule.ads;
@@ -99,6 +99,37 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
       ZNKMainModel(module: ZNKMainModule.ads, show: false),
       ZNKMainModel(module: ZNKMainModule.prod, show: true),
     ];
+    notifyListeners();
+  }
+
+  //推荐数据
+  List<String> _recommends = [];
+  List<String> get recommends => _recommends;
+
+  //获取推荐数据
+  Future<void> fetchRecommends() async {
+    if (this.api.recommandUrl.length == 0) {
+      _recommends = ['防水地板', '集成墙板', '墙布墙漆', '家居软装', '吊顶天花', '五金配件'];
+      notifyListeners();
+      return;
+    }
+    ResponseResult result = await RequestHandler.get(this.api.recommandUrl);
+    result.code = -1;
+    List<String> data = [];
+    if (result.statusCode == 200 && result.data != null) {
+      String code = result.data['code'];
+      result.code = int.parse(code);
+      data = result.data['data'];
+      if (data.length == 0) {
+        result.code = -1;
+      }
+    }
+    if (result.statusCode != 0) {
+      _recommends = ['防水地板', '集成墙板', '墙布墙漆', '家居软装', '吊顶天花', '五金配件'];
+      notifyListeners();
+      return;
+    }
+    _recommends = data;
     notifyListeners();
   }
 
@@ -152,8 +183,8 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
   }
 
   //导航栏数据
-  List<ZNKCollection> _navs = [];
-  List<ZNKCollection> get navs => _navs;
+  List<ZNKNav> _navs = [];
+  List<ZNKNav> get navs => _navs;
 
   //拉取导航栏数据
   Future<void> fetchNav() async {
@@ -176,15 +207,14 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
       _defaultNavData();
       return;
     }
-    List<ZNKCollection> temp = [];
+    List<ZNKNav> temp = [];
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> dataMap = data[i];
       String id = ZNKHelp.safeString(dataMap['id']);
       String path = ZNKHelp.safeString(dataMap['path']);
       String title = ZNKHelp.safeString(dataMap['title']);
       if (id.length > 0 && path.length > 0 && title.length > 0) {
-        ZNKCollection m =
-            ZNKCollection(identifier: id, path: path, title: title);
+        ZNKNav m = ZNKNav(identifier: id, path: path, title: title);
         temp.add(m);
       }
     }
@@ -197,65 +227,65 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
       return;
     }
     _navs = [
-      ZNKCollection(
+      ZNKNav(
           identifier: '1', path: 'lib/resource/collection.jpg', title: '标题标题一'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '2', path: 'lib/resource/collection.jpg', title: '标题标题二'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '3', path: 'lib/resource/collection.jpg', title: '标题标题三'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '4', path: 'lib/resource/collection.jpg', title: '标题标题四'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '5', path: 'lib/resource/collection.jpg', title: '标题标题五'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '6', path: 'lib/resource/collection.jpg', title: '标题标题六'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '7', path: 'lib/resource/collection.jpg', title: '标题标题七'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '8', path: 'lib/resource/collection.jpg', title: '标题标题八'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '9', path: 'lib/resource/collection.jpg', title: '标题标题九'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '10',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '11',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十一'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '12',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十二'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '13',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十三'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '14',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十四'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '15',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十五'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '16',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十六'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '17',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十七'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '18',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十八'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '19',
           path: 'lib/resource/collection.jpg',
           title: '标题标题十九'),
-      ZNKCollection(
+      ZNKNav(
           identifier: '20',
           path: 'lib/resource/collection.jpg',
           title: '标题标题二十'),
@@ -287,34 +317,44 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
     notifyListeners();
   }
 
-  //推荐数据
-  List<String> _recommends = [];
-  List<String> get recommends => _recommends;
-
-  //获取推荐数据
-  Future<void> fetchRecommends() async {
-    if (this.api.recommandUrl.length == 0) {
-      _recommends = ['防水地板', '集成墙板', '墙布墙漆', '家居软装', '吊顶天花', '五金配件'];
-      notifyListeners();
+  //魔方栏数据
+  List<ZNKMagic> _magics = [];
+  List<ZNKMagic> get magics => _magics;
+  //获取魔方栏数据
+  Future<void> fetchMagicData() async {
+    if (this.api.msgNumUrl.length == 0) {
+      _defaultMagicData();
       return;
     }
-    ResponseResult result = await RequestHandler.get(this.api.recommandUrl);
+    ResponseResult result = await RequestHandler.get(this.api.msgNumUrl);
     result.code = -1;
-    List<String> data = [];
+    List<Map<String, dynamic>> data = [];
     if (result.statusCode == 200 && result.data != null) {
       String code = result.data['code'];
       result.code = int.parse(code);
       data = result.data['data'];
-      if (data.length == 0) {
+      if (data.length <= 0) {
         result.code = -1;
       }
     }
-    if (result.statusCode != 0) {
-      _recommends = ['防水地板', '集成墙板', '墙布墙漆', '家居软装', '吊顶天花', '五金配件'];
-      notifyListeners();
+    if (result.code != 0) {
+      _defaultMagicData();
       return;
     }
-    _recommends = data;
+    List<ZNKMagic> datas = [];
+    for (var i = 0; i < data.length; i++) {
+      Map<String, String> mData = data[i];
+      ZNKMagic magic = ZNKMagic(
+          identifier: ZNKHelp.safeString(mData['id']),
+          path: ZNKHelp.safeString(mData['path']));
+      datas.add(magic);
+    }
+    _magics = datas;
+    notifyListeners();
+  }
+
+  //默认魔方栏数据
+  void _defaultMagicData() {
     notifyListeners();
   }
 }

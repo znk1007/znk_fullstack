@@ -11,8 +11,8 @@ class ZNKApi {
   final String bannerUrl = '';
   //导航分类
   final String navUrl = '';
-  //便捷入口地址
-  final String convenienceUrl = '';
+  //魔方栏入口地址
+  final String magicUrl = '';
   //秒杀
   final String seckillUrl = '';
   //火拼爆品

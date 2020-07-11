@@ -1,15 +1,16 @@
-//1.搜索，2.消息，3.幻灯片，4.导航栏，5.公告，6.秒杀，7.魔方栏，8.广告栏，9.产品列表
+//1.搜索，2.消息，3.幻灯片，4.导航栏，5.魔方栏，6.公告，7.秒杀，8.广告栏，9.产品列表
 enum ZNKMainModule {
   search,
   msessage,
   slide,
   nav,
+  magic,
   notify,
   seckill,
-  magic,
   ads,
   prod,
 }
+
 class ZNKMainModel {
   //模块名称
   final ZNKMainModule module;
@@ -27,21 +28,21 @@ class ZNKBannerModel {
 }
 
 //集合
-class ZNKCollection {
+class ZNKNav {
   final String identifier;
   final String title;
   final String path;
-  ZNKCollection({this.identifier, this.title, this.path});
+  ZNKNav({this.identifier, this.title, this.path});
 }
 
 //便捷入口
-class ZNKConvenience {
+class ZNKMagic {
   //唯一标识
   final String identifier;
   //icon路径
   final String path;
 
-  ZNKConvenience({this.identifier, this.path});
+  ZNKMagic({this.identifier, this.path});
 }
 
 class ZNKSeckill {
