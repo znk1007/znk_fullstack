@@ -1,9 +1,63 @@
+import 'dart:async';
+
 import 'package:flb/api/api.dart';
 import 'package:flb/models/main/seckill.dart';
 import 'package:flb/util/config/help.dart';
 import 'package:flb/util/http/core/request.dart';
 import 'package:flb/viewmodels/base.dart';
 import 'package:flutter/material.dart';
+
+class ZNKSeckillCountDownViewModel extends ZNKBaseViewModel {
+  final ZNKApi api;
+  ZNKSeckillCountDownViewModel({@required this.api}) : super(api: api);
+  //天
+  String _day = '0';
+  String get day => _day;
+  //小时
+  String _hour = '00';
+  String get hour => _hour;
+  //分
+  String _minute = '00';
+  String get minute => _minute;
+  //秒
+  String _second = '00';
+  String get second => _second;
+
+  Timer _timer;
+
+  Future<void> fetch(int seconds) async {
+    if (_timer != null) {
+      _timer.cancel();
+      _timer = null;
+    }
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      int day = seconds ~/ (60 * 60 * 24); //换成天
+      int hh = (seconds - (60 * 60 * 24 * day)) ~/
+          3600; //总秒数-换算成天的秒数=剩余的秒数    剩余的秒数换算为小时
+      int mm = (seconds - 60 * 60 * 24 * day - 3600 * hh) ~/
+          60; //总秒数-换算成天的秒数-换算成小时的秒数=剩余的秒数    剩余的秒数换算为分
+      int ss = seconds -
+          60 * 60 * 24 * day -
+          3600 * hh -
+          60 * mm; //总秒数-换算成天的秒数-换算成小时的秒数-换算为分的秒数=剩余的秒数
+      if (hh != 0) {
+        _hour = hh >= 10 ? '$hh' : '0$hh';
+      }
+      if (mm != 0) {
+        _minute = mm >= 10 ? '$mm' : '0$mm';
+      }
+      if (ss != 0) {
+        _second = ss >= 10 ? '$ss' : '0$ss';
+      }
+      seconds--;
+      if (seconds == 0) {
+        _timer.cancel();
+        _timer = null;
+      }
+      notifyListeners();
+    });
+  }
+}
 
 class ZNKSeckillViewModel extends ZNKBaseViewModel {
   final ZNKApi api;

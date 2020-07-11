@@ -6,7 +6,7 @@ import 'package:flb/views/base/base.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ZNKSeckillView extends StatefulWidget {
+class ZNKSeckillView extends StatelessWidget {
   final bool show;
   final ThemeStyle style;
   final seckillHeight;
@@ -18,30 +18,76 @@ class ZNKSeckillView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ZNKSeckillViewState createState() => _ZNKSeckillViewState();
-}
-
-class _ZNKSeckillViewState extends State<ZNKSeckillView> {
-  @override
   Widget build(BuildContext context) {
+    double containWidth = ZNKScreen.screenWidth / 2.0;
     return ZNKBaseView<ZNKSeckillViewModel>(
       model: ZNKSeckillViewModel(
         api: Provider.of(context),
       ),
       onReady: (model) async => model.fetch(),
-      builder: (context, model, child) => (widget.show &&
-              model.seckill != null &&
-              model.seckill.items.length > 0)
+      builder: (context, seckillModel, child) => (this.show &&
+              seckillModel.seckill != null &&
+              seckillModel.seckill.items.length > 0)
           ? Container(
-              width: ZNKScreen.screenWidth / 2.0,
-              height: widget.seckillHeight,
-              color: RandomHandler.randomColor,
+              width: containWidth,
+              height: this.seckillHeight,
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Container(),
-                      Container(),
+                      Container(
+                        width: containWidth / 2.0,
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          seckillModel.seckill.title,
+                          style: TextStyle(
+                            color: Color(0xFFD81E06),
+                            fontFamily: 'PingFangSC-Medium',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: containWidth / 2.0,
+                        padding: EdgeInsets.only(right: 10),
+                        child: ZNKBaseView<ZNKSeckillCountDownViewModel>(
+                          model: ZNKSeckillCountDownViewModel(
+                            api: Provider.of(context),
+                          ),
+                          onReady: (countdown) => countdown
+                              .fetch(int.parse(seckillModel.seckill.time)),
+                          builder: (context, countdown, child) => Row(
+                            children: [
+                              Container(
+                                child: Text(countdown.hour),
+                              ),
+                              Container(
+                                child: Text(
+                                  ':',
+                                  style: TextStyle(
+                                    color: this.style.redColor,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                child: Text(countdown.minute),
+                              ),
+                              Container(
+                                child: Text(
+                                  ':',
+                                  style: TextStyle(
+                                    color: this.style.redColor,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                child: Text(countdown.second),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
