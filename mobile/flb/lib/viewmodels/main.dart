@@ -95,7 +95,7 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
       ZNKMainModel(module: ZNKMainModule.nav, show: true),
       ZNKMainModel(module: ZNKMainModule.notify, show: false),
       ZNKMainModel(module: ZNKMainModule.seckill, show: true),
-      ZNKMainModel(module: ZNKMainModule.magic, show: false),
+      ZNKMainModel(module: ZNKMainModule.magic, show: true),
       ZNKMainModel(module: ZNKMainModule.ads, show: false),
       ZNKMainModel(module: ZNKMainModule.prod, show: true),
     ];
@@ -322,11 +322,11 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
   List<ZNKMagic> get magics => _magics;
   //获取魔方栏数据
   Future<void> fetchMagicData() async {
-    if (this.api.msgNumUrl.length == 0) {
+    if (this.api.magicUrl.length == 0) {
       _defaultMagicData();
       return;
     }
-    ResponseResult result = await RequestHandler.get(this.api.msgNumUrl);
+    ResponseResult result = await RequestHandler.get(this.api.magicUrl);
     result.code = -1;
     List<Map<String, dynamic>> data = [];
     if (result.statusCode == 200 && result.data != null) {
@@ -355,6 +355,16 @@ class ZNKMainViewModel extends ZNKBaseViewModel {
 
   //默认魔方栏数据
   void _defaultMagicData() {
+    if (_magics.length != 0) {
+      return;
+    }
+    _magics = [
+      ZNKMagic(identifier: '1', path: 'lib/resource/sample.jpg'),
+      ZNKMagic(identifier: '2', path: 'lib/resource/sample.jpg'),
+      ZNKMagic(identifier: '3', path: 'lib/resource/sample.jpg'),
+      ZNKMagic(identifier: '4', path: 'lib/resource/sample.jpg'),
+      ZNKMagic(identifier: '5', path: 'lib/resource/sample.jpg'),
+    ];
     notifyListeners();
   }
 }

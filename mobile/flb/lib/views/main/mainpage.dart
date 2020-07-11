@@ -6,6 +6,7 @@ import 'package:flb/pkg/banner/banner.dart';
 import 'package:flb/pkg/grid/grid.dart';
 import 'package:flb/pkg/screen/screen.dart';
 import 'package:flb/pkg/search/search.dart';
+import 'package:flb/util/random/random.dart';
 import 'package:flb/viewmodels/main.dart';
 import 'package:flb/views/base/base.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,8 @@ class ZNKMainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     double bannerHeight = ZNKScreen.setWidth(195);
     double navHeight = bannerHeight * (2 / 3.0);
+    double magicHeight = 35;
+
     ZNKApi api = Provider.of(context);
     return ZNKBaseView<ZNKMainViewModel>(
       model: ZNKMainViewModel(api: api),
@@ -33,6 +36,7 @@ class ZNKMainPage extends StatelessWidget {
         mainVM.fetchMsgNum();
         mainVM.fetchBanner();
         mainVM.fetchNav();
+        mainVM.fetchMagicData();
       },
       builder: (context, mainVM, child) {
         return Consumer<ThemeStyle>(builder: (ctx, style, child) {
@@ -55,6 +59,7 @@ class ZNKMainPage extends StatelessWidget {
                       ],
                     ),
                     _navModule(mainVM, navHeight),
+                    _magicModule(mainVM, magicHeight)
                   ],
                 ),
               ));
@@ -72,7 +77,10 @@ class ZNKMainPage extends StatelessWidget {
       banners: mainVM.banners
           .map((e) =>
               (e.path.startsWith('http://') || e.path.startsWith('https://'))
-                  ? CachedNetworkImage(imageUrl: e.path)
+                  ? CachedNetworkImage(
+                      imageUrl: e.path,
+                      fit: BoxFit.fill,
+                    )
                   : Image.asset(e.path,
                       fit: BoxFit.fill,
                       width: ZNKScreen.screenWidth,
@@ -149,7 +157,6 @@ class ZNKMainPage extends StatelessWidget {
                         left: msgIconSize + msgSize,
                         top: (searchSize.height) / 2.0),
                     decoration: BoxDecoration(
-                      color: Colors.red,
                       borderRadius: BorderRadius.circular(msgSize / 2.0),
                     ),
                     child: Text(mainVM.msgNum,
@@ -176,7 +183,36 @@ class ZNKMainPage extends StatelessWidget {
         : Container();
   }
 
+  //魔方栏
   Widget _magicModule(ZNKMainViewModel mainVM, double magicHeight) {
-    return (mainVM.showModule(ZNKMainModule.magic) && mainVM)
+    print('magic length: ${mainVM.magics.length}');
+    return (mainVM.showModule(ZNKMainModule.magic) && mainVM.magics.length > 0)
+        ? Container(
+            margin: EdgeInsets.only(left: 10, top: 10, right: 10),
+            height: magicHeight,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: mainVM.magics.length,
+              itemBuilder: (BuildContext context, int index) {
+                ZNKMagic magic = mainVM.magics[index];
+                return Container(
+                  margin: EdgeInsets.only(left: index > 0 ? 3.5 : 0),
+                  color: RandomHandler.randomColor,
+                  width: ZNKScreen.screenWidth / 3.0,
+                  child: (magic.path.startsWith('http://') ||
+                          magic.path.startsWith('https://'))
+                      ? CachedNetworkImage(
+                          imageUrl: magic.path,
+                          fit: BoxFit.fill,
+                        )
+                      : Image.asset(
+                          magic.path,
+                          fit: BoxFit.fill,
+                        ),
+                );
+              },
+            ),
+          )
+        : Container(color: Colors.red, height: magicHeight);
   }
 }
