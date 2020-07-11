@@ -1,14 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flb/api/api.dart';
 import 'package:flb/models/main/main.dart';
 import 'package:flb/models/style/style.dart';
-import 'package:flb/pkg/banner/banner.dart';
-import 'package:flb/pkg/grid/grid.dart';
 import 'package:flb/pkg/screen/screen.dart';
-import 'package:flb/pkg/search/search.dart';
 import 'package:flb/util/random/random.dart';
-import 'package:flb/viewmodels/main.dart';
+import 'package:flb/viewmodels/main/main.dart';
 import 'package:flb/views/base/base.dart';
+import 'package:flb/views/main/banner.dart';
+import 'package:flb/views/main/magic.dart';
+import 'package:flb/views/main/msgnum.dart';
+import 'package:flb/views/main/nav.dart';
+import 'package:flb/views/main/search.dart';
+import 'package:flb/views/main/seckill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:provider/provider.dart';
@@ -18,29 +20,24 @@ class ZNKMainPage extends StatelessWidget {
   ZNKMainPage({Key key}) : super(key: key);
   //刷新控制
   EasyRefreshController _refreshController = EasyRefreshController();
-  //集合
-  List<ZNKNav> _collections = [];
 
   @override
   Widget build(BuildContext context) {
     double bannerHeight = ZNKScreen.setWidth(195);
     double navHeight = bannerHeight * (2 / 3.0);
     double magicHeight = 35;
-
+    double seckillHeight = navHeight;
     ZNKApi api = Provider.of(context);
     return ZNKBaseView<ZNKMainViewModel>(
       model: ZNKMainViewModel(api: api),
       onReady: (mainVM) async {
         mainVM.fetchMainLayoutConfig();
-        mainVM.fetchRecommends();
-        mainVM.fetchMsgNum();
-        mainVM.fetchBanner();
-        mainVM.fetchNav();
-        mainVM.fetchMagicData();
       },
       builder: (context, mainVM, child) {
+        final Size searchSize = Size(ZNKScreen.screenWidth - 70, 31.0);
         return Consumer<ThemeStyle>(builder: (ctx, style, child) {
           return Container(
+              color: Color(0xFFF5F5F5),
               height: ZNKScreen.screenHeight,
               child: EasyRefresh(
                 controller: _refreshController,
@@ -54,12 +51,43 @@ class ZNKMainPage extends StatelessWidget {
                   children: [
                     Stack(
                       children: [
-                        _sliderModule(mainVM, bannerHeight),
-                        _searchModule(mainVM),
+                        ZNKBannerView(
+                          show: mainVM.showModule(ZNKMainModule.slide),
+                          bannerHeight: bannerHeight,
+                        ),
+                        Row(
+                          children: [
+                            ZNKSearchView(
+                              show: mainVM.showModule(ZNKMainModule.search),
+                              searchSize: searchSize,
+                            ),
+                            ZNKMsgNumView(
+                              style: style,
+                              marginTop: searchSize.height / 2.0,
+                              show: mainVM.showModule(ZNKMainModule.msessage),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                    _navModule(mainVM, navHeight),
-                    _magicModule(mainVM, magicHeight)
+                    ZNKNavView(
+                      show: mainVM.showModule(ZNKMainModule.nav),
+                      navHeight: navHeight,
+                    ),
+                    ZNKMagicView(
+                        show: mainVM.showModule(ZNKMainModule.magic),
+                        magicHeight: magicHeight),
+                    Container(
+                        margin: EdgeInsets.only(top: 10),
+                        child: Row(
+                          children: [
+                            ZNKSeckillView(
+                                show: mainVM.showModule(ZNKMainModule.seckill),
+                                style: style,
+                                seckillHeight: seckillHeight),
+                            _combineModule(mainVM, style, seckillHeight),
+                          ],
+                        )),
                   ],
                 ),
               ));
@@ -68,151 +96,12 @@ class ZNKMainPage extends StatelessWidget {
     );
   }
 
-  //幻灯片模块
-  Widget _sliderModule(ZNKMainViewModel mainVM, double bannerHeight) {
-    return ZNKBanner(
-      indicatorTrackColor: Color(0xFFD73B1E), //ox后两位表示透明度
-      indicatorTintColor: Colors.white,
-      size: Size(ZNKScreen.screenWidth, bannerHeight),
-      banners: mainVM.banners
-          .map((e) =>
-              (e.path.startsWith('http://') || e.path.startsWith('https://'))
-                  ? CachedNetworkImage(
-                      imageUrl: e.path,
-                      fit: BoxFit.fill,
-                    )
-                  : Image.asset(e.path,
-                      fit: BoxFit.fill,
-                      width: ZNKScreen.screenWidth,
-                      height: bannerHeight))
-          .toList(),
-      scrollDirection: Axis.horizontal,
-      alignment: Alignment.centerLeft,
-      didSelected: (index) {
-        print('did selected: $index');
-      },
+  Widget _combineModule(
+      ZNKMainViewModel mainVM, ThemeStyle style, double combineHeight) {
+    return Container(
+      width: ZNKScreen.screenWidth / 2.0,
+      height: combineHeight,
+      color: RandomHandler.randomColor,
     );
-  }
-
-  //搜索框部分
-  Widget _searchModule(ZNKMainViewModel mainVM) {
-    Size searchSize = Size(ZNKScreen.screenWidth - 70, 31.0);
-    double msgSize = 12;
-    double msgIconSize = 23;
-    //搜索加消息数
-    return Row(
-      children: [
-        (mainVM.showModule(ZNKMainModule.msessage) &&
-                mainVM.recommends.length > 0)
-            ? ZNKSearch(
-                style: ZNKSearchStyle(
-                  enabled: false,
-                  backgroudColor: Colors.white,
-                  cornerRadius: searchSize.height / 2.0,
-                  margin: EdgeInsets.only(left: 14, top: ZNKScreen.safeTopArea),
-                  width: searchSize.width,
-                  height: searchSize.height,
-                ),
-                child: ZNKBanner(
-                  size: Size(searchSize.width, searchSize.height),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(searchSize.height / 2.0))),
-                  banners: mainVM.recommends
-                      .map((e) => Container(
-                            child: Text(
-                              e,
-                              style: TextStyle(color: Color(0xFF999999)),
-                            ),
-                            margin: EdgeInsets.only(left: 40),
-                          ))
-                      .toList(),
-                  showIndicator: false,
-                  scrollDirection: Axis.vertical,
-                  alignment: Alignment.centerLeft,
-                  didSelected: (index) {
-                    print('did selected: $index');
-                  },
-                ),
-              )
-            : Container(),
-        mainVM.showModule(ZNKMainModule.msessage)
-            ? Stack(
-                children: [
-                  Container(
-                    child: Icon(Icons.message),
-                    width: msgIconSize,
-                    height: msgIconSize,
-                    margin: EdgeInsets.only(
-                        left: 16,
-                        top: (searchSize.height +
-                                ZNKScreen.safeTopArea -
-                                msgIconSize / 2.0) /
-                            2.0),
-                  ),
-                  Container(
-                    width: msgSize,
-                    height: msgSize,
-                    margin: EdgeInsets.only(
-                        left: msgIconSize + msgSize,
-                        top: (searchSize.height) / 2.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(msgSize / 2.0),
-                    ),
-                    child: Text(mainVM.msgNum,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 10, color: Colors.white)),
-                  ),
-                ],
-              )
-            : Container()
-      ],
-    );
-  }
-
-  //导航模块
-  Widget _navModule(ZNKMainViewModel mainVM, double navHeight) {
-    List<ZNKNav> navs = mainVM.navs;
-    return (mainVM.showModule(ZNKMainModule.nav) && navs.length > 0)
-        ? ZNKGrid(
-            items: navs
-                .map((e) => ZNKGridItem(
-                    identifier: e.identifier, title: e.title, path: e.path))
-                .toList(),
-          )
-        : Container();
-  }
-
-  //魔方栏
-  Widget _magicModule(ZNKMainViewModel mainVM, double magicHeight) {
-    print('magic length: ${mainVM.magics.length}');
-    return (mainVM.showModule(ZNKMainModule.magic) && mainVM.magics.length > 0)
-        ? Container(
-            margin: EdgeInsets.only(left: 10, top: 10, right: 10),
-            height: magicHeight,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: mainVM.magics.length,
-              itemBuilder: (BuildContext context, int index) {
-                ZNKMagic magic = mainVM.magics[index];
-                return Container(
-                  margin: EdgeInsets.only(left: index > 0 ? 3.5 : 0),
-                  color: RandomHandler.randomColor,
-                  width: ZNKScreen.screenWidth / 3.0,
-                  child: (magic.path.startsWith('http://') ||
-                          magic.path.startsWith('https://'))
-                      ? CachedNetworkImage(
-                          imageUrl: magic.path,
-                          fit: BoxFit.fill,
-                        )
-                      : Image.asset(
-                          magic.path,
-                          fit: BoxFit.fill,
-                        ),
-                );
-              },
-            ),
-          )
-        : Container(color: Colors.red, height: magicHeight);
   }
 }

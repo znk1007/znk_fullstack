@@ -110,7 +110,7 @@
 		</data>
 		<key>Frameworks/App.framework/App</key>
 		<data>
-		6NGGZ15E8R7Aa2W266QsXdKznJ0=
+		Z23nSFFafDMmnOd90enokVztxMU=
 		</data>
 		<key>Frameworks/App.framework/Info.plist</key>
 		<data>
@@ -118,11 +118,11 @@
 		</data>
 		<key>Frameworks/App.framework/_CodeSignature/CodeResources</key>
 		<data>
-		wlA+/DC+f445FH2EWZyQvQ6oOxg=
+		hegHMO7JQba3rhDoCoYyIh2vlsw=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.json</key>
 		<data>
-		H+DMxEi2N26kHy1gPqqCOzLGovI=
+		8IrStDVnTE8eObVXcI/euclUJ88=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/FontManifest.json</key>
 		<data>
@@ -146,11 +146,15 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/kernel_blob.bin</key>
 		<data>
-		2SNpL8TwyUpMGFItxLdPAOWZIrc=
+		xxlSjEahN9Dq4QjPWI/dD9uD//E=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/lib/resource/collection.jpg</key>
 		<data>
 		ZG22vhWxyEVbdRWeLgd/CNp/9Ps=
+		</data>
+		<key>Frameworks/App.framework/flutter_assets/lib/resource/sample.jpg</key>
+		<data>
+		QTU6gn+I+ur8NxQY+lJoxClKjfQ=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/lib/resource/test_img_01.jpg</key>
 		<data>
@@ -238,7 +242,7 @@
 		</data>
 		<key>Frameworks/path_provider.framework/path_provider</key>
 		<data>
-		q3rRafw9lmRuAdUuxFMfiIfvN3c=
+		BXN53dDrv5hXEV+W31aACgNga3k=
 		</data>
 		<key>Frameworks/sqflite.framework/Info.plist</key>
 		<data>
@@ -250,7 +254,7 @@
 		</data>
 		<key>Frameworks/sqflite.framework/sqflite</key>
 		<data>
-		5iwS7ZtXpQNpa3QUchuWNpAE0U8=
+		sstC0XJc6zo7Ett7HWEM6Re/c/I=
 		</data>
 		<key>Info.plist</key>
 		<data>
@@ -553,11 +557,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			6NGGZ15E8R7Aa2W266QsXdKznJ0=
+			Z23nSFFafDMmnOd90enokVztxMU=
 			</data>
 			<key>hash2</key>
 			<data>
-			6Owy6w80WAvoLw2P7lMg0cj64yizuY6vea6s0B1W+y8=
+			m6XrcbRdzZkf23hUsk9yTBflKnHF3jaCupKH6Wo974I=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/Info.plist</key>
@@ -575,22 +579,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			wlA+/DC+f445FH2EWZyQvQ6oOxg=
+			hegHMO7JQba3rhDoCoYyIh2vlsw=
 			</data>
 			<key>hash2</key>
 			<data>
-			/4yknEOLhRGe2s5PKTt3t9UCJmGIjUpVP2ngzisfz6M=
+			yyiSeeFlxng6w5LLEwW9OA4uxFl+MLY363cVHlQa+j8=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			H+DMxEi2N26kHy1gPqqCOzLGovI=
+			8IrStDVnTE8eObVXcI/euclUJ88=
 			</data>
 			<key>hash2</key>
 			<data>
-			QaNKnrB3r9GjgdxE/z6uBIacaG2o83zmGAAwACGtDnQ=
+			JGDK0qSmZqCQgmP7yBq0W5EQREx8ncDpFG+kMALN5Qo=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/FontManifest.json</key>
@@ -652,11 +656,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			2SNpL8TwyUpMGFItxLdPAOWZIrc=
+			xxlSjEahN9Dq4QjPWI/dD9uD//E=
 			</data>
 			<key>hash2</key>
 			<data>
-			lfI5/y4HFKW5K62f8wDxx0wedrubnDAXALOP0TXz/cQ=
+			wHKQ9tapqEBu7mm5A5xZ56/BfFd6FqvAh2bQDhpCayY=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/lib/resource/collection.jpg</key>
@@ -668,6 +672,17 @@
 			<key>hash2</key>
 			<data>
 			tzM9zh2gfKsW4gxJA8tP6OOOknQykD0K9IT9si4crMY=
+			</data>
+		</dict>
+		<key>Frameworks/App.framework/flutter_assets/lib/resource/sample.jpg</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			QTU6gn+I+ur8NxQY+lJoxClKjfQ=
+			</data>
+			<key>hash2</key>
+			<data>
+			pXFg1Ja/T5W+7vMA+w6VEM2Fio4xwdjH2cefIT2H0Lc=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/lib/resource/test_img_01.jpg</key>
@@ -905,11 +920,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			q3rRafw9lmRuAdUuxFMfiIfvN3c=
+			BXN53dDrv5hXEV+W31aACgNga3k=
 			</data>
 			<key>hash2</key>
 			<data>
-			+gh96H/JrS8ChQB+pUV9Kl6LSxXDRj6HQ4xZ71IGfjU=
+			I0FuYtJSPtCWcwEN2sdKmjLtsO84J/3etwrsh8Y2PwY=
 			</data>
 		</dict>
 		<key>Frameworks/sqflite.framework/Info.plist</key>
@@ -938,11 +953,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			5iwS7ZtXpQNpa3QUchuWNpAE0U8=
+			sstC0XJc6zo7Ett7HWEM6Re/c/I=
 			</data>
 			<key>hash2</key>
 			<data>
-			kQVGkBUM17R6ri0W1R2lIMSRqUGcsXCHhUtNWTdAU54=
+			OkXvClHobE/G/QFYh6NubDbjdLywbz3sCRpfp9JiZ3Y=
 			</data>
 		</dict>
 	</dict>
