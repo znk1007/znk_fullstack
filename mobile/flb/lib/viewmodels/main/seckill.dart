@@ -131,7 +131,7 @@ class ZNKSeckillViewModel extends ZNKBaseViewModel {
         ),
         ZNKSeckillItem(
           identifier: '3',
-          title: '秒杀标题三',
+          title: '限时秒杀标题三',
           orgPrice: '￥818',
           newPrice: '￥389',
           path: 'lib/resource/collection.jpg',

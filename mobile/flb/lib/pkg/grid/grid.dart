@@ -29,6 +29,7 @@ class ZNKGrid extends StatelessWidget {
     this.height = 135,
     this.childAspectRatio = 0.9,
     this.iconSize = const Size(35, 35),
+    this.textColor = const Color(0xFF666666),
   }) {
     _controller.addListener(() {
       if (_slideHandler != null) {
@@ -49,6 +50,8 @@ class ZNKGrid extends StatelessWidget {
   final double childAspectRatio;
   //icon 大小
   final Size iconSize;
+  //文字颜色
+  final Color textColor;
   //滚动控制器
   ScrollController _controller = ScrollController();
   //滑动偏移回调
@@ -70,8 +73,9 @@ class ZNKGrid extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: this.items.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: this.numberOfRow,
-                    childAspectRatio: this.childAspectRatio),
+                  crossAxisCount: this.numberOfRow,
+                  childAspectRatio: this.childAspectRatio,
+                ),
                 itemBuilder: (ctx, index) {
                   ZNKGridItem item = this.items[index];
                   return GestureDetector(
@@ -93,7 +97,9 @@ class ZNKGrid extends StatelessWidget {
                             child: Text(
                               item.title,
                               style: TextStyle(
-                                  fontSize: 10, color: Color(0xFF666666)),
+                                fontSize: 10,
+                                color: this.textColor,
+                              ),
                             ),
                           ),
                         ],
@@ -169,8 +175,9 @@ class _ZNKSlieBarState extends State<ZNKSlideBar> {
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
-          color: widget.tintColor,
-          borderRadius: BorderRadius.circular(widget.height / 2.0)),
+        color: widget.tintColor,
+        borderRadius: BorderRadius.circular(widget.height / 2.0),
+      ),
       child: Container(
         // width: widget.sliderWidth,
         height: widget.height,

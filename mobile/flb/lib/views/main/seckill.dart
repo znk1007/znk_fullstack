@@ -64,7 +64,7 @@ class ZNKSeckillView extends StatelessWidget {
                               children: [
                                 Container(
                                   margin: EdgeInsets.only(
-                                    left: ZNKScreen.setWidth(30),
+                                    left: ZNKScreen.setWidth(25),
                                   ),
                                   width: 16,
                                   height: 16,
@@ -139,7 +139,6 @@ class ZNKSeckillView extends StatelessWidget {
                     width: containWidth - 20,
                     height: this.seckillHeight - topHeight,
                     child: ListView.builder(
-                      padding: EdgeInsets.all(5),
                       scrollDirection: Axis.horizontal,
                       itemCount: seckillModel.seckill.items.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -150,17 +149,54 @@ class ZNKSeckillView extends StatelessWidget {
                             children: [
                               Container(
                                 width: (containWidth - 20) / 3.0,
+                                height: (this.seckillHeight - topHeight) / 2.0,
+                                padding: EdgeInsets.all(5),
                                 child: (item.path.startsWith('http://') ||
                                         item.path.startsWith('https://'))
                                     ? CachedNetworkImage(imageUrl: item.path)
                                     : Image.asset(
                                         item.path,
-                                        fit: BoxFit.scaleDown,
                                       ),
                               ),
-                              Container(),
-                              Container(),
-                              Container(),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red[100],
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(3),
+                                    bottomRight: Radius.circular(3),
+                                  ),
+                                ),
+                                width: (containWidth - 20) / 3.0 - 5,
+                                child: Text(
+                                  item.title,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: this.style.middleTextColor,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 2),
+                                child: Text(
+                                  item.newPrice,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: this.style.redColor,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                child: Text(
+                                  item.orgPrice,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: this.style.lightTextColor,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         );

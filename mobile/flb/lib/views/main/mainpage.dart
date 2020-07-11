@@ -37,7 +37,7 @@ class ZNKMainPage extends StatelessWidget {
         final Size searchSize = Size(ZNKScreen.screenWidth - 70, 31.0);
         return Consumer<ThemeStyle>(builder: (ctx, style, child) {
           return Container(
-              color: Color(0xFFF5F5F5),
+              color: style.backgroundColor,
               height: ZNKScreen.screenHeight,
               child: EasyRefresh(
                 controller: _refreshController,

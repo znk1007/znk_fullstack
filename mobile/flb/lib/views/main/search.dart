@@ -34,8 +34,10 @@ class ZNKSearchView extends StatelessWidget {
                 child: ZNKBanner(
                   size: Size(this.searchSize.width, this.searchSize.height),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(this.searchSize.height / 2.0))),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(this.searchSize.height / 2.0),
+                    ),
+                  ),
                   banners: model.recommends
                       .map((e) => Container(
                             child: Text(
