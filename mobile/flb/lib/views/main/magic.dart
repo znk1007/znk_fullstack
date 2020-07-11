@@ -31,25 +31,30 @@ class ZNKMagicView extends StatelessWidget {
                 itemCount: model.magics.length,
                 itemBuilder: (BuildContext context, int index) {
                   ZNKMagic magic = model.magics[index];
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      margin: EdgeInsets.only(left: index > 0 ? 3.5 : 0),
-                      width: (ZNKScreen.screenWidth -
-                              (model.magics.length - 1) * 3.5 -
-                              ZNKScreen.setWidth(15)) /
-                          3.0,
-                      height: magicHeight,
-                      child: (magic.path.startsWith('http://') ||
-                              magic.path.startsWith('https://'))
-                          ? CachedNetworkImage(
-                              imageUrl: magic.path,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              magic.path,
-                              fit: BoxFit.cover,
-                            ),
+                  return GestureDetector(
+                    onTap: () {
+                      print('magic identifier: ${magic.identifier}');
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        margin: EdgeInsets.only(left: index > 0 ? 3.5 : 0),
+                        width: (ZNKScreen.screenWidth -
+                                (model.magics.length - 1) * 3.5 -
+                                ZNKScreen.setWidth(15)) /
+                            3.0,
+                        height: magicHeight,
+                        child: (magic.path.startsWith('http://') ||
+                                magic.path.startsWith('https://'))
+                            ? CachedNetworkImage(
+                                imageUrl: magic.path,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                magic.path,
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                     ),
                   );
                 },

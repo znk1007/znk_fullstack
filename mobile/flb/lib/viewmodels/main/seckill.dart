@@ -50,7 +50,7 @@ class ZNKSeckillCountDownViewModel extends ZNKBaseViewModel {
         _second = ss >= 10 ? '$ss' : '0$ss';
       }
       seconds--;
-      if (seconds == 0) {
+      if (seconds <= 0) {
         _timer.cancel();
         _timer = null;
       }
@@ -102,6 +102,7 @@ class ZNKSeckillViewModel extends ZNKBaseViewModel {
         title: ZNKHelp.safeString(mData['title']),
         orgPrice: ZNKHelp.safeString(mData['orgPrice']),
         newPrice: ZNKHelp.safeString(mData['newPrice']),
+        path: ZNKHelp.safeString(mData['path']),
       );
       tempItems.add(item);
     }
@@ -119,18 +120,21 @@ class ZNKSeckillViewModel extends ZNKBaseViewModel {
           title: '秒杀标题一',
           orgPrice: '￥418',
           newPrice: '￥189',
+          path: 'lib/resource/collection.jpg',
         ),
         ZNKSeckillItem(
           identifier: '2',
           title: '秒杀标题二',
           orgPrice: '￥618',
           newPrice: '￥289',
+          path: 'lib/resource/collection.jpg',
         ),
         ZNKSeckillItem(
           identifier: '3',
           title: '秒杀标题三',
           orgPrice: '￥818',
           newPrice: '￥389',
+          path: 'lib/resource/collection.jpg',
         ),
       ],
     );

@@ -17,6 +17,14 @@ class ZNKSeckillItem {
   final String orgPrice;
   //秒杀价
   final String newPrice;
+  //图片地址
+  final String path;
 
-  ZNKSeckillItem({this.identifier, this.title, this.orgPrice, this.newPrice});
+  ZNKSeckillItem({
+    this.identifier,
+    this.path = '',
+    this.title,
+    this.orgPrice,
+    this.newPrice,
+  });
 }
