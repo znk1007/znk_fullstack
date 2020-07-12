@@ -184,6 +184,7 @@ class ZNKSeckillView extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: this.style.redColor,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),

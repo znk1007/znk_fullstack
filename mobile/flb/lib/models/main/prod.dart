@@ -1,7 +1,13 @@
 //产品列表
 class ZNKProd {
   //段标题
-  final String sectionTitle;
+  final String title;
+  //产品类目列表
+  final List<ZNKProdItem> items;
+  ZNKProd({this.title, this.items});
+}
+
+class ZNKProdItem {
   //大标题
   final String title;
   //详情
@@ -14,22 +20,28 @@ class ZNKProd {
   final String orgPrice;
   //折扣价
   final String newPrice;
+  //单位
+  final String unit;
+  //币种
+  final String coinType;
   //已卖
   final String solt;
   //库存
   final String stock;
   //商品列表
-  final List<ZNKProd> prods;
+  final List<ZNKProdItem> prods;
 
-  ZNKProd(
-      {this.sectionTitle,
-      this.title,
-      this.detail,
-      this.path,
-      this.tags,
-      this.orgPrice,
-      this.newPrice,
-      this.solt,
-      this.stock,
-      this.prods});
+  ZNKProdItem({
+    this.title,
+    this.detail,
+    this.path,
+    this.tags,
+    this.coinType,
+    this.unit,
+    this.orgPrice,
+    this.newPrice,
+    this.solt,
+    this.stock,
+    this.prods,
+  });
 }
