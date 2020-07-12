@@ -11,7 +11,7 @@ class ZNKCombineViewModel extends ZNKBaseViewModel {
   //火拼爆品
   ZNKCombine _combine;
   ZNKCombine get combine => _combine;
-  Future<void> fetchCombine() async {
+  Future<void> fetch() async {
     if (this.api.combineUrl.length == 0) {
       _defaultCombineData();
       return;
@@ -45,6 +45,8 @@ class ZNKCombineViewModel extends ZNKBaseViewModel {
         identifier: ZNKHelp.safeString(mData['id']),
         title: ZNKHelp.safeString(mData['title']),
         price: ZNKHelp.safeString(mData['price']),
+        path: ZNKHelp.safeString(mData['path']),
+        coinType: mData['coinType'] ?? '￥',
       );
       tempItems.add(item);
     }
@@ -59,17 +61,23 @@ class ZNKCombineViewModel extends ZNKBaseViewModel {
         ZNKCombineItem(
           identifier: '1',
           title: '爆品标题一',
-          price: '￥189',
+          price: '189',
+          path: 'lib/resource/collection.jpg',
+          coinType: '￥',
         ),
         ZNKCombineItem(
           identifier: '2',
           title: '爆品标题二',
-          price: '￥289',
+          price: '289',
+          path: 'lib/resource/collection.jpg',
+          coinType: '￥',
         ),
         ZNKCombineItem(
           identifier: '3',
           title: '爆品标题三',
-          price: '￥389',
+          price: '389',
+          path: 'lib/resource/collection.jpg',
+          coinType: '￥',
         ),
       ],
     );

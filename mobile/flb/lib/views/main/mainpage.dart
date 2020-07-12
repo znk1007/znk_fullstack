@@ -6,6 +6,7 @@ import 'package:flb/util/random/random.dart';
 import 'package:flb/viewmodels/main/main.dart';
 import 'package:flb/views/base/base.dart';
 import 'package:flb/views/main/banner.dart';
+import 'package:flb/views/main/combine.dart';
 import 'package:flb/views/main/magic.dart';
 import 'package:flb/views/main/msgnum.dart';
 import 'package:flb/views/main/nav.dart';
@@ -82,10 +83,17 @@ class ZNKMainPage extends StatelessWidget {
                         child: Row(
                           children: [
                             ZNKSeckillView(
-                                show: mainVM.showModule(ZNKMainModule.seckill),
-                                style: style,
-                                seckillHeight: seckillHeight),
-                            _combineModule(mainVM, style, seckillHeight),
+                              show: mainVM.showModule(ZNKMainModule.seckill),
+                              style: style,
+                              width: ZNKScreen.screenWidth / 2.0,
+                              height: seckillHeight,
+                            ),
+                            ZNKCombineView(
+                              style: style,
+                              width: ZNKScreen.screenWidth / 2.0,
+                              height: seckillHeight,
+                              show: mainVM.showModule(ZNKMainModule.seckill),
+                            ),
                           ],
                         )),
                   ],

@@ -103,6 +103,7 @@ class ZNKSeckillViewModel extends ZNKBaseViewModel {
         orgPrice: ZNKHelp.safeString(mData['orgPrice']),
         newPrice: ZNKHelp.safeString(mData['newPrice']),
         path: ZNKHelp.safeString(mData['path']),
+        coinType: mData['coinType'] ?? '￥',
       );
       tempItems.add(item);
     }
@@ -118,23 +119,26 @@ class ZNKSeckillViewModel extends ZNKBaseViewModel {
         ZNKSeckillItem(
           identifier: '1',
           title: '秒杀标题一',
-          orgPrice: '￥418',
-          newPrice: '￥189',
+          orgPrice: '418',
+          newPrice: '189',
           path: 'lib/resource/collection.jpg',
+          coinType: '￥',
         ),
         ZNKSeckillItem(
           identifier: '2',
           title: '秒杀标题二',
-          orgPrice: '￥618',
-          newPrice: '￥289',
+          orgPrice: '618',
+          newPrice: '289',
           path: 'lib/resource/collection.jpg',
+          coinType: '￥',
         ),
         ZNKSeckillItem(
           identifier: '3',
           title: '限时秒杀标题三',
-          orgPrice: '￥818',
-          newPrice: '￥389',
+          orgPrice: '818',
+          newPrice: '389',
           path: 'lib/resource/collection.jpg',
+          coinType: '￥',
         ),
       ],
     );

@@ -12,8 +12,18 @@ class ZNKCombineItem {
   final String identifier;
   //标题
   final String title;
+  //币种
+  final String coinType;
   //价格
   final String price;
+  //图片路径
+  final String path;
 
-  ZNKCombineItem({this.identifier, this.title, this.price});
+  ZNKCombineItem({
+    this.identifier,
+    this.title,
+    this.coinType,
+    this.price,
+    this.path,
+  });
 }

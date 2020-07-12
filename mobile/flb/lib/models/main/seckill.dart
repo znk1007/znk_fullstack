@@ -19,10 +19,13 @@ class ZNKSeckillItem {
   final String newPrice;
   //图片地址
   final String path;
+  //币种
+  final String coinType;
 
   ZNKSeckillItem({
     this.identifier,
     this.path = '',
+    this.coinType,
     this.title,
     this.orgPrice,
     this.newPrice,

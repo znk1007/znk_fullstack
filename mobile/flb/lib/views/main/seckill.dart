@@ -11,18 +11,20 @@ import 'package:provider/provider.dart';
 class ZNKSeckillView extends StatelessWidget {
   final bool show;
   final ThemeStyle style;
-  final seckillHeight;
+  final double width;
+  final double height;
   ZNKSeckillView({
     Key key,
     @required this.show,
     @required this.style,
-    @required this.seckillHeight,
+    @required this.width,
+    @required this.height,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    double containWidth = ZNKScreen.screenWidth / 2.0;
-    double topHeight = this.seckillHeight * (1 / 4.0);
+    double containWidth = this.width;
+    double topHeight = this.height * (1 / 4.0);
     return ZNKBaseView<ZNKSeckillViewModel>(
       model: ZNKSeckillViewModel(
         api: Provider.of(context),
@@ -48,7 +50,7 @@ class ZNKSeckillView extends StatelessWidget {
                               color: Color(0xFFD81E06),
                               fontFamily: 'PingFangSC-Medium',
                               fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -136,8 +138,9 @@ class ZNKSeckillView extends StatelessWidget {
                     ),
                   ),
                   Container(
+                    alignment: Alignment.center,
                     width: containWidth - 20,
-                    height: this.seckillHeight - topHeight,
+                    height: this.height - topHeight,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: seckillModel.seckill.items.length,
@@ -149,8 +152,11 @@ class ZNKSeckillView extends StatelessWidget {
                             children: [
                               Container(
                                 width: (containWidth - 20) / 3.0,
-                                height: (this.seckillHeight - topHeight) / 2.0,
+                                height: (this.height - topHeight) / 2.0,
                                 padding: EdgeInsets.all(5),
+                                margin: index > 0
+                                    ? EdgeInsets.only(left: 5)
+                                    : EdgeInsets.zero,
                                 child: (item.path.startsWith('http://') ||
                                         item.path.startsWith('https://'))
                                     ? CachedNetworkImage(imageUrl: item.path)
@@ -173,14 +179,15 @@ class ZNKSeckillView extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: this.style.middleTextColor,
+                                    color: this.style.dartTextColor,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
                               Container(
                                 margin: EdgeInsets.only(top: 2),
                                 child: Text(
-                                  item.newPrice,
+                                  '${item.coinType}${item.newPrice}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: this.style.redColor,
@@ -190,7 +197,7 @@ class ZNKSeckillView extends StatelessWidget {
                               ),
                               Container(
                                 child: Text(
-                                  item.orgPrice,
+                                  '${item.coinType}${item.orgPrice}',
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: this.style.lightTextColor,
