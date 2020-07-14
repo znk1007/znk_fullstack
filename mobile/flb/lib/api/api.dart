@@ -3,6 +3,8 @@ class ZNKApi {
   final String tabbarUrl = '';
   //首页布局
   final String mainPageConfigUrl = '';
+  //登录地址
+  final String loginUrl = '';
   //首页推荐数据
   final String recommandUrl = '';
   //消息数

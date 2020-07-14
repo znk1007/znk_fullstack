@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeStyle extends ChangeNotifier {
   //主题红色
@@ -17,4 +18,12 @@ class ThemeStyle extends ChangeNotifier {
   Color primarySwatch = Colors.blue;
   //显示密度
   VisualDensity visualDensity = VisualDensity.adaptivePlatformDensity;
+  //是否隐藏价格
+  bool hidePrice = false;
+
+  //更新是否隐藏价格
+  void updateHidePrice(bool hide) {
+    hidePrice = hide;
+    SharedPreferences.getInstance();
+  }
 }

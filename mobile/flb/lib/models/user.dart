@@ -1,6 +1,12 @@
-import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/db/sqlite/user/user.dart';
 import 'package:flutter/material.dart';
+
+class User {
+  //用户ID
+  String userID;
+  //账号
+  String account;
+}
 
 class UserModel extends ChangeNotifier {
   /* 当前用户 */

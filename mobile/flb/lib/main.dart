@@ -1,14 +1,11 @@
 import 'package:flb/models/style/style.dart';
-import 'package:flb/models/user.dart';
 import 'package:flb/provider/provider.dart';
 import 'package:flb/router/paths.dart';
 import 'package:flb/router/router.dart';
-import 'package:flb/util/db/protos/generated/user/user.pb.dart';
 import 'package:flb/util/db/sqlite/sqlitedb.dart';
 import 'package:flb/util/db/sqlite/user/user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //fixed binary message binding
@@ -37,14 +34,5 @@ class MyApp extends StatelessWidget {
       initialRoute: ZNKRoutePaths.home,
       onGenerateRoute: ZNKRouter.generateRoute,
     );
-  }
-
-  
-
-  //加载用户数据
-  Future<User> _loadUserData(BuildContext context) async {
-    UserModel userModel = context.read<UserModel>();
-    await userModel.loadUserData();
-    return userModel.currentUser;
   }
 }

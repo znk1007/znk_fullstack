@@ -3,8 +3,8 @@ class ZNKLogin {
   final String account;
   //密码
   final String password;
+  //验证码
+  final String verifyCode;
 
-  ZNKLogin({this.account, this.password})
-      : assert(account != null && account.length > 0),
-        assert(password != null && password.length > 0);
+  ZNKLogin({this.account, this.password, this.verifyCode});
 }
