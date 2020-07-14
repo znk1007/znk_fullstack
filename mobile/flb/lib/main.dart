@@ -22,7 +22,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //拉取分栏数据
-    // _fetchTabbarItems(context);
     ThemeStyle style = context.watch<ThemeStyle>();
     return MaterialApp(
       debugShowCheckedModeBanner: false,

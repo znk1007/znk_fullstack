@@ -1,4 +1,4 @@
-import 'package:flb/util/db/protos/generated/user/user.pb.dart';
+import 'package:flb/models/user.dart';
 
 import '../sqlitedb.dart';
 
@@ -10,15 +10,18 @@ class UserDB {
   /* 模型转换 */
   static Map<String, dynamic> _toMap(User user) {
     var map = new Map<String, dynamic>();
+    map['sessionID'] = user.sessionID;
     map['userID'] = user.userID;
     map['account'] = user.account;
-    map['nickname'] = user.nickname;
+    map['realName'] = user.realName;
     map['photo'] = user.photo;
     map['phone'] = user.phone;
-    map['email'] = user.email;
+    map['address'] = user.address;
+    map['compName'] = user.compName;
+    map['inviteCode'] = user.inviteCode;
     map['createdAt'] = user.createdAt;
+    map['identifyType'] = user.identifyType;
     map['updatedAt'] = DateTime.now().toString();
-    map['status'] = user.status;
     return map;
   }
 
@@ -28,13 +31,15 @@ class UserDB {
     user.userID = map['userID'] ?? '';
     user.sessionID = map['sessionID'] ?? '';
     user.account = map['account'] ?? '';
-    user.nickname = map['nickname'] ?? '';
+    user.realName = map['realName'] ?? '';
     user.photo = map['photo'] ?? '';
     user.phone = map['phone'] ?? '';
-    user.email = map['email'] ?? '';
+    user.identifyType = map['identifyType'] ?? 1;
     user.createdAt = map['createdAt'] ?? '';
     user.updatedAt = map['updatedAt'] ?? '';
-    user.status = map['status'] ?? 0;
+    user.compName = map['compName'] ?? '';
+    user.address = map['address'] ?? '';
+    user.inviteCode = map['inviteCode'] ?? '';
     return user;
   }
 
@@ -45,13 +50,15 @@ class UserDB {
       userID TEXT not null primary key,
       sessionID TEXT not null,
       account TEXT not null,
-      nickname TEXT not null,
+      realName TEXT not null,
       photo TEXT not null,
       phone TEXT not null, 
-      email TEXT not null,
+      address TEXT not null,
       createdAt TEXT not null,
       updatedAt TEXT not null,
-      status INTEGER
+      inviteCode TEXT not null,
+      compName TEXT not null,
+      identifyType INTEGER
     )
     ''');
   }
